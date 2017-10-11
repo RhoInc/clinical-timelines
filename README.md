@@ -12,12 +12,12 @@
 
 ## Installing
 
-If you use npm, `npm install clinical-timelines`. Otherwise, download the [latest release](https://github.com/RhoInc/clinical-timelines/releases/latest). The released bundle supports anonymous AMD, CommonJS, and vanilla environments. You can load directly from [rawgit](https://rawgit.com/RhoInc/paneled-outlier-explorer/master/build/paneledOutlierExplorer.js). For example:
+If you use npm, `npm install clinical-timelines`. Otherwise, download the [latest release](https://github.com/RhoInc/clinical-timelines/releases/latest). The released bundle supports anonymous AMD, CommonJS, and vanilla environments. You can load directly from [rawgit](https://rawgit.com/RhoInc/clinical-timelines/master/build/clinicalTimelines.js). For example:
 
 ```html
 <script type = 'text/javascript' src = 'https://d3js.org/d3.v3.js'></script>
-<script type = 'text/javascript' src = 'https://rawgit.com/RhoInc/paneled-outlier-explorer/master/build/Webcharts.js'></script>
-<script type = 'text/javascript' src = 'https://rawgit.com/RhoInc/paneled-outlier-explorer/master/build/paneledOutlierExplorer.js'></script>
+<script type = 'text/javascript' src = 'https://rawgit.com/RhoInc/clinical-timelines/master/build/Webcharts.js'></script>
+<script type = 'text/javascript' src = 'https://rawgit.com/RhoInc/clinical-timelines/master/build/clinicalTimelines.js'></script>
 ```
 
 clinical-timelines is written using [ES2015 modules](http://www.2ality.com/2014/09/es6-modules-final.html). To import clinical-timelines into an ES2015 application, import its only module (here, `clinicalTimelines`):

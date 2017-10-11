@@ -52,6 +52,18 @@ export function syncSettings(settings) {
             {value_col: populationSettings.stdy_col, label: 'Start Day'},
             {value_col: populationSettings.endy_col, label: 'Stop Day'}
         ];
+    populationSettings.details = populationSettings.details instanceof Array && populationSettings.details.length
+        ? defaultDetails.concat(
+            populationSettings.details
+                .filter(filter => filter instanceof String || (filter instanceof Object && filter.hasOwnProperty('value_col')))
+                .map(filter => {
+                    const
+                        filterObject = {};
+                        filterObject.value_col = filter.value_col || filter;
+                        filterObject.label = filter.label || filter.value_col;
+                    return filterObject;
+                }))
+        : defaultDetails;
 
   //Add settings.filters columns to default details.
     populationSettings.filters

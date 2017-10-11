@@ -1,0 +1,45 @@
+{
+  "name": "clinical-timelines",
+  "description": "A general purpose graphical timeline library",
+  "version": "1.9.0",
+  "author": "Rho, Inc.",
+  "license": "MIT",
+  "homepage": "https://github.com/RhoInc/clinical-timelines",
+  "main": "./build/clinicalTimelines.js",
+  "module": "./src/index.js",
+  "keywords": [
+    "clinical timelines",
+    "clinical trials",
+    "events over time",
+    "interactive",
+    "data visualization"
+  ],
+  "dependencies": {
+    "d3": "^3",
+    "webcharts": "^1.8"
+  },
+  "scripts": {
+    "build": "npm run bundle && npm run format",
+    "bundle": "rollup -c",
+    "format": "npm run format-src && npm run format-build",
+    "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write src/**/*.js",
+    "format-build": "prettier --print-width=100 --tab-width=4 --single-quote --write build/clinicalTimelines.js",
+    "watch": "rollup -c -w"
+  },
+  "devDependencies": {
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-register": "^6.26.0",
+    "prettier": "^1.7.4",
+    "rollup": "^0.50.0",
+    "rollup-plugin-babel": "^3.0.2",
+    "rollup-watch": "^4.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RhoInc/clinical-timelines.git"
+  },
+  "bugs": {
+    "url": "https://github.com/RhoInc/clinical-timelines/issues"
+  }
+}

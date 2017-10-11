@@ -4,7 +4,7 @@ import charts from './charts/index';
 import listing from './listing/index';
 import { createControls, createChart, createTable } from 'webcharts';
 
-export default function aeTimelines(element, settings) {
+export default function clinicalTimelines(element, settings) {
     const
         mergedSettings = Object.assign({}, defaults.settings, settings),
         syncedSettings = defaults.syncSettings(mergedSettings),

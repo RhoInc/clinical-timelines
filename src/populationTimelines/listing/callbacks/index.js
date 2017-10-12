@@ -3,7 +3,7 @@ import onLayout from './onLayout';
 import onDraw from './onDraw';
 import onDestroy from './onDestroy';
 
-export default listing = {
+export default callbacks = {
     onInit: onInit,
     onLayout: onLayout,
     onDraw: onDraw,

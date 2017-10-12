@@ -6,7 +6,7 @@ import onDraw from './onDraw';
 import onResize from './onResize';
 import onDestroy from './onDestroy';
 
-export default population = {
+export default callbacks = {
     onInit: onInit,
     onLayout: onLayout,
     onPreprocess: onPreprocess,

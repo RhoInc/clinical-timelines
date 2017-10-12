@@ -1,22 +1,19 @@
-import updateSubjectCount from './util/updateSubjectCount';
+import annotatePopulationStats from './onDraw/annotatePopulationStats';
 import { nest, min, set, descending } from 'd3';
 
 export default function onDraw() {
+    const context = this;
+
     //Annotate number of selected participants out of total participants.
-    updateSubjectCount(this, '.annote', 'subject ID(s)');
+    annotatePopulationStats.call(this);
 
     //Sort y-axis based on `Sort IDs` control selection.
-    const yAxisSort = this.controls.wrap
-        .selectAll('.control-group')
-        .filter(d => d.option && d.option === 'y.sort')
-        .select('option:checked')
-        .text();
-
-    if (yAxisSort === 'earliest') {
+    if (this.config.y.sort === 'earliest') {
         //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
         //addition to the current filter selections.
         const filtered_data = this.raw_data.filter(d => {
             let filtered = d[this.config.seq_col] === '';
+
             this.filters.forEach(di => {
                 if (filtered === false && di.val !== 'All')
                     filtered =
@@ -24,6 +21,7 @@ export default function onDraw() {
                             ? di.val.indexOf(d[di.col]) === -1
                             : di.val !== d[di.col];
             });
+
             return !filtered;
         });
 

@@ -1,4 +1,5 @@
-import { set } from 'd3';
+import { svg } from 'd3';
+import { multiply } from 'webcharts';
 
 export default function onResize() {
     const context = this;
@@ -27,29 +28,28 @@ export default function onResize() {
         .selectAll('.y.axis .tick')
         .on('click', d => {
           //Hide population timelines.
-            this.wrap
-                .style('display', 'none');
             this.controls.wrap
-                .style('display', 'none');
+                .selectAll('.control-group select')
+                .property('disabled', true);
+            this.wrap
+                .classed('hidden', true);
 
           //Define participant data.
             const
-                longParticipantData = this.long_data
+                longParticipantData = this.raw_data
                     .filter(di => di[this.config.id_col] === d),
                 wideParticipantData = this.wide_data
                     .filter(di => di[this.config.id_col] === d);
 
           //Draw participant timeline.
-            this.participantTimelines.wrap
-                .style('display', 'block');
-            this.participantTimeline.draw(longParticipantData);
             this.participantTimeline.wrap
-                .select('#backButton')
-                .append('strong')
-                .attr('class', 'id-title')
-                .text('Participant: ' + d);
+                .classed('hidden', false);
+            multiply(this.participantTimeline, longParticipantData, this.config.event_col);
 
           //Draw participant detail listing.
-            this.listing.draw(wideParticipantData);
+            this.listing.wrap
+                .classed('hidden', false);
+            this.listing
+                .draw(wideParticipantData);
         });
 }

@@ -1,11 +1,7 @@
-import annotatePopulationStats from './onDraw/annotatePopulationStats';
 import { nest, min, set, descending } from 'd3';
 
 export default function onDraw() {
     const context = this;
-
-    //Annotate number of selected participants out of total participants.
-    annotatePopulationStats.call(this);
 
     //Sort y-axis based on `Sort IDs` control selection.
     if (this.config.y.sort === 'earliest') {

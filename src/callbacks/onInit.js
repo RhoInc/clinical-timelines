@@ -13,10 +13,10 @@ export default function onInit() {
         );
 
     //Calculate number of total participants and number of participants with any event.
-    this.population = {
-        Nparticipants: set(this.raw_data.map(d => d[this.config.id_col])).values().length,
-        nParticipants: set(this.wide_data.map(d => d[this.config.id_col])).values().length
+    this.sample_population = {
+        population: set(this.raw_data.map(d => d[this.config.id_col])).values()
     };
+    this.sample_population.N = this.sample_population.population.length;
 
     //Define a record for each start day and stop day.
     this.raw_data = lengthenRaw(this.wide_data, [this.config.stdy_col, this.config.endy_col]);
@@ -27,18 +27,17 @@ export default function onInit() {
 
     //Remove filters for variables fewer than two levels.
     this.controls.config.inputs = this.controls.config.inputs
-        .filter(function(d) {
-            if (d.type != 'subsetter') {
-                return true;
-            } else {
-                var levels = set(chart.raw_data.map(f => f[d.value_col])).values();
-                if (levels.length < 2) {
-                    console.warn(
-                        d.value_col + ' filter not shown since the variable has less than 2 levels'
-                    );
-                }
-                return levels.length >= 2;
+        .filter(filter => filter.type === 'subsetter')
+        .filter(filter => {
+            const
+                levels = set(this.raw_data.map(d => d[filter.value_col])).values();
+
+            if (levels.length < 2) {
+                console.warn(
+                    filter.value_col + ' filter removed because the variable has only one level.'
+                );
             }
+
+            return levels.length > 1;
         });
-    this.populationStats.Nparticipants = set(this.raw_data.map(d => d[chart.config.id_col])).values().length;
 }

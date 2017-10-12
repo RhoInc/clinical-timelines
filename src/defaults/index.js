@@ -1,9 +1,9 @@
-import settings from 'settings';
-import syncSettings from 'syncSettings';
-import controls from 'controls';
-import syncControls from 'syncControls';
+import settings from './settings';
+import syncSettings from './syncSettings';
+import controls from './controls';
+import syncControls from './syncControls';
 
-export default defaults = {
+export default {
     settings: settings,
     syncSettings: syncSettings,
     controls: controls,

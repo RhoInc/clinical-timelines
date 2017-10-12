@@ -9,9 +9,13 @@ export default {
     },
     globals: {
         d3: 'd3',
-        webcharts: 'webcharts'
+        webcharts: 'webCharts'
     },
-    external: ['d3', 'webcharts'],
+    external: (function() {
+        var dependencies = require('./package.json').dependencies;
+
+        return Object.keys(dependencies);
+    }()),
     plugins: [
         babel({
             exclude: 'node_modules/**',

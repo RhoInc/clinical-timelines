@@ -1,4 +1,4 @@
-export default settings =
+export default
   //Renderer-specific settings
     {id_col: 'USUBJID'
     ,event_col: 'DOMAIN'
@@ -6,6 +6,7 @@ export default settings =
     ,stdy_col: 'STDY'
     ,endy_col: 'ENDY'
     ,events: null
+    ,unit: 'participant'
     ,filters: null
     ,details: null
 
@@ -37,7 +38,8 @@ export default settings =
     ,color_dom: null // set in syncSettings()
     ,legend:
         {location: 'top'
-        ,legend: 'Event Type'
+        ,label: ''
+        ,mark: 'circle'
         ,order: null} // set in syncSettings()
     ,gridlines: 'y'
     ,range_band: 15

@@ -9,7 +9,6 @@ export default function participantTimeline(clinicalTimelines) {
         participantTimeline.on(callback.substring(2).toLowerCase(), callbacks[callback]);
 
     participantTimeline.clinicalTimelines = clinicalTimelines;
-    participantTimeline.init([]);
     participantTimeline.wrap.classed('hidden', true);
 
     return participantTimeline;

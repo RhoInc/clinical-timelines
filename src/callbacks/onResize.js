@@ -27,10 +27,27 @@ export default function onResize() {
     this.svg
         .selectAll('.y.axis .tick')
         .on('click', d => {
-          //Hide population timelines.
+          //Disable controls.
             this.controls.wrap
                 .selectAll('.control-group select')
-                .property('disabled', true);
+                .property('disabled', d => d.value_col === this.config.id_col);
+
+          //Hide population details.
+            this.populationDetails.annotation.classed('hidden', true);
+
+          //Display back button and participant information.
+            this.participantDetails.annotation.classed('hidden', false);
+            this.participantDetails.annotation
+                .select('#participant')
+                .text(d);
+
+          //Display back button and participant information.
+            this.participantDetails.wrap.classed('hidden', false);
+            this.participantDetails.annotation
+                .select('#participant')
+                .text(d);
+
+          //Hide clinical timelines.
             this.wrap
                 .classed('hidden', true);
 

@@ -1,11 +1,11 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('webcharts'), require('d3')) :
-	typeof define === 'function' && define.amd ? define(['webcharts', 'd3'], factory) :
-	(global.clinicalTimelines = factory(global.webCharts,global.d3));
-}(this, (function (webcharts,d3) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('d3'), require('webcharts')) :
+	typeof define === 'function' && define.amd ? define(['d3', 'webcharts'], factory) :
+	(global.clinicalTimelines = factory(global.d3,global.webCharts));
+}(this, (function (d3,webcharts) { 'use strict';
 
 function defineStyles() {
-    var styles = ['.wc-chart.hidden {' + '    display: none !important;' + '}', '.wc-chart .legend .sample-population {' + '    float: right;' + '}', '.wc-chart .wc-svg .y.axis .tick {' + '    cursor: pointer;' + '}'],
+    var styles = ['#clinical-timelines .hidden {' + '    display: none !important;' + '}', '#clinical-timelines .wc-controls {' + '    border: 1px solid #eee;' + '    padding: 5px;' + '}', '#clinical-timelines .wc-controls .population-details {' + '    float: right;' + '}', '#clinical-timelines .wc-controls .population-details .stats {' + '    font-weight: bold;' + '}', '#clinical-timelines .wc-controls .participant-details {' + '    display: block;' + '}', '#clinical-timelines .wc-controls .participant-details > * {' + '    display: inline-block;' + '    font-size: 16px;' + '}', '#clinical-timelines .wc-controls .participant-details .back-button button {' + '    padding: 0 5px;' + '    font-size: 14px;' + '}', '#clinical-timelines .wc-controls .participant-details #participant {' + '    font-weight: bold;' + '}', '#clinical-timelines .wc-controls .participant-details .back-button {' + '    margin-right: 10px;' + '}', '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' + '    cursor: pointer;' + '    fill: blue;' + '    text-decoration: underline;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart {' + '    width: 100%;' + '    padding: 0;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-chart-title {' + '    text-align: left;' + '    font-size: 21px;' + '    padding-bottom: 5px;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-svg .y.axis .tick {' + '    cursor: default;' + '    fill: black;' + '    text-decoration: none;' + '}'],
         style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = styles.join('\n');
@@ -263,13 +263,15 @@ function syncSettings(settings) {
     syncedSettings.legend.order = syncedSettings.color_dom;
 
     //Default filters
-    var defaultFilters = [{ value_col: syncedSettings.event_col, label: 'Event Type' }, { value_col: syncedSettings.id_col, label: 'Participant' }];
+    var defaultFilters = [{ type: 'subsetter', value_col: syncedSettings.id_col, label: 'Participant', multiple: true }, { type: 'subsetter', value_col: syncedSettings.event_col, label: 'Event Type', multiple: true }];
     syncedSettings.filters = syncedSettings.filters instanceof Array && syncedSettings.filters.length ? defaultFilters.concat(syncedSettings.filters.filter(function (filter) {
         return filter instanceof String || filter instanceof Object && filter.hasOwnProperty('value_col');
     }).map(function (filter) {
         var filterObject = {};
+        filterObject.type = 'subsetter';
         filterObject.value_col = filter.value_col || filter;
         filterObject.label = filter.label || filter.value_col;
+        filterObject.multiple = filterObject.multiple === true ? true : false;
         return filterObject;
     })) : defaultFilters;
 
@@ -297,7 +299,6 @@ function syncSettings(settings) {
     syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
     syncedSettings.participantSettings.marks[0].per = [syncedSettings.participantSettings.event_col, syncedSettings.participantSettings.seq_col];
     syncedSettings.participantSettings.marks[1].per = [syncedSettings.participantSettings.event_col, syncedSettings.participantSettings.seq_col, 'wc_value'];
-    syncedSettings.participantSettings.range_band = syncedSettings.range_band * 2;
     syncedSettings.participantSettings.margin = null;
     syncedSettings.participantSettings.transitions = false;
 
@@ -313,7 +314,7 @@ var controls = [{ type: 'radio',
 
 function syncControls(controls, settings) {
     settings.filters.reverse().forEach(function (filter) {
-        filter.type = 'subsetter';
+        console.log(filter);
         controls.unshift(filter);
     });
 
@@ -358,12 +359,13 @@ function onInit() {
     );
 
     //Calculate number of total participants and number of participants with any event.
-    this.sample_population = {
+    this.populationDetails = {
         population: d3.set(this.raw_data.map(function (d) {
             return d[_this.config.id_col];
         })).values()
     };
-    this.sample_population.N = this.sample_population.population.length;
+    this.populationDetails.N = this.populationDetails.population.length;
+    this.participantDetails = {};
 
     //Define a record for each start day and stop day.
     this.raw_data = lengthenRaw(this.wide_data, [this.config.stdy_col, this.config.endy_col]);
@@ -388,7 +390,24 @@ function onInit() {
 }
 
 function onLayout() {
-    this.sample_population.annotation = this.wrap.select('.legend').append('span').classed('sample-population', true);
+    var _this = this;
+
+    this.populationDetails.wrap = this.controls.wrap.append('div').classed('population-details', true);
+
+    //Add div for back button and participant ID title.
+    this.participantDetails.wrap = this.controls.wrap.append('div').classed('participant-details', true).html('Viewing ' + this.config.unit + ' <span id = \'participant\'></span>');
+
+    //Add div for back button and participant ID title.
+    this.controls.wrap.append('div').classed('back-button hidden', true).append('button').html('&#8592; Back').on('click', function () {
+        _this.controls.wrap.selectAll('.control-group select').property('disabled', false);
+        _this.participantDetails.wrap.classed('hidden', true);
+        _this.populationDetails.wrap.classed('hidden', false);
+        _this.participantTimeline.wrap.classed('hidden', true);
+        _this.listing.wrap.classed('hidden', true);
+        _this.populationDetails.annotation.classed('hidden', false);
+        _this.wrap.classed('hidden', false);
+        _this.participantDetails.wrap.classed('hidden', true);
+    });
 
     //Add top x-axis.
     var topXaxis = this.svg.append('g').classed('x-top axis linear', true);
@@ -402,12 +421,12 @@ function onPreprocess() {
 function onDatatransform() {
     var _this = this;
 
-    this.sample_population.sample = d3.set(this.filtered_data.map(function (d) {
+    this.populationDetails.sample = d3.set(this.filtered_data.map(function (d) {
         return d[_this.config.id_col];
     })).values();
-    this.sample_population.n = this.sample_population.sample.length;
-    this.sample_population.rate = this.sample_population.n / this.sample_population.N;
-    this.sample_population.annotation.text(this.sample_population.n + ' of ' + this.sample_population.N + ' ' + this.config.unit + '(s) displayed (' + d3.format('%')(this.sample_population.rate) + ')');
+    this.populationDetails.n = this.populationDetails.sample.length;
+    this.populationDetails.rate = this.populationDetails.n / this.populationDetails.N;
+    this.populationDetails.annotation.text(this.populationDetails.n + ' of ' + this.populationDetails.N + ' ' + this.config.unit + '(s) displayed (' + d3.format('%')(this.populationDetails.rate) + ')');
 }
 
 function onDraw() {
@@ -461,8 +480,23 @@ function onResize() {
 
     //Draw second chart when y-axis tick label is clicked.
     this.svg.selectAll('.y.axis .tick').on('click', function (d) {
-        //Hide population timelines.
-        _this.controls.wrap.selectAll('.control-group select').property('disabled', true);
+        //Disable controls.
+        _this.controls.wrap.selectAll('.control-group select').property('disabled', function (d) {
+            return d.value_col === _this.config.id_col;
+        });
+
+        //Hide population details.
+        _this.populationDetails.annotation.classed('hidden', true);
+
+        //Display back button and participant information.
+        _this.participantDetails.annotation.classed('hidden', false);
+        _this.participantDetails.annotation.select('#participant').text(d);
+
+        //Display back button and participant information.
+        _this.participantDetails.wrap.classed('hidden', false);
+        _this.participantDetails.annotation.select('#participant').text(d);
+
+        //Hide clinical timelines.
         _this.wrap.classed('hidden', true);
 
         //Define participant data.
@@ -502,14 +536,7 @@ function onInit$1() {
 }
 
 function onLayout$1() {
-    var _this = this;
-
-    this.wrap.insert('div', ':first-child').classed('back-button', true).append('button').html('&#8592; Back').on('click', function () {
-        _this.wrap.classed('hidden', true);
-        _this.clinicalTimelines.listing.classed('hidden', true);
-        _this.controls.wrap.selectAll('.control-group select').property('disabled', false);
-        _this.wrap.classed('hidden', false);
-    });
+    
 }
 
 function onPreprocess$1() {
@@ -525,7 +552,7 @@ function onDraw$1() {
 }
 
 function onResize$1() {
-    
+    this.wrap.select('.legend').classed('hidden', true);
 }
 
 function onDestroy$1() {
@@ -548,7 +575,6 @@ function participantTimeline(clinicalTimelines) {
     for (var callback in callbacks$1) {
         participantTimeline.on(callback.substring(2).toLowerCase(), callbacks$1[callback]);
     }participantTimeline.clinicalTimelines = clinicalTimelines;
-    participantTimeline.init([]);
     participantTimeline.wrap.classed('hidden', true);
 
     return participantTimeline;
@@ -594,18 +620,26 @@ function listing(clinicalTimelines) {
     return listing;
 }
 
-function clinicalTimelines(element, settings) {
+function clinicalTimelines() {
+    var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
+    var settings = arguments[1];
+
+    //Define unique div within passed element argument.
+    var container = d3.select(element).append('div').attr('id', 'clinical-timelines'),
+        containerElement = container.node();
+
+    //Define .css styles to avoid requiring a separate .css file.
     defineStyles();
 
     var mergedSettings = Object.assign({}, defaults.settings, settings),
         syncedSettings = defaults.syncSettings(mergedSettings),
         syncedControls = defaults.syncControls(defaults.controls, syncedSettings),
-        controls = webcharts.createControls(element, { location: 'top', inputs: syncedControls }),
-        clinicalTimelines = webcharts.createChart(element, syncedSettings, controls);
+        controls = webcharts.createControls(containerElement, { location: 'top', inputs: syncedControls }),
+        clinicalTimelines = webcharts.createChart(containerElement, syncedSettings, controls);
 
     for (var callback in callbacks) {
         clinicalTimelines.on(callback.substring(2).toLowerCase(), callbacks[callback]);
-    }clinicalTimelines.element = element;
+    }clinicalTimelines.element = containerElement;
     clinicalTimelines.participantTimeline = participantTimeline(clinicalTimelines);
     clinicalTimelines.listing = listing(clinicalTimelines);
 

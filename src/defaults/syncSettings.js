@@ -27,8 +27,8 @@ export default function syncSettings(settings) {
   //Default filters
     const
         defaultFilters = [
-            {value_col: syncedSettings.event_col, label: 'Event Type'},
-            {value_col: syncedSettings.id_col, label: 'Participant'}
+            {type: 'subsetter', value_col: syncedSettings.id_col, label: 'Participant', multiple: true},
+            {type: 'subsetter', value_col: syncedSettings.event_col, label: 'Event Type', multiple: true}
         ];
     syncedSettings.filters = syncedSettings.filters instanceof Array && syncedSettings.filters.length
         ? defaultFilters.concat(
@@ -37,8 +37,12 @@ export default function syncSettings(settings) {
                 .map(filter => {
                     const
                         filterObject = {};
+                        filterObject.type = 'subsetter';
                         filterObject.value_col = filter.value_col || filter;
                         filterObject.label = filter.label || filter.value_col;
+                        filterObject.multiple = filterObject.multiple === true
+                            ? true
+                            : false;
                     return filterObject;
                 }))
         : defaultFilters;
@@ -77,7 +81,6 @@ export default function syncSettings(settings) {
     syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
     syncedSettings.participantSettings.marks[0].per = [syncedSettings.participantSettings.event_col, syncedSettings.participantSettings.seq_col];
     syncedSettings.participantSettings.marks[1].per = [syncedSettings.participantSettings.event_col, syncedSettings.participantSettings.seq_col, 'wc_value'];
-    syncedSettings.participantSettings.range_band = syncedSettings.range_band*2;
     syncedSettings.participantSettings.margin = null;
     syncedSettings.participantSettings.transitions = false;
 

@@ -13,10 +13,11 @@ export default function onInit() {
         );
 
     //Calculate number of total participants and number of participants with any event.
-    this.sample_population = {
+    this.populationDetails = {
         population: set(this.raw_data.map(d => d[this.config.id_col])).values()
     };
-    this.sample_population.N = this.sample_population.population.length;
+    this.populationDetails.N = this.populationDetails.population.length;
+    this.participantDetails = {};
 
     //Define a record for each start day and stop day.
     this.raw_data = lengthenRaw(this.wide_data, [this.config.stdy_col, this.config.endy_col]);

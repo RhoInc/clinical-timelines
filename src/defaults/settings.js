@@ -25,15 +25,16 @@ export default
             ,per: null // set in syncSettings()
             ,tooltip: null // set in syncSettings()
             ,attributes:
-                {'stroke-width': 5
-                ,'stroke-opacity': .5}}
+                {'stroke-width': 3
+                ,'stroke-opacity': 1}}
         ,
             {type: 'circle'
             ,per: null // set in syncSettings()
             ,tooltip: null // set in syncSettings()
+            ,radius: '3'
             ,attributes:
-                {'fill-opacity': .5
-                ,'stroke-opacity': .5}}
+                {'fill-opacity': 1
+                ,'stroke-opacity': 1}}
         ]
     ,color_dom: null // set in syncSettings()
     ,legend:

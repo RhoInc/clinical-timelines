@@ -27,7 +27,7 @@ export default function syncSettings(settings) {
   //Default filters
     const
         defaultFilters = [
-            {type: 'subsetter', value_col: syncedSettings.id_col, label: 'Participant', multiple: true},
+            {type: 'subsetter', value_col: syncedSettings.id_col, label: 'Participant', multiple: false},
             {type: 'subsetter', value_col: syncedSettings.event_col, label: 'Event Type', multiple: true}
         ];
     syncedSettings.filters = syncedSettings.filters instanceof Array && syncedSettings.filters.length

@@ -1,39 +1,28 @@
+import backButton from './onLayout/backButton';
+
 export default function onLayout() {
     const context = this;
 
     //Add div for population stats.
     this.populationDetails.wrap = this.controls.wrap
         .append('div')
-        .classed('population-details', true);
+        .classed('annotation population-details', true);
 
     //Add div for back button and participant ID title.
     this.participantDetails.wrap = this.controls.wrap
         .append('div')
-        .classed('participant-details', true)
+        .classed('annotation participant-details hidden', true)
         .html(`Viewing ${this.config.unit} <span id = 'participant'></span>`);
 
     //Add div for back button and participant ID title.
-    this.controls.wrap
+    this.backButton = this.controls.wrap
         .append('div')
-        .classed('back-button hidden', true)
+        .classed('back-button hidden', true);
+    this.backButton
             .append('button')
             .html('&#8592; Back')
             .on('click', () => {
-                this.controls.wrap
-                    .selectAll('.control-group select')
-                    .property('disabled', false);
-                this.participantDetails.wrap
-                    .classed('hidden', true);
-                this.populationDetails.wrap
-                    .classed('hidden', false);
-                this.participantTimeline.wrap
-                    .classed('hidden', true);
-                this.listing.wrap
-                    .classed('hidden', true);
-                this.populationDetails.annotation.classed('hidden', false);
-                this.wrap
-                    .classed('hidden', false);
-                this.participantDetails.wrap.classed('hidden', true);
+                backButton.call(this);
             });
 
     //Add top x-axis.

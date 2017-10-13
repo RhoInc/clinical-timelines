@@ -27,25 +27,28 @@ export default function onResize() {
     this.svg
         .selectAll('.y.axis .tick')
         .on('click', d => {
-          //Disable controls.
+          //Update participant filter.
             this.controls.wrap
-                .selectAll('.control-group select')
-                .property('disabled', d => d.value_col === this.config.id_col);
+                .selectAll('.control-group')
+                .filter(control => control.value_col === this.config.id_col)
+                .selectAll('option')
+                .property('selected', option => option === d);
+            this.filters
+                .filter(filter => filter.col === this.config.id_col)[0]
+                .val = d;
 
           //Hide population details.
-            this.populationDetails.annotation.classed('hidden', true);
+            this.populationDetails.wrap.classed('hidden', true);
 
-          //Display back button and participant information.
-            this.participantDetails.annotation.classed('hidden', false);
-            this.participantDetails.annotation
+          //Display participant information.
+            this.participantDetails.wrap
+                .classed('hidden', false);
+            this.participantDetails.wrap
                 .select('#participant')
                 .text(d);
 
-          //Display back button and participant information.
-            this.participantDetails.wrap.classed('hidden', false);
-            this.participantDetails.annotation
-                .select('#participant')
-                .text(d);
+          //Display back button.
+            this.backButton.classed('hidden', false);
 
           //Hide clinical timelines.
             this.wrap
@@ -61,6 +64,7 @@ export default function onResize() {
           //Draw participant timeline.
             this.participantTimeline.wrap
                 .classed('hidden', false);
+            this.participantTimeline.wrap.selectAll('*').remove();
             multiply(this.participantTimeline, longParticipantData, this.config.event_col);
 
           //Draw participant detail listing.

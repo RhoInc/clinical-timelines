@@ -5,7 +5,7 @@
 }(this, (function (d3,webcharts) { 'use strict';
 
 function defineStyles() {
-    var styles = ['#clinical-timelines .hidden {' + '    display: none !important;' + '}', '#clinical-timelines .wc-controls {' + '    border: 1px solid #eee;' + '    padding: 5px;' + '}', '#clinical-timelines .wc-controls .population-details {' + '    float: right;' + '}', '#clinical-timelines .wc-controls .population-details .stats {' + '    font-weight: bold;' + '}', '#clinical-timelines .wc-controls .participant-details {' + '    display: block;' + '}', '#clinical-timelines .wc-controls .participant-details > * {' + '    display: inline-block;' + '    font-size: 16px;' + '}', '#clinical-timelines .wc-controls .participant-details .back-button button {' + '    padding: 0 5px;' + '    font-size: 14px;' + '}', '#clinical-timelines .wc-controls .participant-details #participant {' + '    font-weight: bold;' + '}', '#clinical-timelines .wc-controls .participant-details .back-button {' + '    margin-right: 10px;' + '}', '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' + '    cursor: pointer;' + '    fill: blue;' + '    text-decoration: underline;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart {' + '    width: 100%;' + '    padding: 0;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-chart-title {' + '    text-align: left;' + '    font-size: 21px;' + '    padding-bottom: 5px;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-svg .y.axis .tick {' + '    cursor: default;' + '    fill: black;' + '    text-decoration: none;' + '}'],
+    var styles = ['#clinical-timelines .hidden {' + '    display: none !important;' + '}', '#clinical-timelines .wc-controls {' + '    border: 1px solid #eee;' + '    padding: 5px;' + '}', '#clinical-timelines .wc-controls .annotation {' + '    float: right;' + '    font-size: 16px;' + '}', '#clinical-timelines .wc-controls .annotation .stats,' + '#clinical-timelines .wc-controls .annotation #participant {' + '    font-weight: bold;' + '}', '#clinical-timelines .wc-controls .back-button button {' + '    padding: 0 5px;' + '    font-size: 14px;' + '}', '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' + '    cursor: pointer;' + '    fill: blue;' + '    text-decoration: underline;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart {' + '    width: 100%;' + '    padding: 0;' + '    border-top: 1px solid black;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart > * {' + '    display: inline-block;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-svg {' + '    float: left;' + '    width: 75%;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-chart-title {' + '    text-align: left;' + '    font-size: 21px;' + '    padding-left: 10px;' + '    width: 24%;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-svg .y.axis .tick {' + '    cursor: default;' + '    fill: black;' + '    text-decoration: none;' + '}'],
         style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = styles.join('\n');
@@ -65,12 +65,13 @@ var settings = //Renderer-specific settings
     marks: [{ type: 'line',
         per: null // set in syncSettings()
         , tooltip: null // set in syncSettings()
-        , attributes: { 'stroke-width': 5,
-            'stroke-opacity': .5 } }, { type: 'circle',
+        , attributes: { 'stroke-width': 3,
+            'stroke-opacity': 1 } }, { type: 'circle',
         per: null // set in syncSettings()
         , tooltip: null // set in syncSettings()
-        , attributes: { 'fill-opacity': .5,
-            'stroke-opacity': .5 } }],
+        , radius: '3',
+        attributes: { 'fill-opacity': 1,
+            'stroke-opacity': 1 } }],
     color_dom: null // set in syncSettings()
     , legend: { location: 'top',
         label: '',
@@ -263,7 +264,7 @@ function syncSettings(settings) {
     syncedSettings.legend.order = syncedSettings.color_dom;
 
     //Default filters
-    var defaultFilters = [{ type: 'subsetter', value_col: syncedSettings.id_col, label: 'Participant', multiple: true }, { type: 'subsetter', value_col: syncedSettings.event_col, label: 'Event Type', multiple: true }];
+    var defaultFilters = [{ type: 'subsetter', value_col: syncedSettings.id_col, label: 'Participant', multiple: false }, { type: 'subsetter', value_col: syncedSettings.event_col, label: 'Event Type', multiple: true }];
     syncedSettings.filters = syncedSettings.filters instanceof Array && syncedSettings.filters.length ? defaultFilters.concat(syncedSettings.filters.filter(function (filter) {
         return filter instanceof String || filter instanceof Object && filter.hasOwnProperty('value_col');
     }).map(function (filter) {
@@ -314,7 +315,6 @@ var controls = [{ type: 'radio',
 
 function syncControls(controls, settings) {
     settings.filters.reverse().forEach(function (filter) {
-        console.log(filter);
         controls.unshift(filter);
     });
 
@@ -375,38 +375,56 @@ function onInit() {
 
     //Remove filters for variables fewer than two levels.
     this.controls.config.inputs = this.controls.config.inputs.filter(function (filter) {
-        return filter.type === 'subsetter';
-    }).filter(function (filter) {
-        var levels = d3.set(_this.raw_data.map(function (d) {
-            return d[filter.value_col];
-        })).values();
+        if (filter.type !== 'subsetter') return true;else {
+            var levels = d3.set(_this.raw_data.map(function (d) {
+                return d[filter.value_col];
+            })).values();
 
-        if (levels.length < 2) {
-            console.warn(filter.value_col + ' filter removed because the variable has only one level.');
+            if (levels.length < 2) {
+                console.warn(filter.value_col + ' filter removed because the variable has only one level.');
+            }
+
+            return levels.length > 1;
         }
-
-        return levels.length > 1;
     });
+}
+
+function backButton() {
+    var _this = this;
+
+    //Update participant filter.
+    this.controls.wrap.selectAll('.control-group').filter(function (control) {
+        return control.value_col === _this.config.id_col;
+    }).selectAll('option').property('selected', function (option) {
+        return option === 'All';
+    });
+    this.filters.filter(function (filter) {
+        return filter.col === _this.config.id_col;
+    })[0].val = 'All';
+
+    //Hide participant timelines.
+    this.participantDetails.wrap.classed('hidden', true);
+    this.participantTimeline.wrap.classed('hidden', true);
+    this.listing.wrap.classed('hidden', true);
+    this.backButton.classed('hidden', true);
+
+    //Display population timelines.
+    this.populationDetails.wrap.classed('hidden', false);
+    this.wrap.classed('hidden', false);
 }
 
 function onLayout() {
     var _this = this;
 
-    this.populationDetails.wrap = this.controls.wrap.append('div').classed('population-details', true);
+    this.populationDetails.wrap = this.controls.wrap.append('div').classed('annotation population-details', true);
 
     //Add div for back button and participant ID title.
-    this.participantDetails.wrap = this.controls.wrap.append('div').classed('participant-details', true).html('Viewing ' + this.config.unit + ' <span id = \'participant\'></span>');
+    this.participantDetails.wrap = this.controls.wrap.append('div').classed('annotation participant-details hidden', true).html('Viewing ' + this.config.unit + ' <span id = \'participant\'></span>');
 
     //Add div for back button and participant ID title.
-    this.controls.wrap.append('div').classed('back-button hidden', true).append('button').html('&#8592; Back').on('click', function () {
-        _this.controls.wrap.selectAll('.control-group select').property('disabled', false);
-        _this.participantDetails.wrap.classed('hidden', true);
-        _this.populationDetails.wrap.classed('hidden', false);
-        _this.participantTimeline.wrap.classed('hidden', true);
-        _this.listing.wrap.classed('hidden', true);
-        _this.populationDetails.annotation.classed('hidden', false);
-        _this.wrap.classed('hidden', false);
-        _this.participantDetails.wrap.classed('hidden', true);
+    this.backButton = this.controls.wrap.append('div').classed('back-button hidden', true);
+    this.backButton.append('button').html('&#8592; Back').on('click', function () {
+        backButton.call(_this);
     });
 
     //Add top x-axis.
@@ -426,7 +444,7 @@ function onDatatransform() {
     })).values();
     this.populationDetails.n = this.populationDetails.sample.length;
     this.populationDetails.rate = this.populationDetails.n / this.populationDetails.N;
-    this.populationDetails.annotation.text(this.populationDetails.n + ' of ' + this.populationDetails.N + ' ' + this.config.unit + '(s) displayed (' + d3.format('%')(this.populationDetails.rate) + ')');
+    this.populationDetails.wrap.html('<span class = \'stats\'>' + this.populationDetails.n + '</span> of <span class = \'stats\'>' + this.populationDetails.N + '</span> ' + this.config.unit + '(s) displayed (<span class = \'stats\'>' + d3.format('%')(this.populationDetails.rate) + '</span>)');
 }
 
 function onDraw() {
@@ -480,21 +498,25 @@ function onResize() {
 
     //Draw second chart when y-axis tick label is clicked.
     this.svg.selectAll('.y.axis .tick').on('click', function (d) {
-        //Disable controls.
-        _this.controls.wrap.selectAll('.control-group select').property('disabled', function (d) {
-            return d.value_col === _this.config.id_col;
+        //Update participant filter.
+        _this.controls.wrap.selectAll('.control-group').filter(function (control) {
+            return control.value_col === _this.config.id_col;
+        }).selectAll('option').property('selected', function (option) {
+            return option === d;
         });
+        _this.filters.filter(function (filter) {
+            return filter.col === _this.config.id_col;
+        })[0].val = d;
 
         //Hide population details.
-        _this.populationDetails.annotation.classed('hidden', true);
+        _this.populationDetails.wrap.classed('hidden', true);
 
-        //Display back button and participant information.
-        _this.participantDetails.annotation.classed('hidden', false);
-        _this.participantDetails.annotation.select('#participant').text(d);
-
-        //Display back button and participant information.
+        //Display participant information.
         _this.participantDetails.wrap.classed('hidden', false);
-        _this.participantDetails.annotation.select('#participant').text(d);
+        _this.participantDetails.wrap.select('#participant').text(d);
+
+        //Display back button.
+        _this.backButton.classed('hidden', false);
 
         //Hide clinical timelines.
         _this.wrap.classed('hidden', true);
@@ -509,6 +531,7 @@ function onResize() {
 
         //Draw participant timeline.
         _this.participantTimeline.wrap.classed('hidden', false);
+        _this.participantTimeline.wrap.selectAll('*').remove();
         webcharts.multiply(_this.participantTimeline, longParticipantData, _this.config.event_col);
 
         //Draw participant detail listing.

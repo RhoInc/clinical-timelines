@@ -2,7 +2,6 @@ export default function syncControls(controls, settings) {
     settings.filters
         .reverse()
         .forEach(filter => {
-            console.log(filter);
             controls.unshift(filter);
         });
   

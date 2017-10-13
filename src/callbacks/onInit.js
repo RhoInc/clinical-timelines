@@ -28,17 +28,20 @@ export default function onInit() {
 
     //Remove filters for variables fewer than two levels.
     this.controls.config.inputs = this.controls.config.inputs
-        .filter(filter => filter.type === 'subsetter')
         .filter(filter => {
-            const
-                levels = set(this.raw_data.map(d => d[filter.value_col])).values();
+            if (filter.type !== 'subsetter')
+                return true;
+            else {
+                const
+                    levels = set(this.raw_data.map(d => d[filter.value_col])).values();
 
-            if (levels.length < 2) {
-                console.warn(
-                    filter.value_col + ' filter removed because the variable has only one level.'
-                );
+                if (levels.length < 2) {
+                    console.warn(
+                        filter.value_col + ' filter removed because the variable has only one level.'
+                    );
+                }
+
+                return levels.length > 1;
             }
-
-            return levels.length > 1;
         });
 }

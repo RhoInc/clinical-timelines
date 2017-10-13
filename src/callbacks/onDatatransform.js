@@ -7,6 +7,6 @@ export default function onDatatransform() {
     this.populationDetails.sample = set(this.filtered_data.map(d => d[this.config.id_col])).values();
     this.populationDetails.n = this.populationDetails.sample.length;
     this.populationDetails.rate = this.populationDetails.n/this.populationDetails.N;
-    this.populationDetails.annotation
-        .text(`${this.populationDetails.n} of ${this.populationDetails.N} ${this.config.unit}(s) displayed (${format('%')(this.populationDetails.rate)})`);
+    this.populationDetails.wrap
+        .html(`<span class = 'stats'>${this.populationDetails.n}</span> of <span class = 'stats'>${this.populationDetails.N}</span> ${this.config.unit}(s) displayed (<span class = 'stats'>${format('%')(this.populationDetails.rate)}</span>)`);
 }

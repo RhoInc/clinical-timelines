@@ -31,4 +31,14 @@ export default function onResize() {
         this.selected_id = d;
         drawParticipantTimeline.call(this);
     });
+
+  //Offset overlapping marks.
+    this.marks
+        .forEach((mark,i) => {
+            if (i === 1) {
+                const
+                    overlapping = mark.data
+                        .filter(d => console.log(d));
+            }
+        });
 }

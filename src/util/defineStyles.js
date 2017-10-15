@@ -44,7 +44,14 @@ export default function defineStyles() {
                 '    cursor: default;' +
                 '    fill: black;' +
                 '    text-decoration: none;' +
-                '}'
+                '}',
+            '#clinical-timelines .wc-chart.wc-table {' +
+                '    width: 100%;' +
+                '}',
+            '#clinical-timelines .wc-chart.wc-table table {' +
+                '    display: table;' +
+                '    width: 100%;' +
+                '}',
         ],
         style = document.createElement('style');
     style.type = 'text/css';

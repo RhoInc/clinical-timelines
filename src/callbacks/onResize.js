@@ -29,6 +29,6 @@ export default function onResize() {
     //Draw second chart when y-axis tick label is clicked.
     this.svg.selectAll('.y.axis .tick').on('click', d => {
         this.selected_id = d;
-        participantTimeline.call(this);
+        drawParticipantTimeline.call(this);
     });
 }

@@ -1,6 +1,5 @@
 import backButton from './onLayout/backButton';
 import drawParticipantTimeline from './onLayout/drawParticipantTimeline';
-import updateParticipantTimeline from './onLayout/updateParticipantTimeline';
 
 export default function onLayout() {
     const context = this;
@@ -36,15 +35,27 @@ export default function onLayout() {
     this.controls.wrap
         .selectAll('.control-group')
         .filter(d => d.type === 'subsetter')
+        .each(function(filter) {
+            if (filter.label === 'Event Type')
+                d3
+                    .select(this)
+                    .selectAll('option')
+                    .property('selected', d => {
+                        return context.currentEventTypes instanceof Array
+                            ? context.currentEventTypes.indexOf(d) > -1
+                            : true;
+                    });
+        })
         .on('change', filter => {
             if (filter.value_col === this.config.id_col) {
-                console.log('id');
                 drawParticipantTimeline.call(this);
             } else if (filter.value_col === this.config.event_col) {
-                console.log('event');
-                if (this.selected_id) updateParticipantTimeline.call(this);
+                this.currentEventTypes = this.filters.filter(
+                    filter => filter.col === this.config.event_col
+                )[0].val;
+                if (this.selected_id) drawParticipantTimeline.call(this);
             } else {
-                console.log('custom');
+                console.log('handle custom filters here');
             }
         });
 }

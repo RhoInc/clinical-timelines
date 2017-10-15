@@ -19,10 +19,18 @@ export default function drawParticipantTimeline() {
 
         //Define participant data.
         const longParticipantData = this.raw_data.filter(
-                di => di[this.config.id_col] === this.selected_id
+                di =>
+                    di[this.config.id_col] === this.selected_id &&
+                    (this.currentEventTypes !== 'All'
+                        ? this.currentEventTypes.indexOf(di[this.config.event_col]) > -1
+                        : true)
             ),
             wideParticipantData = this.wide_data.filter(
-                di => di[this.config.id_col] === this.selected_id
+                di =>
+                    di[this.config.id_col] === this.selected_id &&
+                    (this.currentEventTypes !== 'All'
+                        ? this.currentEventTypes.indexOf(di[this.config.event_col]) > -1
+                        : true)
             );
 
         //Draw participant timeline.

@@ -99,7 +99,7 @@
             seq_col: 'SEQ',
             stdy_col: 'STDY',
             endy_col: 'ENDY',
-            events: null,
+            eventTypes: null,
             unit: 'participant',
             filters: null,
             details: null,
@@ -143,13 +143,11 @@
                 location: 'top',
                 label: '',
                 mark: 'circle',
-                order: null // set in syncSettings()
-            },
+                order: null
+            }, // set in syncSettings()
             gridlines: 'y',
             range_band: 15,
-            margin: {
-                top: 50 // for second x-axis
-            },
+            margin: { top: 50 }, // for second x-axis
             resizable: true
         };
 
@@ -357,8 +355,6 @@
 
         //Define mark coloring and legend order.
         syncedSettings.color_by = syncedSettings.event_col;
-        syncedSettings.color_dom = syncedSettings.events;
-        syncedSettings.legend.order = syncedSettings.color_dom;
 
         //Default filters
         var defaultFilters = [
@@ -372,7 +368,8 @@
                 type: 'subsetter',
                 value_col: syncedSettings.event_col,
                 label: 'Event Type',
-                multiple: true
+                multiple: true,
+                start: syncedSettings.eventTypes
             }
         ];
         syncedSettings.filters =
@@ -436,6 +433,7 @@
 
         //Participant timelines settings
         syncedSettings.participantSettings = clone(syncedSettings);
+        syncedSettings.participantSettings.x.label = '';
         syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
         syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
         syncedSettings.participantSettings.marks[0].per = [
@@ -551,6 +549,28 @@
                 return levels.length > 1;
             }
         });
+
+        //Default event types to 'All'.
+        this.allEventTypes = d3$1
+            .set(
+                this.raw_data.map(function(d) {
+                    return d[_this.config.event_col];
+                })
+            )
+            .values()
+            .sort();
+        this.currentEventTypes = this.config.eventTypes || 'All';
+        this.config.color_dom =
+            this.currentEventTypes !== 'All'
+                ? this.currentEventTypes.concat(
+                      this.allEventTypes
+                          .filter(function(eventType) {
+                              return _this.currentEventTypes.indexOf(eventType) === -1;
+                          })
+                          .sort()
+                  )
+                : this.allEventTypes;
+        this.config.legend.order = this.config.color_dom;
     }
 
     function backButton() {
@@ -610,10 +630,20 @@
 
             //Define participant data.
             var longParticipantData = this.raw_data.filter(function(di) {
-                    return di[_this.config.id_col] === _this.selected_id;
+                    return (
+                        di[_this.config.id_col] === _this.selected_id &&
+                        (_this.currentEventTypes !== 'All'
+                            ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1
+                            : true)
+                    );
                 }),
                 wideParticipantData = this.wide_data.filter(function(di) {
-                    return di[_this.config.id_col] === _this.selected_id;
+                    return (
+                        di[_this.config.id_col] === _this.selected_id &&
+                        (_this.currentEventTypes !== 'All'
+                            ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1
+                            : true)
+                    );
                 });
 
             //Draw participant timeline.
@@ -655,40 +685,12 @@
         }
     }
 
-    function hideMultiples() {
-        var context = this;
-
-        //Hide event types not represented in current filter selections.
-        var event_col = this.config.event_col,
-            eventTypes = this.filters.filter(function(filter) {
-                return filter.col === event_col;
-            })[0].val;
-
-        this.participantTimeline.wrap.selectAll('.wc-chart').each(function() {
-            var multiple = d3.select(this),
-                eventType = multiple.select('.wc-chart-title').text();
-
-            multiple.classed(
-                'hidden',
-                eventTypes instanceof Array ? eventTypes.indexOf(eventType) === -1 : false
-            );
-
-            context.listing.draw(
-                context.wide_data.filter(function(d) {
-                    return (
-                        d[context.config.id_col] === context.selected_id &&
-                        (eventTypes instanceof Array
-                            ? eventTypes.indexOf(d[context.config.event_col]) > -1
-                            : true)
-                    );
-                })
-            );
-        });
-    }
-
     function onLayout() {
         var _this = this;
 
+        var context = this;
+
+        //Add div for population stats.
         this.populationDetails.wrap = this.controls.wrap
             .append('div')
             .classed('annotation population-details', true);
@@ -721,15 +723,27 @@
             .filter(function(d) {
                 return d.type === 'subsetter';
             })
+            .each(function(filter) {
+                if (filter.label === 'Event Type')
+                    d3
+                        .select(this)
+                        .selectAll('option')
+                        .property('selected', function(d) {
+                            return context.currentEventTypes instanceof Array
+                                ? context.currentEventTypes.indexOf(d) > -1
+                                : true;
+                        });
+            })
             .on('change', function(filter) {
                 if (filter.value_col === _this.config.id_col) {
-                    console.log('id');
                     drawParticipantTimeline.call(_this);
                 } else if (filter.value_col === _this.config.event_col) {
-                    console.log('event');
-                    if (_this.selected_id) hideMultiples.call(_this);
+                    _this.currentEventTypes = _this.filters.filter(function(filter) {
+                        return filter.col === _this.config.event_col;
+                    })[0].val;
+                    if (_this.selected_id) drawParticipantTimeline.call(_this);
                 } else {
-                    console.log('custom');
+                    console.log('handle custom filters here');
                 }
             });
     }
@@ -830,6 +844,65 @@
         } else this.y_dom = this.y_dom.sort(d3$1.descending);
     }
 
+    function drawParticipantTimeline$1() {
+        var _this = this;
+
+        //Update participant filter.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(control) {
+                return control.value_col === _this.config.id_col;
+            })
+            .selectAll('option')
+            .property('selected', function(option) {
+                return option === _this.selected_id;
+            });
+        this.filters.filter(function(filter) {
+            return filter.col === _this.config.id_col;
+        })[0].val = this.selected_id;
+
+        //Hide population details.
+        this.populationDetails.wrap.classed('hidden', true);
+
+        //Display participant information.
+        this.participantDetails.wrap.classed('hidden', false);
+        this.participantDetails.wrap.select('#participant').text(this.selected_id);
+
+        //Display back button.
+        this.backButton.classed('hidden', false);
+
+        //Hide clinical timelines.
+        this.wrap.classed('hidden', true);
+
+        //Define participant data.
+        console.log(this.currentEventTypes);
+        var longParticipantData = this.raw_data.filter(function(di) {
+                return (
+                    di[_this.config.id_col] === _this.selected_id &&
+                    (_this.currentEventTypes !== 'All'
+                        ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1
+                        : true)
+                );
+            }),
+            wideParticipantData = this.wide_data.filter(function(di) {
+                return (
+                    di[_this.config.id_col] === _this.selected_id &&
+                    (_this.currentEventTypes !== 'All'
+                        ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1
+                        : true)
+                );
+            });
+
+        //Draw participant timeline.
+        this.participantTimeline.wrap.classed('hidden', false);
+        this.participantTimeline.wrap.selectAll('*').remove();
+        webcharts.multiply(this.participantTimeline, longParticipantData, this.config.event_col);
+
+        //Draw participant detail listing.
+        this.listing.wrap.classed('hidden', false);
+        this.listing.draw(wideParticipantData);
+    }
+
     function onResize() {
         var _this = this;
 
@@ -857,7 +930,7 @@
         //Draw second chart when y-axis tick label is clicked.
         this.svg.selectAll('.y.axis .tick').on('click', function(d) {
             _this.selected_id = d;
-            participantTimeline.call(_this);
+            drawParticipantTimeline$1.call(_this);
         });
     }
 
@@ -877,7 +950,9 @@
 
     function onLayout$1() {}
 
-    function onPreprocess$1() {}
+    function onPreprocess$1() {
+        this.config.x.domain = this.parent.clinicalTimelines.x_dom;
+    }
 
     function onDatatransform$1() {}
 
@@ -899,7 +974,7 @@
         onDestroy: onDestroy$1
     };
 
-    function participantTimeline$1(clinicalTimelines) {
+    function participantTimeline(clinicalTimelines) {
         var participantTimeline = webcharts.createChart(
             clinicalTimelines.element,
             clinicalTimelines.config.participantSettings
@@ -976,7 +1051,7 @@
             clinicalTimelines.on(callback.substring(2).toLowerCase(), callbacks[callback]);
         }
         clinicalTimelines.element = containerElement;
-        clinicalTimelines.participantTimeline = participantTimeline$1(clinicalTimelines);
+        clinicalTimelines.participantTimeline = participantTimeline(clinicalTimelines);
         clinicalTimelines.listing = listing(clinicalTimelines);
 
         return clinicalTimelines;

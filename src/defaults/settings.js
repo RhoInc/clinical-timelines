@@ -5,7 +5,7 @@ export default //Renderer-specific settings
     seq_col: 'SEQ',
     stdy_col: 'STDY',
     endy_col: 'ENDY',
-    events: null,
+    eventTypes: null,
     unit: 'participant',
     filters: null,
     details: null,

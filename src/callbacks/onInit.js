@@ -40,4 +40,19 @@ export default function onInit() {
             return levels.length > 1;
         }
     });
+
+    //Default event types to 'All'.
+    this.allEventTypes = set(this.raw_data.map(d => d[this.config.event_col]))
+        .values()
+        .sort();
+    this.currentEventTypes = this.config.eventTypes || 'All';
+    this.config.color_dom =
+        this.currentEventTypes !== 'All'
+            ? this.currentEventTypes.concat(
+                  this.allEventTypes
+                      .filter(eventType => this.currentEventTypes.indexOf(eventType) === -1)
+                      .sort()
+              )
+            : this.allEventTypes;
+    this.config.legend.order = this.config.color_dom;
 }

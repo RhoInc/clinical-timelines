@@ -1,6 +1,6 @@
 import { multiply } from 'webcharts';
 
-export default function drawParticipantTimeline(d) {
+export default function drawParticipantTimeline() {
     //Update participant filter.
     this.controls.wrap
         .selectAll('.control-group')
@@ -23,11 +23,20 @@ export default function drawParticipantTimeline(d) {
     this.wrap.classed('hidden', true);
 
     //Define participant data.
+    console.log(this.currentEventTypes);
     const longParticipantData = this.raw_data.filter(
-            di => di[this.config.id_col] === this.selected_id
+            di =>
+                di[this.config.id_col] === this.selected_id &&
+                (this.currentEventTypes !== 'All'
+                    ? this.currentEventTypes.indexOf(di[this.config.event_col]) > -1
+                    : true)
         ),
         wideParticipantData = this.wide_data.filter(
-            di => di[this.config.id_col] === this.selected_id
+            di =>
+                di[this.config.id_col] === this.selected_id &&
+                (this.currentEventTypes !== 'All'
+                    ? this.currentEventTypes.indexOf(di[this.config.event_col]) > -1
+                    : true)
         );
 
     //Draw participant timeline.

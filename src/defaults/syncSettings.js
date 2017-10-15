@@ -31,8 +31,6 @@ export default function syncSettings(settings) {
 
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;
-    syncedSettings.color_dom = syncedSettings.events;
-    syncedSettings.legend.order = syncedSettings.color_dom;
 
     //Default filters
     const defaultFilters = [
@@ -46,7 +44,8 @@ export default function syncSettings(settings) {
             type: 'subsetter',
             value_col: syncedSettings.event_col,
             label: 'Event Type',
-            multiple: true
+            multiple: true,
+            start: syncedSettings.eventTypes
         }
     ];
     syncedSettings.filters =
@@ -102,6 +101,7 @@ export default function syncSettings(settings) {
 
     //Participant timelines settings
     syncedSettings.participantSettings = clone(syncedSettings);
+    syncedSettings.participantSettings.x.label = '';
     syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
     syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
     syncedSettings.participantSettings.marks[0].per = [

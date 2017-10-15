@@ -8,4 +8,4 @@ export default {
     syncSettings: syncSettings,
     controls: controls,
     syncControls: syncControls
-}
+};

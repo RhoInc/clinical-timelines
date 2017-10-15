@@ -2,8 +2,10 @@ import { createChart } from 'webcharts';
 import callbacks from './callbacks/index';
 
 export default function participantTimeline(clinicalTimelines) {
-    const
-        participantTimeline = createChart(clinicalTimelines.element, clinicalTimelines.config.participantSettings);
+    const participantTimeline = createChart(
+        clinicalTimelines.element,
+        clinicalTimelines.config.participantSettings
+    );
 
     for (const callback in callbacks)
         participantTimeline.on(callback.substring(2).toLowerCase(), callbacks[callback]);

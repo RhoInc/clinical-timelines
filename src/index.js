@@ -9,15 +9,15 @@ import listing from './listing/index';
 
 export default function clinicalTimelines(element = 'body', settings) {
     //Define unique div within passed element argument.
-    const
-        container = select(element).append('div').attr('id', 'clinical-timelines'),
+    const container = select(element)
+            .append('div')
+            .attr('id', 'clinical-timelines'),
         containerElement = container.node();
 
     //Define .css styles to avoid requiring a separate .css file.
     defineStyles();
 
-    const
-        mergedSettings = Object.assign({}, defaults.settings, settings),
+    const mergedSettings = Object.assign({}, defaults.settings, settings),
         syncedSettings = defaults.syncSettings(mergedSettings),
         syncedControls = defaults.syncControls(defaults.controls, syncedSettings),
         controls = createControls(containerElement, { location: 'top', inputs: syncedControls }),

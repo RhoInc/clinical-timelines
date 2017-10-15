@@ -8,4 +8,4 @@ export default {
     onLayout: onLayout,
     onDraw: onDraw,
     onDestroy: onDestroy
-}
+};

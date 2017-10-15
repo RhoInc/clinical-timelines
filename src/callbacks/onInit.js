@@ -5,12 +5,12 @@ export default function onInit() {
     const context = this;
 
     //Remove records with insufficient data.
-    this.wide_data = this.raw_data
-        .filter(d =>
-             /^\d+$/.test(d[this.config.stdy_col]) && // keep only records with start days
+    this.wide_data = this.raw_data.filter(
+        d =>
+            /^\d+$/.test(d[this.config.stdy_col]) && // keep only records with start days
             !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
             !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
-        );
+    );
 
     //Calculate number of total participants and number of participants with any event.
     this.populationDetails = {
@@ -21,27 +21,23 @@ export default function onInit() {
 
     //Define a record for each start day and stop day.
     this.raw_data = lengthenRaw(this.wide_data, [this.config.stdy_col, this.config.endy_col]);
-    this.raw_data
-        .forEach(d => {
-            d.wc_value = d.wc_value ? +d.wc_value : NaN;
-        });
+    this.raw_data.forEach(d => {
+        d.wc_value = d.wc_value ? +d.wc_value : NaN;
+    });
 
     //Remove filters for variables fewer than two levels.
-    this.controls.config.inputs = this.controls.config.inputs
-        .filter(filter => {
-            if (filter.type !== 'subsetter')
-                return true;
-            else {
-                const
-                    levels = set(this.raw_data.map(d => d[filter.value_col])).values();
+    this.controls.config.inputs = this.controls.config.inputs.filter(filter => {
+        if (filter.type !== 'subsetter') return true;
+        else {
+            const levels = set(this.raw_data.map(d => d[filter.value_col])).values();
 
-                if (levels.length < 2) {
-                    console.warn(
-                        filter.value_col + ' filter removed because the variable has only one level.'
-                    );
-                }
-
-                return levels.length > 1;
+            if (levels.length < 2) {
+                console.warn(
+                    filter.value_col + ' filter removed because the variable has only one level.'
+                );
             }
-        });
+
+            return levels.length > 1;
+        }
+    });
 }

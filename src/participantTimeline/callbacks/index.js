@@ -14,4 +14,4 @@ export default {
     onDraw: onDraw,
     onResize: onResize,
     onDestroy: onDestroy
-}
+};

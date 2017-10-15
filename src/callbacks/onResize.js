@@ -37,8 +37,10 @@ export default function onResize() {
         .forEach((mark,i) => {
             if (i === 1) {
                 const
-                    overlapping = mark.data
-                        .filter(d => console.log(d));
+                    overlapping = d3.nest()
+                        .key(d => d.total)
+                        .mark.data
+                        .filter(d => mark.data.map(d => console.log(d));
             }
         });
 }

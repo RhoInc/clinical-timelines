@@ -323,6 +323,8 @@
     function syncSettings(settings) {
         var syncedSettings = clone(settings);
 
+        if (!(syncedSettings.eventTypes instanceof Array && syncedSettings.eventTypes.length))
+            delete syncedSettings.eventTypes;
         syncedSettings.y.column = syncedSettings.id_col;
 
         //Lines (events with duration)
@@ -559,7 +561,7 @@
             )
             .values()
             .sort();
-        this.currentEventTypes = this.config.eventTypes || 'All';
+        this.currentEventTypes = this.config.eventTypes || this.allEventTypes;
         this.config.color_dom =
             this.currentEventTypes !== 'All'
                 ? this.currentEventTypes.concat(
@@ -577,6 +579,15 @@
         var _this = this;
 
         delete this.selected_id;
+
+        //Enable participant sort.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(control) {
+                return control.label === 'Sort participants';
+            })
+            .selectAll('.radio input')
+            .property('disabled', false);
 
         //Update participant filter.
         this.controls.wrap
@@ -658,6 +669,15 @@
             //Draw participant detail listing.
             this.listing.wrap.classed('hidden', false);
             this.listing.draw(wideParticipantData);
+
+            //Disable participant sort.
+            this.controls.wrap
+                .selectAll('.control-group')
+                .filter(function(control) {
+                    return control.label === 'Sort participants';
+                })
+                .selectAll('.radio input')
+                .property('disabled', true);
         } else {
             delete this.selected_id;
 
@@ -682,6 +702,15 @@
             //Draw participant detail listing.
             this.listing.draw([]);
             this.listing.wrap.classed('hidden', true);
+
+            //Enable participant sort.
+            this.controls.wrap
+                .selectAll('.control-group')
+                .filter(function(control) {
+                    return control.label === 'Sort participants';
+                })
+                .selectAll('.radio input')
+                .property('disabled', false);
         }
     }
 
@@ -875,7 +904,6 @@
         this.wrap.classed('hidden', true);
 
         //Define participant data.
-        console.log(this.currentEventTypes);
         var longParticipantData = this.raw_data.filter(function(di) {
                 return (
                     di[_this.config.id_col] === _this.selected_id &&
@@ -901,6 +929,15 @@
         //Draw participant detail listing.
         this.listing.wrap.classed('hidden', false);
         this.listing.draw(wideParticipantData);
+
+        //Disable participant sort.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(control) {
+                return control.label === 'Sort participants';
+            })
+            .selectAll('.radio input')
+            .property('disabled', true);
     }
 
     function onResize() {
@@ -946,7 +983,10 @@
         onDestroy: onDestroy
     };
 
-    function onInit$1() {}
+    function onInit$1() {
+        this.config.color_dom = this.parent.clinicalTimelines.config.color_dom;
+        this.config.legend.order = this.parent.clinicalTimelines.config.legend.order;
+    }
 
     function onLayout$1() {}
 

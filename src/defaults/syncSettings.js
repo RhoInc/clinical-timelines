@@ -3,6 +3,8 @@ import clone from '../util/clone';
 export default function syncSettings(settings) {
     const syncedSettings = clone(settings);
 
+    if (!(syncedSettings.eventTypes instanceof Array && syncedSettings.eventTypes.length))
+        delete syncedSettings.eventTypes;
     syncedSettings.y.column = syncedSettings.id_col;
 
     //Lines (events with duration)

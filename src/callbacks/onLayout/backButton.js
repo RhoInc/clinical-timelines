@@ -1,6 +1,13 @@
 export default function backButton() {
     delete this.selected_id;
 
+    //Enable participant sort.
+    this.controls.wrap
+        .selectAll('.control-group')
+        .filter(control => control.label === 'Sort participants')
+        .selectAll('.radio input')
+        .property('disabled', false);
+
     //Update participant filter.
     this.controls.wrap
         .selectAll('.control-group')

@@ -41,6 +41,13 @@ export default function drawParticipantTimeline() {
         //Draw participant detail listing.
         this.listing.wrap.classed('hidden', false);
         this.listing.draw(wideParticipantData);
+
+        //Disable participant sort.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(control => control.label === 'Sort participants')
+            .selectAll('.radio input')
+            .property('disabled', true);
     } else {
         delete this.selected_id;
 
@@ -65,5 +72,12 @@ export default function drawParticipantTimeline() {
         //Draw participant detail listing.
         this.listing.draw([]);
         this.listing.wrap.classed('hidden', true);
+
+        //Enable participant sort.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(control => control.label === 'Sort participants')
+            .selectAll('.radio input')
+            .property('disabled', false);
     }
 }

@@ -27,7 +27,7 @@ export default function offsetLines(mark, markData) {
 
         //Capture all line x-coordinates in an array.
         const lineCoordinates = lineData.map(di => [di.x1, di.x2]),
-            overlapping = lineData
+            overlappingLines = lineData
                 .filter(lineDatum => {
                     const overlap = lineCoordinates.filter(
                         lineCoordinate =>
@@ -48,60 +48,62 @@ export default function offsetLines(mark, markData) {
                     return x1diff !== 0 ? x1diff : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
                 });
 
-        if (overlapping.length) {
-            //Declare offset and initial line's x-coordinates.
+        if (overlappingLines.length) {
             console.log('- - - - -');
             console.log(participantDatum.key);
-            console.table(overlapping);
-            const overlappingLines = [];
+            let currentlyOverlappingLines = [];
 
             //For each overlapping line...
-            overlapping.forEach((lineDatum, i) => {
+            overlappingLines.forEach((currentLine, i) => {
                 //Leave first line as is.
-                if (i === 0)
-                    overlappingLines.push({
-                        x1: lineDatum.x1,
-                        x2: lineDatum.x2,
-                        offset: 0
-                    });
-                else if (i > 0) {
+                if (i === 0) {
+                    currentLine.offset = 0;
+                    currentlyOverlappingLines.push(currentLine);
+                } else if (i > 0) {
                     //Otherwise calculate overlap.
-                    const nOverlapping = overlappingLines.length;
-                    let line, position;
+                    let previousLine;
+                    const nOverlapping = currentlyOverlappingLines.length;
 
                     for (let j = 0; j < nOverlapping; j++) {
-                        line = overlappingLines[j];
+                        previousLine = currentlyOverlappingLines[j];
 
-                        if (
-                            (lineDatum.x1 <= line.x2 && lineDatum.x2 >= line.x2) ||
-                            (lineDatum.x1 <= line.x1 && lineDatum.x2 >= line.x1) ||
-                            (line.x2 <= lineDatum.x1 && line.x1 >= lineDatum.x1) ||
-                            (line.x2 <= lineDatum.x2 && line.x1 >= lineDatum.x2)
-                        ) {
-                            overlappingLines.push({
-                                x1: lineDatum.x1,
-                                x2: lineDatum.x2,
-                                offset:
-                                    d3.max(
-                                        overlappingLines,
-                                        overlappingLine => overlappingLine.offset
-                                    ) + 1
-                            });
+                        const
+                            currLapsPrevX1 = (currentLine.x1 <= previousLine.x1 && currentLine.x2 >= previousLine.x1),
+                            currLapsPrevX2 = (currentLine.x1 <= previousLine.x2 && currentLine.x2 >= previousLine.x2),
+                            currLapsPrev = (currentLine.x1 <= previousLine.x1 && currentLine.x2 >= previousLine.x2),
+
+                            prevLapsCurrX1 = (previousLine.x1 <= currentLine.x1 && previousLine.x2 >= currentLine.x1),
+                            prevLapsCurrX2 = (previousLine.x1 <= currentLine.x2 && previousLine.x2 >= currentLine.x2),
+                            prevLapsCurr = (previousLine.x1 <= currentLine.x1 && previousLine.x2 >= currentLine.x2);
+
+                        if (currLapsPrevX1 || currLapsPrevX2 || currLapsPrev ||
+                            prevLapsCurrX1 || prevLapsCurrX2 || prevLapsCurr) {
+                            console.log('if');
+                            currentLine.offset = max(
+                                currentlyOverlappingLines,
+                                lineDatum => lineDatum.offset
+                            ) + 1;
+                            currentlyOverlappingLines.push(currentLine);
+                            console.log(currentlyOverlappingLines.map(d => d.offset));
+                            break;
                         } else {
-                            console.log(line);
-                            console.log(lineDatum);
+                            console.log('else');
+                            currentLine.offset = previousLine.offset;
+                            currentlyOverlappingLines = currentlyOverlappingLines.splice(j,1,currentLine);
+                            console.log(currentlyOverlappingLines.map(d => d.offset));
+                            break;
                         }
                     }
 
-                    //console.log(lineDatum.key);
-                    //console.log(offset);
-                    ////Capture line via its class name and offset vertically.
-                    //const className = `${lineDatum.key} line`,
-                    //    g = select(document.getElementsByClassName(className)[0]),
-                    //    line = g.select('path');
-                    //g.attr('transform', `translate(0,${offset * +mark.attributes['stroke-width'] + 1})`);
+                    //Capture line via its class name and offset vertically.
+                    const
+                        className = `${currentLine.key} line`,
+                        g = select(document.getElementsByClassName(className)[0]),
+                        line = g.select('path');
+                        g.attr('transform', `translate(0,${currentLine.offset * +mark.attributes['stroke-width']*2})`);
                 }
             });
+            console.table(overlappingLines);
         }
     });
 }

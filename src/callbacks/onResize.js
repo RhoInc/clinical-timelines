@@ -38,7 +38,7 @@ export default function onResize() {
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {
-            //offsetLines.call(this, mark, markData);
+            offsetLines.call(this, mark, markData);
         } else if (mark.type === 'circle') {
             offsetCircles.call(this, mark, markData);
         }

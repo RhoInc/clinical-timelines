@@ -1,5 +1,6 @@
 import backButton from './onLayout/backButton';
 import drawParticipantTimeline from './onLayout/drawParticipantTimeline';
+import { select } from 'd3';
 
 export default function onLayout() {
     const context = this;
@@ -37,8 +38,7 @@ export default function onLayout() {
         .filter(d => d.type === 'subsetter')
         .each(function(filter) {
             if (filter.label === 'Event Type')
-                d3
-                    .select(this)
+                select(this)
                     .selectAll('option')
                     .property('selected', d => {
                         return context.currentEventTypes instanceof Array

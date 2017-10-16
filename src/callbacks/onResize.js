@@ -1,5 +1,7 @@
-import { svg, select } from 'd3';
+import { svg } from 'd3';
 import drawParticipantTimeline from './onResize/drawParticipantTimeline';
+import offsetLines from './onResize/offsetLines';
+import offsetCircles from './onResize/offsetCircles';
 
 export default function onResize() {
     const context = this;
@@ -36,28 +38,9 @@ export default function onResize() {
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {
+            offsetLines.call(this, mark, markData);
         } else if (mark.type === 'circle') {
-            const overlapping = d3
-                .nest()
-                .key(d => d.total + '|' + d.values.raw[0][this.config.id_col])
-                .rollup(d => {
-                    return {
-                        n: d.length,
-                        keys: d.map(di => di.key)
-                    };
-                })
-                .entries(markData)
-                .filter(d => d.values.n > 1);
-            overlapping.forEach(d => {
-                const x = d.key.split('|')[0],
-                    y = d.key.split('|')[1];
-                d.values.keys.forEach((di, i) => {
-                    const className = `${di} point`,
-                        g = select(document.getElementsByClassName(className)[0]),
-                        point = g.select('circle');
-                    g.attr('transform', `translate(0,${i * +mark.radius * 2})`);
-                });
-            });
+            offsetCircles.call(this, mark, markData);
         }
     });
 }

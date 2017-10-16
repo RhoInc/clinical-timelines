@@ -52,7 +52,7 @@ export default //Renderer-specific settings
         order: null
     }, // set in syncSettings()
     gridlines: 'y',
-    range_band: 15,
+    range_band: 24,
     margin: { top: 50 }, // for second x-axis
     resizable: true
 };

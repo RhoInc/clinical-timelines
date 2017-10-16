@@ -1,4 +1,4 @@
-import { svg } from 'd3';
+import { svg, select } from 'd3';
 import drawParticipantTimeline from './onResize/drawParticipantTimeline';
 
 export default function onResize() {
@@ -32,15 +32,32 @@ export default function onResize() {
         drawParticipantTimeline.call(this);
     });
 
-  //Offset overlapping marks.
-    this.marks
-        .forEach((mark,i) => {
-            if (i === 1) {
-                const
-                    overlapping = d3.nest()
-                        .key(d => d.total)
-                        .mark.data
-                        .filter(d => mark.data.map(d => console.log(d));
-            }
-        });
+    //Offset overlapping marks.
+    this.config.marks.forEach((mark, i) => {
+        const markData = this.marks[i].data;
+        if (mark.type === 'line') {
+        } else if (mark.type === 'circle') {
+            const overlapping = d3
+                .nest()
+                .key(d => d.total + '|' + d.values.raw[0][this.config.id_col])
+                .rollup(d => {
+                    return {
+                        n: d.length,
+                        keys: d.map(di => di.key)
+                    };
+                })
+                .entries(markData)
+                .filter(d => d.values.n > 1);
+            overlapping.forEach(d => {
+                const x = d.key.split('|')[0],
+                    y = d.key.split('|')[1];
+                d.values.keys.forEach((di, i) => {
+                    const className = `${di} point`,
+                        g = select(document.getElementsByClassName(className)[0]),
+                        point = g.select('circle');
+                    g.attr('transform', `translate(0,${i * +mark.radius * 2})`);
+                });
+            });
+        }
+    });
 }

@@ -115,8 +115,8 @@ export default function syncSettings(settings) {
         syncedSettings.participantSettings.seq_col,
         'wc_value'
     ];
+    syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
     syncedSettings.participantSettings.margin = null;
-    syncedSettings.participantSettings.transitions = false;
 
     return syncedSettings;
 }

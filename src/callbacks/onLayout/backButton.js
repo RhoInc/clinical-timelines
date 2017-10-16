@@ -28,4 +28,20 @@ export default function backButton() {
 
     //Redraw clinical timelines.
     this.draw();
+
+    //Highlight participant dropdown.
+    this.controls.wrap
+        .selectAll('.control-group')
+        .filter(control => control.label === 'Participant')
+        .style({
+            'font-weight': 'bold'
+        })
+        .transition()
+        .delay(500)
+        .style({
+            'font-weight': 'normal'
+        })
+        .select('select')
+        .node()
+        .focus();
 }

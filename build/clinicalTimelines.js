@@ -4,7 +4,7 @@
         : typeof define === 'function' && define.amd
           ? define(['d3', 'webcharts'], factory)
           : (global.clinicalTimelines = factory(global.d3, global.webCharts));
-})(this, function(d3, webcharts) {
+})(this, function(d3$1, webcharts) {
     'use strict';
 
     function defineStyles() {
@@ -153,7 +153,7 @@
             gridlines: 'y',
             range_band: 24,
             margin: { top: 50 }, // for second x-axis
-            resizable: true
+            resizable: false
         };
 
     var _typeof =
@@ -453,7 +453,7 @@
             'wc_value'
         ];
         syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
-        syncedSettings.participantSettings.margin = null;
+        syncedSettings.participantSettings.margin = { left: 25 };
 
         return syncedSettings;
     }
@@ -517,7 +517,7 @@
 
         //Calculate number of total participants and number of participants with any event.
         this.populationDetails = {
-            population: d3
+            population: d3$1
                 .set(
                     this.raw_data.map(function(d) {
                         return d[_this.config.id_col];
@@ -538,7 +538,7 @@
         this.controls.config.inputs = this.controls.config.inputs.filter(function(filter) {
             if (filter.type !== 'subsetter') return true;
             else {
-                var levels = d3
+                var levels = d3$1
                     .set(
                         _this.raw_data.map(function(d) {
                             return d[filter.value_col];
@@ -558,7 +558,7 @@
         });
 
         //Default event types to 'All'.
-        this.allEventTypes = d3
+        this.allEventTypes = d3$1
             .set(
                 this.raw_data.map(function(d) {
                     return d[_this.config.event_col];
@@ -621,6 +621,24 @@
 
         //Redraw clinical timelines.
         this.draw();
+
+        //Highlight participant dropdown.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(control) {
+                return control.label === 'Participant';
+            })
+            .style({
+                'font-weight': 'bold'
+            })
+            .transition()
+            .delay(500)
+            .style({
+                'font-weight': 'normal'
+            })
+            .select('select')
+            .node()
+            .focus();
     }
 
     function drawParticipantTimeline() {
@@ -674,15 +692,6 @@
             //Draw participant detail listing.
             this.listing.wrap.classed('hidden', false);
             this.listing.draw(wideParticipantData);
-
-            //Disable participant sort.
-            this.controls.wrap
-                .selectAll('.control-group')
-                .filter(function(control) {
-                    return control.label === 'Sort participants';
-                })
-                .selectAll('.radio input')
-                .property('disabled', true);
         } else {
             delete this.selected_id;
 
@@ -707,16 +716,16 @@
             //Draw participant detail listing.
             this.listing.draw([]);
             this.listing.wrap.classed('hidden', true);
-
-            //Enable participant sort.
-            this.controls.wrap
-                .selectAll('.control-group')
-                .filter(function(control) {
-                    return control.label === 'Sort participants';
-                })
-                .selectAll('.radio input')
-                .property('disabled', false);
         }
+
+        //Enable/Disable participant sort.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(control) {
+                return control.label === 'Sort participants';
+            })
+            .selectAll('.radio input')
+            .property('disabled', !!this.selected_id);
     }
 
     function onLayout() {
@@ -759,7 +768,7 @@
             })
             .each(function(filter) {
                 if (filter.label === 'Event Type')
-                    d3
+                    d3$1
                         .select(this)
                         .selectAll('option')
                         .property('selected', function(d) {
@@ -787,7 +796,7 @@
     function onDatatransform() {
         var _this = this;
 
-        this.populationDetails.sample = d3
+        this.populationDetails.sample = d3$1
             .set(
                 this.filtered_data.map(function(d) {
                     return d[_this.config.id_col];
@@ -804,7 +813,7 @@
                 '</span> ' +
                 this.config.unit +
                 "(s) displayed (<span class = 'stats'>" +
-                d3.format('%')(this.populationDetails.rate) +
+                d3$1.format('%')(this.populationDetails.rate) +
                 '</span>)'
         );
     }
@@ -830,13 +839,13 @@
             });
 
             //Capture all subject IDs with adverse events with a start day.
-            var withStartDay = d3
+            var withStartDay = d3$1
                 .nest()
                 .key(function(d) {
                     return d[_this.config.id_col];
                 })
                 .rollup(function(d) {
-                    return d3.min(d, function(di) {
+                    return d3$1.min(d, function(di) {
                         return +di[_this.config.stdy_col];
                     });
                 })
@@ -858,7 +867,7 @@
                 });
 
             //Capture all subject IDs with adverse events without a start day.
-            var withoutStartDay = d3
+            var withoutStartDay = d3$1
                 .set(
                     filtered_data
                         .filter(function(d) {
@@ -875,7 +884,7 @@
                 )
                 .values();
             this.y_dom = withStartDay.concat(withoutStartDay);
-        } else this.y_dom = this.y_dom.sort(d3.descending);
+        } else this.y_dom = this.y_dom.sort(d3$1.descending);
     }
 
     function drawParticipantTimeline$1() {
@@ -943,98 +952,31 @@
             })
             .selectAll('.radio input')
             .property('disabled', true);
-    }
 
-    function offsetLines(mark, markData) {
-        var _this = this;
-
-        //Nest data by study day and filter on any nested object with more than one datum.
-        var participantData = d3
-            .nest()
-            .key(function(d) {
-                return d.values[0].values.raw[0][_this.config.id_col];
+        //Highlight participant dropdown.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(control) {
+                return control.label === 'Participant';
             })
-            .key(function(d) {
-                return d.key;
+            .style({
+                'font-weight': 'bold'
             })
-            .rollup(function(d) {
-                //Expose start and end point of line.
-                return {
-                    x1: +d[0].values[0].key,
-                    x2: +d[0].values[1].key
-                };
+            .transition()
+            .delay(500)
+            .style({
+                'font-weight': 'normal'
             })
-            .entries(
-                markData.filter(function(d) {
-                    return d.values.length > 1;
-                })
-            );
-
-        //For each participant...
-        participantData.forEach(function(participantDatum) {
-            var lineData = participantDatum.values;
-
-            //Attach line x-coordinates to line object.
-            lineData.forEach(function(lineDatum) {
-                lineDatum.x1 = lineDatum.values.x1;
-                lineDatum.x2 = lineDatum.values.x2;
-            });
-
-            //Capture all line x-coordinates in an array.
-            var lineCoordinates = lineData.map(function(di) {
-                    return [di.x1, di.x2];
-                }),
-                overlapping = lineData
-                    .filter(function(lineDatum) {
-                        var overlap = lineCoordinates.filter(function(lineCoordinate) {
-                            return (
-                                (lineCoordinate[0] <= lineDatum.x1 &&
-                                    lineCoordinate[1] >= lineDatum.x1) ||
-                                (lineDatum.x1 <= lineCoordinate[0] &&
-                                    lineDatum.x2 >= lineCoordinate[0]) ||
-                                (lineCoordinate[0] <= lineDatum.x2 &&
-                                    lineCoordinate[1] >= lineDatum.x2) ||
-                                (lineDatum.x1 <= lineCoordinate[1] &&
-                                    lineDatum.x2 >= lineCoordinate[1])
-                            );
-                        });
-
-                        return overlap.length > 1;
-                    })
-                    .sort(function(a, b) {
-                        return a.x1 - b.x1 + (a.x2 - b.x2);
-                    });
-
-            //For each overlapping line...
-            overlapping.forEach(function(lineDatum, i) {
-                var nOverlapping = 0,
-                    x1 = void 0,
-                    x2 = void 0;
-
-                //Leave first line where it is.
-                if (i === 0) {
-                    x1 = lineDatum.x1;
-                    x2 = lineDatum.x2;
-                } else if (i > 0) {
-                    if (
-                        (x2 <= lineDatum.x1 && x1 >= lineDatum.x1) ||
-                        (lineDatum.x1 <= x2 && lineDatum.x2 >= x2) ||
-                        (x2 <= lineDatum.x2 && x1 >= lineDatum.x2) ||
-                        (lineDatum.x1 <= x1 && lineDatum.x2 >= x1)
-                    ) {
-                        console.log('+1');
-                    } else {
-                    }
-                }
-            });
-        });
+            .select('select')
+            .node()
+            .focus();
     }
 
     function offsetCircles(mark, markData) {
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var overlapping = d3
+        var overlapping = d3$1
             .nest()
             .key(function(d) {
                 return d.total + '|' + d.values.raw[0][_this.config.id_col];
@@ -1062,7 +1004,7 @@
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
                 var className = di + ' point',
-                    g = d3.select(document.getElementsByClassName(className)[0]),
+                    g = d3$1.select(document.getElementsByClassName(className)[0]),
                     point = g.select('circle');
                 g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
             });
@@ -1072,7 +1014,7 @@
     function onResize() {
         var _this = this;
 
-        var topXaxis = d3.svg
+        var topXaxis = d3$1.svg
                 .axis()
                 .scale(this.x)
                 .orient('top')
@@ -1103,7 +1045,7 @@
         this.config.marks.forEach(function(mark, i) {
             var markData = _this.marks[i].data;
             if (mark.type === 'line') {
-                offsetLines.call(_this, mark, markData);
+                //offsetLines.call(this, mark, markData);
             } else if (mark.type === 'circle') {
                 offsetCircles.call(_this, mark, markData);
             }
@@ -1135,7 +1077,11 @@
 
     function onDatatransform$1() {}
 
-    function onDraw$1() {}
+    function onDraw$1() {
+        var wrapWidth = +this.wrap.style('width').replace(/[^\d.]/g, ''),
+            newWidth = wrapWidth * 0.75;
+        this.raw_width = newWidth;
+    }
 
     function onResize$1() {
         this.wrap.select('.legend').classed('hidden', true);
@@ -1208,7 +1154,7 @@
         var settings = arguments[1];
 
         //Define unique div within passed element argument.
-        var container = d3
+        var container = d3$1
                 .select(element)
                 .append('div')
                 .attr('id', 'clinical-timelines'),

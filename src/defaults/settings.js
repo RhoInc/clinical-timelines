@@ -54,5 +54,5 @@ export default //Renderer-specific settings
     gridlines: 'y',
     range_band: 24,
     margin: { top: 50 }, // for second x-axis
-    resizable: true
+    resizable: false
 };

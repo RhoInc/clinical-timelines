@@ -1,4 +1,4 @@
-import { nest, select } from 'd3';
+import { nest, select, max } from 'd3';
 
 export default function offsetLines(mark, markData) {
     //Nest data by study day and filter on any nested object with more than one datum.
@@ -22,6 +22,7 @@ export default function offsetLines(mark, markData) {
         lineData.forEach(lineDatum => {
             lineDatum.x1 = lineDatum.values.x1;
             lineDatum.x2 = lineDatum.values.x2;
+            delete lineDatum.values;
         });
 
         //Capture all line x-coordinates in an array.
@@ -41,33 +42,66 @@ export default function offsetLines(mark, markData) {
 
                     return overlap.length > 1;
                 })
-                .sort((a, b) => a.x1 - b.x1 + (a.x2 - b.x2));
+                .sort((a, b) => {
+                    const x1diff = a.x1 - b.x1,
+                        x2diff = b.x2 - a.x2;
+                    return x1diff !== 0 ? x1diff : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
+                });
 
-        //For each overlapping line...
-        overlapping.forEach((lineDatum, i) => {
-            let nOverlapping = 0,
-                x1,
-                x2,
-                previousLineDatum;
+        if (overlapping.length) {
+            //Declare offset and initial line's x-coordinates.
+            console.log('- - - - -');
+            console.log(participantDatum.key);
+            console.table(overlapping);
+            const overlappingLines = [];
 
-            //Leave first line where it is.
-            if (i === 0) {
-                x1 = lineDatum.x1;
-                x2 = lineDatum.x2;
-            } else if (i > 0) {
-                previousLineDatum = overlapping[i - 1];
-                if (
-                    (x2 <= lineDatum.x1 && x1 >= lineDatum.x1) ||
-                    (lineDatum.x1 <= x2 && lineDatum.x2 >= x2) ||
-                    (x2 <= lineDatum.x2 && x1 >= lineDatum.x2) ||
-                    (lineDatum.x1 <= x1 && lineDatum.x2 >= x1)
-                ) {
-                    console.log('+1');
-                    nOverlapping += 1;
-                } else {
-                    nOverlapping -= 1;
+            //For each overlapping line...
+            overlapping.forEach((lineDatum, i) => {
+                //Leave first line as is.
+                if (i === 0)
+                    overlappingLines.push({
+                        x1: lineDatum.x1,
+                        x2: lineDatum.x2,
+                        offset: 0
+                    });
+                else if (i > 0) {
+                    //Otherwise calculate overlap.
+                    const nOverlapping = overlappingLines.length;
+                    let line, position;
+
+                    for (let j = 0; j < nOverlapping; j++) {
+                        line = overlappingLines[j];
+
+                        if (
+                            (lineDatum.x1 <= line.x2 && lineDatum.x2 >= line.x2) ||
+                            (lineDatum.x1 <= line.x1 && lineDatum.x2 >= line.x1) ||
+                            (line.x2 <= lineDatum.x1 && line.x1 >= lineDatum.x1) ||
+                            (line.x2 <= lineDatum.x2 && line.x1 >= lineDatum.x2)
+                        ) {
+                            overlappingLines.push({
+                                x1: lineDatum.x1,
+                                x2: lineDatum.x2,
+                                offset:
+                                    d3.max(
+                                        overlappingLines,
+                                        overlappingLine => overlappingLine.offset
+                                    ) + 1
+                            });
+                        } else {
+                            console.log(line);
+                            console.log(lineDatum);
+                        }
+                    }
+
+                    //console.log(lineDatum.key);
+                    //console.log(offset);
+                    ////Capture line via its class name and offset vertically.
+                    //const className = `${lineDatum.key} line`,
+                    //    g = select(document.getElementsByClassName(className)[0]),
+                    //    line = g.select('path');
+                    //g.attr('transform', `translate(0,${offset * +mark.attributes['stroke-width'] + 1})`);
                 }
-            }
-        });
+            });
+        }
     });
 }

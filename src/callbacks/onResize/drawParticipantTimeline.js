@@ -53,4 +53,20 @@ export default function drawParticipantTimeline() {
         .filter(control => control.label === 'Sort participants')
         .selectAll('.radio input')
         .property('disabled', true);
+
+    //Highlight participant dropdown.
+    this.controls.wrap
+        .selectAll('.control-group')
+        .filter(control => control.label === 'Participant')
+        .style({
+            'font-weight': 'bold'
+        })
+        .transition()
+        .delay(500)
+        .style({
+            'font-weight': 'normal'
+        })
+        .select('select')
+        .node()
+        .focus();
 }

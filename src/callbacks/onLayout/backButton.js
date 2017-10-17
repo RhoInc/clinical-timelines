@@ -1,11 +1,11 @@
 export default function backButton() {
     delete this.selected_id;
 
-    //Enable participant sort.
+    //Enable/Disable controls other than Participant and Event Type filters.
     this.controls.wrap
         .selectAll('.control-group')
-        .filter(control => control.label === 'Sort participants')
-        .selectAll('.radio input')
+        .filter(control => ['Participant', 'Event Type'].indexOf(control.label) === -1)
+        .selectAll('select,input')
         .property('disabled', false);
 
     //Update participant filter.

@@ -106,6 +106,7 @@
             endy_col: 'ENDY',
             eventTypes: null,
             unit: 'participant',
+            site_col: 'SITE',
             filters: null,
             details: null,
 
@@ -377,6 +378,12 @@
                 label: 'Event Type',
                 multiple: true,
                 start: syncedSettings.eventTypes
+            },
+            {
+                type: 'subsetter',
+                value_col: syncedSettings.site_col,
+                label: 'Site',
+                multiple: false
             }
         ];
         syncedSettings.filters =
@@ -585,13 +592,13 @@
 
         delete this.selected_id;
 
-        //Enable participant sort.
+        //Enable/Disable controls other than Participant and Event Type filters.
         this.controls.wrap
             .selectAll('.control-group')
             .filter(function(control) {
-                return control.label === 'Sort participants';
+                return ['Participant', 'Event Type'].indexOf(control.label) === -1;
             })
-            .selectAll('.radio input')
+            .selectAll('select,input')
             .property('disabled', false);
 
         //Update participant filter.
@@ -718,13 +725,13 @@
             this.listing.wrap.classed('hidden', true);
         }
 
-        //Enable/Disable participant sort.
+        //Enable/Disable controls other than Participant and Event Type filters.
         this.controls.wrap
             .selectAll('.control-group')
             .filter(function(control) {
-                return control.label === 'Sort participants';
+                return ['Participant', 'Event Type'].indexOf(control.label) === -1;
             })
-            .selectAll('.radio input')
+            .selectAll('select,input')
             .property('disabled', !!this.selected_id);
     }
 
@@ -944,14 +951,14 @@
         this.listing.wrap.classed('hidden', false);
         this.listing.draw(wideParticipantData);
 
-        //Disable participant sort.
+        //Enable/Disable controls other than Participant and Event Type filters.
         this.controls.wrap
             .selectAll('.control-group')
             .filter(function(control) {
-                return control.label === 'Sort participants';
+                return ['Participant', 'Event Type'].indexOf(control.label) === -1;
             })
-            .selectAll('.radio input')
-            .property('disabled', true);
+            .selectAll('select,input')
+            .property('disabled', !!this.selected_id);
 
         //Highlight participant dropdown.
         this.controls.wrap

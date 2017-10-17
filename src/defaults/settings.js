@@ -7,6 +7,7 @@ export default //Renderer-specific settings
     endy_col: 'ENDY',
     eventTypes: null,
     unit: 'participant',
+    site_col: 'SITE',
     filters: null,
     details: null,
 

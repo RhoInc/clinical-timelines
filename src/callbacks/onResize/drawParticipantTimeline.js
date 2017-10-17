@@ -47,12 +47,12 @@ export default function drawParticipantTimeline() {
     this.listing.wrap.classed('hidden', false);
     this.listing.draw(wideParticipantData);
 
-    //Disable participant sort.
+    //Enable/Disable controls other than Participant and Event Type filters.
     this.controls.wrap
         .selectAll('.control-group')
-        .filter(control => control.label === 'Sort participants')
-        .selectAll('.radio input')
-        .property('disabled', true);
+        .filter(control => ['Participant', 'Event Type'].indexOf(control.label) === -1)
+        .selectAll('select,input')
+        .property('disabled', !!this.selected_id);
 
     //Highlight participant dropdown.
     this.controls.wrap

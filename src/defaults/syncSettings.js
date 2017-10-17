@@ -48,6 +48,12 @@ export default function syncSettings(settings) {
             label: 'Event Type',
             multiple: true,
             start: syncedSettings.eventTypes
+        },
+        {
+            type: 'subsetter',
+            value_col: syncedSettings.site_col,
+            label: 'Site',
+            multiple: false
         }
     ];
     syncedSettings.filters =

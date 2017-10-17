@@ -1,7 +1,7 @@
 {
   "name": "clinical-timelines",
   "description": "A general purpose graphical timeline library",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Rho, Inc.",
   "license": "MIT",
   "homepage": "https://github.com/RhoInc/clinical-timelines",

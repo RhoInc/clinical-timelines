@@ -1,4 +1,5 @@
 import { svg } from 'd3';
+import legendFilter from './onResize/legendFilter';
 import drawParticipantTimeline from './onResize/drawParticipantTimeline';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';

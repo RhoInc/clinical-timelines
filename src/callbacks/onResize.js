@@ -7,6 +7,9 @@ import offsetCircles from './onResize/offsetCircles';
 export default function onResize() {
     const context = this;
 
+    //Add filter functionality to legend.
+    legendFilter.call(this);
+
     //Draw second x-axis at top of chart.
     const topXaxis = svg
             .axis()

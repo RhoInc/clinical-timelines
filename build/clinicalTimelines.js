@@ -4,7 +4,7 @@
         : typeof define === 'function' && define.amd
           ? define(['d3', 'webcharts'], factory)
           : (global.clinicalTimelines = factory(global.d3, global.webCharts));
-})(this, function(d3, webcharts) {
+})(this, function(d3$1, webcharts) {
     'use strict';
 
     function defineStyles() {
@@ -25,6 +25,18 @@
                 '#clinical-timelines .wc-controls .back-button button {' +
                     '    padding: 0 5px;' +
                     '    font-size: 14px;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item {' +
+                    'cursor: pointer;' +
+                    'border-radius: 4px;' +
+                    'padding: 5px;' +
+                    'border: 2px solid white;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
+                    'border: 2px solid black;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item.selected {' +
+                    'background: lightgray;' +
                     '}',
                 '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' +
                     '    cursor: pointer;' +
@@ -524,7 +536,7 @@
 
         //Calculate number of total participants and number of participants with any event.
         this.populationDetails = {
-            population: d3
+            population: d3$1
                 .set(
                     this.raw_data.map(function(d) {
                         return d[_this.config.id_col];
@@ -545,7 +557,7 @@
         this.controls.config.inputs = this.controls.config.inputs.filter(function(filter) {
             if (filter.type !== 'subsetter') return true;
             else {
-                var levels = d3
+                var levels = d3$1
                     .set(
                         _this.raw_data.map(function(d) {
                             return d[filter.value_col];
@@ -565,7 +577,7 @@
         });
 
         //Default event types to 'All'.
-        this.allEventTypes = d3
+        this.allEventTypes = d3$1
             .set(
                 this.raw_data.map(function(d) {
                     return d[_this.config.event_col];
@@ -775,7 +787,7 @@
             })
             .each(function(filter) {
                 if (filter.label === 'Event Type')
-                    d3
+                    d3$1
                         .select(this)
                         .selectAll('option')
                         .property('selected', function(d) {
@@ -803,7 +815,7 @@
     function onDatatransform() {
         var _this = this;
 
-        this.populationDetails.sample = d3
+        this.populationDetails.sample = d3$1
             .set(
                 this.filtered_data.map(function(d) {
                     return d[_this.config.id_col];
@@ -820,7 +832,7 @@
                 '</span> ' +
                 this.config.unit +
                 "(s) displayed (<span class = 'stats'>" +
-                d3.format('%')(this.populationDetails.rate) +
+                d3$1.format('%')(this.populationDetails.rate) +
                 '</span>)'
         );
     }
@@ -846,13 +858,13 @@
             });
 
             //Capture all subject IDs with adverse events with a start day.
-            var withStartDay = d3
+            var withStartDay = d3$1
                 .nest()
                 .key(function(d) {
                     return d[_this.config.id_col];
                 })
                 .rollup(function(d) {
-                    return d3.min(d, function(di) {
+                    return d3$1.min(d, function(di) {
                         return +di[_this.config.stdy_col];
                     });
                 })
@@ -874,7 +886,7 @@
                 });
 
             //Capture all subject IDs with adverse events without a start day.
-            var withoutStartDay = d3
+            var withoutStartDay = d3$1
                 .set(
                     filtered_data
                         .filter(function(d) {
@@ -891,7 +903,59 @@
                 )
                 .values();
             this.y_dom = withStartDay.concat(withoutStartDay);
-        } else this.y_dom = this.y_dom.sort(d3.descending);
+        } else this.y_dom = this.y_dom.sort(d3$1.descending);
+    }
+
+    function legendFilter() {
+        var _this = this;
+
+        //Filter data by clicking on legend.
+        var context = this,
+            eventTypeFilter = this.filters.filter(function(filter) {
+                return filter.col === _this.config.event_col;
+            })[0],
+            eventTypeControl = this.controls.wrap.selectAll('.control-group').filter(function(d) {
+                return d.label === 'Event Type';
+            }),
+            eventTypes = eventTypeControl.selectAll('.changer option').sort(function(a, b) {
+                return _this.config.color_dom.indexOf(a) - _this.config.color_dom.indexOf(b);
+            }),
+            // event type options
+            legendItems = this.wrap.selectAll('.legend-item').classed('selected', function(d) {
+                return eventTypeFilter.val instanceof Array
+                    ? eventTypeFilter.val.indexOf(d.label) > -1
+                    : true;
+            });
+
+        //Add event listener to legend items.
+        legendItems.on('click', function(d) {
+            var legendItem = d3.select(this),
+                // clicked legend item
+                selected = !legendItem.classed('selected'); // selected boolean
+
+            legendItem.classed('selected', selected); // toggle selected class
+
+            var selectedLegendItems = legendItems
+                .filter(function() {
+                    return d3.select(this).classed('selected');
+                })
+                .data()
+                .map(function(d) {
+                    return d.label;
+                }); // selected event types
+
+            eventTypes
+                .property('selected', false)
+                .filter(function(d) {
+                    return selectedLegendItems.indexOf(d) > -1;
+                })
+                .property('selected', true); // sync selected options in event type filter with selected legend items
+
+            context.filters.filter(function(filter) {
+                return filter.col === context.config.event_col;
+            })[0].val = selectedLegendItems; // update filter object
+            context.draw();
+        });
     }
 
     function drawParticipantTimeline$1() {
@@ -983,7 +1047,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var participantData = d3
+        var participantData = d3$1
             .nest()
             .key(function(d) {
                 return d.values[0].values.raw[0][_this.config.id_col];
@@ -1080,7 +1144,7 @@
                         } else if (nOverlapping === currentlyOverlappingLines.length) {
                             //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
                             currentLine.offset =
-                                d3.max(currentlyOverlappingLines, function(d) {
+                                d3$1.max(currentlyOverlappingLines, function(d) {
                                     return d.offset;
                                 }) + 1;
                             currentlyOverlappingLines.push(currentLine);
@@ -1089,7 +1153,7 @@
                             currentlyOverlappingLines.forEach(function(d, i) {
                                 d.index = i;
                             });
-                            var minOffset = d3.min(
+                            var minOffset = d3$1.min(
                                     currentlyOverlappingLines.filter(function(d) {
                                         return !d.overlapping;
                                     }),
@@ -1109,7 +1173,7 @@
                     if (currentLine.offset > 0) {
                         //Capture line via its class name and offset vertically.
                         var className = currentLine.key + ' line',
-                            g = d3.select(document.getElementsByClassName(className)[0]),
+                            g = d3$1.select(document.getElementsByClassName(className)[0]),
                             line = g.select('path');
                         g.attr(
                             'transform',
@@ -1127,7 +1191,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var overlapping = d3
+        var overlapping = d3$1
             .nest()
             .key(function(d) {
                 return d.total + '|' + d.values.raw[0][_this.config.id_col];
@@ -1155,7 +1219,7 @@
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
                 var className = di + ' point',
-                    g = d3.select(document.getElementsByClassName(className)[0]),
+                    g = d3$1.select(document.getElementsByClassName(className)[0]),
                     point = g.select('circle');
                 g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
             });
@@ -1165,7 +1229,10 @@
     function onResize() {
         var _this = this;
 
-        var topXaxis = d3.svg
+        legendFilter.call(this);
+
+        //Draw second x-axis at top of chart.
+        var topXaxis = d3$1.svg
                 .axis()
                 .scale(this.x)
                 .orient('top')
@@ -1305,7 +1372,7 @@
         var settings = arguments[1];
 
         //Define unique div within passed element argument.
-        var container = d3
+        var container = d3$1
                 .select(element)
                 .append('div')
                 .attr('id', 'clinical-timelines'),

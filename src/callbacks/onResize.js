@@ -1,3 +1,4 @@
+import highlightEvent from './onResize/highlightEvent';
 import { svg } from 'd3';
 import drawParticipantTimeline from './onResize/drawParticipantTimeline';
 import offsetLines from './onResize/offsetLines';
@@ -5,6 +6,9 @@ import offsetCircles from './onResize/offsetCircles';
 
 export default function onResize() {
     const context = this;
+
+    //Highlight events.
+    highlightEvent.call(this);
 
     //Draw second x-axis at top of chart.
     const topXaxis = svg

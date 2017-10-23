@@ -17,10 +17,20 @@ export default function defineStyles() {
                 '    padding: 0 5px;' +
                 '    font-size: 14px;' +
                 '}',
+            '#clinical-timelines .wc-chart .legend .legend-item {' +
+                '    border: 2px solid white;' +
+                '}',
+            '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' +
+                '    border: 2px solid black;' +
+                '}',
             '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' +
                 '    cursor: pointer;' +
                 '    fill: blue;' +
                 '    text-decoration: underline;' +
+                '}',
+            '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
+                '    stroke: black;' +
+                '    stroke-width: 3px;' +
                 '}',
             '#clinical-timelines .wc-small-multiples .wc-chart {' +
                 '    width: 100%;' +

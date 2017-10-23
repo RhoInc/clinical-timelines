@@ -6,6 +6,7 @@ export default //Renderer-specific settings
     stdy_col: 'STDY',
     endy_col: 'ENDY',
     eventTypes: null,
+    highlightedEvent: null,
     unit: 'participant',
     site_col: 'SITE',
     filters: null,

@@ -41,23 +41,21 @@ export default function onInit() {
     this.config.legend.order = this.config.color_dom;
 
     //Remove filters for variables fewer than two levels.
-    this.controls.config.inputs = this.controls.config.inputs
-        .filter(input => {
-            if (input.type !== 'subsetter') {
-                if (input.label === 'Highlighted Event Type')
-                    input.values = this.config.color_dom;
+    this.controls.config.inputs = this.controls.config.inputs.filter(input => {
+        if (input.type !== 'subsetter') {
+            if (input.label === 'Highlighted Event Type') input.values = this.config.color_dom;
 
-                return true;
-            } else {
-                const levels = set(this.raw_data.map(d => d[input.value_col])).values();
+            return true;
+        } else {
+            const levels = set(this.raw_data.map(d => d[input.value_col])).values();
 
-                if (levels.length < 2) {
-                    console.warn(
-                        input.value_col + ' filter removed because the variable has only one level.'
-                    );
-                }
-
-                return levels.length > 1;
+            if (levels.length < 2) {
+                console.warn(
+                    input.value_col + ' filter removed because the variable has only one level.'
+                );
             }
-        });
+
+            return levels.length > 1;
+        }
+    });
 }

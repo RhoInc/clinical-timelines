@@ -3,5 +3,5 @@ export default function syncControls(controls, settings) {
         controls.unshift(filter);
     });
 
-    return controls;
+    return controls.reverse();
 }

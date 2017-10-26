@@ -40,18 +40,21 @@ export default function syncSettings(settings) {
             type: 'subsetter',
             value_col: syncedSettings.id_col,
             label: 'Participant',
+            description: 'filter/view',
             multiple: false
         },
         {
             type: 'subsetter',
             value_col: syncedSettings.event_col,
             label: 'Event Type',
+            description: 'filter',
             multiple: true,
             start: syncedSettings.eventTypes
         },
         {
             type: 'subsetter',
             value_col: syncedSettings.site_col,
+            description: 'filter',
             label: 'Site',
             multiple: false
         }
@@ -66,8 +69,10 @@ export default function syncSettings(settings) {
                               (filter instanceof Object && filter.hasOwnProperty('value_col'))
                       )
                       .map(filter => {
-                          const filterObject = {};
-                          filterObject.type = 'subsetter';
+                          const filterObject = {
+                              type: 'subsetter',
+                              description: 'filter'
+                          };
                           filterObject.value_col = filter.value_col || filter;
                           filterObject.label = filter.label || filter.value_col;
                           filterObject.multiple = filterObject.multiple === true ? true : false;

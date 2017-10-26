@@ -1,5 +1,11 @@
 export default [
     {
+        type: 'dropdown',
+        option: 'highlightedEvent',
+        label: 'Highlighted Event Type',
+        values: null // set in onInit() callback
+    },
+    {
         type: 'radio',
         option: 'y.sort',
         label: 'Sort participants',

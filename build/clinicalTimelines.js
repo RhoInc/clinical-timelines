@@ -27,13 +27,16 @@
                     '    font-size: 14px;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item {' +
+                    '    border: 2px solid white;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' +
+                    'border: 2px solid black;' +
                     'cursor: pointer;' +
                     'border-radius: 4px;' +
                     'padding: 5px;' +
-                    'border: 2px solid white;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
-                    'border: 2px solid black;' +
+                    'border: 2px solid #999;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item.selected {' +
                     'background: lightgray;' +
@@ -43,7 +46,10 @@
                     '    fill: blue;' +
                     '    text-decoration: underline;' +
                     '}',
-                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 3px;' +
+                    '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
                     '    stroke: black;' +
                     '    stroke-width: 2px;' +
                     '    stroke-dasharray: 2,2;' +
@@ -135,6 +141,7 @@
             stdy_col: 'STDY',
             endy_col: 'ENDY',
             eventTypes: null,
+            highlightedEvent: null,
             unit: 'participant',
             site_col: 'SITE',
             filters: null,
@@ -517,6 +524,12 @@
 
     var controls = [
         {
+            type: 'dropdown',
+            option: 'highlightedEvent',
+            label: 'Highlighted Event Type',
+            values: null // set in onInit() callback
+        },
+        {
             type: 'radio',
             option: 'y.sort',
             label: 'Sort participants',
@@ -591,29 +604,6 @@
             d.wc_value = d.wc_value ? +d.wc_value : NaN;
         });
 
-        //Remove filters for variables fewer than two levels.
-        this.controls.config.inputs = this.controls.config.inputs.filter(function(filter) {
-            if (filter.type !== 'subsetter') return true;
-            else {
-                var levels = d3$1
-                    .set(
-                        _this.raw_data.map(function(d) {
-                            return d[filter.value_col];
-                        })
-                    )
-                    .values();
-
-                if (levels.length < 2) {
-                    console.warn(
-                        filter.value_col +
-                            ' filter removed because the variable has only one level.'
-                    );
-                }
-
-                return levels.length > 1;
-            }
-        });
-
         //Default event types to 'All'.
         this.allEventTypes = d3$1
             .set(
@@ -635,6 +625,31 @@
                   )
                 : this.allEventTypes;
         this.config.legend.order = this.config.color_dom;
+
+        //Remove filters for variables fewer than two levels.
+        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
+            if (input.type !== 'subsetter') {
+                if (input.label === 'Highlighted Event Type') input.values = _this.config.color_dom;
+
+                return true;
+            } else {
+                var levels = d3$1
+                    .set(
+                        _this.raw_data.map(function(d) {
+                            return d[input.value_col];
+                        })
+                    )
+                    .values();
+
+                if (levels.length < 2) {
+                    console.warn(
+                        input.value_col + ' filter removed because the variable has only one level.'
+                    );
+                }
+
+                return levels.length > 1;
+            }
+        });
     }
 
     function backButton() {
@@ -875,7 +890,7 @@
         );
     }
 
-    function onDraw() {
+    function sortYdomain() {
         var _this = this;
 
         if (this.config.y.sort === 'earliest') {
@@ -942,6 +957,21 @@
                 .values();
             this.y_dom = withStartDay.concat(withoutStartDay);
         } else this.y_dom = this.y_dom.sort(d3$1.descending);
+    }
+
+    function onDraw() {
+        sortYdomain.call(this);
+    }
+
+    function highlightEvent() {
+        var _this = this;
+
+        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
+            return d.label === _this.config.highlightedEvent;
+        });
+        this.svg.selectAll('.wc-data-mark').classed('highlighted', function(d) {
+            return d.key.indexOf(_this.config.highlightedEvent) > -1;
+        });
     }
 
     function legendFilter() {
@@ -1347,6 +1377,9 @@
     function onResize() {
         var _this = this;
 
+        highlightEvent.call(this);
+
+        //Add filter functionality to legend.
         legendFilter.call(this);
 
         //Draw second x-axis at top of chart.

@@ -1,3 +1,4 @@
+import highlightEvent from './onResize/highlightEvent';
 import { svg } from 'd3';
 import legendFilter from './onResize/legendFilter';
 import drawParticipantTimeline from './onResize/drawParticipantTimeline';
@@ -7,6 +8,9 @@ import drawReferenceLines from './onResize/drawReferenceLines';
 
 export default function onResize() {
     const context = this;
+
+    //Highlight events.
+    highlightEvent.call(this);
 
     //Add filter functionality to legend.
     legendFilter.call(this);

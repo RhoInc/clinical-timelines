@@ -1,14 +1,19 @@
 import highlightEvent from './onResize/highlightEvent';
 import { svg } from 'd3';
+import legendFilter from './onResize/legendFilter';
 import drawParticipantTimeline from './onResize/drawParticipantTimeline';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
+import drawReferenceLines from './onResize/drawReferenceLines';
 
 export default function onResize() {
     const context = this;
 
     //Highlight events.
     highlightEvent.call(this);
+
+    //Add filter functionality to legend.
+    legendFilter.call(this);
 
     //Draw second x-axis at top of chart.
     const topXaxis = svg
@@ -47,4 +52,7 @@ export default function onResize() {
             offsetCircles.call(this, mark, markData);
         }
     });
+
+    //Draw reference lines.
+    if (this.config.referenceLines) drawReferenceLines.call(this);
 }

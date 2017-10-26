@@ -22,6 +22,16 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' +
                 '    border: 2px solid black;' +
+                'cursor: pointer;' +
+                'border-radius: 4px;' +
+                'padding: 5px;' +
+                'border: 2px solid white;' +
+                '}',
+            '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
+                'border: 2px solid black;' +
+                '}',
+            '#clinical-timelines .wc-chart .legend .legend-item.selected {' +
+                'background: lightgray;' +
                 '}',
             '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' +
                 '    cursor: pointer;' +
@@ -31,6 +41,23 @@ export default function defineStyles() {
             '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                 '    stroke: black;' +
                 '    stroke-width: 3px;' +
+            '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                '    stroke: black;' +
+                '    stroke-width: 2px;' +
+                '    stroke-dasharray: 2,2;' +
+                '}',
+            '#clinical-timelines .wc-chart .wc-svg .visible-reference-line.hover {' +
+                '    stroke-dasharray: none;' +
+                '}',
+            '#clinical-timelines .wc-chart .wc-svg .invisible-reference-line {' +
+                '    stroke: black;' +
+                '    stroke-width: 20px;' +
+                '    stroke-opacity: 0;' +
+                '}',
+            '#clinical-timelines .wc-chart .wc-svg .reference-line-label-box {' +
+                '    fill: white;' +
+                '    stroke: black;' +
+                '    stroke-width: black;' +
                 '}',
             '#clinical-timelines .wc-small-multiples .wc-chart {' +
                 '    width: 100%;' +

@@ -4,7 +4,7 @@
         : typeof define === 'function' && define.amd
           ? define(['d3', 'webcharts'], factory)
           : (global.clinicalTimelines = factory(global.d3, global.webCharts));
-})(this, function(d3, webcharts) {
+})(this, function(d3$1, webcharts) {
     'use strict';
 
     function defineStyles() {
@@ -27,19 +27,48 @@
                     '    font-size: 14px;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item {' +
+
                     '    border: 2px solid white;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' +
                     '    border: 2px solid black;' +
+                    'cursor: pointer;' +
+                    'border-radius: 4px;' +
+                    'padding: 5px;' +
+                    'border: 2px solid white;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
+                    'border: 2px solid black;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item.selected {' +
+                    'background: lightgray;' +
                     '}',
                 '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' +
                     '    cursor: pointer;' +
                     '    fill: blue;' +
                     '    text-decoration: underline;' +
                     '}',
+
                 '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                     '    stroke: black;' +
                     '    stroke-width: 3px;' +
+                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 2px;' +
+                    '    stroke-dasharray: 2,2;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line.hover {' +
+                    '    stroke-dasharray: none;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .invisible-reference-line {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 20px;' +
+                    '    stroke-opacity: 0;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .reference-line-label-box {' +
+                    '    fill: white;' +
+                    '    stroke: black;' +
+                    '    stroke-width: black;' +
                     '}',
                 '#clinical-timelines .wc-small-multiples .wc-chart {' +
                     '    width: 100%;' +
@@ -120,6 +149,7 @@
             site_col: 'SITE',
             filters: null,
             details: null,
+            referenceLines: null,
 
             //Standard webcharts settings
             x: {
@@ -473,6 +503,25 @@
         syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
         syncedSettings.participantSettings.margin = { left: 25 };
 
+        //Handle potential referenceLines inputs.
+        if (!(syncedSettings.referenceLines instanceof Array))
+            syncedSettings.referenceLines = [syncedSettings.referenceLines];
+
+        syncedSettings.referenceLines = syncedSettings.referenceLines
+            .map(function(referenceLine) {
+                var referenceLineObject = {};
+                referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
+                referenceLineObject.label =
+                    referenceLine.label || 'Study Day ' + referenceLineObject.studyDay;
+
+                return referenceLineObject;
+            })
+            .filter(function(referenceLine) {
+                return Number.isInteger(referenceLine.studyDay);
+            });
+
+        if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
+
         return syncedSettings;
     }
 
@@ -541,7 +590,7 @@
 
         //Calculate number of total participants and number of participants with any event.
         this.populationDetails = {
-            population: d3
+            population: d3$1
                 .set(
                     this.raw_data.map(function(d) {
                         return d[_this.config.id_col];
@@ -558,8 +607,32 @@
             d.wc_value = d.wc_value ? +d.wc_value : NaN;
         });
 
+
+        //Remove filters for variables fewer than two levels.
+        this.controls.config.inputs = this.controls.config.inputs.filter(function(filter) {
+            if (filter.type !== 'subsetter') return true;
+            else {
+                var levels = d3$1
+                    .set(
+                        _this.raw_data.map(function(d) {
+                            return d[filter.value_col];
+                        })
+                    )
+                    .values();
+
+                if (levels.length < 2) {
+                    console.warn(
+                        filter.value_col +
+                            ' filter removed because the variable has only one level.'
+                    );
+                }
+
+                return levels.length > 1;
+            }
+        });
+
         //Default event types to 'All'.
-        this.allEventTypes = d3
+        this.allEventTypes = d3$1
             .set(
                 this.raw_data.map(function(d) {
                     return d[_this.config.event_col];
@@ -794,7 +867,7 @@
             })
             .each(function(filter) {
                 if (filter.label === 'Event Type')
-                    d3
+                    d3$1
                         .select(this)
                         .selectAll('option')
                         .property('selected', function(d) {
@@ -822,7 +895,7 @@
     function onDatatransform() {
         var _this = this;
 
-        this.populationDetails.sample = d3
+        this.populationDetails.sample = d3$1
             .set(
                 this.filtered_data.map(function(d) {
                     return d[_this.config.id_col];
@@ -839,7 +912,7 @@
                 '</span> ' +
                 this.config.unit +
                 "(s) displayed (<span class = 'stats'>" +
-                d3.format('%')(this.populationDetails.rate) +
+                d3$1.format('%')(this.populationDetails.rate) +
                 '</span>)'
         );
     }
@@ -865,13 +938,13 @@
             });
 
             //Capture all subject IDs with adverse events with a start day.
-            var withStartDay = d3
+            var withStartDay = d3$1
                 .nest()
                 .key(function(d) {
                     return d[_this.config.id_col];
                 })
                 .rollup(function(d) {
-                    return d3.min(d, function(di) {
+                    return d3$1.min(d, function(di) {
                         return +di[_this.config.stdy_col];
                     });
                 })
@@ -893,7 +966,7 @@
                 });
 
             //Capture all subject IDs with adverse events without a start day.
-            var withoutStartDay = d3
+            var withoutStartDay = d3$1
                 .set(
                     filtered_data
                         .filter(function(d) {
@@ -910,7 +983,59 @@
                 )
                 .values();
             this.y_dom = withStartDay.concat(withoutStartDay);
-        } else this.y_dom = this.y_dom.sort(d3.descending);
+        } else this.y_dom = this.y_dom.sort(d3$1.descending);
+    }
+
+    function legendFilter() {
+        var _this = this;
+
+        //Filter data by clicking on legend.
+        var context = this,
+            eventTypeFilter = this.filters.filter(function(filter) {
+                return filter.col === _this.config.event_col;
+            })[0],
+            eventTypeControl = this.controls.wrap.selectAll('.control-group').filter(function(d) {
+                return d.label === 'Event Type';
+            }),
+            eventTypes = eventTypeControl.selectAll('.changer option').sort(function(a, b) {
+                return _this.config.color_dom.indexOf(a) - _this.config.color_dom.indexOf(b);
+            }),
+            // event type options
+            legendItems = this.wrap.selectAll('.legend-item').classed('selected', function(d) {
+                return eventTypeFilter.val instanceof Array
+                    ? eventTypeFilter.val.indexOf(d.label) > -1
+                    : true;
+            });
+
+        //Add event listener to legend items.
+        legendItems.on('click', function(d) {
+            var legendItem = d3.select(this),
+                // clicked legend item
+                selected = !legendItem.classed('selected'); // selected boolean
+
+            legendItem.classed('selected', selected); // toggle selected class
+
+            var selectedLegendItems = legendItems
+                .filter(function() {
+                    return d3.select(this).classed('selected');
+                })
+                .data()
+                .map(function(d) {
+                    return d.label;
+                }); // selected event types
+
+            eventTypes
+                .property('selected', false)
+                .filter(function(d) {
+                    return selectedLegendItems.indexOf(d) > -1;
+                })
+                .property('selected', true); // sync selected options in event type filter with selected legend items
+
+            context.filters.filter(function(filter) {
+                return filter.col === context.config.event_col;
+            })[0].val = selectedLegendItems; // update filter object
+            context.draw();
+        });
     }
 
     function onDraw() {
@@ -1017,7 +1142,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var participantData = d3
+        var participantData = d3$1
             .nest()
             .key(function(d) {
                 return d.values[0].values.raw[0][_this.config.id_col];
@@ -1114,7 +1239,7 @@
                         } else if (nOverlapping === currentlyOverlappingLines.length) {
                             //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
                             currentLine.offset =
-                                d3.max(currentlyOverlappingLines, function(d) {
+                                d3$1.max(currentlyOverlappingLines, function(d) {
                                     return d.offset;
                                 }) + 1;
                             currentlyOverlappingLines.push(currentLine);
@@ -1123,7 +1248,7 @@
                             currentlyOverlappingLines.forEach(function(d, i) {
                                 d.index = i;
                             });
-                            var minOffset = d3.min(
+                            var minOffset = d3$1.min(
                                     currentlyOverlappingLines.filter(function(d) {
                                         return !d.overlapping;
                                     }),
@@ -1143,7 +1268,7 @@
                     if (currentLine.offset > 0) {
                         //Capture line via its class name and offset vertically.
                         var className = currentLine.key + ' line',
-                            g = d3.select(document.getElementsByClassName(className)[0]),
+                            g = d3$1.select(document.getElementsByClassName(className)[0]),
                             line = g.select('path');
                         g.attr(
                             'transform',
@@ -1161,7 +1286,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var overlapping = d3
+        var overlapping = d3$1
             .nest()
             .key(function(d) {
                 return d.total + '|' + d.values.raw[0][_this.config.id_col];
@@ -1189,20 +1314,104 @@
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
                 var className = di + ' point',
-                    g = d3.select(document.getElementsByClassName(className)[0]),
+                    g = d3$1.select(document.getElementsByClassName(className)[0]),
                     point = g.select('circle');
                 g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
             });
         });
     }
 
+    function drawReferenceLines() {
+        var _this = this;
+
+        this.svg.select('.reference-lines').remove();
+        var referenceLinesGroup = this.svg
+            .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+            .classed('reference-lines', true);
+
+        //Append reference line for each item in config.referenceLines.
+        this.config.referenceLines.forEach(function(studyDay, i) {
+            var referenceLineGroup = referenceLinesGroup
+                    .append('g')
+                    .classed('reference-line', true)
+                    .attr('id', 'reference-line-' + i),
+                visibleReferenceLine = referenceLineGroup
+                    .append('line')
+                    .classed('visible-reference-line', true)
+                    .attr({
+                        x1: _this.x(studyDay.studyDay),
+                        x2: _this.x(studyDay.studyDay),
+                        y1: 0,
+                        y2: _this.plot_height
+                    }),
+                invisibleReferenceLine = referenceLineGroup
+                    .append('line')
+                    .classed('invisible-reference-line', true)
+                    .attr({
+                        x1: _this.x(studyDay.studyDay),
+                        x2: _this.x(studyDay.studyDay),
+                        y1: 0,
+                        y2: _this.plot_height
+                    }),
+                // invisible reference line has no dasharray and is much thicker to make hovering easier
+                direction =
+                    studyDay.studyDay <= (_this.x_dom[1] - _this.x_dom[0]) / 2 ? 'right' : 'left',
+                referenceLineLabel = referenceLineGroup
+                    .append('text')
+                    .classed('reference-line-label', true)
+                    .attr({
+                        x: _this.x(studyDay.studyDay),
+                        y: 0,
+                        'text-anchor': direction === 'right' ? 'beginning' : 'end',
+                        dx: direction === 'right' ? 15 : -15,
+                        dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                    })
+                    .text(studyDay.label),
+                dimensions = referenceLineLabel.node().getBBox(),
+                referenceLineLabelBox = referenceLineGroup
+                    .insert('rect', '.reference-line-label')
+                    .classed('reference-line-label-box', true)
+                    .attr({
+                        x: dimensions.x - 10,
+                        y: dimensions.y - 5,
+                        width: dimensions.width + 20,
+                        height: dimensions.height + 10
+                    });
+
+            //Display reference line label on hover.
+            invisibleReferenceLine
+                .on('mouseover', function() {
+                    visibleReferenceLine.classed('hover', true);
+                    referenceLineLabel.classed('hidden', false);
+                    referenceLineLabelBox.classed('hidden', false);
+                    _this.svg.node().appendChild(referenceLineLabelBox.node());
+                    _this.svg.node().appendChild(referenceLineLabel.node());
+                })
+                .on('mouseout', function() {
+                    visibleReferenceLine.classed('hover', false);
+                    referenceLineLabel.classed('hidden', true);
+                    referenceLineLabelBox.classed('hidden', true);
+                    referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
+                    referenceLineGroup.node().appendChild(referenceLineLabel.node());
+                });
+
+            //Hide reference labels initially.
+            referenceLineLabel.classed('hidden', true);
+            referenceLineLabelBox.classed('hidden', true);
+        });
+    }
+
     function onResize() {
         var _this = this;
 
+
         highlightEvent.call(this);
+        legendFilter.call(this);
+        //Draw second x-axis at top of chart.
+
 
         //Draw second x-axis at top of chart.
-        var topXaxis = d3.svg
+        var topXaxis = d3$1.svg
                 .axis()
                 .scale(this.x)
                 .orient('top')
@@ -1238,6 +1447,9 @@
                 offsetCircles.call(_this, mark, markData);
             }
         });
+
+        //Draw reference lines.
+        if (this.config.referenceLines) drawReferenceLines.call(this);
     }
 
     function onDestroy() {}
@@ -1273,6 +1485,9 @@
 
     function onResize$1() {
         this.wrap.select('.legend').classed('hidden', true);
+
+        //Draw reference lines.
+        if (this.config.referenceLines) drawReferenceLines.call(this);
     }
 
     function onDestroy$1() {}
@@ -1342,7 +1557,7 @@
         var settings = arguments[1];
 
         //Define unique div within passed element argument.
-        var container = d3
+        var container = d3$1
                 .select(element)
                 .append('div')
                 .attr('id', 'clinical-timelines'),

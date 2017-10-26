@@ -1,17 +1,17 @@
 export default //Renderer-specific settings
 {
     id_col: 'USUBJID',
-    event_col: 'DOMAIN',
-    seq_col: 'SEQ',
-    stdy_col: 'STDY',
-    endy_col: 'ENDY',
-    eventTypes: null,
-    highlightedEvent: null,
     unit: 'participant',
+    event_col: 'DOMAIN',
+    eventTypes: null,
     site_col: 'SITE',
     filters: null,
-    details: null,
+    highlightedEvent: null,
+    stdy_col: 'STDY',
+    endy_col: 'ENDY',
+    seq_col: 'SEQ',
     referenceLines: null,
+    details: null,
 
     //Standard webcharts settings
     x: {

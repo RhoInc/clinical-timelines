@@ -40,7 +40,8 @@ export default function defineStyles() {
             '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                 '    stroke: black;' +
                 '    stroke-width: 3px;' +
-                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                '}',
+            '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 2px;' +
                 '    stroke-dasharray: 2,2;' +

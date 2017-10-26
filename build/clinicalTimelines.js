@@ -49,7 +49,8 @@
                 '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                     '    stroke: black;' +
                     '    stroke-width: 3px;' +
-                    '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
                     '    stroke: black;' +
                     '    stroke-width: 2px;' +
                     '    stroke-dasharray: 2,2;' +
@@ -146,6 +147,7 @@
             site_col: 'SITE',
             filters: null,
             details: null,
+            listingConfig: null,
             referenceLines: null,
 
             //Standard webcharts settings
@@ -1505,14 +1507,17 @@
     };
 
     function listing(clinicalTimelines) {
-        var listing = webcharts.createTable(clinicalTimelines.element, {
-            cols: clinicalTimelines.config.details.map(function(d) {
-                return d.value_col;
-            }),
-            headers: clinicalTimelines.config.details.map(function(d) {
-                return d.label;
-            })
-        });
+        var listing = webcharts.createTable(
+            clinicalTimelines.element,
+            clinicalTimelines.config.listingConfig || {
+                cols: clinicalTimelines.config.details.map(function(d) {
+                    return d.value_col;
+                }),
+                headers: clinicalTimelines.config.details.map(function(d) {
+                    return d.label;
+                })
+            }
+        );
 
         for (var callback in callbacks$2) {
             listing.on(callback.substring(2).toLowerCase(), callbacks$2[callback]);

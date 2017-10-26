@@ -43,6 +43,24 @@
                     '    fill: blue;' +
                     '    text-decoration: underline;' +
                     '}',
+                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 2px;' +
+                    '    stroke-dasharray: 2,2;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line.hover {' +
+                    '    stroke-dasharray: none;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .invisible-reference-line {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 20px;' +
+                    '    stroke-opacity: 0;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .reference-line-label-box {' +
+                    '    fill: white;' +
+                    '    stroke: black;' +
+                    '    stroke-width: black;' +
+                    '}',
                 '#clinical-timelines .wc-small-multiples .wc-chart {' +
                     '    width: 100%;' +
                     '    padding: 0;' +
@@ -121,6 +139,7 @@
             site_col: 'SITE',
             filters: null,
             details: null,
+            referenceLines: null,
 
             //Standard webcharts settings
             x: {
@@ -473,6 +492,25 @@
         ];
         syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
         syncedSettings.participantSettings.margin = { left: 25 };
+
+        //Handle potential referenceLines inputs.
+        if (!(syncedSettings.referenceLines instanceof Array))
+            syncedSettings.referenceLines = [syncedSettings.referenceLines];
+
+        syncedSettings.referenceLines = syncedSettings.referenceLines
+            .map(function(referenceLine) {
+                var referenceLineObject = {};
+                referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
+                referenceLineObject.label =
+                    referenceLine.label || 'Study Day ' + referenceLineObject.studyDay;
+
+                return referenceLineObject;
+            })
+            .filter(function(referenceLine) {
+                return Number.isInteger(referenceLine.studyDay);
+            });
+
+        if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
 
         return syncedSettings;
     }
@@ -1226,6 +1264,86 @@
         });
     }
 
+    function drawReferenceLines() {
+        var _this = this;
+
+        this.svg.select('.reference-lines').remove();
+        var referenceLinesGroup = this.svg
+            .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+            .classed('reference-lines', true);
+
+        //Append reference line for each item in config.referenceLines.
+        this.config.referenceLines.forEach(function(studyDay, i) {
+            var referenceLineGroup = referenceLinesGroup
+                    .append('g')
+                    .classed('reference-line', true)
+                    .attr('id', 'reference-line-' + i),
+                visibleReferenceLine = referenceLineGroup
+                    .append('line')
+                    .classed('visible-reference-line', true)
+                    .attr({
+                        x1: _this.x(studyDay.studyDay),
+                        x2: _this.x(studyDay.studyDay),
+                        y1: 0,
+                        y2: _this.plot_height
+                    }),
+                invisibleReferenceLine = referenceLineGroup
+                    .append('line')
+                    .classed('invisible-reference-line', true)
+                    .attr({
+                        x1: _this.x(studyDay.studyDay),
+                        x2: _this.x(studyDay.studyDay),
+                        y1: 0,
+                        y2: _this.plot_height
+                    }),
+                // invisible reference line has no dasharray and is much thicker to make hovering easier
+                direction =
+                    studyDay.studyDay <= (_this.x_dom[1] - _this.x_dom[0]) / 2 ? 'right' : 'left',
+                referenceLineLabel = referenceLineGroup
+                    .append('text')
+                    .classed('reference-line-label', true)
+                    .attr({
+                        x: _this.x(studyDay.studyDay),
+                        y: 0,
+                        'text-anchor': direction === 'right' ? 'beginning' : 'end',
+                        dx: direction === 'right' ? 15 : -15,
+                        dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                    })
+                    .text(studyDay.label),
+                dimensions = referenceLineLabel.node().getBBox(),
+                referenceLineLabelBox = referenceLineGroup
+                    .insert('rect', '.reference-line-label')
+                    .classed('reference-line-label-box', true)
+                    .attr({
+                        x: dimensions.x - 10,
+                        y: dimensions.y - 5,
+                        width: dimensions.width + 20,
+                        height: dimensions.height + 10
+                    });
+
+            //Display reference line label on hover.
+            invisibleReferenceLine
+                .on('mouseover', function() {
+                    visibleReferenceLine.classed('hover', true);
+                    referenceLineLabel.classed('hidden', false);
+                    referenceLineLabelBox.classed('hidden', false);
+                    _this.svg.node().appendChild(referenceLineLabelBox.node());
+                    _this.svg.node().appendChild(referenceLineLabel.node());
+                })
+                .on('mouseout', function() {
+                    visibleReferenceLine.classed('hover', false);
+                    referenceLineLabel.classed('hidden', true);
+                    referenceLineLabelBox.classed('hidden', true);
+                    referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
+                    referenceLineGroup.node().appendChild(referenceLineLabel.node());
+                });
+
+            //Hide reference labels initially.
+            referenceLineLabel.classed('hidden', true);
+            referenceLineLabelBox.classed('hidden', true);
+        });
+    }
+
     function onResize() {
         var _this = this;
 
@@ -1268,6 +1386,9 @@
                 offsetCircles.call(_this, mark, markData);
             }
         });
+
+        //Draw reference lines.
+        if (this.config.referenceLines) drawReferenceLines.call(this);
     }
 
     function onDestroy() {}
@@ -1303,6 +1424,9 @@
 
     function onResize$1() {
         this.wrap.select('.legend').classed('hidden', true);
+
+        //Draw reference lines.
+        if (this.config.referenceLines) drawReferenceLines.call(this);
     }
 
     function onDestroy$1() {}

@@ -3,6 +3,7 @@ import legendFilter from './onResize/legendFilter';
 import drawParticipantTimeline from './onResize/drawParticipantTimeline';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
+import drawReferenceLines from './onResize/drawReferenceLines';
 
 export default function onResize() {
     const context = this;
@@ -47,4 +48,7 @@ export default function onResize() {
             offsetCircles.call(this, mark, markData);
         }
     });
+
+    //Draw reference lines.
+    if (this.config.referenceLines) drawReferenceLines.call(this);
 }

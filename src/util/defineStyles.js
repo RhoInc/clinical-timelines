@@ -34,6 +34,24 @@ export default function defineStyles() {
                 '    fill: blue;' +
                 '    text-decoration: underline;' +
                 '}',
+            '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                '    stroke: black;' +
+                '    stroke-width: 2px;' +
+                '    stroke-dasharray: 2,2;' +
+                '}',
+            '#clinical-timelines .wc-chart .wc-svg .visible-reference-line.hover {' +
+                '    stroke-dasharray: none;' +
+                '}',
+            '#clinical-timelines .wc-chart .wc-svg .invisible-reference-line {' +
+                '    stroke: black;' +
+                '    stroke-width: 20px;' +
+                '    stroke-opacity: 0;' +
+                '}',
+            '#clinical-timelines .wc-chart .wc-svg .reference-line-label-box {' +
+                '    fill: white;' +
+                '    stroke: black;' +
+                '    stroke-width: black;' +
+                '}',
             '#clinical-timelines .wc-small-multiples .wc-chart {' +
                 '    width: 100%;' +
                 '    padding: 0;' +

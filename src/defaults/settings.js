@@ -10,6 +10,7 @@ export default //Renderer-specific settings
     site_col: 'SITE',
     filters: null,
     details: null,
+    referenceLines: null,
 
     //Standard webcharts settings
     x: {

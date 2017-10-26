@@ -5,7 +5,7 @@
 }(this, (function (d3$1,webcharts) { 'use strict';
 
 function defineStyles() {
-    var styles = ['#clinical-timelines .hidden {' + '    display: none !important;' + '}', '#clinical-timelines .wc-controls {' + '    border: 1px solid #eee;' + '    padding: 5px;' + '    margin-bottom: 0;' + '    display: inline-block;' + '    width: 100%;' + '}', '#clinical-timelines .wc-controls .control-group {' + '    float: right;' + '    margin-bottom: 0;' + '}', '#clinical-timelines .wc-controls .annotation {' + '    float: left;' + '    font-size: 16px;' + '}', '#clinical-timelines .wc-controls .annotation .stats,' + '#clinical-timelines .wc-controls .annotation #participant {' + '    font-weight: bold;' + '}', '#clinical-timelines .wc-controls .back-button button {' + '    padding: 0 5px;' + '    font-size: 14px;' + '    float: left;' + '    clear: left;' + '    margin-top: 5px;' + '}', '#clinical-timelines > .wc-chart .legend {' + '    display: flex !important;' + '    justify-content: center;' + '}', '#clinical-timelines .wc-chart .legend .legend-item {' + '    cursor: pointer;' + '    float: left;' + '    border-radius: 4px;' + '    padding: 3px 7px 3px 4px;' + '    border: 2px solid white;' + '    margin-right: .25em !important;' + '}', '#clinical-timelines .wc-chart .legend .legend-item:hover {' + '    border: 2px solid black;' + '}', '#clinical-timelines .wc-chart .legend .legend-item.selected {' + '    background: lightgray;' + '}', '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' + '    border: 2px solid black;' + '    cursor: pointer;' + '    border-radius: 4px;' + '    padding: 5px;' + '}', '#clinical-timelines > .wc-chart .wc-svg .y.axis .tick {' + '    cursor: pointer;' + '    fill: blue;' + '    text-decoration: underline;' + '}', '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' + '    stroke: black;' + '    stroke-width: 3px;' + '}', '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' + '    stroke: black;' + '    stroke-width: 2px;' + '    stroke-dasharray: 2,2;' + '}', '#clinical-timelines .wc-chart .wc-svg .visible-reference-line.hover {' + '    stroke-dasharray: none;' + '}', '#clinical-timelines .wc-chart .wc-svg .invisible-reference-line {' + '    stroke: black;' + '    stroke-width: 20px;' + '    stroke-opacity: 0;' + '}', '#clinical-timelines .wc-chart .wc-svg .reference-line-label-box {' + '    fill: white;' + '    stroke: black;' + '    stroke-width: black;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart {' + '    width: 100%;' + '    padding: 0;' + '    border-top: 1px solid black;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart > * {' + '    display: inline-block;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-svg {' + '    float: left;' + '    width: 75%;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-chart-title {' + '    float: right;' + '    text-align: left;' + '    font-size: 21px;' + '    padding-left: 10px;' + '    width: 24%;' + '}', '#clinical-timelines .wc-chart.wc-table {' + '    width: 100%;' + '}', '#clinical-timelines .wc-chart.wc-table table {' + '    display: table;' + '    width: 100%;' + '}'],
+    var styles = ['#clinical-timelines .hidden {' + '    display: none !important;' + '}', '#clinical-timelines .wc-controls {' + '    border: 1px solid #eee;' + '    padding: 5px;' + '    margin-bottom: 0;' + '    display: inline-block;' + '    width: 100%;' + '}', '#clinical-timelines .wc-controls .control-group {' + '    float: right;' + '    margin-bottom: 0;' + '}', '#clinical-timelines .wc-controls .annotation {' + '    float: left;' + '    font-size: 16px;' + '}', '#clinical-timelines .wc-controls .annotation .stats,' + '#clinical-timelines .wc-controls .annotation #participant,' + '#clinical-timelines .wc-controls .annotation .characteristic span {' + '    font-weight: bold;' + '}', '#clinical-timelines .wc-controls .back-button button {' + '    padding: 0 5px;' + '    font-size: 14px;' + '    float: left;' + '    clear: left;' + '    margin-top: 5px;' + '}', '#clinical-timelines > .wc-chart .legend {' + '    display: flex !important;' + '    justify-content: center;' + '}', '#clinical-timelines .wc-chart .legend .legend-item {' + '    cursor: pointer;' + '    float: left;' + '    border-radius: 4px;' + '    padding: 3px 7px 3px 4px;' + '    border: 2px solid white;' + '    margin-right: .25em !important;' + '}', '#clinical-timelines .wc-chart .legend .legend-item:hover {' + '    border: 2px solid black;' + '}', '#clinical-timelines .wc-chart .legend .legend-item.selected {' + '    background: lightgray;' + '}', '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' + '    border: 2px solid black;' + '    cursor: pointer;' + '    border-radius: 4px;' + '    padding: 5px;' + '}', '#clinical-timelines > .wc-chart .wc-svg .y.axis .tick {' + '    cursor: pointer;' + '    fill: blue;' + '    text-decoration: underline;' + '}', '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' + '    stroke: black;' + '    stroke-width: 3px;' + '}', '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' + '    stroke: black;' + '    stroke-width: 2px;' + '    stroke-dasharray: 2,2;' + '}', '#clinical-timelines .wc-chart .wc-svg .visible-reference-line.hover {' + '    stroke-dasharray: none;' + '}', '#clinical-timelines .wc-chart .wc-svg .invisible-reference-line {' + '    stroke: black;' + '    stroke-width: 20px;' + '    stroke-opacity: 0;' + '}', '#clinical-timelines .wc-chart .wc-svg .reference-line-label-box {' + '    fill: white;' + '    stroke: black;' + '    stroke-width: black;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart {' + '    width: 100%;' + '    padding: 0;' + '    border-top: 1px solid black;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart > * {' + '    display: inline-block;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-svg {' + '    float: left;' + '    width: 75%;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-chart-title {' + '    float: right;' + '    text-align: left;' + '    font-size: 21px;' + '    padding-left: 10px;' + '    width: 24%;' + '}', '#clinical-timelines .wc-chart.wc-table {' + '    width: 100%;' + '}', '#clinical-timelines .wc-chart.wc-table table {' + '    display: table;' + '    width: 100%;' + '}'],
         style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = styles.join('\n');
@@ -55,6 +55,7 @@ var settings = //Renderer-specific settings
     site_col: 'SITE',
     filters: null,
     details: null,
+    id_characteristics: null,
     referenceLines: null,
 
     //Standard webcharts settings
@@ -280,11 +281,14 @@ function syncSettings(settings) {
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;
 
+    //Define prop-cased unit.
+    syncedSettings.unitPropCased = syncedSettings.unit.substring(0, 1).toUpperCase() + syncedSettings.unit.substring(1).toLowerCase();
+
     //Default filters
     var defaultFilters = [{
         type: 'subsetter',
         value_col: syncedSettings.id_col,
-        label: 'Participant',
+        label: syncedSettings.unitPropCased,
         description: 'filter/view',
         multiple: false
     }, {
@@ -332,6 +336,10 @@ function syncSettings(settings) {
         }).indexOf(filter.value_col) === -1) syncedSettings.details.push(filter);
     });
 
+    //Handle row identifier characteristics.
+    var id_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
+    syncedSettings.id_characteristics = syncedSettings.id_characteristics instanceof Array ? d3$1.merge([syncedSettings.id_characteristics, id_characteristics]) : id_characteristics;
+
     //Participant timelines settings
     syncedSettings.participantSettings = clone(syncedSettings);
     syncedSettings.participantSettings.x.label = '';
@@ -369,12 +377,15 @@ var controls = [{
 }, {
     type: 'radio',
     option: 'y.sort',
-    label: 'Sort participants',
     values: ['earliest', 'alphabetical-descending'],
     relabels: ['by earliest event', 'alphanumerically']
 }];
 
 function syncControls(controls, settings) {
+    controls.filter(function (control) {
+        return control.option === 'y.sort';
+    })[0].label = 'Sort ' + settings.unit + 's';
+
     settings.filters.reverse().forEach(function (filter) {
         controls.unshift(filter);
     });
@@ -508,6 +519,45 @@ function backButton() {
 }
 
 function drawParticipantTimeline() {
+    var _this = this;
+
+    //Hide population details.
+    this.populationDetails.wrap.classed('hidden', true);
+
+    //Display participant information.
+    this.participantDetails.wrap.classed('hidden', false);
+    this.participantDetails.wrap.select('#participant').text(this.selected_id);
+
+    //Display back button.
+    this.backButton.classed('hidden', false);
+
+    //Hide clinical timelines.
+    this.wrap.classed('hidden', true);
+
+    //Define participant data.
+    var longParticipantData = this.raw_data.filter(function (di) {
+        return di[_this.config.id_col] === _this.selected_id && (_this.currentEventTypes !== 'All' ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1 : true);
+    }),
+        wideParticipantData = this.wide_data.filter(function (di) {
+        return di[_this.config.id_col] === _this.selected_id && (_this.currentEventTypes !== 'All' ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1 : true);
+    });
+
+    //Draw row identifier characteristics.
+    this.participantDetails.wrap.selectAll('div.characteristic').each(function (d) {
+        d3.select(this).select('span').text(wideParticipantData[0][d.value_col]);
+    });
+
+    //Draw participant timeline.
+    this.participantTimeline.wrap.classed('hidden', false);
+    this.participantTimeline.wrap.selectAll('*').remove();
+    webcharts.multiply(this.participantTimeline, longParticipantData, this.config.event_col);
+
+    //Draw participant detail listing.
+    this.listing.wrap.classed('hidden', false);
+    this.listing.draw(wideParticipantData);
+}
+
+function toggleView() {
         var _this = this;
 
         this.selected_id = this.filters.filter(function (filter) {
@@ -515,35 +565,7 @@ function drawParticipantTimeline() {
         })[0].val;
 
         if (this.selected_id !== 'All') {
-                //Hide population details.
-                this.populationDetails.wrap.classed('hidden', true);
-
-                //Display participant information.
-                this.participantDetails.wrap.classed('hidden', false);
-                this.participantDetails.wrap.select('#participant').text(this.selected_id);
-
-                //Display back button.
-                this.backButton.classed('hidden', false);
-
-                //Hide clinical timelines.
-                this.wrap.classed('hidden', true);
-
-                //Define participant data.
-                var longParticipantData = this.raw_data.filter(function (di) {
-                        return di[_this.config.id_col] === _this.selected_id && (_this.currentEventTypes !== 'All' ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1 : true);
-                }),
-                    wideParticipantData = this.wide_data.filter(function (di) {
-                        return di[_this.config.id_col] === _this.selected_id && (_this.currentEventTypes !== 'All' ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1 : true);
-                });
-
-                //Draw participant timeline.
-                this.participantTimeline.wrap.classed('hidden', false);
-                this.participantTimeline.wrap.selectAll('*').remove();
-                webcharts.multiply(this.participantTimeline, longParticipantData, this.config.event_col);
-
-                //Draw participant detail listing.
-                this.listing.wrap.classed('hidden', false);
-                this.listing.draw(wideParticipantData);
+                drawParticipantTimeline.call(this);
         } else {
                 delete this.selected_id;
 
@@ -572,7 +594,7 @@ function drawParticipantTimeline() {
 
         //Enable/Disable controls other than Participant and Event Type filters.
         this.controls.wrap.selectAll('.control-group').filter(function (control) {
-                return ['Participant', 'Event Type'].indexOf(control.label) === -1;
+                return [_this.config.unitPropCased, 'Event Type'].indexOf(control.label) === -1;
         }).selectAll('select,input').property('disabled', !!this.selected_id);
 }
 
@@ -585,7 +607,11 @@ function onLayout() {
     this.populationDetails.wrap = this.controls.wrap.append('div').classed('annotation population-details', true);
 
     //Add div for back button and participant ID title.
-    this.participantDetails.wrap = this.controls.wrap.append('div').classed('annotation participant-details hidden', true).html('Viewing ' + this.config.unit + ' <span id = \'participant\'></span>');
+    this.participantDetails.wrap = this.controls.wrap.append('div').classed('annotation participant-details hidden', true);
+    this.participantDetails.wrap.append('div').html(this.config.unitPropCased + ': <span id = \'participant\'></span>');
+    this.participantDetails.wrap.selectAll('div.characteristic').data(this.config.id_characteristics).enter().append('div').classed('characteristic', true).html(function (d) {
+        return d.label + ': <span id = \'' + d.value_col + '\'></span>';
+    });
 
     //Add div for back button and participant ID title.
     this.backButton = this.controls.wrap.append('div').classed('back-button hidden', true);
@@ -606,12 +632,12 @@ function onLayout() {
         });
     }).on('change', function (filter) {
         if (filter.value_col === _this.config.id_col) {
-            drawParticipantTimeline.call(_this);
+            toggleView.call(_this);
         } else if (filter.value_col === _this.config.event_col) {
             _this.currentEventTypes = _this.filters.filter(function (filter) {
                 return filter.col === _this.config.event_col;
             })[0].val;
-            if (_this.selected_id) drawParticipantTimeline.call(_this);
+            if (_this.selected_id) toggleView.call(_this);
         } else {
             console.log('handle custom filters here');
         }
@@ -733,8 +759,10 @@ function legendFilter() {
     });
 }
 
-function drawParticipantTimeline$1() {
+function tickClick() {
     var _this = this;
+
+    drawParticipantTimeline.call(this);
 
     //Update participant filter.
     this.controls.wrap.selectAll('.control-group').filter(function (control) {
@@ -746,39 +774,9 @@ function drawParticipantTimeline$1() {
         return filter.col === _this.config.id_col;
     })[0].val = this.selected_id;
 
-    //Hide population details.
-    this.populationDetails.wrap.classed('hidden', true);
-
-    //Display participant information.
-    this.participantDetails.wrap.classed('hidden', false);
-    this.participantDetails.wrap.select('#participant').text(this.selected_id);
-
-    //Display back button.
-    this.backButton.classed('hidden', false);
-
-    //Hide clinical timelines.
-    this.wrap.classed('hidden', true);
-
-    //Define participant data.
-    var longParticipantData = this.raw_data.filter(function (di) {
-        return di[_this.config.id_col] === _this.selected_id && (_this.currentEventTypes !== 'All' ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1 : true);
-    }),
-        wideParticipantData = this.wide_data.filter(function (di) {
-        return di[_this.config.id_col] === _this.selected_id && (_this.currentEventTypes !== 'All' ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1 : true);
-    });
-
-    //Draw participant timeline.
-    this.participantTimeline.wrap.classed('hidden', false);
-    this.participantTimeline.wrap.selectAll('*').remove();
-    webcharts.multiply(this.participantTimeline, longParticipantData, this.config.event_col);
-
-    //Draw participant detail listing.
-    this.listing.wrap.classed('hidden', false);
-    this.listing.draw(wideParticipantData);
-
     //Enable/Disable controls other than Participant and Event Type filters.
     this.controls.wrap.selectAll('.control-group').filter(function (control) {
-        return ['Participant', 'Event Type'].indexOf(control.label) === -1;
+        return [_this.config.unitPropCased, 'Event Type'].indexOf(control.label) === -1;
     }).selectAll('select,input').property('disabled', !!this.selected_id);
 
     //Highlight participant dropdown.
@@ -1015,7 +1013,7 @@ function onResize() {
     //Draw second chart when y-axis tick label is clicked.
     this.svg.selectAll('.y.axis .tick').on('click', function (d) {
         _this.selected_id = d;
-        drawParticipantTimeline$1.call(_this);
+        tickClick.call(_this);
     });
 
     //Offset overlapping marks.

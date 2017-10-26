@@ -1,5 +1,5 @@
 import backButton from './onLayout/backButton';
-import drawParticipantTimeline from './onLayout/drawParticipantTimeline';
+import toggleView from './onLayout/toggleView';
 import { select } from 'd3';
 
 export default function onLayout() {
@@ -13,8 +13,17 @@ export default function onLayout() {
     //Add div for back button and participant ID title.
     this.participantDetails.wrap = this.controls.wrap
         .append('div')
-        .classed('annotation participant-details hidden', true)
-        .html(`Viewing ${this.config.unit} <span id = 'participant'></span>`);
+        .classed('annotation participant-details hidden', true);
+    this.participantDetails.wrap
+        .append('div')
+        .html(`${this.config.unitPropCased}: <span id = 'participant'></span>`);
+    this.participantDetails.wrap
+        .selectAll('div.characteristic')
+            .data(this.config.id_characteristics)
+            .enter()
+        .append('div')
+        .classed('characteristic', true)
+        .html(d => `${d.label}: <span id = '${d.value_col}'></span>`);
 
     //Add div for back button and participant ID title.
     this.backButton = this.controls.wrap.append('div').classed('back-button hidden', true);
@@ -48,12 +57,12 @@ export default function onLayout() {
         })
         .on('change', filter => {
             if (filter.value_col === this.config.id_col) {
-                drawParticipantTimeline.call(this);
+                toggleView.call(this);
             } else if (filter.value_col === this.config.event_col) {
                 this.currentEventTypes = this.filters.filter(
                     filter => filter.col === this.config.event_col
                 )[0].val;
-                if (this.selected_id) drawParticipantTimeline.call(this);
+                if (this.selected_id) toggleView.call(this);
             } else {
                 console.log('handle custom filters here');
             }

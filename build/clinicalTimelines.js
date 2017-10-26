@@ -30,14 +30,13 @@
                     '    border: 2px solid white;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' +
-                    '    border: 2px solid black;' +
+                    'border: 2px solid black;' +
                     'cursor: pointer;' +
                     'border-radius: 4px;' +
                     'padding: 5px;' +
-                    'border: 2px solid white;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
-                    'border: 2px solid black;' +
+                    'border: 2px solid #999;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item.selected {' +
                     'background: lightgray;' +

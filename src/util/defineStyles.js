@@ -17,6 +17,18 @@ export default function defineStyles() {
                 '    padding: 0 5px;' +
                 '    font-size: 14px;' +
                 '}',
+            '#clinical-timelines .wc-chart .legend .legend-item {' +
+                'cursor: pointer;' +
+                'border-radius: 4px;' +
+                'padding: 5px;' +
+                'border: 2px solid white;' +
+                '}',
+            '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
+                'border: 2px solid black;' +
+                '}',
+            '#clinical-timelines .wc-chart .legend .legend-item.selected {' +
+                'background: lightgray;' +
+                '}',
             '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' +
                 '    cursor: pointer;' +
                 '    fill: blue;' +

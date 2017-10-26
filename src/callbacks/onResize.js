@@ -1,10 +1,14 @@
 import { svg } from 'd3';
+import legendFilter from './onResize/legendFilter';
 import drawParticipantTimeline from './onResize/drawParticipantTimeline';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
 
 export default function onResize() {
     const context = this;
+
+    //Add filter functionality to legend.
+    legendFilter.call(this);
 
     //Draw second x-axis at top of chart.
     const topXaxis = svg

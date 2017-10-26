@@ -21,14 +21,13 @@ export default function defineStyles() {
                 '    border: 2px solid white;' +
                 '}',
             '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' +
-                '    border: 2px solid black;' +
+                'border: 2px solid black;' +
                 'cursor: pointer;' +
                 'border-radius: 4px;' +
                 'padding: 5px;' +
-                'border: 2px solid white;' +
                 '}',
             '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
-                'border: 2px solid black;' +
+                'border: 2px solid #999;' +
                 '}',
             '#clinical-timelines .wc-chart .legend .legend-item.selected {' +
                 'background: lightgray;' +
@@ -41,7 +40,7 @@ export default function defineStyles() {
             '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                 '    stroke: black;' +
                 '    stroke-width: 3px;' +
-            '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 2px;' +
                 '    stroke-dasharray: 2,2;' +

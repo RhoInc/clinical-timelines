@@ -27,7 +27,6 @@
                     '    font-size: 14px;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item {' +
-
                     '    border: 2px solid white;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' +
@@ -48,11 +47,10 @@
                     '    fill: blue;' +
                     '    text-decoration: underline;' +
                     '}',
-
                 '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                     '    stroke: black;' +
                     '    stroke-width: 3px;' +
-                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                    '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
                     '    stroke: black;' +
                     '    stroke-width: 2px;' +
                     '    stroke-dasharray: 2,2;' +
@@ -607,30 +605,6 @@
             d.wc_value = d.wc_value ? +d.wc_value : NaN;
         });
 
-
-        //Remove filters for variables fewer than two levels.
-        this.controls.config.inputs = this.controls.config.inputs.filter(function(filter) {
-            if (filter.type !== 'subsetter') return true;
-            else {
-                var levels = d3$1
-                    .set(
-                        _this.raw_data.map(function(d) {
-                            return d[filter.value_col];
-                        })
-                    )
-                    .values();
-
-                if (levels.length < 2) {
-                    console.warn(
-                        filter.value_col +
-                            ' filter removed because the variable has only one level.'
-                    );
-                }
-
-                return levels.length > 1;
-            }
-        });
-
         //Default event types to 'All'.
         this.allEventTypes = d3$1
             .set(
@@ -660,7 +634,7 @@
 
                 return true;
             } else {
-                var levels = d3
+                var levels = d3$1
                     .set(
                         _this.raw_data.map(function(d) {
                             return d[input.value_col];
@@ -986,6 +960,21 @@
         } else this.y_dom = this.y_dom.sort(d3$1.descending);
     }
 
+    function onDraw() {
+        sortYdomain.call(this);
+    }
+
+    function highlightEvent() {
+        var _this = this;
+
+        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
+            return d.label === _this.config.highlightedEvent;
+        });
+        this.svg.selectAll('.wc-data-mark').classed('highlighted', function(d) {
+            return d.key.indexOf(_this.config.highlightedEvent) > -1;
+        });
+    }
+
     function legendFilter() {
         var _this = this;
 
@@ -1035,21 +1024,6 @@
                 return filter.col === context.config.event_col;
             })[0].val = selectedLegendItems; // update filter object
             context.draw();
-        });
-    }
-
-    function onDraw() {
-        sortYdomain.call(this);
-    }
-
-    function highlightEvent() {
-        var _this = this;
-
-        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
-            return d.label === _this.config.highlightedEvent;
-        });
-        this.svg.selectAll('.wc-data-mark').classed('highlighted', function(d) {
-            return d.key.indexOf(_this.config.highlightedEvent) > -1;
         });
     }
 
@@ -1404,11 +1378,10 @@
     function onResize() {
         var _this = this;
 
-
         highlightEvent.call(this);
-        legendFilter.call(this);
-        //Draw second x-axis at top of chart.
 
+        //Add filter functionality to legend.
+        legendFilter.call(this);
 
         //Draw second x-axis at top of chart.
         var topXaxis = d3$1.svg

@@ -16,7 +16,8 @@ export default function onResize() {
     legendFilter.call(this);
 
     //Remove None legend item; not sure why it's showing up.
-    this.wrap.selectAll('.legend-item')
+    this.wrap
+        .selectAll('.legend-item')
         .filter(d => d.label === 'None')
         .remove();
 

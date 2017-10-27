@@ -31,11 +31,12 @@ export default function drawParticipantTimeline() {
         );
 
     //Draw row identifier characteristics.
-    this.participantDetails.wrap
-        .selectAll('div.characteristic')
-        .each(function(d) {
-            d3.select(this).select('span').text(wideParticipantData[0][d.value_col]);
-        });
+    this.participantDetails.wrap.selectAll('div.characteristic').each(function(d) {
+        d3
+            .select(this)
+            .select('span')
+            .text(wideParticipantData[0][d.value_col]);
+    });
 
     //Draw participant timeline.
     this.participantTimeline.wrap.classed('hidden', false);

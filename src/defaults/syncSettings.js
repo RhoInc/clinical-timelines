@@ -36,7 +36,9 @@ export default function syncSettings(settings) {
     syncedSettings.color_by = syncedSettings.event_col;
 
     //Define prop-cased unit.
-    syncedSettings.unitPropCased = syncedSettings.unit.substring(0,1).toUpperCase() + syncedSettings.unit.substring(1).toLowerCase();
+    syncedSettings.unitPropCased =
+        syncedSettings.unit.substring(0, 1).toUpperCase() +
+        syncedSettings.unit.substring(1).toLowerCase();
 
     //Default filters
     const defaultFilters = [
@@ -117,12 +119,11 @@ export default function syncSettings(settings) {
     });
 
     //Handle row identifier characteristics.
-    const id_characteristics = [
-        {value_col: syncedSettings.site_col, label: 'Site'}
-    ];
-    syncedSettings.id_characteristics = syncedSettings.id_characteristics instanceof Array
-        ? merge([syncedSettings.id_characteristics, id_characteristics])
-        : id_characteristics;
+    const id_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
+    syncedSettings.id_characteristics =
+        syncedSettings.id_characteristics instanceof Array
+            ? merge([syncedSettings.id_characteristics, id_characteristics])
+            : id_characteristics;
 
     //Participant timelines settings
     syncedSettings.participantSettings = clone(syncedSettings);

@@ -17,8 +17,8 @@ export default function defineStyles() {
                 '    font-size: 16px;' +
                 '}',
             '#clinical-timelines .wc-controls .annotation .stats,' +
-            '#clinical-timelines .wc-controls .annotation #participant,' +
-            '#clinical-timelines .wc-controls .annotation .characteristic span {' +
+                '#clinical-timelines .wc-controls .annotation #participant,' +
+                '#clinical-timelines .wc-controls .annotation .characteristic span {' +
                 '    font-weight: bold;' +
                 '}',
             '#clinical-timelines .wc-controls .back-button button {' +

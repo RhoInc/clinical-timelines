@@ -19,8 +19,8 @@ export default function onLayout() {
         .html(`${this.config.unitPropCased}: <span id = 'participant'></span>`);
     this.participantDetails.wrap
         .selectAll('div.characteristic')
-            .data(this.config.id_characteristics)
-            .enter()
+        .data(this.config.id_characteristics)
+        .enter()
         .append('div')
         .classed('characteristic', true)
         .html(d => `${d.label}: <span id = '${d.value_col}'></span>`);

@@ -11,6 +11,7 @@ export default //Renderer-specific settings
     site_col: 'SITE',
     filters: null,
     details: null,
+    listingConfig: null,
     id_characteristics: null,
     referenceLines: null,
 

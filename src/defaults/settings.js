@@ -10,6 +10,9 @@ export default //Renderer-specific settings
     stdy_col: 'STDY',
     endy_col: 'ENDY',
     seq_col: 'SEQ',
+    details: null,
+    listingConfig: null,
+    id_characteristics: null,
     referenceLines: null,
     details: null,
 

@@ -1,4 +1,5 @@
 import clone from '../util/clone';
+import { merge } from 'd3';
 
 export default function syncSettings(settings) {
     const syncedSettings = clone(settings);
@@ -34,24 +35,30 @@ export default function syncSettings(settings) {
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;
 
+    //Define prop-cased unit.
+    syncedSettings.unitPropCased = syncedSettings.unit.substring(0,1).toUpperCase() + syncedSettings.unit.substring(1).toLowerCase();
+
     //Default filters
     const defaultFilters = [
         {
             type: 'subsetter',
             value_col: syncedSettings.id_col,
-            label: 'Participant',
+            label: syncedSettings.unitPropCased,
+            description: 'filter/view',
             multiple: false
         },
         {
             type: 'subsetter',
             value_col: syncedSettings.event_col,
             label: 'Event Type',
+            description: 'filter',
             multiple: true,
             start: syncedSettings.eventTypes
         },
         {
             type: 'subsetter',
             value_col: syncedSettings.site_col,
+            description: 'filter',
             label: 'Site',
             multiple: false
         }
@@ -66,8 +73,10 @@ export default function syncSettings(settings) {
                               (filter instanceof Object && filter.hasOwnProperty('value_col'))
                       )
                       .map(filter => {
-                          const filterObject = {};
-                          filterObject.type = 'subsetter';
+                          const filterObject = {
+                              type: 'subsetter',
+                              description: 'filter'
+                          };
                           filterObject.value_col = filter.value_col || filter;
                           filterObject.label = filter.label || filter.value_col;
                           filterObject.multiple = filterObject.multiple === true ? true : false;
@@ -106,6 +115,14 @@ export default function syncSettings(settings) {
         if (syncedSettings.details.map(detail => detail.value_col).indexOf(filter.value_col) === -1)
             syncedSettings.details.push(filter);
     });
+
+    //Handle row identifier characteristics.
+    const id_characteristics = [
+        {value_col: syncedSettings.site_col, label: 'Site'}
+    ];
+    syncedSettings.id_characteristics = syncedSettings.id_characteristics instanceof Array
+        ? merge([syncedSettings.id_characteristics, id_characteristics])
+        : id_characteristics;
 
     //Participant timelines settings
     syncedSettings.participantSettings = clone(syncedSettings);

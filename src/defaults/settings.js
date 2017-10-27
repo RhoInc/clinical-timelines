@@ -12,6 +12,7 @@ export default //Renderer-specific settings
     filters: null,
     details: null,
     listingConfig: null,
+    id_characteristics: null,
     referenceLines: null,
 
     //Standard webcharts settings

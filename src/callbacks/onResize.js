@@ -1,7 +1,7 @@
 import highlightEvent from './onResize/highlightEvent';
 import { svg } from 'd3';
 import legendFilter from './onResize/legendFilter';
-import drawParticipantTimeline from './onResize/drawParticipantTimeline';
+import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
 import drawReferenceLines from './onResize/drawReferenceLines';
@@ -14,6 +14,11 @@ export default function onResize() {
 
     //Add filter functionality to legend.
     legendFilter.call(this);
+
+    //Remove None legend item; not sure why it's showing up.
+    this.wrap.selectAll('.legend-item')
+        .filter(d => d.label === 'None')
+        .remove();
 
     //Draw second x-axis at top of chart.
     const topXaxis = svg
@@ -40,7 +45,7 @@ export default function onResize() {
     //Draw second chart when y-axis tick label is clicked.
     this.svg.selectAll('.y.axis .tick').on('click', d => {
         this.selected_id = d;
-        drawParticipantTimeline.call(this);
+        tickClick.call(this);
     });
 
     //Offset overlapping marks.

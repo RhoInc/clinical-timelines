@@ -143,21 +143,23 @@ export default function syncSettings(settings) {
     syncedSettings.participantSettings.margin = { left: 25 };
 
     //Handle potential referenceLines inputs.
-    if (!(syncedSettings.referenceLines instanceof Array))
-        syncedSettings.referenceLines = [syncedSettings.referenceLines];
+    if (syncedSettings.referenceLines) {
+        if (!(syncedSettings.referenceLines instanceof Array))
+            syncedSettings.referenceLines = [syncedSettings.referenceLines];
 
-    syncedSettings.referenceLines = syncedSettings.referenceLines
-        .map(referenceLine => {
-            const referenceLineObject = {};
-            referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
-            referenceLineObject.label =
-                referenceLine.label || `Study Day ${referenceLineObject.studyDay}`;
+        syncedSettings.referenceLines = syncedSettings.referenceLines
+            .map(referenceLine => {
+                const referenceLineObject = {};
+                referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
+                referenceLineObject.label =
+                    referenceLine.label || `Study Day ${referenceLineObject.studyDay}`;
 
-            return referenceLineObject;
-        })
-        .filter(referenceLine => Number.isInteger(referenceLine.studyDay));
+                return referenceLineObject;
+            })
+            .filter(referenceLine => Number.isInteger(referenceLine.studyDay));
 
-    if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
+        if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
+    }
 
     return syncedSettings;
 }

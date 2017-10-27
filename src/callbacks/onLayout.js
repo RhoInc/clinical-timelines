@@ -1,5 +1,6 @@
 import backButton from './onLayout/backButton';
 import toggleView from './onLayout/toggleView';
+import drawParticipantTimeline from './functions/drawParticipantTimeline';
 import { select } from 'd3';
 
 export default function onLayout() {
@@ -62,7 +63,8 @@ export default function onLayout() {
                 this.currentEventTypes = this.filters.filter(
                     filter => filter.col === this.config.event_col
                 )[0].val;
-                if (this.selected_id) toggleView.call(this);
+
+                if (this.selected_id) drawParticipantTimeline.call(this);
             } else {
                 console.log('handle custom filters here');
             }

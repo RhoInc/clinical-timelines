@@ -10,11 +10,10 @@ export default //Renderer-specific settings
     stdy_col: 'STDY',
     endy_col: 'ENDY',
     seq_col: 'SEQ',
+    referenceLines: null,
+    id_characteristics: null,
     details: null,
     listingConfig: null,
-    id_characteristics: null,
-    referenceLines: null,
-    details: null,
 
     //Standard webcharts settings
     x: {

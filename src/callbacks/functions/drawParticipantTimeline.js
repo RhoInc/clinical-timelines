@@ -1,3 +1,4 @@
+import { select } from 'd3';
 import { multiply } from 'webcharts';
 
 export default function drawParticipantTimeline() {
@@ -16,34 +17,42 @@ export default function drawParticipantTimeline() {
 
     //Define participant data.
     const longParticipantData = this.raw_data.filter(
-            di =>
-                di[this.config.id_col] === this.selected_id &&
-                (this.currentEventTypes !== 'All'
-                    ? this.currentEventTypes.indexOf(di[this.config.event_col]) > -1
-                    : true)
+            di => di[this.config.id_col] === this.selected_id
         ),
         wideParticipantData = this.wide_data.filter(
-            di =>
-                di[this.config.id_col] === this.selected_id &&
-                (this.currentEventTypes !== 'All'
-                    ? this.currentEventTypes.indexOf(di[this.config.event_col]) > -1
-                    : true)
+            di => di[this.config.id_col] === this.selected_id
         );
 
     //Draw row identifier characteristics.
-    this.participantDetails.wrap.selectAll('div.characteristic').each(function(d) {
-        d3
-            .select(this)
-            .select('span')
-            .text(wideParticipantData[0][d.value_col]);
-    });
+    if (this.config.id_characteristics)
+        this.participantDetails.wrap.selectAll('div.characteristic').each(function(d) {
+            select(this)
+                .select('span')
+                .text(wideParticipantData[0][d.value_col]);
+        });
 
     //Draw participant timeline.
     this.participantTimeline.wrap.classed('hidden', false);
     this.participantTimeline.wrap.selectAll('*').remove();
-    multiply(this.participantTimeline, longParticipantData, this.config.event_col);
+    multiply(
+        this.participantTimeline,
+        longParticipantData.filter(
+            d =>
+                this.currentEventTypes !== 'All'
+                    ? this.currentEventTypes.indexOf(d[this.config.event_col]) > -1
+                    : true
+        ),
+        this.config.event_col
+    );
 
     //Draw participant detail listing.
     this.listing.wrap.classed('hidden', false);
-    this.listing.draw(wideParticipantData);
+    this.listing.draw(
+        wideParticipantData.filter(
+            d =>
+                this.currentEventTypes !== 'All'
+                    ? this.currentEventTypes.indexOf(d[this.config.event_col]) > -1
+                    : true
+        )
+    );
 }

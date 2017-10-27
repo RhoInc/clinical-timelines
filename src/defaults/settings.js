@@ -10,6 +10,8 @@ export default //Renderer-specific settings
     stdy_col: 'STDY',
     endy_col: 'ENDY',
     seq_col: 'SEQ',
+    ongo_col: 'ONGO',
+    ongo_val: 'Y',
     referenceLines: null,
     id_characteristics: null,
     details: null,
@@ -47,6 +49,11 @@ export default //Renderer-specific settings
                 'fill-opacity': 1,
                 'stroke-opacity': 1
             }
+        },
+        {
+            type: 'text',
+            per: null, // set in syncSettings()
+            text: '>'
         }
     ],
     color_dom: null, // set in syncSettings()

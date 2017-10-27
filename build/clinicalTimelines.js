@@ -162,6 +162,8 @@
             stdy_col: 'STDY',
             endy_col: 'ENDY',
             seq_col: 'SEQ',
+            ongo_col: 'ONGO',
+            ongo_val: 'Y',
             referenceLines: null,
             id_characteristics: null,
             details: null,
@@ -199,6 +201,11 @@
                         'fill-opacity': 1,
                         'stroke-opacity': 1
                     }
+                },
+                {
+                    type: 'text',
+                    per: null, // set in syncSettings()
+                    text: '>'
                 }
             ],
             color_dom: null, // set in syncSettings()
@@ -417,6 +424,16 @@
             ('\nStart Day: [' + syncedSettings.stdy_col + ']') +
             ('\nStop Day: [' + syncedSettings.endy_col + ']');
         syncedSettings.marks[1].values = { wc_category: [syncedSettings.stdy_col] };
+
+        //Ongoing events
+        syncedSettings.marks[2].per = [
+            syncedSettings.id_col,
+            syncedSettings.event_col,
+            syncedSettings.seq_col,
+            'wc_value'
+        ];
+        syncedSettings.marks[1].values = { wc_category: [syncedSettings.endy_col] };
+        syncedSettings.marks[1].values[syncedSettings.ongo_col] = [syncedSettings.ongo_val];
 
         //Define mark coloring and legend order.
         syncedSettings.color_by = syncedSettings.event_col;

@@ -5,15 +5,14 @@ export default function onInit() {
     const context = this;
 
     //Data manipulation
-    this.raw_data
-        .forEach(d => {
-            d[this.config.stdy_col] = /^ *\d+ *$/.test(d[this.config.stdy_col])
-                ? +d[this.config.stdy_col]
-                : NaN;
-            d[this.config.endy_col] = /^ *\d+ *$/.test(d[this.config.endy_col])
-                ? +d[this.config.endy_col]
-                : d[this.config.stdy_col];
-        });
+    this.raw_data.forEach(d => {
+        d[this.config.stdy_col] = /^ *\d+ *$/.test(d[this.config.stdy_col])
+            ? +d[this.config.stdy_col]
+            : NaN;
+        d[this.config.endy_col] = /^ *\d+ *$/.test(d[this.config.endy_col])
+            ? +d[this.config.endy_col]
+            : d[this.config.stdy_col];
+    });
 
     //Calculate number of total participants and number of participants with any event.
     this.populationDetails = {
@@ -32,8 +31,7 @@ export default function onInit() {
     );
 
     //Define a record for each start day and stop day.
-    const
-        singleDayEvents = this.raw_data
+    const singleDayEvents = this.raw_data
             .filter(d => d[this.config.stdy_col] === d[this.config.endy_col])
             .map(d => {
                 d.wc_category = 'DY';
@@ -41,11 +39,10 @@ export default function onInit() {
                 return d;
             }),
         multiDayEvents = lengthenRaw(
-                this.raw_data
-                    .filter(d => d[this.config.stdy_col] !== d[this.config.endy_col]),
-                [this.config.stdy_col, this.config.endy_col]
-            );
-    this.raw_data = merge([singleDayEvents,multiDayEvents]);
+            this.raw_data.filter(d => d[this.config.stdy_col] !== d[this.config.endy_col]),
+            [this.config.stdy_col, this.config.endy_col]
+        );
+    this.raw_data = merge([singleDayEvents, multiDayEvents]);
 
     //Default event types to 'All'.
     this.allEventTypes = set(this.raw_data.map(d => d[this.config.event_col]))

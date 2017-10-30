@@ -54,7 +54,7 @@ export default function onResize() {
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {
-          //Set default offset.  This value will be updated for lines that need to be offset.
+            //Set default offset.  This value will be updated for lines that need to be offset.
             markData.forEach(d => {
                 d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
             });

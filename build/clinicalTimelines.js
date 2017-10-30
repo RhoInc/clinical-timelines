@@ -4,7 +4,7 @@
         : typeof define === 'function' && define.amd
           ? define(['d3', 'webcharts'], factory)
           : (global.clinicalTimelines = factory(global.d3, global.webCharts));
-})(this, function(d3$1, webcharts) {
+})(this, function(d3, webcharts) {
     'use strict';
 
     function defineStyles() {
@@ -534,7 +534,7 @@
         var id_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
         syncedSettings.id_characteristics =
             syncedSettings.id_characteristics instanceof Array
-                ? d3$1.merge([syncedSettings.id_characteristics, id_characteristics])
+                ? d3.merge([syncedSettings.id_characteristics, id_characteristics])
                 : id_characteristics;
 
         //Participant timelines settings
@@ -647,7 +647,7 @@
 
         //Calculate number of total participants and number of participants with any event.
         this.populationDetails = {
-            population: d3$1
+            population: d3
                 .set(
                     this.raw_data.map(function(d) {
                         return d[_this.config.id_col];
@@ -686,10 +686,10 @@
                 }),
                 [this.config.stdy_col, this.config.endy_col]
             );
-        this.raw_data = d3$1.merge([singleDayEvents, multiDayEvents]);
+        this.raw_data = d3.merge([singleDayEvents, multiDayEvents]);
 
         //Default event types to 'All'.
-        this.allEventTypes = d3$1
+        this.allEventTypes = d3
             .set(
                 this.raw_data.map(function(d) {
                     return d[_this.config.event_col];
@@ -717,7 +717,7 @@
 
                 return true;
             } else {
-                var levels = d3$1
+                var levels = d3
                     .set(
                         _this.raw_data.map(function(d) {
                             return d[input.value_col];
@@ -824,7 +824,7 @@
         //Draw row identifier characteristics.
         if (this.config.id_characteristics)
             this.participantDetails.wrap.selectAll('div.characteristic').each(function(d) {
-                d3$1
+                d3
                     .select(this)
                     .select('span')
                     .text(wideParticipantData[0][d.value_col]);
@@ -950,7 +950,7 @@
             })
             .each(function(filter) {
                 if (filter.label === 'Event Type')
-                    d3$1
+                    d3
                         .select(this)
                         .selectAll('option')
                         .property('selected', function(d) {
@@ -979,7 +979,7 @@
     function onDatatransform() {
         var _this = this;
 
-        this.populationDetails.sample = d3$1
+        this.populationDetails.sample = d3
             .set(
                 this.filtered_data.map(function(d) {
                     return d[_this.config.id_col];
@@ -996,7 +996,7 @@
                 '</span> ' +
                 this.config.unit +
                 "(s) displayed (<span class = 'stats'>" +
-                d3$1.format('%')(this.populationDetails.rate) +
+                d3.format('%')(this.populationDetails.rate) +
                 '</span>)'
         );
     }
@@ -1022,13 +1022,13 @@
             });
 
             //Capture all subject IDs with adverse events with a start day.
-            var withStartDay = d3$1
+            var withStartDay = d3
                 .nest()
                 .key(function(d) {
                     return d[_this.config.id_col];
                 })
                 .rollup(function(d) {
-                    return d3$1.min(d, function(di) {
+                    return d3.min(d, function(di) {
                         return +di[_this.config.stdy_col];
                     });
                 })
@@ -1050,7 +1050,7 @@
                 });
 
             //Capture all subject IDs with adverse events without a start day.
-            var withoutStartDay = d3$1
+            var withoutStartDay = d3
                 .set(
                     filtered_data
                         .filter(function(d) {
@@ -1067,7 +1067,7 @@
                 )
                 .values();
             this.y_dom = withStartDay.concat(withoutStartDay);
-        } else this.y_dom = this.y_dom.sort(d3$1.descending);
+        } else this.y_dom = this.y_dom.sort(d3.descending);
     }
 
     function onDraw() {
@@ -1110,7 +1110,7 @@
 
         //Add event listener to legend items.
         legendItems.on('click', function(d) {
-            var legendItem = d3$1.select(this),
+            var legendItem = d3.select(this),
                 // clicked legend item
                 selected = !legendItem.classed('selected'); // selected boolean
 
@@ -1118,7 +1118,7 @@
 
             var selectedLegendItems = legendItems
                 .filter(function() {
-                    return d3$1.select(this).classed('selected');
+                    return d3.select(this).classed('selected');
                 })
                 .data()
                 .map(function(d) {
@@ -1190,7 +1190,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var participantData = d3$1
+        var participantData = d3
             .nest()
             .key(function(d) {
                 return d.values[0].values.raw[0][_this.config.id_col];
@@ -1287,7 +1287,7 @@
                         } else if (nOverlapping === currentlyOverlappingLines.length) {
                             //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
                             currentLine.offset =
-                                d3$1.max(currentlyOverlappingLines, function(d) {
+                                d3.max(currentlyOverlappingLines, function(d) {
                                     return d.offset;
                                 }) + 1;
                             currentlyOverlappingLines.push(currentLine);
@@ -1296,7 +1296,7 @@
                             currentlyOverlappingLines.forEach(function(d, i) {
                                 d.index = i;
                             });
-                            var minOffset = d3$1.min(
+                            var minOffset = d3.min(
                                     currentlyOverlappingLines.filter(function(d) {
                                         return !d.overlapping;
                                     }),
@@ -1316,7 +1316,7 @@
                     if (currentLine.offset > 0) {
                         //Capture line via its class name and offset vertically.
                         var className = currentLine.key + ' line',
-                            g = d3$1.select(document.getElementsByClassName(className)[0]),
+                            g = d3.select(document.getElementsByClassName(className)[0]),
                             line = g.select('path');
                         g.attr(
                             'transform',
@@ -1334,7 +1334,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var overlapping = d3$1
+        var overlapping = d3
             .nest()
             .key(function(d) {
                 return d.total + '|' + d.values.raw[0][_this.config.id_col];
@@ -1362,7 +1362,7 @@
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
                 var className = di + ' point',
-                    g = d3$1.select(document.getElementsByClassName(className)[0]),
+                    g = d3.select(document.getElementsByClassName(className)[0]),
                     point = g.select('circle');
                 g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
             });
@@ -1500,7 +1500,7 @@
             .remove();
 
         //Draw second x-axis at top of chart.
-        var topXaxis = d3$1.svg
+        var topXaxis = d3.svg
                 .axis()
                 .scale(this.x)
                 .orient('top')
@@ -1656,7 +1656,7 @@
         var settings = arguments[1];
 
         //Define unique div within passed element argument.
-        var container = d3$1
+        var container = d3
                 .select(element)
                 .append('div')
                 .attr('id', 'clinical-timelines'),

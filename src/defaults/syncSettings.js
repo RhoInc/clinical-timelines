@@ -37,18 +37,6 @@ export default function syncSettings(settings) {
         wc_category: ['DY']
     };
 
-    //Ongoing events
-    syncedSettings.marks[2].per = [
-        syncedSettings.id_col,
-        syncedSettings.event_col,
-        syncedSettings.seq_col,
-        'wc_value'
-    ];
-    syncedSettings.marks[2].values = {
-        wc_category: [syncedSettings.endy_col]
-    };
-    syncedSettings.marks[2].values[syncedSettings.ongo_col] = [syncedSettings.ongo_val];
-
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;
 

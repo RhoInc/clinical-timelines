@@ -4,6 +4,7 @@ import legendFilter from './onResize/legendFilter';
 import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
+import drawOngoingMarks from './onResize/drawOngoingMarks';
 import drawReferenceLines from './onResize/drawReferenceLines';
 
 export default function onResize() {
@@ -53,11 +54,18 @@ export default function onResize() {
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {
+          //Set default offset.  This value will be updated for lines that need to be offset.
+            markData.forEach(d => {
+                d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
+            });
             offsetLines.call(this, mark, markData);
         } else if (mark.type === 'circle') {
             offsetCircles.call(this, mark, markData);
         }
     });
+
+    //Draw ongoing marks.
+    drawOngoingMarks.call(this);
 
     //Draw reference lines.
     if (this.config.referenceLines) drawReferenceLines.call(this);

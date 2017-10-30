@@ -49,12 +49,18 @@ export default //Renderer-specific settings
                 'fill-opacity': 1,
                 'stroke-opacity': 1
             }
-        },
-        {
-            type: 'text',
-            per: null, // set in syncSettings()
-            text: '>'
         }
+    ],
+    colors: [
+        '#1b9e77',
+        '#d95f02',
+        '#7570b3',
+        '#a6cee3',
+        '#1f78b4',
+        '#b2df8a',
+        '#66c2a5',
+        '#fc8d62',
+        '#8da0cb'
     ],
     color_dom: null, // set in syncSettings()
     legend: {

@@ -2,7 +2,7 @@
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('d3'), require('webcharts')) :
 	typeof define === 'function' && define.amd ? define(['d3', 'webcharts'], factory) :
 	(global.clinicalTimelines = factory(global.d3,global.webCharts));
-}(this, (function (d3,webcharts) { 'use strict';
+}(this, (function (d3$1,webcharts) { 'use strict';
 
 function defineStyles() {
     var styles = ['#clinical-timelines .hidden {' + '    display: none !important;' + '}', '#clinical-timelines .wc-controls {' + '    border: 1px solid #eee;' + '    padding: 5px;' + '    margin-bottom: 0;' + '    display: inline-block;' + '    width: 100%;' + '}', '#clinical-timelines .wc-controls .control-group {' + '    float: right;' + '    margin-bottom: 0;' + '}', '#clinical-timelines .wc-controls .annotation {' + '    float: left;' + '    font-size: 16px;' + '}', '#clinical-timelines .wc-controls .annotation .stats,' + '#clinical-timelines .wc-controls .annotation #participant,' + '#clinical-timelines .wc-controls .annotation .characteristic span {' + '    font-weight: bold;' + '}', '#clinical-timelines .wc-controls .back-button button {' + '    padding: 0 5px;' + '    font-size: 14px;' + '    float: left;' + '    clear: left;' + '    margin-top: 5px;' + '}', '#clinical-timelines > .wc-chart .legend {' + '    display: flex !important;' + '    justify-content: center;' + '}', '#clinical-timelines .wc-chart .legend .legend-item {' + '    cursor: pointer;' + '    float: left;' + '    border-radius: 4px;' + '    padding: 3px 7px 3px 4px;' + '    border: 2px solid white;' + '    margin-right: .25em !important;' + '}', '#clinical-timelines .wc-chart .legend .legend-item:hover {' + '    border: 2px solid black;' + '}', '#clinical-timelines .wc-chart .legend .legend-item.selected {' + '    background: lightgray;' + '}', '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' + '    border: 2px solid black;' + '    cursor: pointer;' + '    border-radius: 4px;' + '    padding: 5px;' + '}', '#clinical-timelines > .wc-chart .wc-svg .y.axis .tick {' + '    cursor: pointer;' + '    fill: blue;' + '    text-decoration: underline;' + '}', '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' + '    stroke: black;' + '    stroke-width: 3px;' + '}', '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' + '    stroke: black;' + '    stroke-width: 2px;' + '    stroke-dasharray: 2,2;' + '}', '#clinical-timelines .wc-chart .wc-svg .visible-reference-line.hover {' + '    stroke-dasharray: none;' + '}', '#clinical-timelines .wc-chart .wc-svg .invisible-reference-line {' + '    stroke: black;' + '    stroke-width: 20px;' + '    stroke-opacity: 0;' + '}', '#clinical-timelines .wc-chart .wc-svg .reference-line-label-box {' + '    fill: white;' + '    stroke: black;' + '    stroke-width: black;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart {' + '    width: 100%;' + '    padding: 0;' + '    border-top: 1px solid black;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart > * {' + '    display: inline-block;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-svg {' + '    float: left;' + '    width: 75%;' + '}', '#clinical-timelines .wc-small-multiples .wc-chart .wc-chart-title {' + '    float: right;' + '    text-align: left;' + '    font-size: 21px;' + '    padding-left: 10px;' + '    width: 24%;' + '}', '#clinical-timelines .wc-chart.wc-table {' + '    width: 100%;' + '}', '#clinical-timelines .wc-chart.wc-table table {' + '    display: table;' + '    width: 100%;' + '}'],
@@ -91,11 +91,8 @@ var settings = //Renderer-specific settings
             'fill-opacity': 1,
             'stroke-opacity': 1
         }
-    }, {
-        type: 'text',
-        per: null, // set in syncSettings()
-        text: '>'
     }],
+    colors: ['#1b9e77', '#d95f02', '#7570b3', '#a6cee3', '#1f78b4', '#b2df8a', '#66c2a5', '#fc8d62', '#8da0cb'],
     color_dom: null, // set in syncSettings()
     legend: {
         location: 'top',
@@ -290,13 +287,6 @@ function syncSettings(settings) {
         wc_category: ['DY']
     };
 
-    //Ongoing events
-    syncedSettings.marks[2].per = [syncedSettings.id_col, syncedSettings.event_col, syncedSettings.seq_col, 'wc_value'];
-    syncedSettings.marks[2].values = {
-        wc_category: [syncedSettings.endy_col]
-    };
-    syncedSettings.marks[2].values[syncedSettings.ongo_col] = [syncedSettings.ongo_val];
-
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;
 
@@ -357,7 +347,7 @@ function syncSettings(settings) {
 
     //Handle row identifier characteristics.
     var id_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
-    syncedSettings.id_characteristics = syncedSettings.id_characteristics instanceof Array ? d3.merge([syncedSettings.id_characteristics, id_characteristics]) : id_characteristics;
+    syncedSettings.id_characteristics = syncedSettings.id_characteristics instanceof Array ? d3$1.merge([syncedSettings.id_characteristics, id_characteristics]) : id_characteristics;
 
     //Participant timelines settings
     syncedSettings.participantSettings = clone(syncedSettings);
@@ -450,7 +440,7 @@ function onInit() {
 
     //Calculate number of total participants and number of participants with any event.
     this.populationDetails = {
-        population: d3.set(this.raw_data.map(function (d) {
+        population: d3$1.set(this.raw_data.map(function (d) {
             return d[_this.config.id_col];
         })).values()
     };
@@ -475,10 +465,10 @@ function onInit() {
         multiDayEvents = lengthenRaw(this.raw_data.filter(function (d) {
         return d[_this.config.stdy_col] !== d[_this.config.endy_col];
     }), [this.config.stdy_col, this.config.endy_col]);
-    this.raw_data = d3.merge([singleDayEvents, multiDayEvents]);
+    this.raw_data = d3$1.merge([singleDayEvents, multiDayEvents]);
 
     //Default event types to 'All'.
-    this.allEventTypes = d3.set(this.raw_data.map(function (d) {
+    this.allEventTypes = d3$1.set(this.raw_data.map(function (d) {
         return d[_this.config.event_col];
     })).values().sort();
     this.currentEventTypes = this.config.eventTypes || this.allEventTypes;
@@ -494,7 +484,7 @@ function onInit() {
 
             return true;
         } else {
-            var levels = d3.set(_this.raw_data.map(function (d) {
+            var levels = d3$1.set(_this.raw_data.map(function (d) {
                 return d[input.value_col];
             })).values();
 
@@ -576,7 +566,7 @@ function drawParticipantTimeline() {
 
     //Draw row identifier characteristics.
     if (this.config.id_characteristics) this.participantDetails.wrap.selectAll('div.characteristic').each(function (d) {
-        d3.select(this).select('span').text(wideParticipantData[0][d.value_col]);
+        d3$1.select(this).select('span').text(wideParticipantData[0][d.value_col]);
     });
 
     //Draw participant timeline.
@@ -663,7 +653,7 @@ function onLayout() {
     this.controls.wrap.selectAll('.control-group').filter(function (d) {
         return d.type === 'subsetter';
     }).each(function (filter) {
-        if (filter.label === 'Event Type') d3.select(this).selectAll('option').property('selected', function (d) {
+        if (filter.label === 'Event Type') d3$1.select(this).selectAll('option').property('selected', function (d) {
             return context.currentEventTypes instanceof Array ? context.currentEventTypes.indexOf(d) > -1 : true;
         });
     }).on('change', function (filter) {
@@ -688,12 +678,12 @@ function onPreprocess() {
 function onDatatransform() {
     var _this = this;
 
-    this.populationDetails.sample = d3.set(this.filtered_data.map(function (d) {
+    this.populationDetails.sample = d3$1.set(this.filtered_data.map(function (d) {
         return d[_this.config.id_col];
     })).values();
     this.populationDetails.n = this.populationDetails.sample.length;
     this.populationDetails.rate = this.populationDetails.n / this.populationDetails.N;
-    this.populationDetails.wrap.html('<span class = \'stats\'>' + this.populationDetails.n + '</span> of <span class = \'stats\'>' + this.populationDetails.N + '</span> ' + this.config.unit + '(s) displayed (<span class = \'stats\'>' + d3.format('%')(this.populationDetails.rate) + '</span>)');
+    this.populationDetails.wrap.html('<span class = \'stats\'>' + this.populationDetails.n + '</span> of <span class = \'stats\'>' + this.populationDetails.N + '</span> ' + this.config.unit + '(s) displayed (<span class = \'stats\'>' + d3$1.format('%')(this.populationDetails.rate) + '</span>)');
 }
 
 function sortYdomain() {
@@ -713,10 +703,10 @@ function sortYdomain() {
         });
 
         //Capture all subject IDs with adverse events with a start day.
-        var withStartDay = d3.nest().key(function (d) {
+        var withStartDay = d3$1.nest().key(function (d) {
             return d[_this.config.id_col];
         }).rollup(function (d) {
-            return d3.min(d, function (di) {
+            return d3$1.min(d, function (di) {
                 return +di[_this.config.stdy_col];
             });
         }).entries(filtered_data.filter(function (d) {
@@ -728,13 +718,13 @@ function sortYdomain() {
         });
 
         //Capture all subject IDs with adverse events without a start day.
-        var withoutStartDay = d3.set(filtered_data.filter(function (d) {
+        var withoutStartDay = d3$1.set(filtered_data.filter(function (d) {
             return +d[_this.config.seq_col] > 0 && (isNaN(parseFloat(d[_this.config.stdy_col])) || !isFinite(d[_this.config.stdy_col])) && withStartDay.indexOf(d[_this.config.id_col]) === -1;
         }).map(function (d) {
             return d[_this.config.id_col];
         })).values();
         this.y_dom = withStartDay.concat(withoutStartDay);
-    } else this.y_dom = this.y_dom.sort(d3.descending);
+    } else this.y_dom = this.y_dom.sort(d3$1.descending);
 }
 
 function onDraw() {
@@ -775,14 +765,14 @@ function legendFilter() {
 
     //Add event listener to legend items.
     legendItems.on('click', function (d) {
-        var legendItem = d3.select(this),
+        var legendItem = d3$1.select(this),
             // clicked legend item
         selected = !legendItem.classed('selected'); // selected boolean
 
         legendItem.classed('selected', selected); // toggle selected class
 
         var selectedLegendItems = legendItems.filter(function () {
-            return d3.select(this).classed('selected');
+            return d3$1.select(this).classed('selected');
         }).data().map(function (d) {
             return d.label;
         }); // selected event types
@@ -832,7 +822,7 @@ function offsetLines(mark, markData) {
     var _this = this;
 
     //Nest data by study day and filter on any nested object with more than one datum.
-    var participantData = d3.nest().key(function (d) {
+    var participantData = d3$1.nest().key(function (d) {
         return d.values[0].values.raw[0][_this.config.id_col];
     }).key(function (d) {
         return d.key;
@@ -902,7 +892,7 @@ function offsetLines(mark, markData) {
                         currentlyOverlappingLines = [currentLine];
                     } else if (nOverlapping === currentlyOverlappingLines.length) {
                         //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
-                        currentLine.offset = d3.max(currentlyOverlappingLines, function (d) {
+                        currentLine.offset = d3$1.max(currentlyOverlappingLines, function (d) {
                             return d.offset;
                         }) + 1;
                         currentlyOverlappingLines.push(currentLine);
@@ -911,7 +901,7 @@ function offsetLines(mark, markData) {
                         currentlyOverlappingLines.forEach(function (d, i) {
                             d.index = i;
                         });
-                        var minOffset = d3.min(currentlyOverlappingLines.filter(function (d) {
+                        var minOffset = d3$1.min(currentlyOverlappingLines.filter(function (d) {
                             return !d.overlapping;
                         }), function (d) {
                             return d.offset;
@@ -928,7 +918,7 @@ function offsetLines(mark, markData) {
                 if (currentLine.offset > 0) {
                     //Capture line via its class name and offset vertically.
                     var className = currentLine.key + ' line',
-                        g = d3.select(document.getElementsByClassName(className)[0]),
+                        g = d3$1.select(document.getElementsByClassName(className)[0]),
                         line = g.select('path');
                     g.attr('transform', 'translate(0,' + currentLine.offset * +mark.attributes['stroke-width'] * 2 + ')');
                 }
@@ -941,7 +931,7 @@ function offsetCircles(mark, markData) {
     var _this = this;
 
     //Nest data by study day and filter on any nested object with more than one datum.
-    var overlapping = d3.nest().key(function (d) {
+    var overlapping = d3$1.nest().key(function (d) {
         return d.total + '|' + d.values.raw[0][_this.config.id_col];
     }).rollup(function (d) {
         return {
@@ -964,9 +954,34 @@ function offsetCircles(mark, markData) {
         d.values.keys.forEach(function (di, i) {
             //Capture point via its class name and offset vertically.
             var className = di + ' point',
-                g = d3.select(document.getElementsByClassName(className)[0]),
+                g = d3$1.select(document.getElementsByClassName(className)[0]),
                 point = g.select('circle');
             g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
+        });
+    });
+}
+
+function drawOngoingMarks() {
+    var _this = this;
+
+    var context = this;
+
+    this.svg.selectAll('.line-supergroup .line').filter(function (d) {
+        return d.ongoing === _this.config.ongo_val;
+    }).each(function (d) {
+        var g = d3.select(this),
+            endpoint = d.values[1],
+            x = context.x(+endpoint.key),
+            y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
+            color = context.colorScale(endpoint.values.raw[0][context.config.event_col]),
+            arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
+
+        g.append('polygon').attr({
+            points: arrow.map(function (coordinate) {
+                return coordinate.join(',');
+            }).join(' '),
+            fill: color,
+            stroke: color
         });
     });
 }
@@ -1044,7 +1059,7 @@ function onResize() {
     }).remove();
 
     //Draw second x-axis at top of chart.
-    var topXaxis = d3.svg.axis().scale(this.x).orient('top').tickFormat(this.xAxis.tickFormat()).innerTickSize(this.xAxis.innerTickSize()).outerTickSize(this.xAxis.outerTickSize()).ticks(this.xAxis.ticks()[0]),
+    var topXaxis = d3$1.svg.axis().scale(this.x).orient('top').tickFormat(this.xAxis.tickFormat()).innerTickSize(this.xAxis.innerTickSize()).outerTickSize(this.xAxis.outerTickSize()).ticks(this.xAxis.ticks()[0]),
         topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');
     topXaxisSelection.call(topXaxis);
     topXaxisSelection.select('text.axis-title.top').attr('transform', 'translate(' + (this.raw_width / 2 - this.margin.left) + ',-' + this.config.margin.top / 2 + ')');
@@ -1059,11 +1074,18 @@ function onResize() {
     this.config.marks.forEach(function (mark, i) {
         var markData = _this.marks[i].data;
         if (mark.type === 'line') {
+            //Set default offset.  This value will be updated for lines that need to be offset.
+            markData.forEach(function (d) {
+                d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+            });
             offsetLines.call(_this, mark, markData);
         } else if (mark.type === 'circle') {
             offsetCircles.call(_this, mark, markData);
         }
     });
+
+    //Draw ongoing marks.
+    drawOngoingMarks.call(this);
 
     //Draw reference lines.
     if (this.config.referenceLines) drawReferenceLines.call(this);
@@ -1185,7 +1207,7 @@ function clinicalTimelines() {
     var settings = arguments[1];
 
     //Define unique div within passed element argument.
-    var container = d3.select(element).append('div').attr('id', 'clinical-timelines'),
+    var container = d3$1.select(element).append('div').attr('id', 'clinical-timelines'),
         containerElement = container.node();
 
     //Define .css styles to avoid requiring a separate .css file.

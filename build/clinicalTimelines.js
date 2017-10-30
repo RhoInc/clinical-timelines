@@ -279,16 +279,23 @@ function syncSettings(settings) {
     //Lines (events with duration)
     syncedSettings.marks[0].per = [syncedSettings.id_col, syncedSettings.event_col, syncedSettings.seq_col];
     syncedSettings.marks[0].tooltip = 'Event: [' + syncedSettings.event_col + ']' + ('\nStart Day: [' + syncedSettings.stdy_col + ']') + ('\nStop Day: [' + syncedSettings.endy_col + ']');
+    syncedSettings.marks[0].values = {
+        wc_category: [syncedSettings.stdy_col, syncedSettings.endy_col]
+    };
 
     //Circles (events without duration)
     syncedSettings.marks[1].per = [syncedSettings.id_col, syncedSettings.event_col, syncedSettings.seq_col, 'wc_value'];
     syncedSettings.marks[1].tooltip = 'Event: [' + syncedSettings.event_col + ']' + ('\nStart Day: [' + syncedSettings.stdy_col + ']') + ('\nStop Day: [' + syncedSettings.endy_col + ']');
-    syncedSettings.marks[1].values = { wc_category: [syncedSettings.stdy_col] };
+    syncedSettings.marks[1].values = {
+        wc_category: ['DY']
+    };
 
     //Ongoing events
     syncedSettings.marks[2].per = [syncedSettings.id_col, syncedSettings.event_col, syncedSettings.seq_col, 'wc_value'];
-    syncedSettings.marks[1].values = { wc_category: [syncedSettings.endy_col] };
-    syncedSettings.marks[1].values[syncedSettings.ongo_col] = [syncedSettings.ongo_val];
+    syncedSettings.marks[2].values = {
+        wc_category: [syncedSettings.endy_col]
+    };
+    syncedSettings.marks[2].values[syncedSettings.ongo_col] = [syncedSettings.ongo_val];
 
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;
@@ -436,13 +443,10 @@ function lengthenRaw(data, columns) {
 function onInit() {
     var _this = this;
 
-    this.wide_data = this.raw_data.filter(function (d) {
-        return (/^\d+$/.test(d[_this.config.stdy_col]) && // keep only records with start days
-            !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
-            !/^\s*$/.test(d[_this.config.event_col])
-        );
-    } // remove records with missing [event_col]
-    );
+    this.raw_data.forEach(function (d) {
+        d[_this.config.stdy_col] = /^ *\d+ *$/.test(d[_this.config.stdy_col]) ? +d[_this.config.stdy_col] : NaN;
+        d[_this.config.endy_col] = /^ *\d+ *$/.test(d[_this.config.endy_col]) ? +d[_this.config.endy_col] : d[_this.config.stdy_col];
+    });
 
     //Calculate number of total participants and number of participants with any event.
     this.populationDetails = {
@@ -453,11 +457,25 @@ function onInit() {
     this.populationDetails.N = this.populationDetails.population.length;
     this.participantDetails = {};
 
+    //Remove records with insufficient data.
+    this.wide_data = this.raw_data.filter(function (d) {
+        return d[_this.config.stdy_col] !== NaN && d[_this.config.endy_col] !== NaN && !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
+        !/^\s*$/.test(d[_this.config.event_col]);
+    } // remove records with missing [event_col]
+    );
+
     //Define a record for each start day and stop day.
-    this.raw_data = lengthenRaw(this.wide_data, [this.config.stdy_col, this.config.endy_col]);
-    this.raw_data.forEach(function (d) {
-        d.wc_value = d.wc_value ? +d.wc_value : NaN;
-    });
+    var singleDayEvents = this.raw_data.filter(function (d) {
+        return d[_this.config.stdy_col] === d[_this.config.endy_col];
+    }).map(function (d) {
+        d.wc_category = 'DY';
+        d.wc_value = d[_this.config.stdy_col];
+        return d;
+    }),
+        multiDayEvents = lengthenRaw(this.raw_data.filter(function (d) {
+        return d[_this.config.stdy_col] !== d[_this.config.endy_col];
+    }), [this.config.stdy_col, this.config.endy_col]);
+    this.raw_data = d3.merge([singleDayEvents, multiDayEvents]);
 
     //Default event types to 'All'.
     this.allEventTypes = d3.set(this.raw_data.map(function (d) {

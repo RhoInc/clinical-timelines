@@ -1,16 +1,19 @@
-import { set } from 'd3';
+import { set, merge } from 'd3';
 import lengthenRaw from './onInit/lengthenRaw';
 
 export default function onInit() {
     const context = this;
 
-    //Remove records with insufficient data.
-    this.wide_data = this.raw_data.filter(
-        d =>
-            /^\d+$/.test(d[this.config.stdy_col]) && // keep only records with start days
-            !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
-            !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
-    );
+    //Data manipulation
+    this.raw_data
+        .forEach(d => {
+            d[this.config.stdy_col] = /^ *\d+ *$/.test(d[this.config.stdy_col])
+                ? +d[this.config.stdy_col]
+                : NaN;
+            d[this.config.endy_col] = /^ *\d+ *$/.test(d[this.config.endy_col])
+                ? +d[this.config.endy_col]
+                : d[this.config.stdy_col];
+        });
 
     //Calculate number of total participants and number of participants with any event.
     this.populationDetails = {
@@ -19,11 +22,30 @@ export default function onInit() {
     this.populationDetails.N = this.populationDetails.population.length;
     this.participantDetails = {};
 
+    //Remove records with insufficient data.
+    this.wide_data = this.raw_data.filter(
+        d =>
+            d[this.config.stdy_col] !== NaN &&
+            d[this.config.endy_col] !== NaN &&
+            !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
+            !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
+    );
+
     //Define a record for each start day and stop day.
-    this.raw_data = lengthenRaw(this.wide_data, [this.config.stdy_col, this.config.endy_col]);
-    this.raw_data.forEach(d => {
-        d.wc_value = d.wc_value ? +d.wc_value : NaN;
-    });
+    const
+        singleDayEvents = this.raw_data
+            .filter(d => d[this.config.stdy_col] === d[this.config.endy_col])
+            .map(d => {
+                d.wc_category = 'DY';
+                d.wc_value = d[this.config.stdy_col];
+                return d;
+            }),
+        multiDayEvents = lengthenRaw(
+                this.raw_data
+                    .filter(d => d[this.config.stdy_col] !== d[this.config.endy_col]),
+                [this.config.stdy_col, this.config.endy_col]
+            );
+    this.raw_data = merge([singleDayEvents,multiDayEvents]);
 
     //Default event types to 'All'.
     this.allEventTypes = set(this.raw_data.map(d => d[this.config.event_col]))

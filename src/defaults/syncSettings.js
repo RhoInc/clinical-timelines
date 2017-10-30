@@ -18,6 +18,9 @@ export default function syncSettings(settings) {
         `Event: [${syncedSettings.event_col}]` +
         `\nStart Day: [${syncedSettings.stdy_col}]` +
         `\nStop Day: [${syncedSettings.endy_col}]`;
+    syncedSettings.marks[0].values = {
+        wc_category: [syncedSettings.stdy_col, syncedSettings.endy_col]
+    };
 
     //Circles (events without duration)
     syncedSettings.marks[1].per = [
@@ -30,7 +33,9 @@ export default function syncSettings(settings) {
         `Event: [${syncedSettings.event_col}]` +
         `\nStart Day: [${syncedSettings.stdy_col}]` +
         `\nStop Day: [${syncedSettings.endy_col}]`;
-    syncedSettings.marks[1].values = { wc_category: [syncedSettings.stdy_col] };
+    syncedSettings.marks[1].values = {
+        wc_category: ['DY']
+    };
 
     //Ongoing events
     syncedSettings.marks[2].per = [
@@ -39,8 +44,10 @@ export default function syncSettings(settings) {
         syncedSettings.seq_col,
         'wc_value'
     ];
-    syncedSettings.marks[1].values = { wc_category: [syncedSettings.endy_col] };
-    syncedSettings.marks[1].values[syncedSettings.ongo_col] = [syncedSettings.ongo_val];
+    syncedSettings.marks[2].values = {
+        wc_category: [syncedSettings.endy_col]
+    };
+    syncedSettings.marks[2].values[syncedSettings.ongo_col] = [syncedSettings.ongo_val];
 
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;

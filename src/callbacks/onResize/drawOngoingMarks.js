@@ -8,7 +8,7 @@ export default function drawOngoingMarks() {
         .selectAll('.line-supergroup .line')
         .filter(d => d.ongoing === this.config.ongo_val)
         .each(function(d) {
-            const g = d3.select(this),
+            const g = select(this),
                 endpoint = d.values[1],
                 x = context.x(+endpoint.key),
                 y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,

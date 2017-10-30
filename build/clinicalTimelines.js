@@ -467,6 +467,13 @@
                 description: 'filter',
                 label: 'Site',
                 multiple: false
+            },
+            {
+                type: 'subsetter',
+                value_col: syncedSettings.ongo_col,
+                description: 'filter',
+                label: 'Ongoing?',
+                multiple: false
             }
         ];
         syncedSettings.filters =
@@ -1374,7 +1381,7 @@
 
         var context = this;
 
-        this.svg.select('.ongoing-event').remove();
+        this.svg.selectAll('.ongoing-event').remove();
         this.svg
             .selectAll('.line-supergroup .line')
             .filter(function(d) {
@@ -1531,7 +1538,7 @@
         this.config.marks.forEach(function(mark, i) {
             var markData = _this.marks[i].data;
             if (mark.type === 'line') {
-                //Set default offset.  This value will be updated for lines that need to be offset.
+                //Identify marks which represent ongoing events.
                 markData.forEach(function(d) {
                     d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
                 });
@@ -1580,7 +1587,21 @@
     }
 
     function onResize$1() {
+        var _this = this;
+
         this.wrap.select('.legend').classed('hidden', true);
+
+        //Draw ongoing marks.
+        this.config.marks.forEach(function(mark, i) {
+            var markData = _this.marks[i].data;
+            //Identify marks which represent ongoing events.
+            if (mark.type === 'line') {
+                markData.forEach(function(d) {
+                    d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+                });
+            }
+        });
+        drawOngoingMarks.call(this);
 
         //Draw reference lines.
         if (this.config.referenceLines) drawReferenceLines.call(this);

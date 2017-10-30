@@ -68,6 +68,13 @@ export default function syncSettings(settings) {
             description: 'filter',
             label: 'Site',
             multiple: false
+        },
+        {
+            type: 'subsetter',
+            value_col: syncedSettings.ongo_col,
+            description: 'filter',
+            label: 'Ongoing?',
+            multiple: false
         }
     ];
     syncedSettings.filters =

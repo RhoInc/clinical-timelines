@@ -3,7 +3,7 @@ import { select } from 'd3';
 export default function drawOngoingMarks() {
     const context = this;
 
-    this.svg.select('.ongoing-event').remove();
+    this.svg.selectAll('.ongoing-event').remove();
     this.svg
         .selectAll('.line-supergroup .line')
         .filter(d => d.ongoing === this.config.ongo_val)

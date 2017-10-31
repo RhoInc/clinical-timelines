@@ -61,6 +61,16 @@
                     '    border-radius: 4px;' +
                     '    padding: 5px;' +
                     '}',
+                '#clinical-timelines > .wc-chart .wc-svg .grouping .boundary {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 2px;' +
+                    '}',
+                '#clinical-timelines > .wc-chart .wc-svg .grouping .annotation {' +
+                    '    font-size: 24px;' +
+                    '    font-weight: bold;' +
+                    '    writing-mode: tb-rl;' +
+                    '    text-anchor: beginning;' +
+                    '}',
                 '#clinical-timelines > .wc-chart .wc-svg .y.axis .tick {' +
                     '    cursor: pointer;' +
                     '    fill: blue;' +
@@ -159,6 +169,8 @@
             site_col: 'SITE',
             filters: null,
             highlightedEvent: null,
+            groupings: null,
+            grouping: null,
             stdy_col: 'STDY',
             endy_col: 'ENDY',
             seq_col: 'SEQ',
@@ -178,7 +190,8 @@
                 column: null,
                 label: null,
                 sort: 'earliest',
-                behavior: 'flex'
+                behavior: 'flex',
+                grouping: null
             },
             marks: [
                 {
@@ -389,6 +402,7 @@
         if (!(syncedSettings.eventTypes instanceof Array && syncedSettings.eventTypes.length))
             delete syncedSettings.eventTypes;
         syncedSettings.y.column = syncedSettings.id_col;
+        syncedSettings.y.grouping = syncedSettings.grouping;
 
         //Lines (events with duration)
         syncedSettings.marks[0].per = [
@@ -437,18 +451,18 @@
             },
             {
                 type: 'subsetter',
+                value_col: syncedSettings.site_col,
+                description: 'filter',
+                label: 'Site',
+                multiple: false
+            },
+            {
+                type: 'subsetter',
                 value_col: syncedSettings.event_col,
                 label: 'Event Type',
                 description: 'filter',
                 multiple: true,
                 start: syncedSettings.eventTypes
-            },
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.site_col,
-                description: 'filter',
-                label: 'Site',
-                multiple: false
             }
         ];
         syncedSettings.filters =
@@ -564,26 +578,32 @@
         {
             type: 'dropdown',
             option: 'highlightedEvent',
-            label: 'Highlighted Event Type',
-            description: 'aesthetics',
+            label: 'Event Type',
+            description: 'highlighting',
             values: null // set in onInit() callback
         },
         {
-            type: 'radio',
+            type: 'dropdown',
             option: 'y.sort',
+            label: 'Y-axis',
+            description: 'sort',
             values: ['earliest', 'alphabetical-descending'],
-            relabels: ['by earliest event', 'alphanumerically']
+            relabels: ['by earliest event', 'alphanumerically'],
+            require: true
+        },
+        {
+            type: 'dropdown',
+            option: 'y.grouping',
+            label: 'Y-axis',
+            description: 'grouping'
         }
     ];
 
     function syncControls(controls, settings) {
-        controls.filter(function(control) {
-            return control.option === 'y.sort';
-        })[0].label =
-            'Sort ' + settings.unit + 's';
-
         settings.filters.reverse().forEach(function(filter) {
-            controls.unshift(filter);
+            if ([settings.unitPropCased, 'Site'].indexOf(filter.label) > -1)
+                controls.unshift(filter);
+            else controls.splice(controls.length - 3, 0, filter);
         });
 
         return controls.reverse();
@@ -672,7 +692,9 @@
         //Remove filters for variables fewer than two levels.
         this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
             if (input.type !== 'subsetter') {
-                if (input.label === 'Highlighted Event Type') input.values = _this.config.color_dom;
+                //Set values of Event Type highlighting control to event types present in the data.
+                if (input.label === 'Event Type' && input.description === 'highlighting')
+                    input.values = _this.config.color_dom;
 
                 return true;
             } else {
@@ -861,14 +883,15 @@
     function onLayout() {
         var _this = this;
 
-        var context = this;
+        var context = this,
+            controls = this.controls.wrap.selectAll('.control-group');
 
-        //Add div for population stats.
+        //Add container for population details.
         this.populationDetails.wrap = this.controls.wrap
             .append('div')
             .classed('annotation population-details', true);
 
-        //Add div for back button and participant ID title.
+        //Add container for ID characteristics.
         this.participantDetails.wrap = this.controls.wrap
             .append('div')
             .classed('annotation participant-details hidden', true);
@@ -885,7 +908,7 @@
                 return d.label + ": <span id = '" + d.value_col + "'></span>";
             });
 
-        //Add div for back button and participant ID title.
+        //Add back button to return from participant timeline to clinical timelines.
         this.backButton = this.controls.wrap.append('div').classed('back-button hidden', true);
         this.backButton
             .append('button')
@@ -895,40 +918,73 @@
             });
 
         //Add top x-axis.
-        var topXaxis = this.svg.append('g').classed('x-top axis linear', true);
-        topXaxis
+        this.svg
+            .append('g')
+            .classed('x-top axis linear', true)
             .append('text')
             .classed('axis-title top', true)
             .text('Study Day');
 
-        //Hide multiples that are currently unselected.
-        this.controls.wrap
-            .selectAll('.control-group')
+        //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
+        controls
+            .filter(function(d) {
+                return d.type !== 'subsetter';
+            })
+            .each(function(d) {
+                var control = d3.select(this),
+                    options = control.selectAll('option');
+
+                if (d.label === 'Y-axis') {
+                    //Add labels to Y-axis sort.
+                    if (d.description === 'sort')
+                        options.property('label', function(di) {
+                            return d.relabels[
+                                d.values
+                                    .filter(function(dii) {
+                                        return dii !== 'None';
+                                    })
+                                    .indexOf(di)
+                            ];
+                        });
+                    else if (d.description === 'grouping')
+                        //Y-axis groupings that make sense are ID-level and not event level.
+                        options.classed('hidden', function(di) {
+                            return !(
+                                ['None', context.config.site_col].indexOf(di) > -1 ||
+                                context.config.id_characteristics
+                                    .map(function(dii) {
+                                        return dii.value_col;
+                                    })
+                                    .indexOf(di) > -1
+                            );
+                        });
+                }
+            });
+
+        //Set to selected event types specified in settings.eventTypes and handle clinical timelines and participant timeline toggle.
+        controls
             .filter(function(d) {
                 return d.type === 'subsetter';
             })
-            .each(function(filter) {
-                if (filter.label === 'Event Type')
+            .each(function(d) {
+                if (d.label === 'Event Type')
                     d3
                         .select(this)
                         .selectAll('option')
-                        .property('selected', function(d) {
+                        .property('selected', function(di) {
                             return context.currentEventTypes instanceof Array
-                                ? context.currentEventTypes.indexOf(d) > -1
+                                ? context.currentEventTypes.indexOf(di) > -1
                                 : true;
                         });
             })
-            .on('change', function(filter) {
-                if (filter.value_col === _this.config.id_col) {
-                    toggleView.call(_this);
-                } else if (filter.value_col === _this.config.event_col) {
-                    _this.currentEventTypes = _this.filters.filter(function(filter) {
-                        return filter.col === _this.config.event_col;
+            .on('change', function(d) {
+                if (d.value_col === _this.config.id_col) toggleView.call(_this);
+                else if (d.value_col === _this.config.event_col) {
+                    _this.currentEventTypes = _this.filters.filter(function(di) {
+                        return di.col === _this.config.event_col;
                     })[0].val;
 
                     if (_this.selected_id) drawParticipantTimeline.call(_this);
-                } else {
-                    console.log('handle custom filters here');
                 }
             });
     }
@@ -963,16 +1019,34 @@
     function sortYdomain() {
         var _this = this;
 
+        //Capture each grouping and corresponding array of IDs.
+        if (this.config.y.grouping)
+            this.groupings = d3
+                .set(
+                    this.raw_data.map(function(d) {
+                        return d[_this.config.y.grouping];
+                    })
+                )
+                .values()
+                .map(function(d) {
+                    return {
+                        key: d,
+                        IDs: []
+                    };
+                });
+        else delete this.groupings;
+
+        //Sort y-domain by the earliest event of each ID.
         if (this.config.y.sort === 'earliest') {
             //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
             //addition to the current filter selections.
             var filtered_data = this.raw_data.filter(function(d) {
-                var filtered = d[_this.config.seq_col] === '';
+                var filtered = false;
 
                 _this.filters.forEach(function(di) {
                     if (filtered === false && di.val !== 'All')
                         filtered =
-                            Object.prototype.toString.call(di.val) === '[object Array]'
+                            di.val instanceof Array
                                 ? di.val.indexOf(d[di.col]) === -1
                                 : di.val !== d[di.col];
                 });
@@ -980,57 +1054,125 @@
                 return !filtered;
             });
 
-            //Capture all subject IDs with adverse events with a start day.
-            var withStartDay = d3
-                .nest()
-                .key(function(d) {
-                    return d[_this.config.id_col];
-                })
-                .rollup(function(d) {
-                    return d3.min(d, function(di) {
-                        return +di[_this.config.stdy_col];
-                    });
-                })
-                .entries(
-                    filtered_data.filter(function(d) {
-                        return (
-                            !isNaN(parseFloat(d[_this.config.stdy_col])) &&
-                            isFinite(d[_this.config.stdy_col])
-                        );
+            //Sort IDs by grouping then earliest event start date if y-axis is grouped.
+            if (this.config.y.grouping) {
+                //Nest data by grouping and ID.
+                var nestedData = d3
+                    .nest()
+                    .key(function(d) {
+                        return d[_this.config.y.grouping] + '|' + d[_this.config.id_col];
                     })
-                )
-                .sort(function(a, b) {
-                    return a.values > b.values
-                        ? -2
-                        : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
-                })
-                .map(function(d) {
-                    return d.key;
+                    .rollup(function(d) {
+                        return d3.min(d, function(di) {
+                            return +di[_this.config.stdy_col];
+                        });
+                    })
+                    .entries(filtered_data)
+                    .sort(function(a, b) {
+                        var aGrouping = a.key.split('|')[0],
+                            bGrouping = b.key.split('|')[0],
+                            earliestEventSort =
+                                a.values > b.values
+                                    ? -2
+                                    : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
+
+                        return aGrouping > bGrouping
+                            ? -1
+                            : aGrouping < bGrouping ? 1 : earliestEventSort;
+                    });
+
+                //Capture list of IDs by grouping.
+                nestedData.forEach(function(d) {
+                    var split = d.key.split('|');
+
+                    _this.groupings
+                        .filter(function(grouping) {
+                            return grouping.key === split[0];
+                        })
+                        .pop()
+                        .IDs.push(split[1]);
                 });
 
-            //Capture all subject IDs with adverse events without a start day.
-            var withoutStartDay = d3
-                .set(
-                    filtered_data
-                        .filter(function(d) {
+                //Set y-domain.
+                this.y_dom = nestedData.map(function(d) {
+                    return d.key.split('|')[1];
+                });
+            } else {
+                //Otherwise sort IDs by earliest event start date.
+                //Set y-domain.
+                this.y_dom = d3
+                    .nest()
+                    .key(function(d) {
+                        return d[_this.config.id_col];
+                    })
+                    .rollup(function(d) {
+                        return d3.min(d, function(di) {
+                            return +di[_this.config.stdy_col];
+                        });
+                    })
+                    .entries(filtered_data)
+                    .sort(function(a, b) {
+                        var earliestEventSort =
+                            a.values > b.values
+                                ? -2
+                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
+
+                        return earliestEventSort;
+                    })
+                    .map(function(d) {
+                        return d.key;
+                    });
+            }
+        } else {
+            //Sort y-domain alphanumerically.
+            //Sort IDs by grouping then alphanumerically if y-axis is grouped.
+            if (this.config.y.grouping) {
+                this.y_dom = this.y_dom.sort(function(a, b) {
+                    var aGrouping = _this.raw_data.filter(function(d) {
+                            return d[_this.config.id_col] === a;
+                        })[0][_this.config.y.grouping],
+                        bGrouping = _this.raw_data.filter(function(d) {
+                            return d[_this.config.id_col] === b;
+                        })[0][_this.config.y.grouping],
+                        alphanumericSort = a < b ? -1 : 1;
+
+                    return aGrouping > bGrouping
+                        ? -1
+                        : aGrouping < bGrouping ? 1 : alphanumericSort;
+                });
+
+                this.y_dom.forEach(function(d) {
+                    _this.groupings
+                        .filter(function(grouping) {
                             return (
-                                +d[_this.config.seq_col] > 0 &&
-                                (isNaN(parseFloat(d[_this.config.stdy_col])) ||
-                                    !isFinite(d[_this.config.stdy_col])) &&
-                                withStartDay.indexOf(d[_this.config.id_col]) === -1
+                                grouping.key ===
+                                _this.raw_data.filter(function(di) {
+                                    return di[_this.config.id_col] === d;
+                                })[0][_this.config.y.grouping]
                             );
                         })
-                        .map(function(d) {
-                            return d[_this.config.id_col];
-                        })
-                )
-                .values();
-            this.y_dom = withStartDay.concat(withoutStartDay);
-        } else this.y_dom = this.y_dom.sort(d3.descending);
+                        .pop()
+                        .IDs.push(d);
+                });
+            } else {
+                //Otherwise sort IDs alphanumerically.
+                //Set y-domain.
+                this.y_dom = this.y_dom.sort(function(a, b) {
+                    var alphanumericSort = a < b ? -1 : 1;
+
+                    return alphanumericSort;
+                });
+            }
+        }
     }
 
     function onDraw() {
         sortYdomain.call(this);
+
+        //Add left margin for y-axis grouping.
+        this.svg.selectAll('.grouping').remove();
+        if (this.config.y.grouping) this.config.margin.right = 40;
+        else delete this.config.margin.right;
     }
 
     function highlightEvent() {
@@ -1328,6 +1470,49 @@
         });
     }
 
+    function annotateGrouping() {
+        var _this = this;
+
+        this.groupings.forEach(function(d) {
+            var nIDs = d.IDs.length,
+                firstID = d.IDs[nIDs - 1],
+                y1 = _this.y(firstID),
+                y2 = _this.y(d.IDs[0]),
+                g = _this.svg
+                    .append('g')
+                    .classed('grouping', true)
+                    .attr('id', d.key.replace(/ /g, '-')),
+                boundary = g
+                    .append('line')
+                    .classed('boundary horizontal', true)
+                    .attr({
+                        x1: 0,
+                        x2: _this.plot_width + _this.margin.right / 8,
+                        y1: y1,
+                        y2: y1
+                    }),
+                span = g
+                    .append('line')
+                    .classed('boundary vertical', true)
+                    .attr({
+                        x1: _this.plot_width + _this.margin.right / 8,
+                        x2: _this.plot_width + _this.margin.right / 8,
+                        y1: y1,
+                        y2: y2 + _this.y.rangeBand() / 2
+                    }),
+                annotation = g
+                    .append('text')
+                    .classed('annotation', true)
+                    .attr({
+                        x: _this.plot_width,
+                        dx: _this.margin.right / 2,
+                        y: y1,
+                        dy: _this.y.rangeBand() / 2
+                    })
+                    .text(d.key);
+        });
+    }
+
     function drawReferenceLines() {
         var _this = this;
 
@@ -1422,7 +1607,7 @@
             .filter(function(d) {
                 return d.label === 'None';
             })
-            .remove();
+            .classed('hidden', true);
 
         //Draw second x-axis at top of chart.
         var topXaxis = d3.svg
@@ -1461,6 +1646,9 @@
                 offsetCircles.call(_this, mark, markData);
             }
         });
+
+        //Annotate grouping.
+        if (this.config.y.grouping) annotateGrouping.call(this);
 
         //Draw reference lines.
         if (this.config.referenceLines) drawReferenceLines.call(this);

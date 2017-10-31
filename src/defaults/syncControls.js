@@ -1,8 +1,7 @@
 export default function syncControls(controls, settings) {
-    controls.filter(control => control.option === 'y.sort')[0].label = `Sort ${settings.unit}s`;
-
     settings.filters.reverse().forEach(filter => {
-        controls.unshift(filter);
+        if ([settings.unitPropCased, 'Site'].indexOf(filter.label) > -1) controls.unshift(filter);
+        else controls.splice(controls.length - 3, 0, filter);
     });
 
     return controls.reverse();

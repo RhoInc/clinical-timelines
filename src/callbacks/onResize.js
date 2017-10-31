@@ -4,6 +4,7 @@ import legendFilter from './onResize/legendFilter';
 import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
+import annotateGrouping from './onResize/annotateGrouping';
 import drawReferenceLines from './onResize/drawReferenceLines';
 
 export default function onResize() {
@@ -19,7 +20,7 @@ export default function onResize() {
     this.wrap
         .selectAll('.legend-item')
         .filter(d => d.label === 'None')
-        .remove();
+        .classed('hidden', true);
 
     //Draw second x-axis at top of chart.
     const topXaxis = svg
@@ -58,6 +59,9 @@ export default function onResize() {
             offsetCircles.call(this, mark, markData);
         }
     });
+
+    //Annotate grouping.
+    if (this.config.y.grouping) annotateGrouping.call(this);
 
     //Draw reference lines.
     if (this.config.referenceLines) drawReferenceLines.call(this);

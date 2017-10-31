@@ -7,6 +7,7 @@ export default function syncSettings(settings) {
     if (!(syncedSettings.eventTypes instanceof Array && syncedSettings.eventTypes.length))
         delete syncedSettings.eventTypes;
     syncedSettings.y.column = syncedSettings.id_col;
+    syncedSettings.y.grouping = syncedSettings.grouping;
 
     //Lines (events with duration)
     syncedSettings.marks[0].per = [
@@ -51,18 +52,18 @@ export default function syncSettings(settings) {
         },
         {
             type: 'subsetter',
+            value_col: syncedSettings.site_col,
+            description: 'filter',
+            label: 'Site',
+            multiple: false
+        },
+        {
+            type: 'subsetter',
             value_col: syncedSettings.event_col,
             label: 'Event Type',
             description: 'filter',
             multiple: true,
             start: syncedSettings.eventTypes
-        },
-        {
-            type: 'subsetter',
-            value_col: syncedSettings.site_col,
-            description: 'filter',
-            label: 'Site',
-            multiple: false
         }
     ];
     syncedSettings.filters =

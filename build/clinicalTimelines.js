@@ -383,6 +383,35 @@
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
+    function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
+        var validSetting =
+            userDefinedVariables instanceof Array && userDefinedVariables.length
+                ? d3
+                      .merge([
+                          defaultVariables,
+                          userDefinedVariables.filter(function(item) {
+                              return !(
+                                  item instanceof Object &&
+                                  item.hasOwnProperty('value_col') === false
+                              );
+                          })
+                      ])
+                      .map(function(item) {
+                          var itemObject = {};
+
+                          itemObject.value_col = item instanceof Object ? item.value_col : item;
+                          itemObject.label =
+                              item instanceof Object
+                                  ? item.label || itemObject.value_col
+                                  : itemObject.value_col;
+
+                          return itemObject;
+                      })
+                : defaultVariables;
+
+        return validSetting;
+    }
+
     function syncSettings(settings) {
         var syncedSettings = clone(settings);
 
@@ -426,141 +455,6 @@
             syncedSettings.unit.substring(0, 1).toUpperCase() +
             syncedSettings.unit.substring(1).toLowerCase();
 
-        //Default filters
-        var defaultFilters = [
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.id_col,
-                label: syncedSettings.unitPropCased,
-                description: 'filter/view',
-                multiple: false
-            },
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.event_col,
-                label: 'Event Type',
-                description: 'filter',
-                multiple: true,
-                start: syncedSettings.eventTypes
-            },
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.site_col,
-                description: 'filter',
-                label: 'Site',
-                multiple: false
-            }
-        ];
-        syncedSettings.filters =
-            syncedSettings.filters instanceof Array && syncedSettings.filters.length
-                ? defaultFilters.concat(
-                      syncedSettings.filters
-                          .filter(function(filter) {
-                              return (
-                                  filter instanceof String ||
-                                  (filter instanceof Object && filter.hasOwnProperty('value_col'))
-                              );
-                          })
-                          .map(function(filter) {
-                              var filterObject = {
-                                  type: 'subsetter',
-                                  description: 'filter'
-                              };
-                              filterObject.value_col = filter.value_col || filter;
-                              filterObject.label = filter.label || filter.value_col;
-                              filterObject.multiple = filterObject.multiple === true ? true : false;
-                              return filterObject;
-                          })
-                  )
-                : defaultFilters;
-
-        //Default details
-        var defaultDetails = [
-            { value_col: syncedSettings.event_col, label: 'Event Type' },
-            { value_col: syncedSettings.seq_col, label: 'Sequence Number' },
-            { value_col: syncedSettings.stdy_col, label: 'Start Day' },
-            { value_col: syncedSettings.endy_col, label: 'Stop Day' }
-        ];
-        syncedSettings.details =
-            syncedSettings.details instanceof Array && syncedSettings.details.length
-                ? defaultDetails.concat(
-                      syncedSettings.details
-                          .filter(function(detail) {
-                              return (
-                                  detail instanceof String ||
-                                  (detail instanceof Object && detail.hasOwnProperty('value_col'))
-                              );
-                          })
-                          .map(function(detail) {
-                              var detailObject = {};
-                              detailObject.value_col = detail.value_col || detail;
-                              detailObject.label = detail.label || detail.value_col;
-                              return detailObject;
-                          })
-                  )
-                : defaultDetails;
-
-        //Add settings.filters columns to default details.
-        syncedSettings.filters.forEach(function(filter) {
-            if (
-                syncedSettings.details
-                    .map(function(detail) {
-                        return detail.value_col;
-                    })
-                    .indexOf(filter.value_col) === -1
-            )
-                syncedSettings.details.push(filter);
-        });
-
-        //Handle row identifier characteristics.
-        var id_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
-        syncedSettings.id_characteristics =
-            syncedSettings.id_characteristics instanceof Array
-                ? d3
-                      .merge([
-                          syncedSettings.id_characteristics.filter(function(id_characteristic) {
-                              return id_characteristic instanceof Object
-                                  ? id_characteristic.value_col !== syncedSettings.site_col
-                                  : id_characteristic !== syncedSettings.site_col;
-                          }),
-                          id_characteristics
-                      ])
-                      .map(function(id_characteristic) {
-                          var id_characteristicObject = {};
-
-                          id_characteristicObject.value_col =
-                              id_characteristic instanceof Object
-                                  ? id_characteristic.value_col
-                                  : id_characteristic;
-                          id_characteristicObject.label =
-                              id_characteristic instanceof Object
-                                  ? id_characteristic.label || id_characteristic.value_col
-                                  : id_characteristicObject.value_col;
-
-                          return id_characteristicObject;
-                      })
-                      .filter(function(id_characteristic) {
-                          return id_characteristic.value_col;
-                      })
-                : id_characteristics;
-
-        //Participant timelines settings
-        syncedSettings.participantSettings = clone(syncedSettings);
-        syncedSettings.participantSettings.x.label = '';
-        syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
-        syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
-        syncedSettings.participantSettings.marks[0].per = [
-            syncedSettings.participantSettings.event_col,
-            syncedSettings.participantSettings.seq_col
-        ];
-        syncedSettings.participantSettings.marks[1].per = [
-            syncedSettings.participantSettings.event_col,
-            syncedSettings.participantSettings.seq_col,
-            'wc_value'
-        ];
-        syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
-        syncedSettings.participantSettings.margin = { left: 25 };
-
         //Handle potential referenceLines inputs.
         if (syncedSettings.referenceLines) {
             if (!(syncedSettings.referenceLines instanceof Array))
@@ -581,6 +475,59 @@
 
             if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
         }
+
+        //Default filters.
+        var defaultFilters = [
+            { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
+            { value_col: syncedSettings.event_col, label: 'Event Type' },
+            { value_col: syncedSettings.site_col, label: 'Site' }
+        ];
+        syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
+
+        //Default ID characteristics.
+        var defaultId_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
+        syncedSettings.id_characteristics = arrayOfVariablesCheck(
+            defaultId_characteristics,
+            syncedSettings.id_characteristics
+        );
+
+        //Default details
+        var defaultDetails = [
+            { value_col: syncedSettings.event_col, label: 'Event Type' },
+            { value_col: syncedSettings.stdy_col, label: 'Start Day' },
+            { value_col: syncedSettings.endy_col, label: 'Stop Day' },
+            { value_col: syncedSettings.seq_col, label: 'Sequence Number' }
+        ];
+        syncedSettings.details = arrayOfVariablesCheck(defaultDetails, syncedSettings.details);
+
+        //Add settings.filters columns to default details.
+        syncedSettings.filters.forEach(function(filter) {
+            if (
+                syncedSettings.details
+                    .map(function(detail) {
+                        return detail.value_col;
+                    })
+                    .indexOf(filter.value_col) === -1
+            )
+                syncedSettings.details.push(filter);
+        });
+
+        //Participant timelines settings
+        syncedSettings.participantSettings = clone(syncedSettings);
+        syncedSettings.participantSettings.x.label = '';
+        syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
+        syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
+        syncedSettings.participantSettings.marks[0].per = [
+            syncedSettings.participantSettings.event_col,
+            syncedSettings.participantSettings.seq_col
+        ];
+        syncedSettings.participantSettings.marks[1].per = [
+            syncedSettings.participantSettings.event_col,
+            syncedSettings.participantSettings.seq_col,
+            'wc_value'
+        ];
+        syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
+        syncedSettings.participantSettings.margin = { left: 25 };
 
         return syncedSettings;
     }
@@ -608,6 +555,15 @@
             'Sort ' + settings.unit + 's';
 
         settings.filters.reverse().forEach(function(filter) {
+            filter.type = 'subsetter';
+            filter.description =
+                'filter' + (filter.label === settings.unitPropCased ? '/view' : '');
+
+            if (filter.value_col === settings.event_col) {
+                filter.multiple = filter.value_col === settings.event_col;
+                filter.start = settings.eventTypes;
+            }
+
             controls.unshift(filter);
         });
 

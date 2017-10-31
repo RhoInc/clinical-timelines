@@ -122,7 +122,30 @@ export default function syncSettings(settings) {
     const id_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
     syncedSettings.id_characteristics =
         syncedSettings.id_characteristics instanceof Array
-            ? merge([syncedSettings.id_characteristics, id_characteristics])
+            ? merge([
+                  syncedSettings.id_characteristics.filter(
+                      id_characteristic =>
+                          id_characteristic instanceof Object
+                              ? id_characteristic.value_col !== syncedSettings.site_col
+                              : id_characteristic !== syncedSettings.site_col
+                  ),
+                  id_characteristics
+              ])
+                  .map(id_characteristic => {
+                      const id_characteristicObject = {};
+
+                      id_characteristicObject.value_col =
+                          id_characteristic instanceof Object
+                              ? id_characteristic.value_col
+                              : id_characteristic;
+                      id_characteristicObject.label =
+                          id_characteristic instanceof Object
+                              ? id_characteristic.label || id_characteristic.value_col
+                              : id_characteristicObject.value_col;
+
+                      return id_characteristicObject;
+                  })
+                  .filter(id_characteristic => id_characteristic.value_col)
             : id_characteristics;
 
     //Participant timelines settings

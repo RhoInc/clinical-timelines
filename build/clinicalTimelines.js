@@ -516,7 +516,32 @@
         var id_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
         syncedSettings.id_characteristics =
             syncedSettings.id_characteristics instanceof Array
-                ? d3.merge([syncedSettings.id_characteristics, id_characteristics])
+                ? d3
+                      .merge([
+                          syncedSettings.id_characteristics.filter(function(id_characteristic) {
+                              return id_characteristic instanceof Object
+                                  ? id_characteristic.value_col !== syncedSettings.site_col
+                                  : id_characteristic !== syncedSettings.site_col;
+                          }),
+                          id_characteristics
+                      ])
+                      .map(function(id_characteristic) {
+                          var id_characteristicObject = {};
+
+                          id_characteristicObject.value_col =
+                              id_characteristic instanceof Object
+                                  ? id_characteristic.value_col
+                                  : id_characteristic;
+                          id_characteristicObject.label =
+                              id_characteristic instanceof Object
+                                  ? id_characteristic.label || id_characteristic.value_col
+                                  : id_characteristicObject.value_col;
+
+                          return id_characteristicObject;
+                      })
+                      .filter(function(id_characteristic) {
+                          return id_characteristic.value_col;
+                      })
                 : id_characteristics;
 
         //Participant timelines settings

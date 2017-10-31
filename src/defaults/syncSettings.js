@@ -90,7 +90,7 @@ export default function syncSettings(settings) {
             syncedSettings.details.push(filter);
     });
 
-    //Participant timelines settings
+    //Participant timeline settings
     syncedSettings.participantSettings = clone(syncedSettings);
     syncedSettings.participantSettings.x.label = '';
     syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
@@ -106,6 +106,16 @@ export default function syncSettings(settings) {
     ];
     syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
     syncedSettings.participantSettings.margin = { left: 25 };
+
+    //Listing settings
+    syncedSettings.listingConfig = syncedSettings.listingConfig || {
+        cols: syncedSettings.details.map(detail => detail.value_col),
+        headers: syncedSettings.details.map(detail => detail.label)
+    };
+    if (!syncedSettings.listingConfig.hasOwnProperty('cols')) {
+        syncedSettings.listingConfig.cols = syncedSettings.details.map(detail => detail.value_col);
+        syncedSettings.listingConfig.headers = syncedSettings.details.map(detail => detail.label);
+    }
 
     return syncedSettings;
 }

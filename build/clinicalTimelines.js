@@ -512,7 +512,7 @@
                 syncedSettings.details.push(filter);
         });
 
-        //Participant timelines settings
+        //Participant timeline settings
         syncedSettings.participantSettings = clone(syncedSettings);
         syncedSettings.participantSettings.x.label = '';
         syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
@@ -528,6 +528,24 @@
         ];
         syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
         syncedSettings.participantSettings.margin = { left: 25 };
+
+        //Listing settings
+        syncedSettings.listingConfig = syncedSettings.listingConfig || {
+            cols: syncedSettings.details.map(function(detail) {
+                return detail.value_col;
+            }),
+            headers: syncedSettings.details.map(function(detail) {
+                return detail.label;
+            })
+        };
+        if (!syncedSettings.listingConfig.hasOwnProperty('cols')) {
+            syncedSettings.listingConfig.cols = syncedSettings.details.map(function(detail) {
+                return detail.value_col;
+            });
+            syncedSettings.listingConfig.headers = syncedSettings.details.map(function(detail) {
+                return detail.label;
+            });
+        }
 
         return syncedSettings;
     }
@@ -1530,14 +1548,7 @@
     function listing(clinicalTimelines) {
         var listing = webcharts.createTable(
             clinicalTimelines.element,
-            clinicalTimelines.config.listingConfig || {
-                cols: clinicalTimelines.config.details.map(function(d) {
-                    return d.value_col;
-                }),
-                headers: clinicalTimelines.config.details.map(function(d) {
-                    return d.label;
-                })
-            }
+            clinicalTimelines.config.listingConfig
         );
 
         for (var callback in callbacks$2) {

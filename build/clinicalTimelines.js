@@ -174,6 +174,8 @@
             stdy_col: 'STDY',
             endy_col: 'ENDY',
             seq_col: 'SEQ',
+            ongo_col: 'ONGO',
+            ongo_val: 'Y',
             referenceLines: null,
             id_characteristics: null,
             details: null,
@@ -213,6 +215,17 @@
                         'stroke-opacity': 1
                     }
                 }
+            ],
+            colors: [
+                '#1b9e77',
+                '#d95f02',
+                '#7570b3',
+                '#a6cee3',
+                '#1f78b4',
+                '#b2df8a',
+                '#66c2a5',
+                '#fc8d62',
+                '#8da0cb'
             ],
             color_dom: null, // set in syncSettings()
             legend: {
@@ -396,6 +409,35 @@
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
+    function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
+        var validSetting =
+            userDefinedVariables instanceof Array && userDefinedVariables.length
+                ? d3
+                      .merge([
+                          defaultVariables,
+                          userDefinedVariables.filter(function(item) {
+                              return !(
+                                  item instanceof Object &&
+                                  item.hasOwnProperty('value_col') === false
+                              );
+                          })
+                      ])
+                      .map(function(item) {
+                          var itemObject = {};
+
+                          itemObject.value_col = item instanceof Object ? item.value_col : item;
+                          itemObject.label =
+                              item instanceof Object
+                                  ? item.label || itemObject.value_col
+                                  : itemObject.value_col;
+
+                          return itemObject;
+                      })
+                : defaultVariables;
+
+        return validSetting;
+    }
+
     function syncSettings(settings) {
         var syncedSettings = clone(settings);
 
@@ -416,6 +458,9 @@
             ']' +
             ('\nStart Day: [' + syncedSettings.stdy_col + ']') +
             ('\nStop Day: [' + syncedSettings.endy_col + ']');
+        syncedSettings.marks[0].values = {
+            wc_category: [syncedSettings.stdy_col, syncedSettings.endy_col]
+        };
 
         //Circles (events without duration)
         syncedSettings.marks[1].per = [
@@ -430,7 +475,9 @@
             ']' +
             ('\nStart Day: [' + syncedSettings.stdy_col + ']') +
             ('\nStop Day: [' + syncedSettings.endy_col + ']');
-        syncedSettings.marks[1].values = { wc_category: [syncedSettings.stdy_col] };
+        syncedSettings.marks[1].values = {
+            wc_category: ['DY']
+        };
 
         //Define mark coloring and legend order.
         syncedSettings.color_by = syncedSettings.event_col;
@@ -439,116 +486,6 @@
         syncedSettings.unitPropCased =
             syncedSettings.unit.substring(0, 1).toUpperCase() +
             syncedSettings.unit.substring(1).toLowerCase();
-
-        //Default filters
-        var defaultFilters = [
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.id_col,
-                label: syncedSettings.unitPropCased,
-                description: 'filter/view',
-                multiple: false
-            },
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.site_col,
-                description: 'filter',
-                label: 'Site',
-                multiple: false
-            },
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.event_col,
-                label: 'Event Type',
-                description: 'filter',
-                multiple: true,
-                start: syncedSettings.eventTypes
-            }
-        ];
-        syncedSettings.filters =
-            syncedSettings.filters instanceof Array && syncedSettings.filters.length
-                ? defaultFilters.concat(
-                      syncedSettings.filters
-                          .filter(function(filter) {
-                              return (
-                                  filter instanceof String ||
-                                  (filter instanceof Object && filter.hasOwnProperty('value_col'))
-                              );
-                          })
-                          .map(function(filter) {
-                              var filterObject = {
-                                  type: 'subsetter',
-                                  description: 'filter'
-                              };
-                              filterObject.value_col = filter.value_col || filter;
-                              filterObject.label = filter.label || filter.value_col;
-                              filterObject.multiple = filterObject.multiple === true ? true : false;
-                              return filterObject;
-                          })
-                  )
-                : defaultFilters;
-
-        //Default details
-        var defaultDetails = [
-            { value_col: syncedSettings.event_col, label: 'Event Type' },
-            { value_col: syncedSettings.seq_col, label: 'Sequence Number' },
-            { value_col: syncedSettings.stdy_col, label: 'Start Day' },
-            { value_col: syncedSettings.endy_col, label: 'Stop Day' }
-        ];
-        syncedSettings.details =
-            syncedSettings.details instanceof Array && syncedSettings.details.length
-                ? defaultDetails.concat(
-                      syncedSettings.details
-                          .filter(function(detail) {
-                              return (
-                                  detail instanceof String ||
-                                  (detail instanceof Object && detail.hasOwnProperty('value_col'))
-                              );
-                          })
-                          .map(function(detail) {
-                              var detailObject = {};
-                              detailObject.value_col = detail.value_col || detail;
-                              detailObject.label = detail.label || detail.value_col;
-                              return detailObject;
-                          })
-                  )
-                : defaultDetails;
-
-        //Add settings.filters columns to default details.
-        syncedSettings.filters.forEach(function(filter) {
-            if (
-                syncedSettings.details
-                    .map(function(detail) {
-                        return detail.value_col;
-                    })
-                    .indexOf(filter.value_col) === -1
-            )
-                syncedSettings.details.push(filter);
-        });
-
-        //Handle row identifier characteristics.
-        var id_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
-        syncedSettings.id_characteristics =
-            syncedSettings.id_characteristics instanceof Array
-                ? d3.merge([syncedSettings.id_characteristics, id_characteristics])
-                : id_characteristics;
-
-        //Participant timelines settings
-        syncedSettings.participantSettings = clone(syncedSettings);
-        syncedSettings.participantSettings.x.label = '';
-        syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
-        syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
-        syncedSettings.participantSettings.marks[0].per = [
-            syncedSettings.participantSettings.event_col,
-            syncedSettings.participantSettings.seq_col
-        ];
-        syncedSettings.participantSettings.marks[1].per = [
-            syncedSettings.participantSettings.event_col,
-            syncedSettings.participantSettings.seq_col,
-            'wc_value'
-        ];
-        syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
-        syncedSettings.participantSettings.margin = { left: 25 };
 
         //Handle potential referenceLines inputs.
         if (syncedSettings.referenceLines) {
@@ -569,6 +506,78 @@
                 });
 
             if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
+        }
+
+        //Default filters.
+        var defaultFilters = [
+            { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
+            { value_col: syncedSettings.event_col, label: 'Event Type' },
+            { value_col: syncedSettings.site_col, label: 'Site' },
+            { value_col: syncedSettings.ongo_col, label: 'Ongoing?' }
+        ];
+        syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
+
+        //Default ID characteristics.
+        var defaultId_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
+        syncedSettings.id_characteristics = arrayOfVariablesCheck(
+            defaultId_characteristics,
+            syncedSettings.id_characteristics
+        );
+
+        //Default details
+        var defaultDetails = [
+            { value_col: syncedSettings.event_col, label: 'Event Type' },
+            { value_col: syncedSettings.stdy_col, label: 'Start Day' },
+            { value_col: syncedSettings.endy_col, label: 'Stop Day' },
+            { value_col: syncedSettings.seq_col, label: 'Sequence Number' }
+        ];
+        syncedSettings.details = arrayOfVariablesCheck(defaultDetails, syncedSettings.details);
+
+        //Add settings.filters columns to default details.
+        syncedSettings.filters.forEach(function(filter) {
+            if (
+                syncedSettings.details
+                    .map(function(detail) {
+                        return detail.value_col;
+                    })
+                    .indexOf(filter.value_col) === -1
+            )
+                syncedSettings.details.push(filter);
+        });
+
+        //Participant timeline settings
+        syncedSettings.participantSettings = clone(syncedSettings);
+        syncedSettings.participantSettings.x.label = '';
+        syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
+        syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
+        syncedSettings.participantSettings.marks[0].per = [
+            syncedSettings.participantSettings.event_col,
+            syncedSettings.participantSettings.seq_col
+        ];
+        syncedSettings.participantSettings.marks[1].per = [
+            syncedSettings.participantSettings.event_col,
+            syncedSettings.participantSettings.seq_col,
+            'wc_value'
+        ];
+        syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
+        syncedSettings.participantSettings.margin = { left: 25 };
+
+        //Listing settings
+        syncedSettings.listingConfig = syncedSettings.listingConfig || {
+            cols: syncedSettings.details.map(function(detail) {
+                return detail.value_col;
+            }),
+            headers: syncedSettings.details.map(function(detail) {
+                return detail.label;
+            })
+        };
+        if (!syncedSettings.listingConfig.hasOwnProperty('cols')) {
+            syncedSettings.listingConfig.cols = syncedSettings.details.map(function(detail) {
+                return detail.value_col;
+            });
+            syncedSettings.listingConfig.headers = syncedSettings.details.map(function(detail) {
+                return detail.label;
+            });
         }
 
         return syncedSettings;
@@ -601,9 +610,16 @@
 
     function syncControls(controls, settings) {
         settings.filters.reverse().forEach(function(filter) {
-            if ([settings.unitPropCased, 'Site'].indexOf(filter.label) > -1)
-                controls.unshift(filter);
-            else controls.splice(controls.length - 3, 0, filter);
+            filter.type = 'subsetter';
+            filter.description =
+                'filter' + (filter.label === settings.unitPropCased ? '/view' : '');
+
+            if (filter.value_col === settings.event_col) {
+                filter.multiple = filter.value_col === settings.event_col;
+                filter.start = settings.eventTypes;
+            }
+
+            controls.unshift(filter);
         });
 
         return controls.reverse();
@@ -638,15 +654,14 @@
     function onInit() {
         var _this = this;
 
-        this.wide_data = this.raw_data.filter(
-            function(d) {
-                return (
-                    /^\d+$/.test(d[_this.config.stdy_col]) && // keep only records with start days
-                    !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
-                    !/^\s*$/.test(d[_this.config.event_col])
-                );
-            } // remove records with missing [event_col]
-        );
+        this.raw_data.forEach(function(d) {
+            d[_this.config.stdy_col] = /^ *\d+ *$/.test(d[_this.config.stdy_col])
+                ? +d[_this.config.stdy_col]
+                : NaN;
+            d[_this.config.endy_col] = /^ *\d+ *$/.test(d[_this.config.endy_col])
+                ? +d[_this.config.endy_col]
+                : d[_this.config.stdy_col];
+        });
 
         //Calculate number of total participants and number of participants with any event.
         this.populationDetails = {
@@ -661,11 +676,35 @@
         this.populationDetails.N = this.populationDetails.population.length;
         this.participantDetails = {};
 
+        //Remove records with insufficient data.
+        this.wide_data = this.raw_data.filter(
+            function(d) {
+                return (
+                    d[_this.config.stdy_col] !== NaN &&
+                    d[_this.config.endy_col] !== NaN &&
+                    !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
+                    !/^\s*$/.test(d[_this.config.event_col])
+                );
+            } // remove records with missing [event_col]
+        );
+
         //Define a record for each start day and stop day.
-        this.raw_data = lengthenRaw(this.wide_data, [this.config.stdy_col, this.config.endy_col]);
-        this.raw_data.forEach(function(d) {
-            d.wc_value = d.wc_value ? +d.wc_value : NaN;
-        });
+        var singleDayEvents = this.raw_data
+                .filter(function(d) {
+                    return d[_this.config.stdy_col] === d[_this.config.endy_col];
+                })
+                .map(function(d) {
+                    d.wc_category = 'DY';
+                    d.wc_value = d[_this.config.stdy_col];
+                    return d;
+                }),
+            multiDayEvents = lengthenRaw(
+                this.raw_data.filter(function(d) {
+                    return d[_this.config.stdy_col] !== d[_this.config.endy_col];
+                }),
+                [this.config.stdy_col, this.config.endy_col]
+            );
+        this.raw_data = d3.merge([singleDayEvents, multiDayEvents]);
 
         //Default event types to 'All'.
         this.allEventTypes = d3
@@ -1641,14 +1680,18 @@
         this.config.marks.forEach(function(mark, i) {
             var markData = _this.marks[i].data;
             if (mark.type === 'line') {
+                //Identify marks which represent ongoing events.
+                markData.forEach(function(d) {
+                    d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+                });
                 offsetLines.call(_this, mark, markData);
             } else if (mark.type === 'circle') {
                 offsetCircles.call(_this, mark, markData);
             }
         });
 
-        //Annotate grouping.
-        if (this.config.y.grouping) annotateGrouping.call(this);
+        //Draw ongoing marks.
+        drawOngoingMarks.call(this);
 
         //Draw reference lines.
         if (this.config.referenceLines) drawReferenceLines.call(this);
@@ -1686,7 +1729,21 @@
     }
 
     function onResize$1() {
+        var _this = this;
+
         this.wrap.select('.legend').classed('hidden', true);
+
+        //Draw ongoing marks.
+        this.config.marks.forEach(function(mark, i) {
+            var markData = _this.marks[i].data;
+            //Identify marks which represent ongoing events.
+            if (mark.type === 'line') {
+                markData.forEach(function(d) {
+                    d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+                });
+            }
+        });
+        drawOngoingMarks.call(this);
 
         //Draw reference lines.
         if (this.config.referenceLines) drawReferenceLines.call(this);
@@ -1737,14 +1794,7 @@
     function listing(clinicalTimelines) {
         var listing = webcharts.createTable(
             clinicalTimelines.element,
-            clinicalTimelines.config.listingConfig || {
-                cols: clinicalTimelines.config.details.map(function(d) {
-                    return d.value_col;
-                }),
-                headers: clinicalTimelines.config.details.map(function(d) {
-                    return d.label;
-                })
-            }
+            clinicalTimelines.config.listingConfig
         );
 
         for (var callback in callbacks$2) {

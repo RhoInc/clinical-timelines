@@ -4,7 +4,11 @@ import legendFilter from './onResize/legendFilter';
 import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
+<<<<<<< HEAD
 import annotateGrouping from './onResize/annotateGrouping';
+=======
+import drawOngoingMarks from './onResize/drawOngoingMarks';
+>>>>>>> origin/v0.2-dev
 import drawReferenceLines from './onResize/drawReferenceLines';
 
 export default function onResize() {
@@ -54,14 +58,23 @@ export default function onResize() {
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {
+            //Identify marks which represent ongoing events.
+            markData.forEach(d => {
+                d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
+            });
             offsetLines.call(this, mark, markData);
         } else if (mark.type === 'circle') {
             offsetCircles.call(this, mark, markData);
         }
     });
 
+<<<<<<< HEAD
     //Annotate grouping.
     if (this.config.y.grouping) annotateGrouping.call(this);
+=======
+    //Draw ongoing marks.
+    drawOngoingMarks.call(this);
+>>>>>>> origin/v0.2-dev
 
     //Draw reference lines.
     if (this.config.referenceLines) drawReferenceLines.call(this);

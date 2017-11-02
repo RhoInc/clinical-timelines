@@ -416,9 +416,16 @@
                       .merge([
                           defaultVariables,
                           userDefinedVariables.filter(function(item) {
-                              return !(
-                                  item instanceof Object &&
-                                  item.hasOwnProperty('value_col') === false
+                              return (
+                                  !(
+                                      item instanceof Object &&
+                                      item.hasOwnProperty('value_col') === false
+                                  ) &&
+                                  defaultVariables
+                                      .map(function(d) {
+                                          return d.value_col;
+                                      })
+                                      .indexOf(item.value_col || item) === -1
                               );
                           })
                       ])
@@ -1175,7 +1182,7 @@
                         bGrouping = _this.raw_data.filter(function(d) {
                             return d[_this.config.id_col] === b;
                         })[0][_this.config.y.grouping],
-                        alphanumericSort = a < b ? -1 : 1;
+                        alphanumericSort = a > b ? -1 : 1;
 
                     return aGrouping > bGrouping
                         ? -1
@@ -1199,7 +1206,7 @@
                 //Otherwise sort IDs alphanumerically.
                 //Set y-domain.
                 this.y_dom = this.y_dom.sort(function(a, b) {
-                    var alphanumericSort = a < b ? -1 : 1;
+                    var alphanumericSort = a > b ? -1 : 1;
 
                     return alphanumericSort;
                 });
@@ -1515,42 +1522,44 @@
         var _this = this;
 
         this.groupings.forEach(function(d) {
-            var nIDs = d.IDs.length,
-                firstID = d.IDs[nIDs - 1],
-                y1 = _this.y(firstID),
-                y2 = _this.y(d.IDs[0]),
-                g = _this.svg
-                    .append('g')
-                    .classed('grouping', true)
-                    .attr('id', d.key.replace(/ /g, '-')),
-                boundary = g
-                    .append('line')
-                    .classed('boundary horizontal', true)
-                    .attr({
-                        x1: 0,
-                        x2: _this.plot_width + _this.margin.right / 8,
-                        y1: y1,
-                        y2: y1
-                    }),
-                span = g
-                    .append('line')
-                    .classed('boundary vertical', true)
-                    .attr({
-                        x1: _this.plot_width + _this.margin.right / 8,
-                        x2: _this.plot_width + _this.margin.right / 8,
-                        y1: y1,
-                        y2: y2 + _this.y.rangeBand() / 2
-                    }),
-                annotation = g
-                    .append('text')
-                    .classed('annotation', true)
-                    .attr({
-                        x: _this.plot_width,
-                        dx: _this.margin.right / 2,
-                        y: y1,
-                        dy: _this.y.rangeBand() / 2
-                    })
-                    .text(d.key);
+            if (d.IDs.length) {
+                var nIDs = d.IDs.length,
+                    firstID = d.IDs[nIDs - 1],
+                    y1 = _this.y(firstID),
+                    y2 = _this.y(d.IDs[0]),
+                    g = _this.svg
+                        .append('g')
+                        .classed('grouping', true)
+                        .attr('id', d.key.replace(/ /g, '-')),
+                    boundary = g
+                        .append('line')
+                        .classed('boundary horizontal', true)
+                        .attr({
+                            x1: _this.plot_width + _this.margin.right / 8,
+                            x2: _this.plot_width + _this.margin.right,
+                            y1: y1,
+                            y2: y1
+                        }),
+                    span = g
+                        .append('line')
+                        .classed('boundary vertical', true)
+                        .attr({
+                            x1: _this.plot_width + _this.margin.right / 8,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y1,
+                            y2: y2 + _this.y.rangeBand()
+                        }),
+                    annotation = g
+                        .append('text')
+                        .classed('annotation', true)
+                        .attr({
+                            x: _this.plot_width,
+                            dx: 5 * _this.margin.right / 8,
+                            y: y1,
+                            dy: _this.y.rangeBand() / 4
+                        })
+                        .text(d.key);
+            }
         });
     }
 

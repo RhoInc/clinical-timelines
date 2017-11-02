@@ -89,7 +89,7 @@ export default function sortYdomain() {
                     bGrouping = this.raw_data.filter(d => d[this.config.id_col] === b)[0][
                         this.config.y.grouping
                     ],
-                    alphanumericSort = a < b ? -1 : 1;
+                    alphanumericSort = a > b ? -1 : 1;
 
                 return aGrouping > bGrouping ? -1 : aGrouping < bGrouping ? 1 : alphanumericSort;
             });
@@ -110,7 +110,7 @@ export default function sortYdomain() {
             //Otherwise sort IDs alphanumerically.
             //Set y-domain.
             this.y_dom = this.y_dom.sort((a, b) => {
-                const alphanumericSort = a < b ? -1 : 1;
+                const alphanumericSort = a > b ? -1 : 1;
 
                 return alphanumericSort;
             });

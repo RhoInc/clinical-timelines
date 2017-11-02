@@ -76,6 +76,12 @@
         ,"default": "SEQ"
         ,"type": "string"
         }
+    ,"ongo_col":
+        {"title": "Ongoing?"
+        ,"description": "ongoing event indicator variable name"
+        ,"default": "ONGO"
+        ,"type": "string"
+        }
     ,"referenceLines":
         {"title": "Reference Days"
         ,"description": "an array of reference days and associated description"

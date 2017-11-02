@@ -4,11 +4,8 @@ import legendFilter from './onResize/legendFilter';
 import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
-<<<<<<< HEAD
 import annotateGrouping from './onResize/annotateGrouping';
-=======
 import drawOngoingMarks from './onResize/drawOngoingMarks';
->>>>>>> origin/v0.2-dev
 import drawReferenceLines from './onResize/drawReferenceLines';
 
 export default function onResize() {
@@ -68,13 +65,11 @@ export default function onResize() {
         }
     });
 
-<<<<<<< HEAD
     //Annotate grouping.
     if (this.config.y.grouping) annotateGrouping.call(this);
-=======
+
     //Draw ongoing marks.
     drawOngoingMarks.call(this);
->>>>>>> origin/v0.2-dev
 
     //Draw reference lines.
     if (this.config.referenceLines) drawReferenceLines.call(this);

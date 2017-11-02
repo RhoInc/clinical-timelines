@@ -615,11 +615,13 @@
                 'filter' + (filter.label === settings.unitPropCased ? '/view' : '');
 
             if (filter.value_col === settings.event_col) {
-                filter.multiple = filter.value_col === settings.event_col;
+                filter.multiple = true;
                 filter.start = settings.eventTypes;
             }
 
-            controls.unshift(filter);
+            if ([settings.unitPropCased, 'Site'].indexOf(filter.label) > -1)
+                controls.unshift(filter);
+            else controls.splice(controls.length - 3, 0, filter);
         });
 
         return controls.reverse();
@@ -1552,6 +1554,40 @@
         });
     }
 
+    function drawOngoingMarks() {
+        var _this = this;
+
+        var context = this;
+
+        this.svg.selectAll('.ongoing-event').remove();
+        this.svg
+            .selectAll('.line-supergroup .line')
+            .filter(function(d) {
+                return d.ongoing === _this.config.ongo_val;
+            })
+            .each(function(d) {
+                var g = d3.select(this),
+                    endpoint = d.values[1],
+                    x = context.x(+endpoint.key),
+                    y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
+                    color = context.colorScale(endpoint.values.raw[0][context.config.event_col]),
+                    arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
+
+                g
+                    .append('polygon')
+                    .classed('ongoing-event', true)
+                    .attr({
+                        points: arrow
+                            .map(function(coordinate) {
+                                return coordinate.join(',');
+                            })
+                            .join(' '),
+                        fill: color,
+                        stroke: color
+                    });
+            });
+    }
+
     function drawReferenceLines() {
         var _this = this;
 
@@ -1689,6 +1725,9 @@
                 offsetCircles.call(_this, mark, markData);
             }
         });
+
+        //Annotate grouping.
+        if (this.config.y.grouping) annotateGrouping.call(this);
 
         //Draw ongoing marks.
         drawOngoingMarks.call(this);

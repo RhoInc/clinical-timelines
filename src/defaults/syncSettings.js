@@ -31,9 +31,7 @@ export default function syncSettings(settings) {
         'wc_value'
     ];
     syncedSettings.marks[1].tooltip =
-        `Event: [${syncedSettings.event_col}]` +
-        `\nStart Day: [${syncedSettings.stdy_col}]` +
-        `\nStop Day: [${syncedSettings.endy_col}]`;
+        `Event: [${syncedSettings.event_col}]` + `\nStudy Day: [${syncedSettings.stdy_col}]`;
     syncedSettings.marks[1].values = {
         wc_category: ['DY']
     };

@@ -9,7 +9,28 @@ export default function groupingData() {
     ];
 
     //Capture each grouping and corresponding array of IDs.
-    this.groupings = set(this.raw_data.map(d => d[this.config.y.grouping]))
+    this.groupings = set(
+        this.raw_data
+            .filter(d => {
+                let filtered = false;
+
+                this.filters.forEach(di => {
+                    if (
+                        filtered === false &&
+                        di.val !== 'All' &&
+                        d[this.config.event_col] !== 'Grouping'
+                    ) {
+                        filtered =
+                            di.val instanceof Array
+                                ? di.val.indexOf(d[di.col]) === -1
+                                : di.val !== d[di.col];
+                    }
+                });
+
+                return !filtered;
+            })
+            .map(d => d[this.config.y.grouping])
+    )
         .values()
         .map(d => {
             const groupingObject = {

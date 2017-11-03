@@ -1068,9 +1068,28 @@
         //Capture each grouping and corresponding array of IDs.
         this.groupings = d3$1
             .set(
-                this.raw_data.map(function(d) {
-                    return d[_this.config.y.grouping];
-                })
+                this.raw_data
+                    .filter(function(d) {
+                        var filtered = false;
+
+                        _this.filters.forEach(function(di) {
+                            if (
+                                filtered === false &&
+                                di.val !== 'All' &&
+                                d[_this.config.event_col] !== 'Grouping'
+                            ) {
+                                filtered =
+                                    di.val instanceof Array
+                                        ? di.val.indexOf(d[di.col]) === -1
+                                        : di.val !== d[di.col];
+                            }
+                        });
+
+                        return !filtered;
+                    })
+                    .map(function(d) {
+                        return d[_this.config.y.grouping];
+                    })
             )
             .values()
             .map(function(d) {

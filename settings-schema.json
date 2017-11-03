@@ -136,7 +136,7 @@
                 }
             }
         }
-    ,"grouping":
+    ,"initial_grouping":
         {"title": "Initial participant grouping"
         ,"description": "initial participant grouping variable"
         ,"default": null

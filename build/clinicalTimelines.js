@@ -498,9 +498,10 @@
         var defaultFilters = [
             { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
             { value_col: syncedSettings.event_col, label: 'Event Type' },
-            { value_col: syncedSettings.site_col, label: 'Site' },
-            { value_col: syncedSettings.ongo_col, label: 'Ongoing?' }
+            { value_col: syncedSettings.site_col, label: 'Site' }
         ];
+        if (syncedSettings.ongo_col)
+            defaultFilters.push({ value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
         syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
 
         //Default ID characteristics.
@@ -968,8 +969,6 @@
                     })[0].val;
 
                     if (_this.selected_id) drawParticipantTimeline.call(_this);
-                } else {
-                    console.log('handle custom filters here');
                 }
             });
     }
@@ -1532,9 +1531,10 @@
             var markData = _this.marks[i].data;
             if (mark.type === 'line') {
                 //Identify marks which represent ongoing events.
-                markData.forEach(function(d) {
-                    d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
-                });
+                if (_this.config.ongo_col)
+                    markData.forEach(function(d) {
+                        d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+                    });
                 offsetLines.call(_this, mark, markData);
             } else if (mark.type === 'circle') {
                 offsetCircles.call(_this, mark, markData);
@@ -1542,7 +1542,7 @@
         });
 
         //Draw ongoing marks.
-        drawOngoingMarks.call(this);
+        if (this.config.ongo_col) drawOngoingMarks.call(this);
 
         //Draw reference lines.
         if (this.config.referenceLines) drawReferenceLines.call(this);

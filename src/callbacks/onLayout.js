@@ -65,8 +65,6 @@ export default function onLayout() {
                 )[0].val;
 
                 if (this.selected_id) drawParticipantTimeline.call(this);
-            } else {
-                console.log('handle custom filters here');
             }
         });
 }

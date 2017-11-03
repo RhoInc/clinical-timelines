@@ -55,9 +55,10 @@ export default function onResize() {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {
             //Identify marks which represent ongoing events.
-            markData.forEach(d => {
-                d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
-            });
+            if (this.config.ongo_col)
+                markData.forEach(d => {
+                    d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
+                });
             offsetLines.call(this, mark, markData);
         } else if (mark.type === 'circle') {
             offsetCircles.call(this, mark, markData);
@@ -65,7 +66,7 @@ export default function onResize() {
     });
 
     //Draw ongoing marks.
-    drawOngoingMarks.call(this);
+    if (this.config.ongo_col) drawOngoingMarks.call(this);
 
     //Draw reference lines.
     if (this.config.referenceLines) drawReferenceLines.call(this);

@@ -1,5 +1,6 @@
 import { select } from 'd3';
 import defineStyles from './util/defineStyles';
+import clone from './util/clone';
 import './util/object-assign';
 import defaults from './defaults/index';
 import { createControls, createChart } from 'webcharts';
@@ -27,6 +28,7 @@ export default function clinicalTimelines(element = 'body', settings) {
         clinicalTimelines.on(callback.substring(2).toLowerCase(), callbacks[callback]);
 
     clinicalTimelines.element = containerElement;
+    clinicalTimelines.initialSettings = clone(syncedSettings);
     clinicalTimelines.participantTimeline = participantTimeline(clinicalTimelines);
     clinicalTimelines.listing = listing(clinicalTimelines);
 

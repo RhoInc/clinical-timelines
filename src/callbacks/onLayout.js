@@ -63,9 +63,7 @@ export default function onLayout() {
                     di =>
                         !(
                             ['None', context.config.site_col].indexOf(di) > -1 ||
-                            context.config.id_characteristics
-                                .map(dii => dii.value_col)
-                                .indexOf(di) > -1
+                            context.config.groupings.map(dii => dii.value_col).indexOf(di) > -1
                         )
                 );
         }

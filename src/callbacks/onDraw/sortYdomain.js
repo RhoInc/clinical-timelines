@@ -1,18 +1,6 @@
-import { set, nest, min } from 'd3';
+import { nest, min } from 'd3';
 
 export default function sortYdomain() {
-    //Capture each grouping and corresponding array of IDs.
-    if (this.config.y.grouping)
-        this.groupings = set(this.raw_data.map(d => d[this.config.y.grouping]))
-            .values()
-            .map(d => {
-                return {
-                    key: d,
-                    IDs: []
-                };
-            });
-    else delete this.groupings;
-
     //Sort y-domain by the earliest event of each ID.
     if (this.config.y.sort === 'earliest') {
         //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
@@ -21,11 +9,16 @@ export default function sortYdomain() {
             let filtered = false;
 
             this.filters.forEach(di => {
-                if (filtered === false && di.val !== 'All')
+                if (
+                    filtered === false &&
+                    di.val !== 'All' &&
+                    d[this.config.event_col] !== 'Grouping'
+                ) {
                     filtered =
                         di.val instanceof Array
                             ? di.val.indexOf(d[di.col]) === -1
                             : di.val !== d[di.col];
+                }
             });
 
             return !filtered;

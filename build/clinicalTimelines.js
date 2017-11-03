@@ -4,7 +4,7 @@
         : typeof define === 'function' && define.amd
           ? define(['d3', 'webcharts'], factory)
           : (global.clinicalTimelines = factory(global.d3, global.webCharts));
-})(this, function(d3, webcharts) {
+})(this, function(d3$1, webcharts) {
     'use strict';
 
     function defineStyles() {
@@ -68,8 +68,10 @@
                 '#clinical-timelines > .wc-chart .wc-svg .grouping .annotation {' +
                     '    font-size: 24px;' +
                     '    font-weight: bold;' +
-                    '    writing-mode: tb-rl;' +
                     '    text-anchor: beginning;' +
+                    '}',
+                '#clinical-timelines > .wc-chart .wc-svg .grouping.vertical .annotation {' +
+                    '    writing-mode: tb-rl;' +
                     '}',
                 '#clinical-timelines > .wc-chart .wc-svg .y.axis .tick {' +
                     '    cursor: pointer;' +
@@ -129,116 +131,6 @@
 
         document.getElementsByTagName('head')[0].appendChild(style);
     }
-
-    /*------------------------------------------------------------------------------------------------\
-  Add assign method to Object if nonexistent.
-\------------------------------------------------------------------------------------------------*/
-
-    if (typeof Object.assign != 'function') {
-        (function() {
-            Object.assign = function(target) {
-                'use strict';
-
-                if (target === undefined || target === null) {
-                    throw new TypeError('Cannot convert undefined or null to object');
-                }
-
-                var output = Object(target);
-                for (var index = 1; index < arguments.length; index++) {
-                    var source = arguments[index];
-                    if (source !== undefined && source !== null) {
-                        for (var nextKey in source) {
-                            if (source.hasOwnProperty(nextKey)) {
-                                output[nextKey] = source[nextKey];
-                            }
-                        }
-                    }
-                }
-                return output;
-            };
-        })();
-    }
-
-    var settings =
-        //Renderer-specific settings
-        {
-            id_col: 'USUBJID',
-            unit: 'participant',
-            event_col: 'DOMAIN',
-            eventTypes: null,
-            site_col: 'SITE',
-            filters: null,
-            highlightedEvent: null,
-            groupings: null,
-            grouping: null,
-            stdy_col: 'STDY',
-            endy_col: 'ENDY',
-            seq_col: 'SEQ',
-            ongo_col: 'ONGO',
-            ongo_val: 'Y',
-            referenceLines: null,
-            id_characteristics: null,
-            details: null,
-            listingConfig: null,
-
-            //Standard webcharts settings
-            x: {
-                type: 'linear',
-                column: 'wc_value',
-                label: 'Study Day'
-            },
-            y: {
-                type: 'ordinal', // set in syncSettings()
-                column: null,
-                label: null,
-                sort: 'earliest',
-                behavior: 'flex',
-                grouping: null
-            },
-            marks: [
-                {
-                    type: 'line',
-                    per: null, // set in syncSettings()
-                    tooltip: null, // set in syncSettings()
-                    attributes: {
-                        'stroke-width': 3,
-                        'stroke-opacity': 1
-                    }
-                },
-                {
-                    type: 'circle',
-                    per: null, // set in syncSettings()
-                    tooltip: null, // set in syncSettings()
-                    radius: '3',
-                    attributes: {
-                        'fill-opacity': 1,
-                        'stroke-opacity': 1
-                    }
-                }
-            ],
-            colors: [
-                '#1b9e77',
-                '#d95f02',
-                '#7570b3',
-                '#a6cee3',
-                '#1f78b4',
-                '#b2df8a',
-                '#66c2a5',
-                '#fc8d62',
-                '#8da0cb'
-            ],
-            color_dom: null, // set in syncSettings()
-            legend: {
-                location: 'top',
-                label: '',
-                mark: 'circle',
-                order: null
-            }, // set in syncSettings()
-            gridlines: 'y',
-            range_band: 24,
-            margin: { top: 50 }, // for second x-axis
-            resizable: false
-        };
 
     var _typeof =
         typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
@@ -409,10 +301,121 @@
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
+    /*------------------------------------------------------------------------------------------------\
+  Add assign method to Object if nonexistent.
+\------------------------------------------------------------------------------------------------*/
+
+    if (typeof Object.assign != 'function') {
+        (function() {
+            Object.assign = function(target) {
+                'use strict';
+
+                if (target === undefined || target === null) {
+                    throw new TypeError('Cannot convert undefined or null to object');
+                }
+
+                var output = Object(target);
+                for (var index = 1; index < arguments.length; index++) {
+                    var source = arguments[index];
+                    if (source !== undefined && source !== null) {
+                        for (var nextKey in source) {
+                            if (source.hasOwnProperty(nextKey)) {
+                                output[nextKey] = source[nextKey];
+                            }
+                        }
+                    }
+                }
+                return output;
+            };
+        })();
+    }
+
+    var settings =
+        //Renderer-specific settings
+        {
+            id_col: 'USUBJID',
+            unit: 'participant',
+            event_col: 'DOMAIN',
+            eventTypes: null,
+            site_col: 'SITE',
+            filters: null,
+            highlightedEvent: null,
+            groupings: null,
+            initial_grouping: null,
+            grouping_direction: 'horizontal',
+            stdy_col: 'STDY',
+            endy_col: 'ENDY',
+            seq_col: 'SEQ',
+            ongo_col: 'ONGO',
+            ongo_val: 'Y',
+            referenceLines: null,
+            id_characteristics: null,
+            details: null,
+            listingConfig: null,
+
+            //Standard webcharts settings
+            x: {
+                type: 'linear',
+                column: 'wc_value',
+                label: 'Study Day'
+            },
+            y: {
+                type: 'ordinal', // set in syncSettings()
+                column: null,
+                label: null,
+                sort: 'earliest',
+                behavior: 'flex',
+                grouping: null
+            },
+            marks: [
+                {
+                    type: 'line',
+                    per: null, // set in syncSettings()
+                    tooltip: null, // set in syncSettings()
+                    attributes: {
+                        'stroke-width': 3,
+                        'stroke-opacity': 1
+                    }
+                },
+                {
+                    type: 'circle',
+                    per: null, // set in syncSettings()
+                    tooltip: null, // set in syncSettings()
+                    radius: '3',
+                    attributes: {
+                        'fill-opacity': 1,
+                        'stroke-opacity': 1
+                    }
+                }
+            ],
+            colors: [
+                '#1b9e77',
+                '#d95f02',
+                '#7570b3',
+                '#a6cee3',
+                '#1f78b4',
+                '#b2df8a',
+                '#66c2a5',
+                '#fc8d62',
+                '#8da0cb'
+            ],
+            color_dom: null, // set in syncSettings()
+            legend: {
+                location: 'top',
+                label: '',
+                mark: 'circle',
+                order: null
+            }, // set in syncSettings()
+            gridlines: 'y',
+            range_band: 24,
+            margin: { top: 50 }, // for second x-axis
+            resizable: true
+        };
+
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
             userDefinedVariables instanceof Array && userDefinedVariables.length
-                ? d3
+                ? d3$1
                       .merge([
                           defaultVariables,
                           userDefinedVariables.filter(function(item) {
@@ -451,7 +454,9 @@
         if (!(syncedSettings.eventTypes instanceof Array && syncedSettings.eventTypes.length))
             delete syncedSettings.eventTypes;
         syncedSettings.y.column = syncedSettings.id_col;
-        syncedSettings.y.grouping = syncedSettings.grouping;
+        syncedSettings.y.grouping = syncedSettings.initial_grouping;
+        if (['horizontal', 'vertical'].indexOf(syncedSettings.grouping_direction) === -1)
+            syncedSettings.grouping_direction = 'horizontal';
 
         //Lines (events with duration)
         syncedSettings.marks[0].per = [
@@ -524,6 +529,13 @@
         ];
         syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
 
+        //Default groupings
+        var defaultGroupings = [{ value_col: syncedSettings.site_col, label: 'Site' }];
+        syncedSettings.groupings = arrayOfVariablesCheck(
+            defaultGroupings,
+            syncedSettings.groupings
+        );
+
         //Default ID characteristics.
         var defaultId_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
         syncedSettings.id_characteristics = arrayOfVariablesCheck(
@@ -551,6 +563,9 @@
             )
                 syncedSettings.details.push(filter);
         });
+
+        //Sync bottom margin with y-axis range band.
+        syncedSettings.margin.bottom = syncedSettings.margin.top + syncedSettings.range_band;
 
         //Participant timeline settings
         syncedSettings.participantSettings = clone(syncedSettings);
@@ -634,7 +649,7 @@
         return controls.reverse();
     }
 
-    var defaults = {
+    var defaults$1 = {
         settings: settings,
         syncSettings: syncSettings,
         controls: controls,
@@ -674,7 +689,7 @@
 
         //Calculate number of total participants and number of participants with any event.
         this.populationDetails = {
-            population: d3
+            population: d3$1
                 .set(
                     this.raw_data.map(function(d) {
                         return d[_this.config.id_col];
@@ -713,10 +728,10 @@
                 }),
                 [this.config.stdy_col, this.config.endy_col]
             );
-        this.raw_data = d3.merge([singleDayEvents, multiDayEvents]);
+        this.raw_data = d3$1.merge([singleDayEvents, multiDayEvents]);
 
         //Default event types to 'All'.
-        this.allEventTypes = d3
+        this.allEventTypes = d3$1
             .set(
                 this.raw_data.map(function(d) {
                     return d[_this.config.event_col];
@@ -746,7 +761,7 @@
 
                 return true;
             } else {
-                var levels = d3
+                var levels = d3$1
                     .set(
                         _this.raw_data.map(function(d) {
                             return d[input.value_col];
@@ -853,7 +868,7 @@
         //Draw row identifier characteristics.
         if (this.config.id_characteristics)
             this.participantDetails.wrap.selectAll('div.characteristic').each(function(d) {
-                d3
+                d3$1
                     .select(this)
                     .select('span')
                     .text(wideParticipantData[0][d.value_col]);
@@ -979,7 +994,7 @@
                 return d.type !== 'subsetter';
             })
             .each(function(d) {
-                var control = d3.select(this),
+                var control = d3$1.select(this),
                     options = control.selectAll('option');
 
                 if (d.label === 'Y-axis') {
@@ -999,7 +1014,7 @@
                         options.classed('hidden', function(di) {
                             return !(
                                 ['None', context.config.site_col].indexOf(di) > -1 ||
-                                context.config.id_characteristics
+                                context.config.groupings
                                     .map(function(dii) {
                                         return dii.value_col;
                                     })
@@ -1016,7 +1031,7 @@
             })
             .each(function(d) {
                 if (d.label === 'Event Type')
-                    d3
+                    d3$1
                         .select(this)
                         .selectAll('option')
                         .property('selected', function(di) {
@@ -1037,12 +1052,114 @@
             });
     }
 
-    function onPreprocess() {}
+    function groupingData() {
+        var _this = this;
+
+        //Calculate x-domain.
+        var xDomain = [
+            d3.min(this.raw_data, function(d) {
+                return Math.min(d[_this.config.stdy_col], d[_this.config.endy_col]);
+            }),
+            d3.max(this.raw_data, function(d) {
+                return Math.max(d[_this.config.stdy_col], d[_this.config.endy_col]);
+            })
+        ];
+
+        //Capture each grouping and corresponding array of IDs.
+        this.groupings = d3$1
+            .set(
+                this.raw_data.map(function(d) {
+                    return d[_this.config.y.grouping];
+                })
+            )
+            .values()
+            .map(function(d) {
+                var groupingObject = {
+                    key: d,
+                    IDs: []
+                };
+
+                if (_this.config.grouping_direction === 'horizontal') {
+                    //Define datum for each grouping that looks like actual data.
+                    for (var variable in _this.raw_data[0]) {
+                        if (
+                            [
+                                _this.config.id_col,
+                                _this.config.event_col,
+                                _this.config.seq_col,
+                                _this.config.y.grouping
+                            ].indexOf(variable) === -1
+                        )
+                            groupingObject[variable] = '';
+                        else if (variable === _this.config.id_col)
+                            groupingObject[_this.config.id_col] = d;
+                        else if (variable === _this.config.event_col)
+                            groupingObject[_this.config.event_col] = 'Grouping';
+                        else if (variable === _this.config.seq_col)
+                            groupingObject[_this.config.seq_col] = '1';
+                        else if (variable === _this.config.y.grouping)
+                            groupingObject[_this.config.y.grouping] = d;
+                    }
+
+                    //Define both a start and end datum.
+                    var groupingStart = clone(groupingObject),
+                        groupingEnd = clone(groupingObject);
+
+                    groupingStart.wc_value = xDomain[0];
+                    groupingEnd.wc_value = xDomain[0];
+
+                    //Push two start and two end data to raw_data to create space to annotate grouping.
+                    var groupingStart1 = clone(groupingStart),
+                        groupingStart2 = clone(groupingStart),
+                        groupingEnd1 = clone(groupingEnd),
+                        groupingEnd2 = clone(groupingEnd);
+
+                    groupingStart1[_this.config.id_col] = '--' + d;
+                    _this.raw_data.push(groupingStart1);
+                    groupingStart2[_this.config.id_col] = '-' + d;
+                    _this.raw_data.push(groupingStart2);
+                    groupingEnd1[_this.config.id_col] = '--' + d;
+                    _this.raw_data.push(groupingEnd1);
+                    groupingEnd2[_this.config.id_col] = '-' + d;
+                    _this.raw_data.push(groupingEnd2);
+                }
+
+                return groupingObject;
+            });
+
+        //range_band hack
+        if (this.config.grouping_direction === 'horizontal')
+            this.config.range_band =
+                this.initialSettings.range_band +
+                this.groupings.length *
+                    2 /
+                    d3$1
+                        .set(
+                            this.wide_data.map(function(d) {
+                                return d[_this.config.id_col];
+                            })
+                        )
+                        .values().length *
+                    this.initialSettings.range_band;
+    }
+
+    function onPreprocess() {
+        var _this = this;
+
+        this.raw_data = this.raw_data.filter(function(d) {
+            return d[_this.config.event_col] !== 'Grouping';
+        });
+        if (this.config.y.grouping) groupingData.call(this);
+        else {
+            delete this.groupings;
+            this.config.range_band = this.initialSettings.range_band;
+        }
+    }
 
     function onDatatransform() {
         var _this = this;
 
-        this.populationDetails.sample = d3
+        this.populationDetails.sample = d3$1
             .set(
                 this.filtered_data.map(function(d) {
                     return d[_this.config.id_col];
@@ -1059,30 +1176,13 @@
                 '</span> ' +
                 this.config.unit +
                 "(s) displayed (<span class = 'stats'>" +
-                d3.format('%')(this.populationDetails.rate) +
+                d3$1.format('%')(this.populationDetails.rate) +
                 '</span>)'
         );
     }
 
     function sortYdomain() {
         var _this = this;
-
-        //Capture each grouping and corresponding array of IDs.
-        if (this.config.y.grouping)
-            this.groupings = d3
-                .set(
-                    this.raw_data.map(function(d) {
-                        return d[_this.config.y.grouping];
-                    })
-                )
-                .values()
-                .map(function(d) {
-                    return {
-                        key: d,
-                        IDs: []
-                    };
-                });
-        else delete this.groupings;
 
         //Sort y-domain by the earliest event of each ID.
         if (this.config.y.sort === 'earliest') {
@@ -1092,11 +1192,16 @@
                 var filtered = false;
 
                 _this.filters.forEach(function(di) {
-                    if (filtered === false && di.val !== 'All')
+                    if (
+                        filtered === false &&
+                        di.val !== 'All' &&
+                        d[_this.config.event_col] !== 'Grouping'
+                    ) {
                         filtered =
                             di.val instanceof Array
                                 ? di.val.indexOf(d[di.col]) === -1
                                 : di.val !== d[di.col];
+                    }
                 });
 
                 return !filtered;
@@ -1105,13 +1210,13 @@
             //Sort IDs by grouping then earliest event start date if y-axis is grouped.
             if (this.config.y.grouping) {
                 //Nest data by grouping and ID.
-                var nestedData = d3
+                var nestedData = d3$1
                     .nest()
                     .key(function(d) {
                         return d[_this.config.y.grouping] + '|' + d[_this.config.id_col];
                     })
                     .rollup(function(d) {
-                        return d3.min(d, function(di) {
+                        return d3$1.min(d, function(di) {
                             return +di[_this.config.stdy_col];
                         });
                     })
@@ -1148,13 +1253,13 @@
             } else {
                 //Otherwise sort IDs by earliest event start date.
                 //Set y-domain.
-                this.y_dom = d3
+                this.y_dom = d3$1
                     .nest()
                     .key(function(d) {
                         return d[_this.config.id_col];
                     })
                     .rollup(function(d) {
-                        return d3.min(d, function(di) {
+                        return d3$1.min(d, function(di) {
                             return +di[_this.config.stdy_col];
                         });
                     })
@@ -1259,7 +1364,7 @@
 
         //Add event listener to legend items.
         legendItems.on('click', function(d) {
-            var legendItem = d3.select(this),
+            var legendItem = d3$1.select(this),
                 // clicked legend item
                 selected = !legendItem.classed('selected'); // selected boolean
 
@@ -1267,7 +1372,7 @@
 
             var selectedLegendItems = legendItems
                 .filter(function() {
-                    return d3.select(this).classed('selected');
+                    return d3$1.select(this).classed('selected');
                 })
                 .data()
                 .map(function(d) {
@@ -1339,7 +1444,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var participantData = d3
+        var participantData = d3$1
             .nest()
             .key(function(d) {
                 return d.values[0].values.raw[0][_this.config.id_col];
@@ -1436,7 +1541,7 @@
                         } else if (nOverlapping === currentlyOverlappingLines.length) {
                             //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
                             currentLine.offset =
-                                d3.max(currentlyOverlappingLines, function(d) {
+                                d3$1.max(currentlyOverlappingLines, function(d) {
                                     return d.offset;
                                 }) + 1;
                             currentlyOverlappingLines.push(currentLine);
@@ -1445,7 +1550,7 @@
                             currentlyOverlappingLines.forEach(function(d, i) {
                                 d.index = i;
                             });
-                            var minOffset = d3.min(
+                            var minOffset = d3$1.min(
                                     currentlyOverlappingLines.filter(function(d) {
                                         return !d.overlapping;
                                     }),
@@ -1465,7 +1570,7 @@
                     if (currentLine.offset > 0) {
                         //Capture line via its class name and offset vertically.
                         var className = currentLine.key + ' line',
-                            g = d3.select(document.getElementsByClassName(className)[0]),
+                            g = d3$1.select(document.getElementsByClassName(className)[0]),
                             line = g.select('path');
                         g.attr(
                             'transform',
@@ -1483,7 +1588,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var overlapping = d3
+        var overlapping = d3$1
             .nest()
             .key(function(d) {
                 return d.total + '|' + d.values.raw[0][_this.config.id_col];
@@ -1511,14 +1616,14 @@
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
                 var className = di + ' point',
-                    g = d3.select(document.getElementsByClassName(className)[0]),
+                    g = d3$1.select(document.getElementsByClassName(className)[0]),
                     point = g.select('circle');
                 g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
             });
         });
     }
 
-    function annotateGrouping() {
+    function horizontally() {
         var _this = this;
 
         this.groupings.forEach(function(d) {
@@ -1529,16 +1634,43 @@
                     y2 = _this.y(d.IDs[0]),
                     g = _this.svg
                         .append('g')
-                        .classed('grouping', true)
+                        .classed('grouping horizontal', true)
                         .attr('id', d.key.replace(/ /g, '-')),
-                    boundary = g
+                    annotation = g
+                        .append('text')
+                        .classed('annotation', true)
+                        .attr({
+                            x: 0,
+                            dx: -_this.margin.left,
+                            y: y1,
+                            dy: _this.y.rangeBand() * 1.75
+                        })
+                        .text(d.key);
+            }
+        });
+    }
+
+    function vertically() {
+        var _this = this;
+
+        this.groupings.forEach(function(d) {
+            if (d.IDs.length) {
+                var nIDs = d.IDs.length,
+                    firstID = d.IDs[nIDs - 1],
+                    y1 = _this.y(firstID),
+                    y2 = _this.y(d.IDs[0]),
+                    g = _this.svg
+                        .append('g')
+                        .classed('grouping vertical', true)
+                        .attr('id', d.key.replace(/ /g, '-')),
+                    topBoundary = g
                         .append('line')
                         .classed('boundary horizontal', true)
                         .attr({
-                            x1: _this.plot_width + _this.margin.right / 8,
-                            x2: _this.plot_width + _this.margin.right,
-                            y1: y1,
-                            y2: y1
+                            x1: _this.plot_width,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y1 + _this.y.rangeBand() / 4,
+                            y2: y1 + _this.y.rangeBand() / 4
                         }),
                     span = g
                         .append('line')
@@ -1546,8 +1678,17 @@
                         .attr({
                             x1: _this.plot_width + _this.margin.right / 8,
                             x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y1,
-                            y2: y2 + _this.y.rangeBand()
+                            y1: y1 + _this.y.rangeBand() / 4,
+                            y2: y2 + 3 * _this.y.rangeBand() / 4
+                        }),
+                    bottomBoundary = g
+                        .append('line')
+                        .classed('boundary horizontal', true)
+                        .attr({
+                            x1: _this.plot_width,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y2 + 3 * _this.y.rangeBand() / 4,
+                            y2: y2 + 3 * _this.y.rangeBand() / 4
                         }),
                     annotation = g
                         .append('text')
@@ -1556,11 +1697,18 @@
                             x: _this.plot_width,
                             dx: 5 * _this.margin.right / 8,
                             y: y1,
-                            dy: _this.y.rangeBand() / 4
+                            dy: _this.y.rangeBand() / 2
                         })
                         .text(d.key);
             }
         });
+    }
+
+    function annotateGrouping() {
+        this.svg.selectAll('.grouping').remove();
+
+        if (this.config.grouping_direction === 'horizontal') horizontally.call(this);
+        else if (this.config.grouping_direction === 'vertical') vertically.call(this);
     }
 
     function drawOngoingMarks() {
@@ -1575,7 +1723,7 @@
                 return d.ongoing === _this.config.ongo_val;
             })
             .each(function(d) {
-                var g = d3.select(this),
+                var g = d3$1.select(this),
                     endpoint = d.values[1],
                     x = context.x(+endpoint.key),
                     y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
@@ -1694,7 +1842,7 @@
             .classed('hidden', true);
 
         //Draw second x-axis at top of chart.
-        var topXaxis = d3.svg
+        var topXaxis = d3$1.svg
                 .axis()
                 .scale(this.x)
                 .orient('top')
@@ -1711,15 +1859,20 @@
                 'translate(' +
                     (this.raw_width / 2 - this.margin.left) +
                     ',-' +
-                    this.config.margin.top / 2 +
+                    9 * this.config.margin.top / 16 +
                     ')'
             );
 
         //Draw second chart when y-axis tick label is clicked.
-        this.svg.selectAll('.y.axis .tick').on('click', function(d) {
-            _this.selected_id = d;
-            tickClick.call(_this);
-        });
+        this.svg
+            .selectAll('.y.axis .tick')
+            .each(function(d) {
+                if (/^-/.test(d)) d3$1.select(this).remove();
+            })
+            .on('click', function(d) {
+                _this.selected_id = d;
+                tickClick.call(_this);
+            });
 
         //Offset overlapping marks.
         this.config.marks.forEach(function(mark, i) {
@@ -1743,6 +1896,35 @@
 
         //Draw reference lines.
         if (this.config.referenceLines) drawReferenceLines.call(this);
+
+        //Offset bottom x-axis to prevent overlap with final ID.
+        var bottomXaxis = this.svg.select('.x.axis'),
+            bottomXaxisTitle = bottomXaxis.select('.axis-title');
+        bottomXaxis.attr(
+            'transform',
+            'translate(0,' +
+                (+bottomXaxis
+                    .attr('transform')
+                    .split(',')[1]
+                    .split(')')[0] +
+                    this.y.rangeBand()) +
+                ')'
+        );
+        bottomXaxisTitle.attr(
+            'transform',
+            'translate(\n            ' +
+                +bottomXaxisTitle
+                    .attr('transform')
+                    .split(',')[0]
+                    .split('(')[1] +
+                ',\n            ' +
+                (+bottomXaxisTitle
+                    .attr('transform')
+                    .split(',')[1]
+                    .split(')')[0] -
+                    7 * this.margin.bottom / 16) +
+                ')'
+        );
     }
 
     function onDestroy() {}
@@ -1860,7 +2042,7 @@
         var settings = arguments[1];
 
         //Define unique div within passed element argument.
-        var container = d3
+        var container = d3$1
                 .select(element)
                 .append('div')
                 .attr('id', 'clinical-timelines'),
@@ -1869,9 +2051,9 @@
         //Define .css styles to avoid requiring a separate .css file.
         defineStyles();
 
-        var mergedSettings = Object.assign({}, defaults.settings, settings),
-            syncedSettings = defaults.syncSettings(mergedSettings),
-            syncedControls = defaults.syncControls(defaults.controls, syncedSettings),
+        var mergedSettings = Object.assign({}, defaults$1.settings, settings),
+            syncedSettings = defaults$1.syncSettings(mergedSettings),
+            syncedControls = defaults$1.syncControls(defaults$1.controls, syncedSettings),
             controls = webcharts.createControls(containerElement, {
                 location: 'top',
                 inputs: syncedControls
@@ -1882,6 +2064,7 @@
             clinicalTimelines.on(callback.substring(2).toLowerCase(), callbacks[callback]);
         }
         clinicalTimelines.element = containerElement;
+        clinicalTimelines.initialSettings = clone(syncedSettings);
         clinicalTimelines.participantTimeline = participantTimeline(clinicalTimelines);
         clinicalTimelines.listing = listing(clinicalTimelines);
 

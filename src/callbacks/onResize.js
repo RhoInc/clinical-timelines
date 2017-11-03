@@ -1,5 +1,5 @@
 import highlightEvent from './onResize/highlightEvent';
-import { svg } from 'd3';
+import { svg, select } from 'd3';
 import legendFilter from './onResize/legendFilter';
 import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
@@ -41,15 +41,20 @@ export default function onResize() {
             'translate(' +
                 (this.raw_width / 2 - this.margin.left) +
                 ',-' +
-                this.config.margin.top / 2 +
+                9 * this.config.margin.top / 16 +
                 ')'
         );
 
     //Draw second chart when y-axis tick label is clicked.
-    this.svg.selectAll('.y.axis .tick').on('click', d => {
-        this.selected_id = d;
-        tickClick.call(this);
-    });
+    this.svg
+        .selectAll('.y.axis .tick')
+        .each(function(d) {
+            if (/^-/.test(d)) select(this).remove();
+        })
+        .on('click', d => {
+            this.selected_id = d;
+            tickClick.call(this);
+        });
 
     //Offset overlapping marks.
     this.config.marks.forEach((mark, i) => {
@@ -73,4 +78,28 @@ export default function onResize() {
 
     //Draw reference lines.
     if (this.config.referenceLines) drawReferenceLines.call(this);
+
+    //Offset bottom x-axis to prevent overlap with final ID.
+    const bottomXaxis = this.svg.select('.x.axis'),
+        bottomXaxisTitle = bottomXaxis.select('.axis-title');
+    bottomXaxis.attr(
+        'transform',
+        `translate(0,${+bottomXaxis
+            .attr('transform')
+            .split(',')[1]
+            .split(')')[0] + this.y.rangeBand()})`
+    );
+    bottomXaxisTitle.attr(
+        'transform',
+        `translate(
+            ${+bottomXaxisTitle
+                .attr('transform')
+                .split(',')[0]
+                .split('(')[1]},
+            ${+bottomXaxisTitle
+                .attr('transform')
+                .split(',')[1]
+                .split(')')[0] -
+                7 * this.margin.bottom / 16})`
+    );
 }

@@ -59,8 +59,10 @@ export default function defineStyles() {
             '#clinical-timelines > .wc-chart .wc-svg .grouping .annotation {' +
                 '    font-size: 24px;' +
                 '    font-weight: bold;' +
-                '    writing-mode: tb-rl;' +
                 '    text-anchor: beginning;' +
+                '}',
+            '#clinical-timelines > .wc-chart .wc-svg .grouping.vertical .annotation {' +
+                '    writing-mode: tb-rl;' +
                 '}',
             '#clinical-timelines > .wc-chart .wc-svg .y.axis .tick {' +
                 '    cursor: pointer;' +

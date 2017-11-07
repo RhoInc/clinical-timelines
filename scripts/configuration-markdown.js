@@ -1,4 +1,4 @@
-var schema = require('./settings-schema'),
+var schema = require('../settings-schema'),
     properties = schema.properties,
     markdown = [],
     fs = require('fs');

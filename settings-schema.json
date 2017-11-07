@@ -1,0 +1,140 @@
+{"title": "settings"
+,"description": "JSON schema for the configuration of the clinical-timelines"
+,"version": "1.0.0"
+,"type": "object"
+,"properties":
+    {"id_col":
+        {"title": "ID"
+        ,"description": "unique identifier variable name"
+        ,"default": "USUBJID"
+        ,"type": "string"
+        }
+    ,"unit":
+        {"title": "ID Unit"
+        ,"description": "unique identifier unit"
+        ,"default": "participant"
+        ,"type": "string"
+        }
+    ,"event_col":
+        {"title": "Event Type"
+        ,"description": "event type variable name"
+        ,"default": "DOMAIN"
+        ,"type": "string"
+        }
+    ,"eventTypes":
+        {"title": "Initial Event Types"
+        ,"description": "an array of event types displayed initially"
+        ,"type": "array"
+        ,"items":
+            {"type": "string"}
+        }
+    ,"site_col":
+        {"title": "Site"
+        ,"description": "site variable name"
+        ,"default": "SITE"
+        ,"type": "string"
+        }
+    ,"filters":
+        {"title": "Filters"
+        ,"description": "an array of filter variables and associated metadata"
+        ,"type": "array"
+        ,"items":
+            {"type": "object"
+            ,"properties":
+                {"value_col":
+                    {"title": "Variable name"
+                    ,"type": "string"
+                    }
+                ,"label":
+                    {"title": "Variable label"
+                    ,"type": "string"
+                    }
+                }
+            }
+        }
+    ,"highlightedEvent":
+        {"title": "Highlighted Event"
+        ,"description": "highlighted event type"
+        ,"default": null
+        ,"type": "string"
+        }
+    ,"stdy_col":
+        {"title": "Start Day"
+        ,"description": "start day variable name"
+        ,"default": "STDY"
+        ,"type": "string"
+        }
+    ,"endy_col":
+        {"title": "End Day"
+        ,"description": "end day variable name"
+        ,"default": "ENDY"
+        ,"type": "string"
+        }
+    ,"seq_col":
+        {"title": "Sequence Number"
+        ,"description": "event type sequence variable name"
+        ,"default": "SEQ"
+        ,"type": "string"
+        }
+    ,"ongo_col":
+        {"title": "Ongoing?"
+        ,"description": "ongoing event indicator variable name"
+        ,"default": "ONGO"
+        ,"type": "string"
+        }
+    ,"referenceLines":
+        {"title": "Reference Days"
+        ,"description": "an array of reference days and associated description"
+        ,"type": "array"
+        ,"items":
+            {"type": "object"
+            ,"properties":
+                {"studyDay":
+                    {"title": "Study day"
+                    ,"type": "number"
+                    }
+                ,"label":
+                    {"title": "Reference day description"
+                    ,"type": "string"
+                    }
+                }
+            }
+        }
+    ,"id_characteristics":
+        {"title": "ID Characteristics"
+        ,"description": "an array of identifier characteristic variables and associated metadata"
+        ,"type": "array"
+        ,"items":
+            {"type": "object"
+            ,"properties":
+                {"value_col":
+                    {"title": "Variable name"
+                    ,"type": "string"
+                    }
+                ,"label":
+                    {"title": "Variable label"
+                    ,"type": "string"
+                    }
+                }
+            }
+        }
+    ,"details":
+        {"title": "Details"
+        ,"description": "an array of listing variables and associated metadata"
+        ,"type": "array"
+        ,"items":
+            {"type": "object"
+            ,"properties":
+                {"value_col":
+                    {"title": "Variable name"
+                    ,"type": "string"
+                    }
+                ,"label":
+                    {"title": "Variable label"
+                    ,"type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

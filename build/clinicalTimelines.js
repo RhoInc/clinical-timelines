@@ -13,23 +13,80 @@
                 '#clinical-timelines .wc-controls {' +
                     '    border: 1px solid #eee;' +
                     '    padding: 5px;' +
+                    '    margin-bottom: 0;' +
+                    '    display: inline-block;' +
+                    '    width: 100%;' +
+                    '}',
+                '#clinical-timelines .wc-controls .control-group {' +
+                    '    float: right;' +
+                    '    margin-bottom: 0;' +
                     '}',
                 '#clinical-timelines .wc-controls .annotation {' +
-                    '    float: right;' +
+                    '    float: left;' +
                     '    font-size: 16px;' +
                     '}',
                 '#clinical-timelines .wc-controls .annotation .stats,' +
-                    '#clinical-timelines .wc-controls .annotation #participant {' +
+                    '#clinical-timelines .wc-controls .annotation #participant,' +
+                    '#clinical-timelines .wc-controls .annotation .characteristic span {' +
                     '    font-weight: bold;' +
                     '}',
                 '#clinical-timelines .wc-controls .back-button button {' +
                     '    padding: 0 5px;' +
                     '    font-size: 14px;' +
+                    '    float: left;' +
+                    '    clear: left;' +
+                    '    margin-top: 5px;' +
                     '}',
-                '#clinical-timelines .wc-chart .wc-svg .y.axis .tick {' +
+                '#clinical-timelines > .wc-chart .legend {' +
+                    '    display: flex !important;' +
+                    '    justify-content: center;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item {' +
+                    '    cursor: pointer;' +
+                    '    float: left;' +
+                    '    border-radius: 4px;' +
+                    '    padding: 3px 7px 3px 4px;' +
+                    '    border: 2px solid white;' +
+                    '    margin-right: .25em !important;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
+                    '    border: 2px solid black;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item.selected {' +
+                    '    background: lightgray;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item.highlighted {' +
+                    '    border: 2px solid black;' +
+                    '    cursor: pointer;' +
+                    '    border-radius: 4px;' +
+                    '    padding: 5px;' +
+                    '}',
+                '#clinical-timelines > .wc-chart .wc-svg .y.axis .tick {' +
                     '    cursor: pointer;' +
                     '    fill: blue;' +
                     '    text-decoration: underline;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 3px;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 2px;' +
+                    '    stroke-dasharray: 2,2;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .visible-reference-line.hover {' +
+                    '    stroke-dasharray: none;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .invisible-reference-line {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 20px;' +
+                    '    stroke-opacity: 0;' +
+                    '}',
+                '#clinical-timelines .wc-chart .wc-svg .reference-line-label-box {' +
+                    '    fill: white;' +
+                    '    stroke: black;' +
+                    '    stroke-width: black;' +
                     '}',
                 '#clinical-timelines .wc-small-multiples .wc-chart {' +
                     '    width: 100%;' +
@@ -44,15 +101,11 @@
                     '    width: 75%;' +
                     '}',
                 '#clinical-timelines .wc-small-multiples .wc-chart .wc-chart-title {' +
+                    '    float: right;' +
                     '    text-align: left;' +
                     '    font-size: 21px;' +
                     '    padding-left: 10px;' +
                     '    width: 24%;' +
-                    '}',
-                '#clinical-timelines .wc-small-multiples .wc-chart .wc-svg .y.axis .tick {' +
-                    '    cursor: default;' +
-                    '    fill: black;' +
-                    '    text-decoration: none;' +
                     '}',
                 '#clinical-timelines .wc-chart.wc-table {' + '    width: 100%;' + '}',
                 '#clinical-timelines .wc-chart.wc-table table {' +
@@ -100,15 +153,21 @@
         //Renderer-specific settings
         {
             id_col: 'USUBJID',
-            event_col: 'DOMAIN',
-            seq_col: 'SEQ',
-            stdy_col: 'STDY',
-            endy_col: 'ENDY',
-            eventTypes: null,
             unit: 'participant',
+            event_col: 'DOMAIN',
+            eventTypes: null,
             site_col: 'SITE',
             filters: null,
+            highlightedEvent: null,
+            stdy_col: 'STDY',
+            endy_col: 'ENDY',
+            seq_col: 'SEQ',
+            ongo_col: 'ONGO',
+            ongo_val: 'Y',
+            referenceLines: null,
+            id_characteristics: null,
             details: null,
+            listingConfig: null,
 
             //Standard webcharts settings
             x: {
@@ -143,6 +202,17 @@
                         'stroke-opacity': 1
                     }
                 }
+            ],
+            colors: [
+                '#1b9e77',
+                '#d95f02',
+                '#7570b3',
+                '#a6cee3',
+                '#1f78b4',
+                '#b2df8a',
+                '#66c2a5',
+                '#fc8d62',
+                '#8da0cb'
             ],
             color_dom: null, // set in syncSettings()
             legend: {
@@ -326,6 +396,35 @@
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
+    function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
+        var validSetting =
+            userDefinedVariables instanceof Array && userDefinedVariables.length
+                ? d3
+                      .merge([
+                          defaultVariables,
+                          userDefinedVariables.filter(function(item) {
+                              return !(
+                                  item instanceof Object &&
+                                  item.hasOwnProperty('value_col') === false
+                              );
+                          })
+                      ])
+                      .map(function(item) {
+                          var itemObject = {};
+
+                          itemObject.value_col = item instanceof Object ? item.value_col : item;
+                          itemObject.label =
+                              item instanceof Object
+                                  ? item.label || itemObject.value_col
+                                  : itemObject.value_col;
+
+                          return itemObject;
+                      })
+                : defaultVariables;
+
+        return validSetting;
+    }
+
     function syncSettings(settings) {
         var syncedSettings = clone(settings);
 
@@ -345,6 +444,9 @@
             ']' +
             ('\nStart Day: [' + syncedSettings.stdy_col + ']') +
             ('\nStop Day: [' + syncedSettings.endy_col + ']');
+        syncedSettings.marks[0].values = {
+            wc_category: [syncedSettings.stdy_col, syncedSettings.endy_col]
+        };
 
         //Circles (events without duration)
         syncedSettings.marks[1].per = [
@@ -359,79 +461,63 @@
             ']' +
             ('\nStart Day: [' + syncedSettings.stdy_col + ']') +
             ('\nStop Day: [' + syncedSettings.endy_col + ']');
-        syncedSettings.marks[1].values = { wc_category: [syncedSettings.stdy_col] };
+        syncedSettings.marks[1].values = {
+            wc_category: ['DY']
+        };
 
         //Define mark coloring and legend order.
         syncedSettings.color_by = syncedSettings.event_col;
 
-        //Default filters
+        //Define prop-cased unit.
+        syncedSettings.unitPropCased =
+            syncedSettings.unit.substring(0, 1).toUpperCase() +
+            syncedSettings.unit.substring(1).toLowerCase();
+
+        //Handle potential referenceLines inputs.
+        if (syncedSettings.referenceLines) {
+            if (!(syncedSettings.referenceLines instanceof Array))
+                syncedSettings.referenceLines = [syncedSettings.referenceLines];
+
+            syncedSettings.referenceLines = syncedSettings.referenceLines
+                .map(function(referenceLine) {
+                    var referenceLineObject = {};
+                    referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
+                    referenceLineObject.label =
+                        referenceLine.label || 'Study Day ' + referenceLineObject.studyDay;
+
+                    return referenceLineObject;
+                })
+                .filter(function(referenceLine) {
+                    return Number.isInteger(referenceLine.studyDay);
+                });
+
+            if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
+        }
+
+        //Default filters.
         var defaultFilters = [
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.id_col,
-                label: 'Participant',
-                multiple: false
-            },
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.event_col,
-                label: 'Event Type',
-                multiple: true,
-                start: syncedSettings.eventTypes
-            },
-            {
-                type: 'subsetter',
-                value_col: syncedSettings.site_col,
-                label: 'Site',
-                multiple: false
-            }
+            { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
+            { value_col: syncedSettings.event_col, label: 'Event Type' },
+            { value_col: syncedSettings.site_col, label: 'Site' },
+            { value_col: syncedSettings.ongo_col, label: 'Ongoing?' }
         ];
-        syncedSettings.filters =
-            syncedSettings.filters instanceof Array && syncedSettings.filters.length
-                ? defaultFilters.concat(
-                      syncedSettings.filters
-                          .filter(function(filter) {
-                              return (
-                                  filter instanceof String ||
-                                  (filter instanceof Object && filter.hasOwnProperty('value_col'))
-                              );
-                          })
-                          .map(function(filter) {
-                              var filterObject = {};
-                              filterObject.type = 'subsetter';
-                              filterObject.value_col = filter.value_col || filter;
-                              filterObject.label = filter.label || filter.value_col;
-                              filterObject.multiple = filterObject.multiple === true ? true : false;
-                              return filterObject;
-                          })
-                  )
-                : defaultFilters;
+        syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
+
+        //Default ID characteristics.
+        var defaultId_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
+        syncedSettings.id_characteristics = arrayOfVariablesCheck(
+            defaultId_characteristics,
+            syncedSettings.id_characteristics
+        );
 
         //Default details
         var defaultDetails = [
             { value_col: syncedSettings.event_col, label: 'Event Type' },
-            { value_col: syncedSettings.seq_col, label: 'Sequence Number' },
             { value_col: syncedSettings.stdy_col, label: 'Start Day' },
-            { value_col: syncedSettings.endy_col, label: 'Stop Day' }
+            { value_col: syncedSettings.endy_col, label: 'Stop Day' },
+            { value_col: syncedSettings.seq_col, label: 'Sequence Number' }
         ];
-        syncedSettings.details =
-            syncedSettings.details instanceof Array && syncedSettings.details.length
-                ? defaultDetails.concat(
-                      syncedSettings.details
-                          .filter(function(detail) {
-                              return (
-                                  detail instanceof String ||
-                                  (detail instanceof Object && detail.hasOwnProperty('value_col'))
-                              );
-                          })
-                          .map(function(detail) {
-                              var detailObject = {};
-                              detailObject.value_col = detail.value_col || detail;
-                              detailObject.label = detail.label || detail.value_col;
-                              return detailObject;
-                          })
-                  )
-                : defaultDetails;
+        syncedSettings.details = arrayOfVariablesCheck(defaultDetails, syncedSettings.details);
 
         //Add settings.filters columns to default details.
         syncedSettings.filters.forEach(function(filter) {
@@ -445,7 +531,7 @@
                 syncedSettings.details.push(filter);
         });
 
-        //Participant timelines settings
+        //Participant timeline settings
         syncedSettings.participantSettings = clone(syncedSettings);
         syncedSettings.participantSettings.x.label = '';
         syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
@@ -462,25 +548,63 @@
         syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
         syncedSettings.participantSettings.margin = { left: 25 };
 
+        //Listing settings
+        syncedSettings.listingConfig = syncedSettings.listingConfig || {
+            cols: syncedSettings.details.map(function(detail) {
+                return detail.value_col;
+            }),
+            headers: syncedSettings.details.map(function(detail) {
+                return detail.label;
+            })
+        };
+        if (!syncedSettings.listingConfig.hasOwnProperty('cols')) {
+            syncedSettings.listingConfig.cols = syncedSettings.details.map(function(detail) {
+                return detail.value_col;
+            });
+            syncedSettings.listingConfig.headers = syncedSettings.details.map(function(detail) {
+                return detail.label;
+            });
+        }
+
         return syncedSettings;
     }
 
     var controls = [
         {
+            type: 'dropdown',
+            option: 'highlightedEvent',
+            label: 'Highlighted Event Type',
+            description: 'aesthetics',
+            values: null // set in onInit() callback
+        },
+        {
             type: 'radio',
             option: 'y.sort',
-            label: 'Sort participants',
             values: ['earliest', 'alphabetical-descending'],
             relabels: ['by earliest event', 'alphanumerically']
         }
     ];
 
     function syncControls(controls, settings) {
+        controls.filter(function(control) {
+            return control.option === 'y.sort';
+        })[0].label =
+            'Sort ' + settings.unit + 's';
+
         settings.filters.reverse().forEach(function(filter) {
+            filter.type = 'subsetter';
+            filter.description =
+                'filter' + (filter.label === settings.unitPropCased ? '/view' : '');
+
+            if (filter.value_col === settings.event_col) {
+                filter.multiple = filter.value_col === settings.event_col;
+                filter.start = settings.eventTypes;
+            }
+
             controls.unshift(filter);
         });
 
-        return controls;
+        return controls.reverse();
     }
 
     var defaults = {
@@ -512,15 +636,14 @@
     function onInit() {
         var _this = this;
 
-        this.wide_data = this.raw_data.filter(
-            function(d) {
-                return (
-                    /^\d+$/.test(d[_this.config.stdy_col]) && // keep only records with start days
-                    !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
-                    !/^\s*$/.test(d[_this.config.event_col])
-                );
-            } // remove records with missing [event_col]
-        );
+        this.raw_data.forEach(function(d) {
+            d[_this.config.stdy_col] = /^ *\d+ *$/.test(d[_this.config.stdy_col])
+                ? +d[_this.config.stdy_col]
+                : NaN;
+            d[_this.config.endy_col] = /^ *\d+ *$/.test(d[_this.config.endy_col])
+                ? +d[_this.config.endy_col]
+                : d[_this.config.stdy_col];
+        });
 
         //Calculate number of total participants and number of participants with any event.
         this.populationDetails = {
@@ -535,34 +658,35 @@
         this.populationDetails.N = this.populationDetails.population.length;
         this.participantDetails = {};
 
+        //Remove records with insufficient data.
+        this.wide_data = this.raw_data.filter(
+            function(d) {
+                return (
+                    d[_this.config.stdy_col] !== NaN &&
+                    d[_this.config.endy_col] !== NaN &&
+                    !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
+                    !/^\s*$/.test(d[_this.config.event_col])
+                );
+            } // remove records with missing [event_col]
+        );
+
         //Define a record for each start day and stop day.
-        this.raw_data = lengthenRaw(this.wide_data, [this.config.stdy_col, this.config.endy_col]);
-        this.raw_data.forEach(function(d) {
-            d.wc_value = d.wc_value ? +d.wc_value : NaN;
-        });
-
-        //Remove filters for variables fewer than two levels.
-        this.controls.config.inputs = this.controls.config.inputs.filter(function(filter) {
-            if (filter.type !== 'subsetter') return true;
-            else {
-                var levels = d3
-                    .set(
-                        _this.raw_data.map(function(d) {
-                            return d[filter.value_col];
-                        })
-                    )
-                    .values();
-
-                if (levels.length < 2) {
-                    console.warn(
-                        filter.value_col +
-                            ' filter removed because the variable has only one level.'
-                    );
-                }
-
-                return levels.length > 1;
-            }
-        });
+        var singleDayEvents = this.raw_data
+                .filter(function(d) {
+                    return d[_this.config.stdy_col] === d[_this.config.endy_col];
+                })
+                .map(function(d) {
+                    d.wc_category = 'DY';
+                    d.wc_value = d[_this.config.stdy_col];
+                    return d;
+                }),
+            multiDayEvents = lengthenRaw(
+                this.raw_data.filter(function(d) {
+                    return d[_this.config.stdy_col] !== d[_this.config.endy_col];
+                }),
+                [this.config.stdy_col, this.config.endy_col]
+            );
+        this.raw_data = d3.merge([singleDayEvents, multiDayEvents]);
 
         //Default event types to 'All'.
         this.allEventTypes = d3
@@ -585,6 +709,31 @@
                   )
                 : this.allEventTypes;
         this.config.legend.order = this.config.color_dom;
+
+        //Remove filters for variables fewer than two levels.
+        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
+            if (input.type !== 'subsetter') {
+                if (input.label === 'Highlighted Event Type') input.values = _this.config.color_dom;
+
+                return true;
+            } else {
+                var levels = d3
+                    .set(
+                        _this.raw_data.map(function(d) {
+                            return d[input.value_col];
+                        })
+                    )
+                    .values();
+
+                if (levels.length < 2) {
+                    console.warn(
+                        input.value_col + ' filter removed because the variable has only one level.'
+                    );
+                }
+
+                return levels.length > 1;
+            }
+        });
     }
 
     function backButton() {
@@ -651,54 +800,69 @@
     function drawParticipantTimeline() {
         var _this = this;
 
+        //Hide population details.
+        this.populationDetails.wrap.classed('hidden', true);
+
+        //Display participant information.
+        this.participantDetails.wrap.classed('hidden', false);
+        this.participantDetails.wrap.select('#participant').text(this.selected_id);
+
+        //Display back button.
+        this.backButton.classed('hidden', false);
+
+        //Hide clinical timelines.
+        this.wrap.classed('hidden', true);
+
+        //Define participant data.
+        var longParticipantData = this.raw_data.filter(function(di) {
+                return di[_this.config.id_col] === _this.selected_id;
+            }),
+            wideParticipantData = this.wide_data.filter(function(di) {
+                return di[_this.config.id_col] === _this.selected_id;
+            });
+
+        //Draw row identifier characteristics.
+        if (this.config.id_characteristics)
+            this.participantDetails.wrap.selectAll('div.characteristic').each(function(d) {
+                d3
+                    .select(this)
+                    .select('span')
+                    .text(wideParticipantData[0][d.value_col]);
+            });
+
+        //Draw participant timeline.
+        this.participantTimeline.wrap.classed('hidden', false);
+        this.participantTimeline.wrap.selectAll('*').remove();
+        webcharts.multiply(
+            this.participantTimeline,
+            longParticipantData.filter(function(d) {
+                return _this.currentEventTypes !== 'All'
+                    ? _this.currentEventTypes.indexOf(d[_this.config.event_col]) > -1
+                    : true;
+            }),
+            this.config.event_col
+        );
+
+        //Draw participant detail listing.
+        this.listing.wrap.classed('hidden', false);
+        this.listing.draw(
+            wideParticipantData.filter(function(d) {
+                return _this.currentEventTypes !== 'All'
+                    ? _this.currentEventTypes.indexOf(d[_this.config.event_col]) > -1
+                    : true;
+            })
+        );
+    }
+
+    function toggleView() {
+        var _this = this;
+
         this.selected_id = this.filters.filter(function(filter) {
             return filter.col === _this.config.id_col;
         })[0].val;
 
         if (this.selected_id !== 'All') {
-            //Hide population details.
-            this.populationDetails.wrap.classed('hidden', true);
-
-            //Display participant information.
-            this.participantDetails.wrap.classed('hidden', false);
-            this.participantDetails.wrap.select('#participant').text(this.selected_id);
-
-            //Display back button.
-            this.backButton.classed('hidden', false);
-
-            //Hide clinical timelines.
-            this.wrap.classed('hidden', true);
-
-            //Define participant data.
-            var longParticipantData = this.raw_data.filter(function(di) {
-                    return (
-                        di[_this.config.id_col] === _this.selected_id &&
-                        (_this.currentEventTypes !== 'All'
-                            ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1
-                            : true)
-                    );
-                }),
-                wideParticipantData = this.wide_data.filter(function(di) {
-                    return (
-                        di[_this.config.id_col] === _this.selected_id &&
-                        (_this.currentEventTypes !== 'All'
-                            ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1
-                            : true)
-                    );
-                });
-
-            //Draw participant timeline.
-            this.participantTimeline.wrap.classed('hidden', false);
-            this.participantTimeline.wrap.selectAll('*').remove();
-            webcharts.multiply(
-                this.participantTimeline,
-                longParticipantData,
-                this.config.event_col
-            );
-
-            //Draw participant detail listing.
-            this.listing.wrap.classed('hidden', false);
-            this.listing.draw(wideParticipantData);
+            drawParticipantTimeline.call(this);
         } else {
             delete this.selected_id;
 
@@ -729,7 +893,7 @@
         this.controls.wrap
             .selectAll('.control-group')
             .filter(function(control) {
-                return ['Participant', 'Event Type'].indexOf(control.label) === -1;
+                return [_this.config.unitPropCased, 'Event Type'].indexOf(control.label) === -1;
             })
             .selectAll('select,input')
             .property('disabled', !!this.selected_id);
@@ -748,8 +912,19 @@
         //Add div for back button and participant ID title.
         this.participantDetails.wrap = this.controls.wrap
             .append('div')
-            .classed('annotation participant-details hidden', true)
-            .html('Viewing ' + this.config.unit + " <span id = 'participant'></span>");
+            .classed('annotation participant-details hidden', true);
+        this.participantDetails.wrap
+            .append('div')
+            .html(this.config.unitPropCased + ": <span id = 'participant'></span>");
+        this.participantDetails.wrap
+            .selectAll('div.characteristic')
+            .data(this.config.id_characteristics)
+            .enter()
+            .append('div')
+            .classed('characteristic', true)
+            .html(function(d) {
+                return d.label + ": <span id = '" + d.value_col + "'></span>";
+            });
 
         //Add div for back button and participant ID title.
         this.backButton = this.controls.wrap.append('div').classed('back-button hidden', true);
@@ -786,11 +961,12 @@
             })
             .on('change', function(filter) {
                 if (filter.value_col === _this.config.id_col) {
-                    drawParticipantTimeline.call(_this);
+                    toggleView.call(_this);
                 } else if (filter.value_col === _this.config.event_col) {
                     _this.currentEventTypes = _this.filters.filter(function(filter) {
                         return filter.col === _this.config.event_col;
                     })[0].val;
+
                     if (_this.selected_id) drawParticipantTimeline.call(_this);
                 } else {
                     console.log('handle custom filters here');
@@ -825,7 +1001,7 @@
         );
     }
 
-    function onDraw() {
+    function sortYdomain() {
         var _this = this;
 
         if (this.config.y.sort === 'earliest') {
@@ -894,8 +1070,79 @@
         } else this.y_dom = this.y_dom.sort(d3.descending);
     }
 
-    function drawParticipantTimeline$1() {
+    function onDraw() {
+        sortYdomain.call(this);
+    }
+
+    function highlightEvent() {
         var _this = this;
+
+        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
+            return d.label === _this.config.highlightedEvent;
+        });
+        this.svg.selectAll('.wc-data-mark').classed('highlighted', function(d) {
+            return d.key.indexOf(_this.config.highlightedEvent) > -1;
+        });
+    }
+
+    function legendFilter() {
+        var _this = this;
+
+        //Filter data by clicking on legend.
+        var context = this,
+            eventTypeFilter = this.filters.filter(function(filter) {
+                return filter.col === _this.config.event_col;
+            })[0],
+            // event type filter object
+            eventTypeControl = this.controls.wrap.selectAll('.control-group').filter(function(d) {
+                return d.label === 'Event Type';
+            }),
+            // event type control
+            eventTypes = eventTypeControl.selectAll('.changer option').sort(function(a, b) {
+                return _this.config.color_dom.indexOf(a) - _this.config.color_dom.indexOf(b);
+            }),
+            // event type options
+            legendItems = this.wrap.selectAll('.legend-item').classed('selected', function(d) {
+                return eventTypeFilter.val instanceof Array
+                    ? eventTypeFilter.val.indexOf(d.label) > -1
+                    : true;
+            }); // legend items
+
+        //Add event listener to legend items.
+        legendItems.on('click', function(d) {
+            var legendItem = d3.select(this),
+                // clicked legend item
+                selected = !legendItem.classed('selected'); // selected boolean
+
+            legendItem.classed('selected', selected); // toggle selected class
+
+            var selectedLegendItems = legendItems
+                .filter(function() {
+                    return d3.select(this).classed('selected');
+                })
+                .data()
+                .map(function(d) {
+                    return d.label;
+                }); // selected event types
+
+            eventTypes
+                .property('selected', false)
+                .filter(function(d) {
+                    return selectedLegendItems.indexOf(d) > -1;
+                })
+                .property('selected', true); // sync selected options in event type filter with selected legend items
+
+            eventTypeFilter.val = selectedLegendItems; // update filter object
+            context.currentEventTypes = selectedLegendItems;
+
+            context.draw();
+        });
+    }
+
+    function tickClick() {
+        var _this = this;
+
+        drawParticipantTimeline.call(this);
 
         //Update participant filter.
         this.controls.wrap
@@ -911,51 +1158,11 @@
             return filter.col === _this.config.id_col;
         })[0].val = this.selected_id;
 
-        //Hide population details.
-        this.populationDetails.wrap.classed('hidden', true);
-
-        //Display participant information.
-        this.participantDetails.wrap.classed('hidden', false);
-        this.participantDetails.wrap.select('#participant').text(this.selected_id);
-
-        //Display back button.
-        this.backButton.classed('hidden', false);
-
-        //Hide clinical timelines.
-        this.wrap.classed('hidden', true);
-
-        //Define participant data.
-        var longParticipantData = this.raw_data.filter(function(di) {
-                return (
-                    di[_this.config.id_col] === _this.selected_id &&
-                    (_this.currentEventTypes !== 'All'
-                        ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1
-                        : true)
-                );
-            }),
-            wideParticipantData = this.wide_data.filter(function(di) {
-                return (
-                    di[_this.config.id_col] === _this.selected_id &&
-                    (_this.currentEventTypes !== 'All'
-                        ? _this.currentEventTypes.indexOf(di[_this.config.event_col]) > -1
-                        : true)
-                );
-            });
-
-        //Draw participant timeline.
-        this.participantTimeline.wrap.classed('hidden', false);
-        this.participantTimeline.wrap.selectAll('*').remove();
-        webcharts.multiply(this.participantTimeline, longParticipantData, this.config.event_col);
-
-        //Draw participant detail listing.
-        this.listing.wrap.classed('hidden', false);
-        this.listing.draw(wideParticipantData);
-
         //Enable/Disable controls other than Participant and Event Type filters.
         this.controls.wrap
             .selectAll('.control-group')
             .filter(function(control) {
-                return ['Participant', 'Event Type'].indexOf(control.label) === -1;
+                return [_this.config.unitPropCased, 'Event Type'].indexOf(control.label) === -1;
             })
             .selectAll('select,input')
             .property('disabled', !!this.selected_id);
@@ -1162,9 +1369,137 @@
         });
     }
 
+    function drawOngoingMarks() {
+        var _this = this;
+
+        var context = this;
+
+        this.svg.selectAll('.ongoing-event').remove();
+        this.svg
+            .selectAll('.line-supergroup .line')
+            .filter(function(d) {
+                return d.ongoing === _this.config.ongo_val;
+            })
+            .each(function(d) {
+                var g = d3.select(this),
+                    endpoint = d.values[1],
+                    x = context.x(+endpoint.key),
+                    y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
+                    color = context.colorScale(endpoint.values.raw[0][context.config.event_col]),
+                    arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
+
+                g
+                    .append('polygon')
+                    .classed('ongoing-event', true)
+                    .attr({
+                        points: arrow
+                            .map(function(coordinate) {
+                                return coordinate.join(',');
+                            })
+                            .join(' '),
+                        fill: color,
+                        stroke: color
+                    });
+            });
+    }
+
+    function drawReferenceLines() {
+        var _this = this;
+
+        this.svg.select('.reference-lines').remove();
+        var referenceLinesGroup = this.svg
+            .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+            .classed('reference-lines', true);
+
+        //Append reference line for each item in config.referenceLines.
+        this.config.referenceLines.forEach(function(studyDay, i) {
+            var referenceLineGroup = referenceLinesGroup
+                    .append('g')
+                    .classed('reference-line', true)
+                    .attr('id', 'reference-line-' + i),
+                visibleReferenceLine = referenceLineGroup
+                    .append('line')
+                    .classed('visible-reference-line', true)
+                    .attr({
+                        x1: _this.x(studyDay.studyDay),
+                        x2: _this.x(studyDay.studyDay),
+                        y1: 0,
+                        y2: _this.plot_height
+                    }),
+                invisibleReferenceLine = referenceLineGroup
+                    .append('line')
+                    .classed('invisible-reference-line', true)
+                    .attr({
+                        x1: _this.x(studyDay.studyDay),
+                        x2: _this.x(studyDay.studyDay),
+                        y1: 0,
+                        y2: _this.plot_height
+                    }),
+                // invisible reference line has no dasharray and is much thicker to make hovering easier
+                direction =
+                    studyDay.studyDay <= (_this.x_dom[1] - _this.x_dom[0]) / 2 ? 'right' : 'left',
+                referenceLineLabel = referenceLineGroup
+                    .append('text')
+                    .classed('reference-line-label', true)
+                    .attr({
+                        x: _this.x(studyDay.studyDay),
+                        y: 0,
+                        'text-anchor': direction === 'right' ? 'beginning' : 'end',
+                        dx: direction === 'right' ? 15 : -15,
+                        dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                    })
+                    .text(studyDay.label),
+                dimensions = referenceLineLabel.node().getBBox(),
+                referenceLineLabelBox = referenceLineGroup
+                    .insert('rect', '.reference-line-label')
+                    .classed('reference-line-label-box', true)
+                    .attr({
+                        x: dimensions.x - 10,
+                        y: dimensions.y - 5,
+                        width: dimensions.width + 20,
+                        height: dimensions.height + 10
+                    });
+
+            //Display reference line label on hover.
+            invisibleReferenceLine
+                .on('mouseover', function() {
+                    visibleReferenceLine.classed('hover', true);
+                    referenceLineLabel.classed('hidden', false);
+                    referenceLineLabelBox.classed('hidden', false);
+                    _this.svg.node().appendChild(referenceLineLabelBox.node());
+                    _this.svg.node().appendChild(referenceLineLabel.node());
+                })
+                .on('mouseout', function() {
+                    visibleReferenceLine.classed('hover', false);
+                    referenceLineLabel.classed('hidden', true);
+                    referenceLineLabelBox.classed('hidden', true);
+                    referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
+                    referenceLineGroup.node().appendChild(referenceLineLabel.node());
+                });
+
+            //Hide reference labels initially.
+            referenceLineLabel.classed('hidden', true);
+            referenceLineLabelBox.classed('hidden', true);
+        });
+    }
+
     function onResize() {
         var _this = this;
 
+        highlightEvent.call(this);
+
+        //Add filter functionality to legend.
+        legendFilter.call(this);
+
+        //Remove None legend item; not sure why it's showing up.
+        this.wrap
+            .selectAll('.legend-item')
+            .filter(function(d) {
+                return d.label === 'None';
+            })
+            .remove();
+
+        //Draw second x-axis at top of chart.
         var topXaxis = d3.svg
                 .axis()
                 .scale(this.x)
@@ -1189,18 +1524,28 @@
         //Draw second chart when y-axis tick label is clicked.
         this.svg.selectAll('.y.axis .tick').on('click', function(d) {
             _this.selected_id = d;
-            drawParticipantTimeline$1.call(_this);
+            tickClick.call(_this);
         });
 
         //Offset overlapping marks.
         this.config.marks.forEach(function(mark, i) {
             var markData = _this.marks[i].data;
             if (mark.type === 'line') {
+                //Identify marks which represent ongoing events.
+                markData.forEach(function(d) {
+                    d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+                });
                 offsetLines.call(_this, mark, markData);
             } else if (mark.type === 'circle') {
                 offsetCircles.call(_this, mark, markData);
             }
         });
+
+        //Draw ongoing marks.
+        drawOngoingMarks.call(this);
+
+        //Draw reference lines.
+        if (this.config.referenceLines) drawReferenceLines.call(this);
     }
 
     function onDestroy() {}
@@ -1235,7 +1580,24 @@
     }
 
     function onResize$1() {
+        var _this = this;
+
         this.wrap.select('.legend').classed('hidden', true);
+
+        //Draw ongoing marks.
+        this.config.marks.forEach(function(mark, i) {
+            var markData = _this.marks[i].data;
+            //Identify marks which represent ongoing events.
+            if (mark.type === 'line') {
+                markData.forEach(function(d) {
+                    d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+                });
+            }
+        });
+        drawOngoingMarks.call(this);
+
+        //Draw reference lines.
+        if (this.config.referenceLines) drawReferenceLines.call(this);
     }
 
     function onDestroy$1() {}
@@ -1281,14 +1643,10 @@
     };
 
     function listing(clinicalTimelines) {
-        var listing = webcharts.createTable(clinicalTimelines.element, {
-            cols: clinicalTimelines.config.details.map(function(d) {
-                return d.value_col;
-            }),
-            headers: clinicalTimelines.config.details.map(function(d) {
-                return d.label;
-            })
-        });
+        var listing = webcharts.createTable(
+            clinicalTimelines.element,
+            clinicalTimelines.config.listingConfig
+        );
 
         for (var callback in callbacks$2) {
             listing.on(callback.substring(2).toLowerCase(), callbacks$2[callback]);

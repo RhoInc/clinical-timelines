@@ -1,10 +1,26 @@
+import highlightEvent from './onResize/highlightEvent';
 import { svg } from 'd3';
-import drawParticipantTimeline from './onResize/drawParticipantTimeline';
+import legendFilter from './onResize/legendFilter';
+import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
+import drawOngoingMarks from './onResize/drawOngoingMarks';
+import drawReferenceLines from './onResize/drawReferenceLines';
 
 export default function onResize() {
     const context = this;
+
+    //Highlight events.
+    highlightEvent.call(this);
+
+    //Add filter functionality to legend.
+    legendFilter.call(this);
+
+    //Remove None legend item; not sure why it's showing up.
+    this.wrap
+        .selectAll('.legend-item')
+        .filter(d => d.label === 'None')
+        .remove();
 
     //Draw second x-axis at top of chart.
     const topXaxis = svg
@@ -31,16 +47,26 @@ export default function onResize() {
     //Draw second chart when y-axis tick label is clicked.
     this.svg.selectAll('.y.axis .tick').on('click', d => {
         this.selected_id = d;
-        drawParticipantTimeline.call(this);
+        tickClick.call(this);
     });
 
     //Offset overlapping marks.
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {
+            //Identify marks which represent ongoing events.
+            markData.forEach(d => {
+                d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
+            });
             offsetLines.call(this, mark, markData);
         } else if (mark.type === 'circle') {
             offsetCircles.call(this, mark, markData);
         }
     });
+
+    //Draw ongoing marks.
+    drawOngoingMarks.call(this);
+
+    //Draw reference lines.
+    if (this.config.referenceLines) drawReferenceLines.call(this);
 }

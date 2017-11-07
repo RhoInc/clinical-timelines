@@ -1,15 +1,21 @@
 export default //Renderer-specific settings
 {
     id_col: 'USUBJID',
-    event_col: 'DOMAIN',
-    seq_col: 'SEQ',
-    stdy_col: 'STDY',
-    endy_col: 'ENDY',
-    eventTypes: null,
     unit: 'participant',
+    event_col: 'DOMAIN',
+    eventTypes: null,
     site_col: 'SITE',
     filters: null,
+    highlightedEvent: null,
+    stdy_col: 'STDY',
+    endy_col: 'ENDY',
+    seq_col: 'SEQ',
+    ongo_col: 'ONGO',
+    ongo_val: 'Y',
+    referenceLines: null,
+    id_characteristics: null,
     details: null,
+    listingConfig: null,
 
     //Standard webcharts settings
     x: {
@@ -44,6 +50,17 @@ export default //Renderer-specific settings
                 'stroke-opacity': 1
             }
         }
+    ],
+    colors: [
+        '#1b9e77',
+        '#d95f02',
+        '#7570b3',
+        '#a6cee3',
+        '#1f78b4',
+        '#b2df8a',
+        '#66c2a5',
+        '#fc8d62',
+        '#8da0cb'
     ],
     color_dom: null, // set in syncSettings()
     legend: {

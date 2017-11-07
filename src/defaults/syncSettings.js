@@ -34,9 +34,7 @@ export default function syncSettings(settings) {
         'wc_value'
     ];
     syncedSettings.marks[1].tooltip =
-        `Event: [${syncedSettings.event_col}]` +
-        `\nStart Day: [${syncedSettings.stdy_col}]` +
-        `\nStop Day: [${syncedSettings.endy_col}]`;
+        `Event: [${syncedSettings.event_col}]` + `\nStudy Day: [${syncedSettings.stdy_col}]`;
     syncedSettings.marks[1].values = {
         wc_category: ['DY']
     };
@@ -72,9 +70,10 @@ export default function syncSettings(settings) {
     const defaultFilters = [
         { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
         { value_col: syncedSettings.event_col, label: 'Event Type' },
-        { value_col: syncedSettings.site_col, label: 'Site' },
-        { value_col: syncedSettings.ongo_col, label: 'Ongoing?' }
+        { value_col: syncedSettings.site_col, label: 'Site' }
     ];
+    if (syncedSettings.ongo_col)
+        defaultFilters.push({ value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
     syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
 
     //Default groupings

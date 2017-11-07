@@ -346,6 +346,7 @@
             stdy_col: 'STDY',
             endy_col: 'ENDY',
             seq_col: 'SEQ',
+            tooltip_col: 'TOOLTIP',
             ongo_col: 'ONGO',
             ongo_val: 'Y',
             referenceLines: null,
@@ -485,8 +486,7 @@
             'Event: [' +
             syncedSettings.event_col +
             ']' +
-            ('\nStart Day: [' + syncedSettings.stdy_col + ']') +
-            ('\nStop Day: [' + syncedSettings.endy_col + ']');
+            ('\nStudy Day: [' + syncedSettings.stdy_col + ']');
         syncedSettings.marks[1].values = {
             wc_category: ['DY']
         };
@@ -524,9 +524,10 @@
         var defaultFilters = [
             { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
             { value_col: syncedSettings.event_col, label: 'Event Type' },
-            { value_col: syncedSettings.site_col, label: 'Site' },
-            { value_col: syncedSettings.ongo_col, label: 'Ongoing?' }
+            { value_col: syncedSettings.site_col, label: 'Site' }
         ];
+        if (syncedSettings.ongo_col)
+            defaultFilters.push({ value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
         syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
 
         //Default groupings
@@ -778,6 +779,12 @@
                 return levels.length > 1;
             }
         });
+
+        //Add data-driven tooltips.
+        if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col))
+            this.config.marks.forEach(function(mark) {
+                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
+            });
     }
 
     function backButton() {
@@ -1898,9 +1905,10 @@
             var markData = _this.marks[i].data;
             if (mark.type === 'line') {
                 //Identify marks which represent ongoing events.
-                markData.forEach(function(d) {
-                    d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
-                });
+                if (_this.config.ongo_col)
+                    markData.forEach(function(d) {
+                        d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+                    });
                 offsetLines.call(_this, mark, markData);
             } else if (mark.type === 'circle') {
                 offsetCircles.call(_this, mark, markData);
@@ -1911,7 +1919,7 @@
         if (this.config.y.grouping) annotateGrouping.call(this);
 
         //Draw ongoing marks.
-        drawOngoingMarks.call(this);
+        if (this.config.ongo_col) drawOngoingMarks.call(this);
 
         //Draw reference lines.
         if (this.config.referenceLines) drawReferenceLines.call(this);

@@ -76,6 +76,12 @@
         ,"default": "SEQ"
         ,"type": "string"
         }
+    ,"tooltip_col":
+        {"title": "Event Details"
+        ,"description": "hovering over a mark displays a tooltip with the details of the event"
+        ,"default": "TOOLTIP"
+        ,"type": "string"
+        }
     ,"ongo_col":
         {"title": "Ongoing?"
         ,"description": "ongoing event indicator variable name"

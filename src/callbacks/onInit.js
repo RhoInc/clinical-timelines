@@ -62,7 +62,9 @@ export default function onInit() {
     //Remove filters for variables fewer than two levels.
     this.controls.config.inputs = this.controls.config.inputs.filter(input => {
         if (input.type !== 'subsetter') {
-            if (input.label === 'Highlighted Event Type') input.values = this.config.color_dom;
+            //Set values of Event Type highlighting control to event types present in the data.
+            if (input.label === 'Event Type' && input.description === 'highlighting')
+                input.values = this.config.color_dom;
 
             return true;
         } else {

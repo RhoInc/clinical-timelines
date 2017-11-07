@@ -124,6 +124,36 @@
                 }
             }
         }
+    ,"groupings":
+        {"title": "Participant grouping"
+        ,"description": "an array of categorical participant characteristic variables with which to group participants"
+        ,"type": "array"
+        ,"items":
+            {"type": "object"
+            ,"properties":
+                {"value_col":
+                    {"title": "Variable name"
+                    ,"type": "string"
+                    }
+                ,"label":
+                    {"title": "Variable label"
+                    ,"type": "string"
+                    }
+                }
+            }
+        }
+    ,"initial_grouping":
+        {"title": "Initial participant grouping"
+        ,"description": "initial participant grouping variable"
+        ,"default": null
+        ,"type": "string"
+        }
+    ,"grouping_direction":
+        {"title": "Grouping annotation placement"
+        ,"description": "grouping annotation placement, 'horizontal' or 'vertical'"
+        ,"default": "horizontal"
+        ,"type": "string"
+        }
     ,"details":
         {"title": "Details"
         ,"description": "an array of listing variables and associated metadata"

@@ -7,7 +7,9 @@ export default function arrayOfVariablesCheck(defaultVariables, userDefinedVaria
                   defaultVariables,
                   userDefinedVariables.filter(
                       item =>
-                          !(item instanceof Object && item.hasOwnProperty('value_col') === false)
+                          !(item instanceof Object && item.hasOwnProperty('value_col') === false) &&
+                          defaultVariables.map(d => d.value_col).indexOf(item.value_col || item) ===
+                              -1
                   )
               ]).map(item => {
                   const itemObject = {};

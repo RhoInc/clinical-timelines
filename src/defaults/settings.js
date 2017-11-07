@@ -7,6 +7,9 @@ export default //Renderer-specific settings
     site_col: 'SITE',
     filters: null,
     highlightedEvent: null,
+    groupings: null,
+    initial_grouping: null,
+    grouping_direction: 'horizontal',
     stdy_col: 'STDY',
     endy_col: 'ENDY',
     seq_col: 'SEQ',
@@ -29,7 +32,8 @@ export default //Renderer-specific settings
         column: null,
         label: null,
         sort: 'earliest',
-        behavior: 'flex'
+        behavior: 'flex',
+        grouping: null
     },
     marks: [
         {
@@ -73,5 +77,5 @@ export default //Renderer-specific settings
     gridlines: 'y',
     range_band: 24,
     margin: { top: 50 }, // for second x-axis
-    resizable: false
+    resizable: true
 };

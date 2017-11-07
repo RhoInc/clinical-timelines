@@ -8,6 +8,9 @@ export default function syncSettings(settings) {
     if (!(syncedSettings.eventTypes instanceof Array && syncedSettings.eventTypes.length))
         delete syncedSettings.eventTypes;
     syncedSettings.y.column = syncedSettings.id_col;
+    syncedSettings.y.grouping = syncedSettings.initial_grouping;
+    if (['horizontal', 'vertical'].indexOf(syncedSettings.grouping_direction) === -1)
+        syncedSettings.grouping_direction = 'horizontal';
 
     //Lines (events with duration)
     syncedSettings.marks[0].per = [
@@ -73,6 +76,10 @@ export default function syncSettings(settings) {
         defaultFilters.push({ value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
     syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
 
+    //Default groupings
+    const defaultGroupings = [{ value_col: syncedSettings.site_col, label: 'Site' }];
+    syncedSettings.groupings = arrayOfVariablesCheck(defaultGroupings, syncedSettings.groupings);
+
     //Default ID characteristics.
     const defaultId_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
     syncedSettings.id_characteristics = arrayOfVariablesCheck(
@@ -94,6 +101,9 @@ export default function syncSettings(settings) {
         if (syncedSettings.details.map(detail => detail.value_col).indexOf(filter.value_col) === -1)
             syncedSettings.details.push(filter);
     });
+
+    //Sync bottom margin with y-axis range band.
+    syncedSettings.margin.bottom = syncedSettings.margin.top + syncedSettings.range_band;
 
     //Participant timeline settings
     syncedSettings.participantSettings = clone(syncedSettings);

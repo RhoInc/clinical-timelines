@@ -67,9 +67,10 @@ export default function syncSettings(settings) {
     const defaultFilters = [
         { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
         { value_col: syncedSettings.event_col, label: 'Event Type' },
-        { value_col: syncedSettings.site_col, label: 'Site' },
-        { value_col: syncedSettings.ongo_col, label: 'Ongoing?' }
+        { value_col: syncedSettings.site_col, label: 'Site' }
     ];
+    if (syncedSettings.ongo_col)
+        defaultFilters.push({ value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
     syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
 
     //Default ID characteristics.

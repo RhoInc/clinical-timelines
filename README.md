@@ -1,6 +1,9 @@
 # Clinical Timelines
 
-Cinical Timelines is a JavaScript library for visualizing clinical events over time by participant.
+![alt tag](https://user-images.githubusercontent.com/31038805/32514368-ccf98744-c3ca-11e7-890d-d10bba8350ff.gif)
+
+
+Cinical Timelines is a JavaScript library for visualizing clinical events over time by participant. It is designed for use in clinical trial research, but can also be applied in other areas.
 
 
 

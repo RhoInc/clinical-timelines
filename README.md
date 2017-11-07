@@ -6,7 +6,7 @@ Cinical Timelines is a JavaScript library for visualizing clinical events over t
 
 ## Usage
 
-If you use npm, `npm install clinical-timelines`. Otherwise, download the [latest release](https://github.com/RhoInc/clinical-timelines/releases/latest). The released bundle supports anonymous AMD, CommonJS, and vanilla environments. You can load directly from [rawgit](https://rawgit.com/RhoInc/clinical-timelines/master/build/clinicalTimelines.js). For example:
+Download the [latest release](https://github.com/RhoInc/clinical-timelines/releases/latest). The released bundle supports anonymous AMD, CommonJS, and vanilla environments. You can load directly from [rawgit](https://rawgit.com/RhoInc/clinical-timelines/master/build/clinicalTimelines.js). For example:
 
 ```html
 <script type = 'text/javascript' src = 'https://d3js.org/d3.v3.js'></script>

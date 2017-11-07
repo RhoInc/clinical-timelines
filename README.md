@@ -1,16 +1,10 @@
-# clinical-timelines
+# Clinical Timelines
 
-**clinical-timelines** is a JavaScript library for visualizing clinical events over time by participant.
+Cinical Timelines is a JavaScript library for visualizing clinical events over time by participant.
 
-## Resources
 
-* [Wiki](https://github.com/RhoInc/clinical-timelines/wiki)
-* [Data Guidelines](https://github.com/RhoInc/clinical-timelines/wiki/Data-Guidelines)
-* [API Reference](https://github.com/RhoInc/clinical-timelines/wiki/API)
-* [Release Notes](https://github.com/RhoInc/clinical-timelines/releases)
-* [Examples](https://rhoinc.github.io/viz-library/)
 
-## Installing
+## Usage
 
 If you use npm, `npm install clinical-timelines`. Otherwise, download the [latest release](https://github.com/RhoInc/clinical-timelines/releases/latest). The released bundle supports anonymous AMD, CommonJS, and vanilla environments. You can load directly from [rawgit](https://rawgit.com/RhoInc/clinical-timelines/master/build/clinicalTimelines.js). For example:
 
@@ -31,3 +25,11 @@ In Node:
 ```js
 var clinicalTimelines = require("clinical-timelines");
 ```
+## Links
+
+More information is available in the project's [wiki](https://github.com/RhoInc/clinical-timelines/wiki): 
+
+* [Data Guidelines](https://github.com/RhoInc/clinical-timelines/wiki/Data-Guidelines)
+* [API Reference](https://github.com/RhoInc/clinical-timelines/wiki/API)
+* [Release Notes](https://github.com/RhoInc/clinical-timelines/releases)
+* [Examples](https://rhoinc.github.io/viz-library/)

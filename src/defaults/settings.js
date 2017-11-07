@@ -10,6 +10,7 @@ export default //Renderer-specific settings
     stdy_col: 'STDY',
     endy_col: 'ENDY',
     seq_col: 'SEQ',
+    tooltip_col: 'TOOLTIP',
     ongo_col: 'ONGO',
     ongo_val: 'Y',
     referenceLines: null,

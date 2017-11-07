@@ -14,7 +14,7 @@ If you use npm, `npm install clinical-timelines`. Otherwise, download the [lates
 <script type = 'text/javascript' src = 'https://rawgit.com/RhoInc/clinical-timelines/master/build/clinicalTimelines.js'></script>
 ```
 
-clinical-timelines is written using [ES2015 modules](http://www.2ality.com/2014/09/es6-modules-final.html). To import clinical-timelines into an ES2015 application, import its only module (here, `clinicalTimelines`):
+Clinical Timelines is written using [ES2015 modules](http://www.2ality.com/2014/09/es6-modules-final.html). To import Clinical Timelines into an ES2015 application, import its only module (here, `clinicalTimelines`):
 
 ```js
 import clinicalTimelines from "clinical-timelines";

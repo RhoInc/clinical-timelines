@@ -10,6 +10,5 @@ export default function onDraw() {
     this.svg.selectAll('.grouping').remove();
     if (this.config.y.grouping && this.config.grouping_direction === 'vertical')
         this.config.margin.right = 40;
-    else
-        delete this.config.margin.right;
+    else delete this.config.margin.right;
 }

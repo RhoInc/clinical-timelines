@@ -7,11 +7,7 @@ export default function sortYdomain() {
         let filtered = false;
 
         this.filters.forEach(di => {
-            if (
-                filtered === false &&
-                di.val !== 'All' &&
-                d[this.config.event_col] !== 'Grouping'
-            ) {
+            if (filtered === false && di.val !== 'All' && d[this.config.event_col] !== 'Grouping') {
                 filtered =
                     di.val instanceof Array
                         ? di.val.indexOf(d[di.col]) === -1
@@ -86,7 +82,9 @@ export default function sortYdomain() {
                         ],
                         alphanumericSort = a > b ? -1 : 1;
 
-                    return aGrouping > bGrouping ? -1 : aGrouping < bGrouping ? 1 : alphanumericSort;
+                    return aGrouping > bGrouping
+                        ? -1
+                        : aGrouping < bGrouping ? 1 : alphanumericSort;
                 });
 
             this.y_dom.forEach(d => {

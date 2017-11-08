@@ -5,10 +5,10 @@ import arrayOfVariablesCheck from './functions/arrayOfVariablesCheck';
 export default function syncSettings(settings) {
     const syncedSettings = clone(settings);
 
-    if (!(syncedSettings.eventTypes instanceof Array && syncedSettings.eventTypes.length))
-        delete syncedSettings.eventTypes;
+    if (!(syncedSettings.event_types instanceof Array && syncedSettings.event_types.length))
+        delete syncedSettings.event_types;
     syncedSettings.y.column = syncedSettings.id_col;
-    syncedSettings.y.grouping = syncedSettings.initial_grouping;
+    syncedSettings.y.grouping = syncedSettings.grouping_initial;
     if (['horizontal', 'vertical'].indexOf(syncedSettings.grouping_direction) === -1)
         syncedSettings.grouping_direction = 'horizontal';
 
@@ -42,17 +42,17 @@ export default function syncSettings(settings) {
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;
 
-    //Define prop-cased unit.
-    syncedSettings.unitPropCased =
-        syncedSettings.unit.substring(0, 1).toUpperCase() +
-        syncedSettings.unit.substring(1).toLowerCase();
+    //Define prop-cased id_unit.
+    syncedSettings.id_unitPropCased =
+        syncedSettings.id_unit.substring(0, 1).toUpperCase() +
+        syncedSettings.id_unit.substring(1).toLowerCase();
 
-    //Handle potential referenceLines inputs.
-    if (syncedSettings.referenceLines) {
-        if (!(syncedSettings.referenceLines instanceof Array))
-            syncedSettings.referenceLines = [syncedSettings.referenceLines];
+    //Handle potential reference_lines inputs.
+    if (syncedSettings.reference_lines) {
+        if (!(syncedSettings.reference_lines instanceof Array))
+            syncedSettings.reference_lines = [syncedSettings.reference_lines];
 
-        syncedSettings.referenceLines = syncedSettings.referenceLines
+        syncedSettings.reference_lines = syncedSettings.reference_lines
             .map(referenceLine => {
                 const referenceLineObject = {};
                 referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
@@ -63,12 +63,12 @@ export default function syncSettings(settings) {
             })
             .filter(referenceLine => Number.isInteger(referenceLine.studyDay));
 
-        if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
+        if (!syncedSettings.reference_lines.length) delete syncedSettings.reference_lines;
     }
 
     //Default filters.
     const defaultFilters = [
-        { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
+        { value_col: syncedSettings.id_col, label: syncedSettings.id_unitPropCased },
         { value_col: syncedSettings.event_col, label: 'Event Type' },
         { value_col: syncedSettings.site_col, label: 'Site' }
     ];
@@ -123,13 +123,13 @@ export default function syncSettings(settings) {
     syncedSettings.participantSettings.margin = { left: 25 };
 
     //Listing settings
-    syncedSettings.listingConfig = syncedSettings.listingConfig || {
+    syncedSettings.details_config = syncedSettings.details_config || {
         cols: syncedSettings.details.map(detail => detail.value_col),
         headers: syncedSettings.details.map(detail => detail.label)
     };
-    if (!syncedSettings.listingConfig.hasOwnProperty('cols')) {
-        syncedSettings.listingConfig.cols = syncedSettings.details.map(detail => detail.value_col);
-        syncedSettings.listingConfig.headers = syncedSettings.details.map(detail => detail.label);
+    if (!syncedSettings.details_config.hasOwnProperty('cols')) {
+        syncedSettings.details_config.cols = syncedSettings.details.map(detail => detail.value_col);
+        syncedSettings.details_config.headers = syncedSettings.details.map(detail => detail.label);
     }
 
     return syncedSettings;

@@ -48,7 +48,7 @@ export default function onInit() {
     this.allEventTypes = set(this.raw_data.map(d => d[this.config.event_col]))
         .values()
         .sort();
-    this.currentEventTypes = this.config.eventTypes || this.allEventTypes;
+    this.currentEventTypes = this.config.event_types || this.allEventTypes;
     this.config.color_dom =
         this.currentEventTypes !== 'All'
             ? this.currentEventTypes.concat(

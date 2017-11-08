@@ -18,7 +18,7 @@ export default function onLayout() {
         .classed('annotation participant-details hidden', true);
     this.participantDetails.wrap
         .append('div')
-        .html(`${this.config.unitPropCased}: <span id = 'participant'></span>`);
+        .html(`${this.config.id_unitPropCased}: <span id = 'participant'></span>`);
     this.participantDetails.wrap
         .selectAll('div.characteristic')
         .data(this.config.id_characteristics)
@@ -69,7 +69,7 @@ export default function onLayout() {
         }
     });
 
-    //Set to selected event types specified in settings.eventTypes and handle clinical timelines and participant timeline toggle.
+    //Set to selected event types specified in settings.event_types and handle clinical timelines and participant timeline toggle.
     controls
         .filter(d => d.type === 'subsetter')
         .each(function(d) {

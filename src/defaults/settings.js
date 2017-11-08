@@ -1,25 +1,32 @@
 export default //Renderer-specific settings
 {
     id_col: 'USUBJID',
-    unit: 'participant',
+    id_unit: 'participant',
+    id_characteristics: null,
+
     event_col: 'DOMAIN',
-    eventTypes: null,
+    event_types: null,
+    event_highlighted: null,
+
     site_col: 'SITE',
     filters: null,
-    highlightedEvent: null,
+
     groupings: null,
-    initial_grouping: null,
+    grouping_initial: null,
     grouping_direction: 'horizontal',
+
     stdy_col: 'STDY',
     endy_col: 'ENDY',
     seq_col: 'SEQ',
     tooltip_col: 'TOOLTIP',
+
     ongo_col: 'ONGO',
     ongo_val: 'Y',
-    referenceLines: null,
-    id_characteristics: null,
+
+    reference_lines: null,
+
     details: null,
-    listingConfig: null,
+    details_config: null,
 
     //Standard webcharts settings
     x: {

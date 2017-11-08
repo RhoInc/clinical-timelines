@@ -1,22 +1,11 @@
 import drawParticipantTimeline from '../functions/drawParticipantTimeline';
+import updateIDfilter from '../functions/updateIDfilter';
+import enableDisableControls from '../functions/enableDisableControls';
 
 export default function tickClick() {
     drawParticipantTimeline.call(this);
-
-    //Update participant filter.
-    this.controls.wrap
-        .selectAll('.control-group')
-        .filter(control => control.value_col === this.config.id_col)
-        .selectAll('option')
-        .property('selected', option => option === this.selected_id);
-    this.filters.filter(filter => filter.col === this.config.id_col)[0].val = this.selected_id;
-
-    //Enable/Disable controls other than Participant and Event Type filters.
-    this.controls.wrap
-        .selectAll('.control-group')
-        .filter(control => [this.config.unitPropCased, 'Event Type'].indexOf(control.label) === -1)
-        .selectAll('select,input')
-        .property('disabled', !!this.selected_id);
+    enableDisableControls.call(this);
+    updateIDfilter.call(this);
 
     //Highlight participant dropdown.
     this.controls.wrap

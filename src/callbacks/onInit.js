@@ -65,6 +65,8 @@ export default function onInit() {
             //Set values of Event Type highlighting control to event types present in the data.
             if (input.label === 'Event Type' && input.description === 'highlighting')
                 input.values = this.config.color_dom;
+            else if (input.label === 'Y-axis' && input.description === 'grouping')
+                input.values = this.config.groupings.map(grouping => grouping.value_col);
 
             return true;
         } else {

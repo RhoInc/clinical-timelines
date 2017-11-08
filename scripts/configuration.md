@@ -95,7 +95,7 @@ Variable label
 ## settings.groupings
 `array`
 
-an array of categorical participant characteristic variables with which to group participants
+an array of categorical ID characteristic variables with which to group IDs
 
 **default:** none
 ### settings.groupings.value_col
@@ -115,7 +115,7 @@ Variable label
 ## settings.grouping_initial
 `string`
 
-initial participant grouping variable
+initial ID grouping variable
 
 **default:** none
 

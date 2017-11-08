@@ -86,8 +86,8 @@
 
 
     ,"groupings":
-        {"title": "Participant grouping"
-        ,"description": "an array of categorical participant characteristic variables with which to group participants"
+        {"title": "ID grouping"
+        ,"description": "an array of categorical ID characteristic variables with which to group IDs"
         ,"type": "array"
         ,"items":
             {"type": "object"
@@ -104,8 +104,8 @@
             }
         }
     ,"grouping_initial":
-        {"title": "Initial participant grouping"
-        ,"description": "initial participant grouping variable"
+        {"title": "Initial ID grouping"
+        ,"description": "initial ID grouping variable"
         ,"default": null
         ,"type": "string"
         }

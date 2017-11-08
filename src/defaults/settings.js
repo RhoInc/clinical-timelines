@@ -38,7 +38,7 @@ export default //Renderer-specific settings
         type: 'ordinal', // set in syncSettings()
         column: null,
         label: null,
-        sort: 'earliest',
+        sort: 'alphabetical-descending',
         behavior: 'flex',
         grouping: null
     },

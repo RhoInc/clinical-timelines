@@ -8,6 +8,8 @@ export default function onDraw() {
 
     //Add left margin for y-axis grouping.
     this.svg.selectAll('.grouping').remove();
-    if (this.config.y.grouping) this.config.margin.right = 40;
-    else delete this.config.margin.right;
+    if (this.config.y.grouping && this.config.grouping_direction === 'vertical')
+        this.config.margin.right = 40;
+    else
+        delete this.config.margin.right;
 }

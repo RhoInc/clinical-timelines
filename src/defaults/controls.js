@@ -20,5 +20,13 @@ export default [
         option: 'y.grouping',
         label: 'Y-axis',
         description: 'grouping'
+    },
+    {
+        type: 'dropdown',
+        option: 'time_scale',
+        values: ['study day', 'date'],
+        label: 'X-axis',
+        description: 'scale',
+        require: true
     }
 ];

@@ -1,5 +1,5 @@
-export default //Renderer-specific settings
-{
+export default {
+    //Renderer-specific settings
     id_col: 'USUBJID',
     id_unit: 'participant',
     id_characteristics: null,
@@ -8,21 +8,24 @@ export default //Renderer-specific settings
     event_types: null,
     event_highlighted: null,
 
-    site_col: 'SITE',
     filters: null,
+    site_col: 'SITE',
 
     groupings: null,
     grouping_initial: null,
     grouping_direction: 'horizontal',
 
+    time_scale: 'study day',
     stdy_col: 'STDY',
     endy_col: 'ENDY',
+    stdt_col: 'STDT',
+    endt_col: 'ENDT',
+    date_format: '%Y-%m-%d',
+
     seq_col: 'SEQ',
     tooltip_col: 'TOOLTIP',
-
     ongo_col: 'ONGO',
     ongo_val: 'Y',
-
     reference_lines: null,
 
     details: null,
@@ -78,9 +81,9 @@ export default //Renderer-specific settings
     legend: {
         location: 'top',
         label: '',
-        mark: 'circle',
-        order: null
-    }, // set in syncSettings()
+        order: null, // set in syncSettings()
+        mark: 'circle'
+    },
     gridlines: 'y',
     range_band: 24,
     margin: { top: 50 }, // for second x-axis

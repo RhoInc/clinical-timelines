@@ -7,6 +7,10 @@ export default function syncSettings(settings) {
 
     if (!(syncedSettings.event_types instanceof Array && syncedSettings.event_types.length))
         delete syncedSettings.event_types;
+    syncedSettings.x.type = syncedSettings.time_scale === 'Study Day' ? 'linear' : 'time';
+    syncedSettings.x.label = syncedSettings.time_scale;
+    syncedSettings.x.format =
+        syncedSettings.time_scale === 'Study Day' ? '1d' : syncedSettings.date_format;
     syncedSettings.y.column = syncedSettings.id_col;
     syncedSettings.y.grouping = syncedSettings.grouping_initial;
     if (['horizontal', 'vertical'].indexOf(syncedSettings.grouping_direction) === -1)
@@ -19,12 +23,17 @@ export default function syncSettings(settings) {
         syncedSettings.seq_col
     ];
     syncedSettings.marks[0].tooltip =
-        `Event: [${syncedSettings.event_col}]` +
-        `\nStart Day: [${syncedSettings.stdy_col}]` +
-        `\nStop Day: [${syncedSettings.endy_col}]`;
-    syncedSettings.marks[0].values = {
-        wc_category: [syncedSettings.stdy_col, syncedSettings.endy_col]
-    };
+        syncedSettings.time_scale === 'Study Day'
+            ? `Event: [${syncedSettings.event_col}]` +
+              `\nStart Day: [${syncedSettings.stdy_col}]` +
+              `\nStop Day: [${syncedSettings.endy_col}]`
+            : `Event: [${syncedSettings.event_col}]` +
+              `\nStart Date: [${syncedSettings.stdt_col}]` +
+              `\nStop Date: [${syncedSettings.endt_col}]`;
+    syncedSettings.marks[0].values =
+        syncedSettings.time_scale === 'Study Day'
+            ? { wc_category: [syncedSettings.stdy_col, syncedSettings.endy_col] }
+            : { wc_category: [syncedSettings.stdt_col, syncedSettings.endt_col] };
 
     //Circles (events without duration)
     syncedSettings.marks[1].per = [
@@ -34,10 +43,13 @@ export default function syncSettings(settings) {
         'wc_value'
     ];
     syncedSettings.marks[1].tooltip =
-        `Event: [${syncedSettings.event_col}]` + `\nStudy Day: [${syncedSettings.stdy_col}]`;
-    syncedSettings.marks[1].values = {
-        wc_category: ['DY']
-    };
+        syncedSettings.time_scale === 'Study Day'
+            ? `Event: [${syncedSettings.event_col}]` + `\nStudy Day: [${syncedSettings.stdy_col}]`
+            : `Event: [${syncedSettings.event_col}]` + `\nStudy Date: [${syncedSettings.stdt_col}]`;
+    syncedSettings.marks[1].values =
+        syncedSettings.time_scale === 'Study Day'
+            ? { wc_category: ['DY'] }
+            : { wc_category: ['DT'] };
 
     //Define mark coloring and legend order.
     syncedSettings.color_by = syncedSettings.event_col;
@@ -88,12 +100,20 @@ export default function syncSettings(settings) {
     );
 
     //Default details
-    const defaultDetails = [
-        { value_col: syncedSettings.event_col, label: 'Event Type' },
-        { value_col: syncedSettings.stdy_col, label: 'Start Day' },
-        { value_col: syncedSettings.endy_col, label: 'Stop Day' },
-        { value_col: syncedSettings.seq_col, label: 'Sequence Number' }
-    ];
+    const defaultDetails =
+        syncedSettings.time_scale === 'Study Day'
+            ? [
+                  { value_col: syncedSettings.event_col, label: 'Event Type' },
+                  { value_col: syncedSettings.stdy_col, label: 'Start Day' },
+                  { value_col: syncedSettings.endy_col, label: 'Stop Day' },
+                  { value_col: syncedSettings.seq_col, label: 'Sequence Number' }
+              ]
+            : [
+                  { value_col: syncedSettings.event_col, label: 'Event Type' },
+                  { value_col: syncedSettings.stdt_col, label: 'Start Date' },
+                  { value_col: syncedSettings.endt_col, label: 'Stop Date' },
+                  { value_col: syncedSettings.seq_col, label: 'Sequence Number' }
+              ];
     syncedSettings.details = arrayOfVariablesCheck(defaultDetails, syncedSettings.details);
 
     //Add settings.filters columns to default details.

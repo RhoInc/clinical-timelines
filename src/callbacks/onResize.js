@@ -28,7 +28,11 @@ export default function onResize() {
             .axis()
             .scale(this.x)
             .orient('top')
-            .tickFormat(this.xAxis.tickFormat())
+            .tickFormat(
+                this.config.time_scale === 'Date'
+                    ? d3.time.format(this.config.date_format)
+                    : d3.format('1d')
+            )
             .innerTickSize(this.xAxis.innerTickSize())
             .outerTickSize(this.xAxis.outerTickSize())
             .ticks(this.xAxis.ticks()[0]),

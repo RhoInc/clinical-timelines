@@ -15,7 +15,7 @@ export default {
     grouping_initial: null,
     grouping_direction: 'horizontal',
 
-    time_scale: 'study day',
+    time_scale: 'Study Day',
     stdy_col: 'STDY',
     endy_col: 'ENDY',
     stdt_col: 'STDT',
@@ -33,9 +33,10 @@ export default {
 
     //Standard webcharts settings
     x: {
-        type: 'linear',
+        type: null, // set in syncSettings()
         column: 'wc_value',
-        label: 'Study Day'
+        label: null, // set in syncSettings()
+        format: null // set in syncSettings()
     },
     y: {
         type: 'ordinal', // set in syncSettings()

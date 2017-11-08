@@ -12,6 +12,12 @@ export default function onInit() {
         d[this.config.endy_col] = /^ *\d+ *$/.test(d[this.config.endy_col])
             ? +d[this.config.endy_col]
             : d[this.config.stdy_col];
+        d[this.config.stdt_col] = /^\d{4}-\d\d-\d\d *$/.test(d[this.config.stdt_col])
+            ? d[this.config.stdt_col]
+            : '';
+        d[this.config.endt_col] = /^\d{4}-\d\d-\d\d *$/.test(d[this.config.endt_col])
+            ? d[this.config.endt_col]
+            : d[this.config.stdt_col];
     });
 
     //Calculate number of total participants and number of participants with any event.
@@ -26,21 +32,36 @@ export default function onInit() {
         d =>
             d[this.config.stdy_col] !== NaN &&
             d[this.config.endy_col] !== NaN &&
+            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] == '') &&
+            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] == '') &&
             !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
             !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
     );
 
     //Define a record for each start day and stop day.
     const singleDayEvents = this.raw_data
-            .filter(d => d[this.config.stdy_col] === d[this.config.endy_col])
+            .filter(
+                d =>
+                    d[this.config.stdy_col] === d[this.config.endy_col] ||
+                    d[this.config.stdt_col] === d[this.config.endt_col]
+            )
             .map(d => {
-                d.wc_category = 'DY';
-                d.wc_value = d[this.config.stdy_col];
+                d.wc_category = this.config.time_scale === 'Study Day' ? 'DY' : 'DT';
+                d.wc_value =
+                    this.config.time_scale === 'Study Day'
+                        ? d[this.config.stdy_col]
+                        : d[this.config.stdt_col];
                 return d;
             }),
         multiDayEvents = lengthenRaw(
-            this.raw_data.filter(d => d[this.config.stdy_col] !== d[this.config.endy_col]),
-            [this.config.stdy_col, this.config.endy_col]
+            this.raw_data.filter(
+                d =>
+                    d[this.config.stdy_col] !== d[this.config.endy_col] ||
+                    d[this.config.stdt_col] !== d[this.config.endt_col]
+            ),
+            this.config.time_scale === 'Study Day'
+                ? [this.config.stdy_col, this.config.endy_col]
+                : [this.config.stdt_col, this.config.endt_col]
         );
     this.raw_data = merge([singleDayEvents, multiDayEvents]);
 

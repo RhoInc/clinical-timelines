@@ -1,12 +1,23 @@
-import { set } from 'd3';
+import { time, set } from 'd3';
 import clone from '../../util/clone';
 
 export default function groupingData() {
     //Calculate x-domain.
-    const xDomain = [
-        d3.min(this.raw_data, d => Math.min(d[this.config.stdy_col], d[this.config.endy_col])),
-        d3.max(this.raw_data, d => Math.max(d[this.config.stdy_col], d[this.config.endy_col]))
-    ];
+    const xDomain =
+        this.config.time_scale === 'Study Day'
+            ? [
+                  d3.min(this.raw_data, d => +d[this.config.stdy_col]),
+                  d3.max(this.raw_data, d => +d[this.config.endy_col])
+              ]
+            : [
+                  d3.min(this.raw_data, d =>
+                      d3.time.format(this.config.date_format).parse(d[this.config.stdt_col])
+                  ),
+                  d3.max(this.raw_data, d =>
+                      d3.time.format(this.config.date_format).parse(d[this.config.endt_col])
+                  )
+              ];
+    console.log(xDomain);
 
     //Capture each grouping and corresponding array of IDs.
     this.groupings = set(

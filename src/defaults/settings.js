@@ -41,7 +41,7 @@ export default {
         type: 'ordinal', // set in syncSettings()
         column: null,
         label: null,
-        sort: 'alphabetical-descending',
+        sort: 'earliest',
         behavior: 'flex',
         grouping: null
     },

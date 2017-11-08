@@ -371,7 +371,7 @@
                 type: 'ordinal', // set in syncSettings()
                 column: null,
                 label: null,
-                sort: 'alphabetical-descending',
+                sort: 'earliest',
                 behavior: 'flex',
                 grouping: null
             },
@@ -1374,11 +1374,14 @@
     function onDraw() {
         sortYdomain.call(this);
 
-        //Add left margin for y-axis grouping.
+        //Clear grouping elements.
         this.svg.selectAll('.grouping').remove();
-        if (this.config.y.grouping && this.config.grouping_direction === 'vertical')
-            this.config.margin.right = 40;
-        else delete this.config.margin.right;
+
+        //Add right margin for vertical y-axis grouping.
+        if (this.config.grouping_direction === 'vertical') {
+            if (this.config.y.grouping) this.config.margin.right = 40;
+            else delete this.config.margin.right;
+        }
     }
 
     function highlightEvent() {

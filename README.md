@@ -2,6 +2,7 @@
 
 ![alt tag](https://user-images.githubusercontent.com/31038805/32514368-ccf98744-c3ca-11e7-890d-d10bba8350ff.gif)
 
+## Overview
 
 Clinical Timelines is a JavaScript library that provides line charts with an overview of events over time. It is designed for use in clinical trial research, but can also be applied in other areas.   
 

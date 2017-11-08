@@ -7,7 +7,7 @@ Clinical Timelines is a JavaScript library that provides line charts with an ove
 
 Clinical Timelines includes helpful visualization features such as points for all events occurring within a single day or points for a single event witnessed over multiple days. Users can also accesses a separate page view of individual participant data.
 
-![alt tag](![alt tag](https://user-images.githubusercontent.com/31038805/32514368-ccf98744-c3ca-11e7-890d-d10bba8350ff.gif)
+![alt tag](https://user-images.githubusercontent.com/31038805/32514368-ccf98744-c3ca-11e7-890d-d10bba8350ff.gif)
 
 
 ## Usage

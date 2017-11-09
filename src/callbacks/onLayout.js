@@ -1,11 +1,11 @@
 import backButton from './onLayout/backButton';
+import { select, merge } from 'd3';
 import toggleView from './onLayout/toggleView';
 import drawParticipantTimeline from './functions/drawParticipantTimeline';
-import { select } from 'd3';
+import clone from '../util/clone';
 
 export default function onLayout() {
-    const context = this,
-        controls = this.controls.wrap.selectAll('.control-group');
+    const context = this;
 
     //Add container for population details.
     this.populationDetails.wrap = this.controls.wrap
@@ -18,7 +18,7 @@ export default function onLayout() {
         .classed('annotation participant-details hidden', true);
     this.participantDetails.wrap
         .append('div')
-        .html(`${this.config.unitPropCased}: <span id = 'participant'></span>`);
+        .html(`${this.config.id_unitPropCased}: <span id = 'participant'></span>`);
     this.participantDetails.wrap
         .selectAll('div.characteristic')
         .data(this.config.id_characteristics)
@@ -44,8 +44,44 @@ export default function onLayout() {
         .classed('axis-title top', true)
         .text('Study Day');
 
+    /**-------------------------------------------------------------------------------------------\
+      Control customization
+    \-------------------------------------------------------------------------------------------**/
+
+    const controls = this.controls.wrap.selectAll('.control-group'),
+        filters = controls.filter(d => d.type === 'subsetter'),
+        otherControls = controls.filter(d => d.type !== 'subsetter');
+
+    //Set to selected event types specified in settings.event_types and handle clinical timelines and participant timeline toggle.
+    filters
+        //Highlight selectecd event types in select.
+        .each(function(d) {
+            if (d.value_col === context.config.event_col)
+                select(this)
+                    .selectAll('option')
+                    .property('selected', di => {
+                        return context.currentEventTypes instanceof Array
+                            ? context.currentEventTypes.indexOf(di) > -1
+                            : true;
+                    });
+        })
+        .on('change', d => {
+            const filter = this.filters.filter(filter => filter.col === d.value_col)[0];
+
+            //Update currently selected ID and toggle view.
+            if (filter.col === this.config.id_col) {
+                this.selected_id = filter.val !== 'All' ? filter.val : null;
+                toggleView.call(this);
+            } else if (d.value_col === this.config.event_col) {
+                //Re-draw participant timeline if in participant timeline view.
+                this.currentEventTypes = filter.val;
+
+                if (this.selected_id) drawParticipantTimeline.call(this);
+            }
+        });
+
     //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-    controls.filter(d => d.type !== 'subsetter').each(function(d) {
+    otherControls.each(function(d) {
         const control = select(this),
             options = control.selectAll('option');
 
@@ -57,39 +93,16 @@ export default function onLayout() {
                     di => d.relabels[d.values.filter(dii => dii !== 'None').indexOf(di)]
                 );
             else if (d.description === 'grouping')
-                //Y-axis groupings that make sense are ID-level and not event level.
-                options.classed(
-                    'hidden',
+                //Add variable labels to Y-axis grouping options.
+                options.property(
+                    'label',
                     di =>
-                        !(
-                            ['None', context.config.site_col].indexOf(di) > -1 ||
-                            context.config.groupings.map(dii => dii.value_col).indexOf(di) > -1
-                        )
+                        di !== 'None'
+                            ? context.config.groupings[
+                                  context.config.groupings.map(dii => dii.value_col).indexOf(di)
+                              ].label
+                            : 'None'
                 );
         }
     });
-
-    //Set to selected event types specified in settings.eventTypes and handle clinical timelines and participant timeline toggle.
-    controls
-        .filter(d => d.type === 'subsetter')
-        .each(function(d) {
-            if (d.label === 'Event Type')
-                select(this)
-                    .selectAll('option')
-                    .property('selected', di => {
-                        return context.currentEventTypes instanceof Array
-                            ? context.currentEventTypes.indexOf(di) > -1
-                            : true;
-                    });
-        })
-        .on('change', d => {
-            if (d.value_col === this.config.id_col) toggleView.call(this);
-            else if (d.value_col === this.config.event_col) {
-                this.currentEventTypes = this.filters.filter(
-                    di => di.col === this.config.event_col
-                )[0].val;
-
-                if (this.selected_id) drawParticipantTimeline.call(this);
-            }
-        });
 }

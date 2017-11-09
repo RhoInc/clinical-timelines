@@ -48,7 +48,7 @@ export default function onInit() {
     this.allEventTypes = set(this.raw_data.map(d => d[this.config.event_col]))
         .values()
         .sort();
-    this.currentEventTypes = this.config.eventTypes || this.allEventTypes;
+    this.currentEventTypes = this.config.event_types || this.allEventTypes;
     this.config.color_dom =
         this.currentEventTypes !== 'All'
             ? this.currentEventTypes.concat(
@@ -65,6 +65,8 @@ export default function onInit() {
             //Set values of Event Type highlighting control to event types present in the data.
             if (input.label === 'Event Type' && input.description === 'highlighting')
                 input.values = this.config.color_dom;
+            else if (input.label === 'Y-axis' && input.description === 'grouping')
+                input.values = this.config.groupings.map(grouping => grouping.value_col);
 
             return true;
         } else {

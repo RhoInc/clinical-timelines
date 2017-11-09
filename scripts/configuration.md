@@ -7,12 +7,32 @@ unique identifier variable name
 
 
 
-## settings.unit
+## settings.id_unit
 `string`
 
 unique identifier unit
 
 **default:** `"participant"`
+
+
+
+## settings.id_characteristics
+`array`
+
+an array of identifier characteristic variables and associated metadata
+
+**default:** none
+### settings.id_characteristics.value_col
+`string`
+
+Variable name
+
+### settings.id_characteristics.label
+`string`
+
+Variable label
+
+
 
 
 
@@ -25,10 +45,19 @@ event type variable name
 
 
 
-## settings.eventTypes
+## settings.event_types
 `array`
 
 an array of event types displayed initially
+
+**default:** none
+
+
+
+## settings.event_highlighted
+`string`
+
+highlighted event type
 
 **default:** none
 
@@ -63,12 +92,41 @@ Variable label
 
 
 
-## settings.highlightedEvent
-`string`
+## settings.groupings
+`array`
 
-highlighted event type
+an array of categorical ID characteristic variables with which to group IDs
 
 **default:** none
+### settings.groupings.value_col
+`string`
+
+Variable name
+
+### settings.groupings.label
+`string`
+
+Variable label
+
+
+
+
+
+## settings.grouping_initial
+`string`
+
+initial ID grouping variable
+
+**default:** none
+
+
+
+## settings.grouping_direction
+`string`
+
+grouping annotation placement, 'horizontal' or 'vertical'
+
+**default:** `"horizontal"`
 
 
 
@@ -99,6 +157,15 @@ event type sequence variable name
 
 
 
+## settings.tooltip_col
+`string`
+
+hovering over a mark displays a tooltip with the details of the event
+
+**default:** `"TOOLTIP"`
+
+
+
 ## settings.ongo_col
 `string`
 
@@ -108,18 +175,27 @@ ongoing event indicator variable name
 
 
 
-## settings.referenceLines
+## settings.ongo_val
+`string`
+
+ongoing event indicator value
+
+**default:** `"Y"`
+
+
+
+## settings.reference_lines
 `array`
 
-an array of reference days and associated description
+an array of reference timepoints and associated descriptions
 
 **default:** none
-### settings.referenceLines.studyDay
+### settings.reference_lines.studyDay
 `number`
 
 Study day
 
-### settings.referenceLines.label
+### settings.reference_lines.label
 `string`
 
 Reference day description
@@ -128,30 +204,10 @@ Reference day description
 
 
 
-## settings.id_characteristics
-`array`
-
-an array of identifier characteristic variables and associated metadata
-
-**default:** none
-### settings.id_characteristics.value_col
-`string`
-
-Variable name
-
-### settings.id_characteristics.label
-`string`
-
-Variable label
-
-
-
-
-
 ## settings.details
 `array`
 
-an array of listing variables and associated metadata
+an array of detail listing variables and associated metadata
 
 **default:** none
 ### settings.details.value_col
@@ -164,6 +220,14 @@ Variable name
 
 Variable label
 
+
+
+
+
+## settings.details_config
+`object`
+
+a webcharts table settings object
 
 
 

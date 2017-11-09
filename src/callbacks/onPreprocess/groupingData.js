@@ -1,4 +1,4 @@
-import { extent, set } from 'd3';
+import { set } from 'd3';
 import clone from '../../util/clone';
 
 export default function groupingData() {

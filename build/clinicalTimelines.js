@@ -334,25 +334,32 @@
         //Renderer-specific settings
         {
             id_col: 'USUBJID',
-            unit: 'participant',
+            id_unit: 'participant',
+            id_characteristics: null,
+
             event_col: 'DOMAIN',
-            eventTypes: null,
+            event_types: null,
+            event_highlighted: null,
+
             site_col: 'SITE',
             filters: null,
-            highlightedEvent: null,
+
             groupings: null,
-            initial_grouping: null,
+            grouping_initial: null,
             grouping_direction: 'horizontal',
+
             stdy_col: 'STDY',
             endy_col: 'ENDY',
             seq_col: 'SEQ',
             tooltip_col: 'TOOLTIP',
+
             ongo_col: 'ONGO',
             ongo_val: 'Y',
-            referenceLines: null,
-            id_characteristics: null,
+
+            reference_lines: null,
+
             details: null,
-            listingConfig: null,
+            details_config: null,
 
             //Standard webcharts settings
             x: {
@@ -452,10 +459,10 @@
     function syncSettings(settings) {
         var syncedSettings = clone(settings);
 
-        if (!(syncedSettings.eventTypes instanceof Array && syncedSettings.eventTypes.length))
-            delete syncedSettings.eventTypes;
+        if (!(syncedSettings.event_types instanceof Array && syncedSettings.event_types.length))
+            delete syncedSettings.event_types;
         syncedSettings.y.column = syncedSettings.id_col;
-        syncedSettings.y.grouping = syncedSettings.initial_grouping;
+        syncedSettings.y.grouping = syncedSettings.grouping_initial;
         if (['horizontal', 'vertical'].indexOf(syncedSettings.grouping_direction) === -1)
             syncedSettings.grouping_direction = 'horizontal';
 
@@ -494,17 +501,17 @@
         //Define mark coloring and legend order.
         syncedSettings.color_by = syncedSettings.event_col;
 
-        //Define prop-cased unit.
-        syncedSettings.unitPropCased =
-            syncedSettings.unit.substring(0, 1).toUpperCase() +
-            syncedSettings.unit.substring(1).toLowerCase();
+        //Define prop-cased id_unit.
+        syncedSettings.id_unitPropCased =
+            syncedSettings.id_unit.substring(0, 1).toUpperCase() +
+            syncedSettings.id_unit.substring(1).toLowerCase();
 
-        //Handle potential referenceLines inputs.
-        if (syncedSettings.referenceLines) {
-            if (!(syncedSettings.referenceLines instanceof Array))
-                syncedSettings.referenceLines = [syncedSettings.referenceLines];
+        //Handle potential reference_lines inputs.
+        if (syncedSettings.reference_lines) {
+            if (!(syncedSettings.reference_lines instanceof Array))
+                syncedSettings.reference_lines = [syncedSettings.reference_lines];
 
-            syncedSettings.referenceLines = syncedSettings.referenceLines
+            syncedSettings.reference_lines = syncedSettings.reference_lines
                 .map(function(referenceLine) {
                     var referenceLineObject = {};
                     referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
@@ -517,12 +524,12 @@
                     return Number.isInteger(referenceLine.studyDay);
                 });
 
-            if (!syncedSettings.referenceLines.length) delete syncedSettings.referenceLines;
+            if (!syncedSettings.reference_lines.length) delete syncedSettings.reference_lines;
         }
 
         //Default filters.
         var defaultFilters = [
-            { value_col: syncedSettings.id_col, label: syncedSettings.unitPropCased },
+            { value_col: syncedSettings.id_col, label: syncedSettings.id_unitPropCased },
             { value_col: syncedSettings.event_col, label: 'Event Type' },
             { value_col: syncedSettings.site_col, label: 'Site' }
         ];
@@ -586,7 +593,7 @@
         syncedSettings.participantSettings.margin = { left: 25 };
 
         //Listing settings
-        syncedSettings.listingConfig = syncedSettings.listingConfig || {
+        syncedSettings.details_config = syncedSettings.details_config || {
             cols: syncedSettings.details.map(function(detail) {
                 return detail.value_col;
             }),
@@ -594,11 +601,11 @@
                 return detail.label;
             })
         };
-        if (!syncedSettings.listingConfig.hasOwnProperty('cols')) {
-            syncedSettings.listingConfig.cols = syncedSettings.details.map(function(detail) {
+        if (!syncedSettings.details_config.hasOwnProperty('cols')) {
+            syncedSettings.details_config.cols = syncedSettings.details.map(function(detail) {
                 return detail.value_col;
             });
-            syncedSettings.listingConfig.headers = syncedSettings.details.map(function(detail) {
+            syncedSettings.details_config.headers = syncedSettings.details.map(function(detail) {
                 return detail.label;
             });
         }
@@ -609,7 +616,7 @@
     var controls = [
         {
             type: 'dropdown',
-            option: 'highlightedEvent',
+            option: 'event_highlighted',
             label: 'Event Type',
             description: 'highlighting',
             values: null // set in onInit() callback
@@ -635,14 +642,14 @@
         settings.filters.reverse().forEach(function(filter) {
             filter.type = 'subsetter';
             filter.description =
-                'filter' + (filter.label === settings.unitPropCased ? '/view' : '');
+                'filter' + (filter.label === settings.id_unitPropCased ? '/view' : '');
 
             if (filter.value_col === settings.event_col) {
                 filter.multiple = true;
-                filter.start = settings.eventTypes;
+                filter.start = settings.event_types;
             }
 
-            if ([settings.unitPropCased, 'Site'].indexOf(filter.label) > -1)
+            if ([settings.id_unitPropCased, 'Site'].indexOf(filter.label) > -1)
                 controls.unshift(filter);
             else controls.splice(controls.length - 3, 0, filter);
         });
@@ -740,7 +747,7 @@
             )
             .values()
             .sort();
-        this.currentEventTypes = this.config.eventTypes || this.allEventTypes;
+        this.currentEventTypes = this.config.event_types || this.allEventTypes;
         this.config.color_dom =
             this.currentEventTypes !== 'All'
                 ? this.currentEventTypes.concat(
@@ -759,6 +766,10 @@
                 //Set values of Event Type highlighting control to event types present in the data.
                 if (input.label === 'Event Type' && input.description === 'highlighting')
                     input.values = _this.config.color_dom;
+                else if (input.label === 'Y-axis' && input.description === 'grouping')
+                    input.values = _this.config.groupings.map(function(grouping) {
+                        return grouping.value_col;
+                    });
 
                 return true;
             } else {
@@ -787,19 +798,21 @@
             });
     }
 
-    function backButton() {
+    function enableDisableControls() {
         var _this = this;
-
-        delete this.selected_id;
 
         //Enable/Disable controls other than Participant and Event Type filters.
         this.controls.wrap
             .selectAll('.control-group')
             .filter(function(control) {
-                return ['Participant', 'Event Type'].indexOf(control.label) === -1;
+                return [_this.config.id_unitPropCased, 'Event Type'].indexOf(control.label) === -1;
             })
             .selectAll('select,input')
-            .property('disabled', false);
+            .property('disabled', !!this.selected_id);
+    }
+
+    function updateIDfilter() {
+        var _this = this;
 
         //Update participant filter.
         this.controls.wrap
@@ -809,12 +822,19 @@
             })
             .selectAll('option')
             .property('selected', function(option) {
-                return option === 'All';
+                return option === _this.selected_id;
             });
         this.filters.filter(function(filter) {
             return filter.col === _this.config.id_col;
         })[0].val =
-            'All';
+            this.selected_id || 'All';
+    }
+
+    function backButton() {
+        delete this.selected_id;
+
+        enableDisableControls.call(this);
+        updateIDfilter.call(this);
 
         //Hide participant timelines.
         this.participantDetails.wrap.classed('hidden', true);
@@ -906,13 +926,7 @@
     }
 
     function toggleView() {
-        var _this = this;
-
-        this.selected_id = this.filters.filter(function(filter) {
-            return filter.col === _this.config.id_col;
-        })[0].val;
-
-        if (this.selected_id !== 'All') {
+        if (this.selected_id && this.selected_id !== 'All') {
             drawParticipantTimeline.call(this);
         } else {
             delete this.selected_id;
@@ -940,21 +954,13 @@
             this.listing.wrap.classed('hidden', true);
         }
 
-        //Enable/Disable controls other than Participant and Event Type filters.
-        this.controls.wrap
-            .selectAll('.control-group')
-            .filter(function(control) {
-                return [_this.config.unitPropCased, 'Event Type'].indexOf(control.label) === -1;
-            })
-            .selectAll('select,input')
-            .property('disabled', !!this.selected_id);
+        enableDisableControls.call(this);
     }
 
     function onLayout() {
         var _this = this;
 
-        var context = this,
-            controls = this.controls.wrap.selectAll('.control-group');
+        var context = this;
 
         //Add container for population details.
         this.populationDetails.wrap = this.controls.wrap
@@ -967,7 +973,7 @@
             .classed('annotation participant-details hidden', true);
         this.participantDetails.wrap
             .append('div')
-            .html(this.config.unitPropCased + ": <span id = 'participant'></span>");
+            .html(this.config.id_unitPropCased + ": <span id = 'participant'></span>");
         this.participantDetails.wrap
             .selectAll('div.characteristic')
             .data(this.config.id_characteristics)
@@ -995,49 +1001,23 @@
             .classed('axis-title top', true)
             .text('Study Day');
 
-        //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-        controls
-            .filter(function(d) {
-                return d.type !== 'subsetter';
-            })
-            .each(function(d) {
-                var control = d3$1.select(this),
-                    options = control.selectAll('option');
+        /**-------------------------------------------------------------------------------------------\
+      Control customization
+    \-------------------------------------------------------------------------------------------**/
 
-                if (d.label === 'Y-axis') {
-                    //Add labels to Y-axis sort.
-                    if (d.description === 'sort')
-                        options.property('label', function(di) {
-                            return d.relabels[
-                                d.values
-                                    .filter(function(dii) {
-                                        return dii !== 'None';
-                                    })
-                                    .indexOf(di)
-                            ];
-                        });
-                    else if (d.description === 'grouping')
-                        //Y-axis groupings that make sense are ID-level and not event level.
-                        options.classed('hidden', function(di) {
-                            return !(
-                                ['None', context.config.site_col].indexOf(di) > -1 ||
-                                context.config.groupings
-                                    .map(function(dii) {
-                                        return dii.value_col;
-                                    })
-                                    .indexOf(di) > -1
-                            );
-                        });
-                }
+        var controls = this.controls.wrap.selectAll('.control-group'),
+            filters = controls.filter(function(d) {
+                return d.type === 'subsetter';
+            }),
+            otherControls = controls.filter(function(d) {
+                return d.type !== 'subsetter';
             });
 
-        //Set to selected event types specified in settings.eventTypes and handle clinical timelines and participant timeline toggle.
-        controls
-            .filter(function(d) {
-                return d.type === 'subsetter';
-            })
+        //Set to selected event types specified in settings.event_types and handle clinical timelines and participant timeline toggle.
+        filters
+            //Highlight selectecd event types in select.
             .each(function(d) {
-                if (d.label === 'Event Type')
+                if (d.value_col === context.config.event_col)
                     d3$1
                         .select(this)
                         .selectAll('option')
@@ -1048,15 +1028,54 @@
                         });
             })
             .on('change', function(d) {
-                if (d.value_col === _this.config.id_col) toggleView.call(_this);
-                else if (d.value_col === _this.config.event_col) {
-                    _this.currentEventTypes = _this.filters.filter(function(di) {
-                        return di.col === _this.config.event_col;
-                    })[0].val;
+                var filter = _this.filters.filter(function(filter) {
+                    return filter.col === d.value_col;
+                })[0];
+
+                //Update currently selected ID and toggle view.
+                if (filter.col === _this.config.id_col) {
+                    _this.selected_id = filter.val !== 'All' ? filter.val : null;
+                    toggleView.call(_this);
+                } else if (d.value_col === _this.config.event_col) {
+                    //Re-draw participant timeline if in participant timeline view.
+                    _this.currentEventTypes = filter.val;
 
                     if (_this.selected_id) drawParticipantTimeline.call(_this);
                 }
             });
+
+        //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
+        otherControls.each(function(d) {
+            var control = d3$1.select(this),
+                options = control.selectAll('option');
+
+            if (d.label === 'Y-axis') {
+                //Add labels to Y-axis sort.
+                if (d.description === 'sort')
+                    options.property('label', function(di) {
+                        return d.relabels[
+                            d.values
+                                .filter(function(dii) {
+                                    return dii !== 'None';
+                                })
+                                .indexOf(di)
+                        ];
+                    });
+                else if (d.description === 'grouping')
+                    //Add variable labels to Y-axis grouping options.
+                    options.property('label', function(di) {
+                        return di !== 'None'
+                            ? context.config.groupings[
+                                  context.config.groupings
+                                      .map(function(dii) {
+                                          return dii.value_col;
+                                      })
+                                      .indexOf(di)
+                              ].label
+                            : 'None';
+                    });
+            }
+        });
     }
 
     function groupingData() {
@@ -1200,7 +1219,7 @@
                 "</span> of <span class = 'stats'>" +
                 this.populationDetails.N +
                 '</span> ' +
-                this.config.unit +
+                this.config.id_unit +
                 "(s) displayed (<span class = 'stats'>" +
                 d3$1.format('%')(this.populationDetails.rate) +
                 '</span>)'
@@ -1210,29 +1229,29 @@
     function sortYdomain() {
         var _this = this;
 
-        //Sort y-domain by the earliest event of each ID.
-        if (this.config.y.sort === 'earliest') {
-            //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
-            //addition to the current filter selections.
-            var filtered_data = this.raw_data.filter(function(d) {
-                var filtered = false;
+        //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
+        //addition to the current filter selections.
+        var filtered_data = this.raw_data.filter(function(d) {
+            var filtered = false;
 
-                _this.filters.forEach(function(di) {
-                    if (
-                        filtered === false &&
-                        di.val !== 'All' &&
-                        d[_this.config.event_col] !== 'Grouping'
-                    ) {
-                        filtered =
-                            di.val instanceof Array
-                                ? di.val.indexOf(d[di.col]) === -1
-                                : di.val !== d[di.col];
-                    }
-                });
-
-                return !filtered;
+            _this.filters.forEach(function(di) {
+                if (
+                    filtered === false &&
+                    di.val !== 'All' &&
+                    d[_this.config.event_col] !== 'Grouping'
+                ) {
+                    filtered =
+                        di.val instanceof Array
+                            ? di.val.indexOf(d[di.col]) === -1
+                            : di.val !== d[di.col];
+                }
             });
 
+            return !filtered;
+        });
+
+        //Sort y-domain by the earliest event of each ID.
+        if (this.config.y.sort === 'earliest') {
             //Sort IDs by grouping then earliest event start date if y-axis is grouped.
             if (this.config.y.grouping) {
                 //Nest data by grouping and ID.
@@ -1306,19 +1325,26 @@
             //Sort y-domain alphanumerically.
             //Sort IDs by grouping then alphanumerically if y-axis is grouped.
             if (this.config.y.grouping) {
-                this.y_dom = this.y_dom.sort(function(a, b) {
-                    var aGrouping = _this.raw_data.filter(function(d) {
-                            return d[_this.config.id_col] === a;
-                        })[0][_this.config.y.grouping],
-                        bGrouping = _this.raw_data.filter(function(d) {
-                            return d[_this.config.id_col] === b;
-                        })[0][_this.config.y.grouping],
-                        alphanumericSort = a > b ? -1 : 1;
+                this.y_dom = d3$1
+                    .set(
+                        filtered_data.map(function(d) {
+                            return d[_this.config.id_col];
+                        })
+                    )
+                    .values()
+                    .sort(function(a, b) {
+                        var aGrouping = _this.raw_data.filter(function(d) {
+                                return d[_this.config.id_col] === a;
+                            })[0][_this.config.y.grouping],
+                            bGrouping = _this.raw_data.filter(function(d) {
+                                return d[_this.config.id_col] === b;
+                            })[0][_this.config.y.grouping],
+                            alphanumericSort = a > b ? -1 : 1;
 
-                    return aGrouping > bGrouping
-                        ? -1
-                        : aGrouping < bGrouping ? 1 : alphanumericSort;
-                });
+                        return aGrouping > bGrouping
+                            ? -1
+                            : aGrouping < bGrouping ? 1 : alphanumericSort;
+                    });
 
                 this.y_dom.forEach(function(d) {
                     _this.groupings
@@ -1348,20 +1374,24 @@
     function onDraw() {
         sortYdomain.call(this);
 
-        //Add left margin for y-axis grouping.
+        //Clear grouping elements.
         this.svg.selectAll('.grouping').remove();
-        if (this.config.y.grouping) this.config.margin.right = 40;
-        else delete this.config.margin.right;
+
+        //Add right margin for vertical y-axis grouping.
+        if (this.config.grouping_direction === 'vertical') {
+            if (this.config.y.grouping) this.config.margin.right = 40;
+            else delete this.config.margin.right;
+        }
     }
 
     function highlightEvent() {
         var _this = this;
 
         this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
-            return d.label === _this.config.highlightedEvent;
+            return d.label === _this.config.event_highlighted;
         });
         this.svg.selectAll('.wc-data-mark').classed('highlighted', function(d) {
-            return d.key.indexOf(_this.config.highlightedEvent) > -1;
+            return d.key.indexOf(_this.config.event_highlighted) > -1;
         });
     }
 
@@ -1375,7 +1405,7 @@
             })[0],
             // event type filter object
             eventTypeControl = this.controls.wrap.selectAll('.control-group').filter(function(d) {
-                return d.label === 'Event Type';
+                return d.label === 'Event Type' && d.description === 'filter';
             }),
             // event type control
             eventTypes = eventTypeControl.selectAll('.changer option').sort(function(a, b) {
@@ -1420,32 +1450,9 @@
     }
 
     function tickClick() {
-        var _this = this;
-
         drawParticipantTimeline.call(this);
-
-        //Update participant filter.
-        this.controls.wrap
-            .selectAll('.control-group')
-            .filter(function(control) {
-                return control.value_col === _this.config.id_col;
-            })
-            .selectAll('option')
-            .property('selected', function(option) {
-                return option === _this.selected_id;
-            });
-        this.filters.filter(function(filter) {
-            return filter.col === _this.config.id_col;
-        })[0].val = this.selected_id;
-
-        //Enable/Disable controls other than Participant and Event Type filters.
-        this.controls.wrap
-            .selectAll('.control-group')
-            .filter(function(control) {
-                return [_this.config.unitPropCased, 'Event Type'].indexOf(control.label) === -1;
-            })
-            .selectAll('select,input')
-            .property('disabled', !!this.selected_id);
+        enableDisableControls.call(this);
+        updateIDfilter.call(this);
 
         //Highlight participant dropdown.
         this.controls.wrap
@@ -1922,7 +1929,7 @@
         if (this.config.ongo_col) drawOngoingMarks.call(this);
 
         //Draw reference lines.
-        if (this.config.referenceLines) drawReferenceLines.call(this);
+        if (this.config.reference_lines) drawReferenceLines.call(this);
 
         //Offset bottom x-axis to prevent overlap with final ID.
         var bottomXaxis = this.svg.select('.x.axis'),
@@ -2051,7 +2058,7 @@
     function listing(clinicalTimelines) {
         var listing = webcharts.createTable(
             clinicalTimelines.element,
-            clinicalTimelines.config.listingConfig
+            clinicalTimelines.config.details_config
         );
 
         for (var callback in callbacks$2) {

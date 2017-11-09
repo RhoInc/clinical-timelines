@@ -78,7 +78,7 @@ export default function onResize() {
     if (this.config.ongo_col) drawOngoingMarks.call(this);
 
     //Draw reference lines.
-    if (this.config.referenceLines) drawReferenceLines.call(this);
+    if (this.config.reference_lines) drawReferenceLines.call(this);
 
     //Offset bottom x-axis to prevent overlap with final ID.
     const bottomXaxis = this.svg.select('.x.axis'),

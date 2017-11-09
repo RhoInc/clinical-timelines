@@ -1,7 +1,7 @@
 export default [
     {
         type: 'dropdown',
-        option: 'highlightedEvent',
+        option: 'event_highlighted',
         label: 'Event Type',
         description: 'highlighting',
         values: null // set in onInit() callback

@@ -1,7 +1,7 @@
 # Clinical Timelines
 
 <p align="center"> 
-<img src="![alt tag](https://user-images.githubusercontent.com/31038805/32514368-ccf98744-c3ca-11e7-890d-d10bba8350ff.gif)">
+<img src="https://user-images.githubusercontent.com/31038805/32514368-ccf98744-c3ca-11e7-890d-d10bba8350ff.gif">
 </p>
 
 

@@ -10,7 +10,7 @@ Clinical Timelines includes helpful visualization features such as points for al
 
 [Click here to see a live demo](https://rhoinc.github.io/viz-library/examples/0022-clinical-timelines/example.html) when the page loads the user sees multiple colored lines providing a summary of events happening overtime within a clinical study. 
 
-![alt tag](https://user-images.githubusercontent.com/31038805/32564699-14931e54-c483-11e7-82bb-43e448ad6ada.gif)
+![alt tag](https://user-images.githubusercontent.com/31038805/32617032-e90cc4aa-c541-11e7-8ec8-c8867de51c94.PNG)
 
 
 ## Usage

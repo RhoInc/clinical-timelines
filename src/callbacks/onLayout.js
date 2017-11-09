@@ -2,6 +2,7 @@ import backButton from './onLayout/backButton';
 import toggleView from './onLayout/toggleView';
 import augmentFilterControls from './onLayout/augmentFilterControls';
 import augmentOtherControls from './onLayout/augmentOtherControls';
+import drawParticipantTimeline from './functions/drawParticipantTimeline';
 
 export default function onLayout() {
     const context = this;

@@ -103,6 +103,27 @@ export default function groupingData() {
             this.initialSettings.range_band +
             this.groupings.length *
                 2 /
-                set(this.wide_data.map(d => d[this.config.id_col])).values().length *
+                set(
+                    this.wide_data
+                        .filter(d => {
+                            let filtered = false;
+
+                            this.filters.forEach(di => {
+                                if (
+                                    filtered === false &&
+                                    di.val !== 'All' &&
+                                    d[this.config.event_col] !== 'Grouping'
+                                ) {
+                                    filtered =
+                                        di.val instanceof Array
+                                            ? di.val.indexOf(d[di.col]) === -1
+                                            : di.val !== d[di.col];
+                                }
+                            });
+
+                            return !filtered;
+                        })
+                        .map(d => d[this.config.id_col])
+                ).values().length *
                 this.initialSettings.range_band;
 }

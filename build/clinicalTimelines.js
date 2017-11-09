@@ -1297,9 +1297,28 @@
                     2 /
                     d3$1
                         .set(
-                            this.wide_data.map(function(d) {
-                                return d[_this.config.id_col];
-                            })
+                            this.wide_data
+                                .filter(function(d) {
+                                    var filtered = false;
+
+                                    _this.filters.forEach(function(di) {
+                                        if (
+                                            filtered === false &&
+                                            di.val !== 'All' &&
+                                            d[_this.config.event_col] !== 'Grouping'
+                                        ) {
+                                            filtered =
+                                                di.val instanceof Array
+                                                    ? di.val.indexOf(d[di.col]) === -1
+                                                    : di.val !== d[di.col];
+                                        }
+                                    });
+
+                                    return !filtered;
+                                })
+                                .map(function(d) {
+                                    return d[_this.config.id_col];
+                                })
                         )
                         .values().length *
                     this.initialSettings.range_band;

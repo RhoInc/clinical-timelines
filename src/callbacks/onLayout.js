@@ -2,7 +2,6 @@ import backButton from './onLayout/backButton';
 import { select, merge } from 'd3';
 import toggleView from './onLayout/toggleView';
 import drawParticipantTimeline from './functions/drawParticipantTimeline';
-import clone from '../util/clone';
 
 export default function onLayout() {
     const context = this;

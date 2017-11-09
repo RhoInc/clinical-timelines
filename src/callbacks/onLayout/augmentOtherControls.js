@@ -29,7 +29,8 @@ export default function augmentOtherControls() {
                               ].label
                             : 'None'
                 );
-        } else if (d.label === 'Time Scale') {
+        } else if (d.label === 'X-axis') {
+            console.log('triggered');
             //Handle time scales.
             if (context.config.time_scale === 'Study Day') {
                 context.config.x.type = 'linear';

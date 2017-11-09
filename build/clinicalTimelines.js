@@ -494,11 +494,9 @@
         syncedSettings.marks[0].values =
             syncedSettings.time_scale === 'Study Day'
                 ? { wc_category: [syncedSettings.stdy_col, syncedSettings.endy_col] }
-                : {
-                      wc_category: [syncedSettings.stdt_col, syncedSettings.endt_col]
+                : { wc_category: [syncedSettings.stdt_col, syncedSettings.endt_col] };
 
-                      //Circles (events without duration)
-                  };
+        //Circles (events without duration)
         syncedSettings.marks[1].per = [
             syncedSettings.id_col,
             syncedSettings.event_col,
@@ -518,11 +516,9 @@
         syncedSettings.marks[1].values =
             syncedSettings.time_scale === 'Study Day'
                 ? { wc_category: ['DY'] }
-                : {
-                      wc_category: ['DT']
+                : { wc_category: ['DT'] };
 
-                      //Define mark coloring and legend order.
-                  };
+        //Define mark coloring and legend order.
         syncedSettings.color_by = syncedSettings.event_col;
 
         //Define prop-cased id_unit.
@@ -1060,7 +1056,8 @@
                               ].label
                             : 'None';
                     });
-            } else if (d.label === 'Time Scale') {
+            } else if (d.label === 'X-axis') {
+                console.log('triggered');
                 //Handle time scales.
                 if (context.config.time_scale === 'Study Day') {
                     context.config.x.type = 'linear';
@@ -1206,7 +1203,6 @@
                               .parse(d[_this.config.endt_col]);
                       })
                   ];
-        console.log(xDomain);
 
         //Capture each grouping and corresponding array of IDs.
         this.groupings = d3$1

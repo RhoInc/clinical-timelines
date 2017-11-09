@@ -17,7 +17,6 @@ export default function groupingData() {
                       d3.time.format(this.config.date_format).parse(d[this.config.endt_col])
                   )
               ];
-    console.log(xDomain);
 
     //Capture each grouping and corresponding array of IDs.
     this.groupings = set(

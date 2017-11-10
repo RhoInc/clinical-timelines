@@ -5,21 +5,16 @@ import './util/object-assign';
 import defaults from './defaults/index';
 import { createControls, createChart } from 'webcharts';
 import callbacks from './callbacks/index';
-import participantTimeline from './participantTimeline/index';
+import IDtimeline from './IDtimeline/index';
 import listing from './listing/index';
 
 export default function clinicalTimelines(element = 'body', settings) {
     //Define unique div within passed element argument.
-    const
-        container = select(element)
+    const container = select(element)
             .append('div')
             .attr('id', 'clinical-timelines'),
-        leftSide = container
-            .append('div')
-            .attr('id', 'left-side'),
-        rightSide = container
-            .append('div')
-            .attr('id', 'right-side');
+        leftSide = container.append('div').attr('id', 'left-side'),
+        rightSide = container.append('div').attr('id', 'right-side');
 
     //Define .css styles to avoid requiring a separate .css file.
     defineStyles();
@@ -36,7 +31,7 @@ export default function clinicalTimelines(element = 'body', settings) {
     clinicalTimelines.leftSide = leftSide;
     clinicalTimelines.rightSide = rightSide;
     clinicalTimelines.initialSettings = clone(syncedSettings);
-    clinicalTimelines.participantTimeline = participantTimeline(clinicalTimelines);
+    clinicalTimelines.IDtimeline = IDtimeline(clinicalTimelines);
     clinicalTimelines.listing = listing(clinicalTimelines);
 
     return clinicalTimelines;

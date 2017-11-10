@@ -125,22 +125,22 @@ export default function syncSettings(settings) {
     //Sync bottom margin with y-axis range band.
     syncedSettings.margin.bottom = syncedSettings.margin.top + syncedSettings.range_band;
 
-    //Participant timeline settings
-    syncedSettings.participantSettings = clone(syncedSettings);
-    syncedSettings.participantSettings.x.label = '';
-    syncedSettings.participantSettings.y.column = syncedSettings.participantSettings.seq_col;
-    syncedSettings.participantSettings.y.sort = 'alphabetical-descending';
-    syncedSettings.participantSettings.marks[0].per = [
-        syncedSettings.participantSettings.event_col,
-        syncedSettings.participantSettings.seq_col
+    //ID timeline settings
+    syncedSettings.IDsettings = clone(syncedSettings);
+    syncedSettings.IDsettings.x.label = '';
+    syncedSettings.IDsettings.y.column = syncedSettings.IDsettings.seq_col;
+    syncedSettings.IDsettings.y.sort = 'alphabetical-descending';
+    syncedSettings.IDsettings.marks[0].per = [
+        syncedSettings.IDsettings.event_col,
+        syncedSettings.IDsettings.seq_col
     ];
-    syncedSettings.participantSettings.marks[1].per = [
-        syncedSettings.participantSettings.event_col,
-        syncedSettings.participantSettings.seq_col,
+    syncedSettings.IDsettings.marks[1].per = [
+        syncedSettings.IDsettings.event_col,
+        syncedSettings.IDsettings.seq_col,
         'wc_value'
     ];
-    syncedSettings.participantSettings.range_band = syncedSettings.range_band / 2;
-    syncedSettings.participantSettings.margin = { left: 25 };
+    syncedSettings.IDsettings.range_band = syncedSettings.range_band / 2;
+    syncedSettings.IDsettings.margin = { left: 25 };
 
     //Listing settings
     syncedSettings.details_config = syncedSettings.details_config || {

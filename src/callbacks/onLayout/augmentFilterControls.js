@@ -1,6 +1,6 @@
 import { select } from 'd3';
 import toggleView from './toggleView';
-import drawParticipantTimeline from '../functions/drawParticipantTimeline';
+import drawIDtimeline from '../functions/drawIDtimeline';
 
 export default function augmentFilterControls() {
     const context = this,
@@ -8,7 +8,7 @@ export default function augmentFilterControls() {
             .selectAll('.control-group')
             .filter(d => d.type === 'subsetter');
 
-    //Set to selected event types specified in settings.event_types and handle clinical timelines and participant timeline toggle.
+    //Set to selected event types specified in settings.event_types and handle clinical timelines and ID timeline toggle.
     filters
         //Highlight selectecd event types in select.
         .each(function(d) {
@@ -29,10 +29,10 @@ export default function augmentFilterControls() {
                 this.selected_id = filter.val !== 'All' ? filter.val : null;
                 toggleView.call(this);
             } else if (d.value_col === this.config.event_col) {
-                //Re-draw participant timeline if in participant timeline view.
+                //Re-draw ID timeline if in ID timeline view.
                 this.currentEventTypes = filter.val;
 
-                if (this.selected_id) drawParticipantTimeline.call(this);
+                if (this.selected_id) drawIDtimeline.call(this);
             }
         });
 }

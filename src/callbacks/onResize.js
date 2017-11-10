@@ -1,4 +1,4 @@
-import highlightEvent from './onResize/highlightEvent';
+import highlightMarks from './onResize/highlightMarks';
 import legendFilter from './onResize/legendFilter';
 import drawTopXaxis from './onResize/drawTopXaxis';
 import { select } from 'd3';
@@ -12,25 +12,11 @@ import drawReferenceLines from './onResize/drawReferenceLines';
 export default function onResize() {
     const context = this;
 
-    //Highlight events.
-    highlightEvent.call(this);
-
     //Add filter functionality to legend.
     legendFilter.call(this);
 
     //Draw second x-axis at top of chart.
     drawTopXaxis.call(this);
-
-    //Draw second chart when y-axis tick label is clicked.
-    this.svg
-        .selectAll('.y.axis .tick')
-        .each(function(d) {
-            if (/^-/.test(d)) select(this).remove();
-        })
-        .on('click', d => {
-            this.selected_id = d;
-            tickClick.call(this);
-        });
 
     //Offset overlapping marks.
     this.config.marks.forEach((mark, i) => {
@@ -47,11 +33,25 @@ export default function onResize() {
         }
     });
 
-    //Annotate grouping.
-    if (this.config.y.grouping) annotateGrouping.call(this);
-
     //Draw ongoing marks.
     if (this.config.ongo_col) drawOngoingMarks.call(this);
+
+    //Highlight events.
+    highlightMarks.call(this);
+
+    //Draw second chart when y-axis tick label is clicked.
+    this.svg
+        .selectAll('.y.axis .tick')
+        .each(function(d) {
+            if (/^-/.test(d)) select(this).remove();
+        })
+        .on('click', d => {
+            this.selected_id = d;
+            tickClick.call(this);
+        });
+
+    //Annotate grouping.
+    if (this.config.y.grouping) annotateGrouping.call(this);
 
     //Draw reference lines.
     if (this.config.reference_lines) drawReferenceLines.call(this);

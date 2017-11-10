@@ -1,18 +1,18 @@
-import drawParticipantTimeline from '../functions/drawParticipantTimeline';
+import drawIDtimeline from '../functions/drawIDtimeline';
 import enableDisableControls from '../functions/enableDisableControls';
 
 export default function toggleView() {
     if (this.selected_id && this.selected_id !== 'All') {
-        drawParticipantTimeline.call(this);
+        drawIDtimeline.call(this);
     } else {
         delete this.selected_id;
 
         //Display population details.
         this.populationDetails.wrap.classed('hidden', false);
 
-        //Hide participant information.
-        this.participantDetails.wrap.classed('hidden', true);
-        this.participantDetails.wrap.select('#participant').text('');
+        //Hide ID information.
+        this.IDdetails.wrap.classed('hidden', true);
+        this.IDdetails.wrap.select('#ID').text('');
 
         //Display back button.
         this.backButton.classed('hidden', true);
@@ -21,11 +21,11 @@ export default function toggleView() {
         this.wrap.select('svg.wc-svg').classed('hidden', false);
         this.draw();
 
-        //Hide participant timeline.
-        this.participantTimeline.wrap.selectAll('*').remove();
-        this.participantTimeline.wrap.classed('hidden', true);
+        //Hide ID timeline.
+        this.IDtimeline.wrap.selectAll('*').remove();
+        this.IDtimeline.wrap.classed('hidden', true);
 
-        //Draw participant detail listing.
+        //Draw ID detail listing.
         this.listing.draw([]);
         this.listing.wrap.classed('hidden', true);
     }

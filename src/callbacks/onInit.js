@@ -1,5 +1,5 @@
-import { set, merge } from 'd3';
-import lengthenRaw from './onInit/lengthenRaw';
+import { set } from 'd3';
+import defineData from './functions/defineData';
 
 export default function onInit() {
     const context = this;
@@ -20,12 +20,12 @@ export default function onInit() {
             : d[this.config.stdt_col];
     });
 
-    //Calculate number of total participants and number of participants with any event.
+    //Calculate number of total IDs and number of IDs with any event.
     this.populationDetails = {
         population: set(this.raw_data.map(d => d[this.config.id_col])).values()
     };
     this.populationDetails.N = this.populationDetails.population.length;
-    this.participantDetails = {};
+    this.IDdetails = {};
 
     //Remove records with insufficient data.
     this.wide_data = this.raw_data.filter(
@@ -39,31 +39,7 @@ export default function onInit() {
     );
 
     //Define a record for each start day and stop day.
-    const singleDayEvents = this.raw_data
-            .filter(
-                d =>
-                    d[this.config.stdy_col] === d[this.config.endy_col] ||
-                    d[this.config.stdt_col] === d[this.config.endt_col]
-            )
-            .map(d => {
-                d.wc_category = this.config.time_scale === 'Study Day' ? 'DY' : 'DT';
-                d.wc_value =
-                    this.config.time_scale === 'Study Day'
-                        ? d[this.config.stdy_col]
-                        : d[this.config.stdt_col];
-                return d;
-            }),
-        multiDayEvents = lengthenRaw(
-            this.raw_data.filter(
-                d =>
-                    d[this.config.stdy_col] !== d[this.config.endy_col] ||
-                    d[this.config.stdt_col] !== d[this.config.endt_col]
-            ),
-            this.config.time_scale === 'Study Day'
-                ? [this.config.stdy_col, this.config.endy_col]
-                : [this.config.stdt_col, this.config.endt_col]
-        );
-    this.raw_data = merge([singleDayEvents, multiDayEvents]);
+    defineData.call(this);
 
     //Default event types to 'All'.
     this.allEventTypes = set(this.raw_data.map(d => d[this.config.event_col]))

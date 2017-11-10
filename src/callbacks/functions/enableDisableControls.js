@@ -1,5 +1,5 @@
 export default function enableDisableControls() {
-    //Enable/Disable controls other than Participant and Event Type filters.
+    //Enable/Disable controls other than ID and Event Type filters.
     this.controls.wrap
         .selectAll('.control-group')
         .filter(

@@ -7,9 +7,9 @@ export default function backButton() {
     enableDisableControls.call(this);
     updateIDfilter.call(this);
 
-    //Hide participant timelines.
-    this.participantDetails.wrap.classed('hidden', true);
-    this.participantTimeline.wrap.classed('hidden', true);
+    //Hide ID timelines.
+    this.IDdetails.wrap.classed('hidden', true);
+    this.IDtimeline.wrap.classed('hidden', true);
     this.listing.wrap.classed('hidden', true);
     this.backButton.classed('hidden', true);
 
@@ -20,10 +20,10 @@ export default function backButton() {
     //Redraw clinical timelines.
     this.draw();
 
-    //Highlight participant dropdown.
+    //Highlight ID dropdown.
     this.controls.wrap
         .selectAll('.control-group')
-        .filter(control => control.label === 'Participant')
+        .filter(control => control.label === this.config.id_unitPropCased)
         .style({
             'font-weight': 'bold'
         })

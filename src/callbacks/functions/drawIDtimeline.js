@@ -1,13 +1,13 @@
 import { select } from 'd3';
 import { multiply } from 'webcharts';
 
-export default function drawParticipantTimeline() {
+export default function drawIDtimeline() {
     //Hide population details.
     this.populationDetails.wrap.classed('hidden', true);
 
-    //Display participant information.
-    this.participantDetails.wrap.classed('hidden', false);
-    this.participantDetails.wrap.select('#participant').text(this.selected_id);
+    //Display ID information.
+    this.IDdetails.wrap.classed('hidden', false);
+    this.IDdetails.wrap.select('#ID').text(this.selected_id);
 
     //Display back button.
     this.backButton.classed('hidden', false);
@@ -15,28 +15,24 @@ export default function drawParticipantTimeline() {
     //Hide clinical timelines.
     this.wrap.select('svg.wc-svg').classed('hidden', true);
 
-    //Define participant data.
-    const longParticipantData = this.raw_data.filter(
-            di => di[this.config.id_col] === this.selected_id
-        ),
-        wideParticipantData = this.wide_data.filter(
-            di => di[this.config.id_col] === this.selected_id
-        );
+    //Define ID data.
+    const longIDdata = this.raw_data.filter(di => di[this.config.id_col] === this.selected_id),
+        wideIDdata = this.wide_data.filter(di => di[this.config.id_col] === this.selected_id);
 
     //Draw row identifier characteristics.
     if (this.config.id_characteristics)
-        this.participantDetails.wrap.selectAll('div.characteristic').each(function(d) {
+        this.IDdetails.wrap.selectAll('div.characteristic').each(function(d) {
             select(this)
                 .select('span')
-                .text(wideParticipantData[0][d.value_col]);
+                .text(wideIDdata[0][d.value_col]);
         });
 
-    //Draw participant timeline.
-    this.participantTimeline.wrap.classed('hidden', false);
-    this.participantTimeline.wrap.selectAll('*').remove();
+    //Draw ID timeline.
+    this.IDtimeline.wrap.classed('hidden', false);
+    this.IDtimeline.wrap.selectAll('*').remove();
     multiply(
-        this.participantTimeline,
-        longParticipantData.filter(
+        this.IDtimeline,
+        longIDdata.filter(
             d =>
                 this.currentEventTypes !== 'All'
                     ? this.currentEventTypes.indexOf(d[this.config.event_col]) > -1
@@ -45,10 +41,10 @@ export default function drawParticipantTimeline() {
         this.config.event_col
     );
 
-    //Draw participant detail listing.
+    //Draw ID detail listing.
     this.listing.wrap.classed('hidden', false);
     this.listing.draw(
-        wideParticipantData.filter(
+        wideIDdata.filter(
             d =>
                 this.currentEventTypes !== 'All'
                     ? this.currentEventTypes.indexOf(d[this.config.event_col]) > -1

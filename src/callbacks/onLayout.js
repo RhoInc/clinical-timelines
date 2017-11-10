@@ -3,7 +3,6 @@ import backButton from './onLayout/backButton';
 import toggleView from './onLayout/toggleView';
 import augmentFilterControls from './onLayout/augmentFilterControls';
 import augmentOtherControls from './onLayout/augmentOtherControls';
-import drawParticipantTimeline from './functions/drawParticipantTimeline';
 
 export default function onLayout() {
     const context = this;
@@ -24,13 +23,13 @@ export default function onLayout() {
     });
 
     //Add container for ID characteristics.
-    this.participantDetails.wrap = this.leftSide
+    this.IDdetails.wrap = this.leftSide
         .insert('div', ':first-child')
-        .classed('annotation participant-details hidden', true);
-    this.participantDetails.wrap
+        .classed('annotation ID-details hidden', true);
+    this.IDdetails.wrap
         .append('div')
-        .html(`${this.config.id_unitPropCased}: <span id = 'participant'></span>`);
-    this.participantDetails.wrap
+        .html(`${this.config.id_unitPropCased}: <span id = 'ID'></span>`);
+    this.IDdetails.wrap
         .selectAll('div.characteristic')
         .data(this.config.id_characteristics)
         .enter()
@@ -43,7 +42,7 @@ export default function onLayout() {
         .insert('div', ':first-child')
         .classed('annotation population-details', true);
 
-    //Add back button to return from participant timeline to clinical timelines.
+    //Add back button to return from ID timeline to clinical timelines.
     this.backButton = this.controls.wrap.append('div').classed('back-button hidden', true);
     this.backButton
         .append('button')

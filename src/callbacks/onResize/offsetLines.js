@@ -110,8 +110,7 @@ export default function offsetLines(mark, markData) {
                 if (currentLine.offset > 0) {
                     //Capture line via its class name and offset vertically.
                     const className = `${currentLine.key} line`,
-                        g = select(document.getElementsByClassName(className)[0]),
-                        line = g.select('path');
+                        g = select(document.getElementsByClassName(className)[0]);
                     g.attr(
                         'transform',
                         `translate(0,${currentLine.offset * +mark.attributes['stroke-width'] * 2})`

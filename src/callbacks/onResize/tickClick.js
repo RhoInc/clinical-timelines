@@ -1,16 +1,16 @@
-import drawParticipantTimeline from '../functions/drawParticipantTimeline';
+import drawIDtimeline from '../functions/drawIDtimeline';
 import updateIDfilter from '../functions/updateIDfilter';
 import enableDisableControls from '../functions/enableDisableControls';
 
 export default function tickClick() {
-    drawParticipantTimeline.call(this);
+    drawIDtimeline.call(this);
     enableDisableControls.call(this);
     updateIDfilter.call(this);
 
-    //Highlight participant dropdown.
+    //Highlight ID dropdown.
     this.controls.wrap
         .selectAll('.control-group')
-        .filter(control => control.label === 'Participant')
+        .filter(control => control.label === this.config.id_unitPropCased)
         .style({
             'font-weight': 'bold'
         })

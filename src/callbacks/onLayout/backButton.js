@@ -15,7 +15,7 @@ export default function backButton() {
 
     //Display population timelines.
     this.populationDetails.wrap.classed('hidden', false);
-    this.wrap.classed('hidden', false);
+    this.wrap.select('svg.wc-svg').classed('hidden', false);
 
     //Redraw clinical timelines.
     this.draw();

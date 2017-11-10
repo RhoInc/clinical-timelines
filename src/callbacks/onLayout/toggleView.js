@@ -18,7 +18,7 @@ export default function toggleView() {
         this.backButton.classed('hidden', true);
 
         //Hide clinical timelines.
-        this.wrap.classed('hidden', false);
+        this.wrap.select('svg.wc-svg').classed('hidden', false);
         this.draw();
 
         //Hide participant timeline.

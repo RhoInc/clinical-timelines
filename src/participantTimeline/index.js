@@ -3,7 +3,7 @@ import callbacks from './callbacks/index';
 
 export default function participantTimeline(clinicalTimelines) {
     const participantTimeline = createChart(
-        clinicalTimelines.element,
+        clinicalTimelines.rightSide.node(),
         clinicalTimelines.config.participantSettings
     );
 

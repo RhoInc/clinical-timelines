@@ -10,10 +10,16 @@ import listing from './listing/index';
 
 export default function clinicalTimelines(element = 'body', settings) {
     //Define unique div within passed element argument.
-    const container = select(element)
+    const
+        container = select(element)
             .append('div')
             .attr('id', 'clinical-timelines'),
-        containerElement = container.node();
+        leftSide = container
+            .append('div')
+            .attr('id', 'left-side'),
+        rightSide = container
+            .append('div')
+            .attr('id', 'right-side');
 
     //Define .css styles to avoid requiring a separate .css file.
     defineStyles();
@@ -21,13 +27,14 @@ export default function clinicalTimelines(element = 'body', settings) {
     const mergedSettings = Object.assign({}, defaults.settings, settings),
         syncedSettings = defaults.syncSettings(mergedSettings),
         syncedControls = defaults.syncControls(defaults.controls, syncedSettings),
-        controls = createControls(containerElement, { location: 'top', inputs: syncedControls }),
-        clinicalTimelines = createChart(containerElement, syncedSettings, controls);
+        controls = createControls(leftSide.node(), { location: 'top', inputs: syncedControls }),
+        clinicalTimelines = createChart(rightSide.node(), syncedSettings, controls);
 
     for (const callback in callbacks)
         clinicalTimelines.on(callback.substring(2).toLowerCase(), callbacks[callback]);
 
-    clinicalTimelines.element = containerElement;
+    clinicalTimelines.leftSide = leftSide;
+    clinicalTimelines.rightSide = rightSide;
     clinicalTimelines.initialSettings = clone(syncedSettings);
     clinicalTimelines.participantTimeline = participantTimeline(clinicalTimelines);
     clinicalTimelines.listing = listing(clinicalTimelines);

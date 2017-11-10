@@ -2,7 +2,7 @@ import { createTable } from 'webcharts';
 import callbacks from './callbacks/index';
 
 export default function listing(clinicalTimelines) {
-    const listing = createTable(clinicalTimelines.element, clinicalTimelines.config.details_config);
+    const listing = createTable(clinicalTimelines.rightSide.node(), clinicalTimelines.config.details_config);
 
     for (const callback in callbacks)
         listing.on(callback.substring(2).toLowerCase(), callbacks[callback]);

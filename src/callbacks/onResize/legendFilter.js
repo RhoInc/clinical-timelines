@@ -1,4 +1,5 @@
 import { select } from 'd3';
+import drawParticipantTimeline from '../functions/drawParticipantTimeline';
 
 export default function legendFilter() {
     //Filter data by clicking on legend.
@@ -43,6 +44,9 @@ export default function legendFilter() {
         eventTypeFilter.val = selectedLegendItems; // update filter object
         context.currentEventTypes = selectedLegendItems;
 
-        context.draw();
+        if (context.selected_id)
+            drawParticipantTimeline.call(context);
+        else
+            context.draw();
     });
 }

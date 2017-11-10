@@ -23,13 +23,8 @@ export default function onLayout() {
         if (d.value_col === context.config.event_col) controlGroup.classed('hidden', true);
     });
 
-    //Add container for population details.
-    this.populationDetails.wrap = this.controls.wrap
-        .insert('div', ':first-child')
-        .classed('annotation population-details', true);
-
     //Add container for ID characteristics.
-    this.participantDetails.wrap = this.controls.wrap
+    this.participantDetails.wrap = this.leftSide
         .insert('div', ':first-child')
         .classed('annotation participant-details hidden', true);
     this.participantDetails.wrap
@@ -42,6 +37,11 @@ export default function onLayout() {
         .append('div')
         .classed('characteristic', true)
         .html(d => `${d.label}: <span id = '${d.value_col}'></span>`);
+
+    //Add container for population details.
+    this.populationDetails.wrap = this.leftSide
+        .insert('div', ':first-child')
+        .classed('annotation population-details', true);
 
     //Add back button to return from participant timeline to clinical timelines.
     this.backButton = this.controls.wrap.append('div').classed('back-button hidden', true);

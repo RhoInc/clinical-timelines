@@ -12,7 +12,7 @@ export default function onDatatransform() {
     this.populationDetails.wrap.html(
         `<span class = 'stats'>${this.populationDetails.n}</span> of <span class = 'stats'>${this
             .populationDetails.N}</span> ${this.config
-            .id_unit}(s) displayed (<span class = 'stats'>${format('%')(
+            .id_unit}(s) (<span class = 'stats'>${format('%')(
             this.populationDetails.rate
         )}</span>)`
     );

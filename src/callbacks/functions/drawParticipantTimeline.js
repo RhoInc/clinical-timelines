@@ -13,7 +13,7 @@ export default function drawParticipantTimeline() {
     this.backButton.classed('hidden', false);
 
     //Hide clinical timelines.
-    this.wrap.classed('hidden', true);
+    this.wrap.select('svg.wc-svg').classed('hidden', true);
 
     //Define participant data.
     const longParticipantData = this.raw_data.filter(

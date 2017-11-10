@@ -1,4 +1,4 @@
-import { time, set } from 'd3';
+import { min, max, time, set } from 'd3';
 import clone from '../../util/clone';
 
 export default function groupingData() {
@@ -6,15 +6,15 @@ export default function groupingData() {
     const xDomain =
         this.config.time_scale === 'Study Day'
             ? [
-                  d3.min(this.raw_data, d => +d[this.config.stdy_col]),
-                  d3.max(this.raw_data, d => +d[this.config.endy_col])
+                  min(this.raw_data, d => +d[this.config.stdy_col]),
+                  max(this.raw_data, d => +d[this.config.endy_col])
               ]
             : [
-                  d3.min(this.raw_data, d =>
-                      d3.time.format(this.config.date_format).parse(d[this.config.stdt_col])
+                  min(this.raw_data, d =>
+                      time.format(this.config.date_format).parse(d[this.config.stdt_col])
                   ),
-                  d3.max(this.raw_data, d =>
-                      d3.time.format(this.config.date_format).parse(d[this.config.endt_col])
+                  max(this.raw_data, d =>
+                      time.format(this.config.date_format).parse(d[this.config.endt_col])
                   )
               ];
 

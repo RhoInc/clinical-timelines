@@ -4,26 +4,45 @@
         : typeof define === 'function' && define.amd
           ? define(['d3', 'webcharts'], factory)
           : (global.clinicalTimelines = factory(global.d3, global.webCharts));
-})(this, function(d3$1, webcharts) {
+})(this, function(d3, webcharts) {
     'use strict';
 
     function defineStyles() {
         var styles = [
                 '#clinical-timelines .hidden {' + '    display: none !important;' + '}',
-                '#clinical-timelines .wc-controls {' +
+                '#clinical-timelines > .wc-controls {' +
                     '    border: 1px solid #eee;' +
                     '    padding: 5px;' +
                     '    margin-bottom: 0;' +
                     '    display: inline-block;' +
-                    '    width: 100%;' +
+                    '    width: 22%;' +
+                    '    float: left;' +
+                    '}',
+                '#clinical-timelines > .wc-chart,' +
+                    '#clinical-timelines > .wc-layout,' +
+                    '#clinical-timelines > .wc-table {' +
+                    '    border-left: 1px solid #eee;' +
+                    '    padding-left: 1%;' +
+                    '    width: 75%;' +
+                    '    float: right;' +
                     '}',
                 '#clinical-timelines .wc-controls .control-group {' +
+                    '    margin-bottom: 5px;' +
+                    '    display: block;' +
                     '    float: right;' +
-                    '    margin-bottom: 0;' +
+                    '    clear: both;' +
+                    '}',
+                '#clinical-timelines .wc-controls .control-group > * {' +
+                    '    display: inline-block;' +
+                    '    vertical-align: top;' +
+                    '}',
+                '#clinical-timelines .wc-controls .control-group .changer {' +
+                    '    margin-left: 5px;' +
                     '}',
                 '#clinical-timelines .wc-controls .annotation {' +
-                    '    float: left;' +
+                    '    display: block;' +
                     '    font-size: 16px;' +
+                    '    clear: both;' +
                     '}',
                 '#clinical-timelines .wc-controls .annotation .stats,' +
                     '#clinical-timelines .wc-controls .annotation #participant,' +
@@ -41,13 +60,24 @@
                     '    display: flex !important;' +
                     '    justify-content: center;' +
                     '}',
+                '#clinical-timelines .wc-chart .legend .legend-title {' +
+                    '    border-radius: 4px;' +
+                    '    padding: 5px 7px 3px 4px;' +
+                    '    border: 2px solid white;' +
+                    '    margin-right: .25em !important;' +
+                    '}',
                 '#clinical-timelines .wc-chart .legend .legend-item {' +
                     '    cursor: pointer;' +
                     '    float: left;' +
                     '    border-radius: 4px;' +
-                    '    padding: 3px 7px 3px 4px;' +
+                    '    padding: 4px 7px 3px 4px;' +
                     '    border: 2px solid white;' +
                     '    margin-right: .25em !important;' +
+                    '}',
+                '#clinical-timelines .wc-chart .legend .legend-item .legend-color-block circle {' +
+                    '    cx: .55em !important;' +
+                    '    cy: .55em !important;' +
+                    '    r: .4em !important;' +
                     '}',
                 '#clinical-timelines .wc-chart .legend .legend-item:hover {' +
                     '    border: 2px solid black;' +
@@ -119,7 +149,6 @@
                     '    padding-left: 10px;' +
                     '    width: 24%;' +
                     '}',
-                '#clinical-timelines .wc-chart.wc-table {' + '    width: 100%;' + '}',
                 '#clinical-timelines .wc-chart.wc-table table {' +
                     '    display: table;' +
                     '    width: 100%;' +
@@ -413,7 +442,7 @@
         color_dom: null, // set in syncSettings()
         legend: {
             location: 'top',
-            label: '',
+            label: 'Event Type',
             order: null, // set in syncSettings()
             mark: 'circle'
         },
@@ -426,7 +455,7 @@
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
             userDefinedVariables instanceof Array && userDefinedVariables.length
-                ? d3$1
+                ? d3
                       .merge([
                           defaultVariables,
                           userDefinedVariables.filter(function(item) {
@@ -550,11 +579,11 @@
         //Default filters.
         var defaultFilters = [
             { value_col: syncedSettings.id_col, label: syncedSettings.id_unitPropCased },
-            { value_col: syncedSettings.event_col, label: 'Event Type' },
-            { value_col: syncedSettings.site_col, label: 'Site' }
+            { value_col: syncedSettings.site_col, label: 'Site' },
+            { value_col: syncedSettings.event_col, label: 'Event Type' }
         ];
         if (syncedSettings.ongo_col)
-            defaultFilters.push({ value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
+            defaultFilters.splice(2, 0, { value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
         syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
 
         //Default groupings
@@ -675,22 +704,19 @@
     ];
 
     function syncControls(controls, settings) {
-        settings.filters.reverse().forEach(function(filter) {
+        settings.filters.forEach(function(filter) {
             filter.type = 'subsetter';
-            filter.description =
-                'filter' + (filter.label === settings.id_unitPropCased ? '/view' : '');
+            filter.description = 'filter' + (filter.value_col === settings.id_col ? '/view' : '');
 
             if (filter.value_col === settings.event_col) {
                 filter.multiple = true;
                 filter.start = settings.event_types;
             }
-
-            if ([settings.id_unitPropCased, 'Site'].indexOf(filter.label) > -1)
-                controls.unshift(filter);
-            else controls.splice(controls.length - 3, 0, filter);
         });
 
-        return controls.reverse();
+        var syncedControls = d3.merge([settings.filters, clone(controls)]);
+
+        return syncedControls;
     }
 
     var defaults$1 = {
@@ -739,7 +765,7 @@
 
         //Calculate number of total participants and number of participants with any event.
         this.populationDetails = {
-            population: d3$1
+            population: d3
                 .set(
                     this.raw_data.map(function(d) {
                         return d[_this.config.id_col];
@@ -791,10 +817,10 @@
                     ? [this.config.stdy_col, this.config.endy_col]
                     : [this.config.stdt_col, this.config.endt_col]
             );
-        this.raw_data = d3$1.merge([singleDayEvents, multiDayEvents]);
+        this.raw_data = d3.merge([singleDayEvents, multiDayEvents]);
 
         //Default event types to 'All'.
-        this.allEventTypes = d3$1
+        this.allEventTypes = d3
             .set(
                 this.raw_data.map(function(d) {
                     return d[_this.config.event_col];
@@ -828,7 +854,7 @@
 
                 return true;
             } else {
-                var levels = d3$1
+                var levels = d3
                     .set(
                         _this.raw_data.map(function(d) {
                             return d[input.value_col];
@@ -950,7 +976,7 @@
         //Draw row identifier characteristics.
         if (this.config.id_characteristics)
             this.participantDetails.wrap.selectAll('div.characteristic').each(function(d) {
-                d3$1
+                d3
                     .select(this)
                     .select('span')
                     .text(wideParticipantData[0][d.value_col]);
@@ -980,6 +1006,38 @@
         );
     }
 
+    function toggleView() {
+        if (this.selected_id && this.selected_id !== 'All') {
+            drawParticipantTimeline.call(this);
+        } else {
+            delete this.selected_id;
+
+            //Display population details.
+            this.populationDetails.wrap.classed('hidden', false);
+
+            //Hide participant information.
+            this.participantDetails.wrap.classed('hidden', true);
+            this.participantDetails.wrap.select('#participant').text('');
+
+            //Display back button.
+            this.backButton.classed('hidden', true);
+
+            //Hide clinical timelines.
+            this.wrap.classed('hidden', false);
+            this.draw();
+
+            //Hide participant timeline.
+            this.participantTimeline.wrap.selectAll('*').remove();
+            this.participantTimeline.wrap.classed('hidden', true);
+
+            //Draw participant detail listing.
+            this.listing.draw([]);
+            this.listing.wrap.classed('hidden', true);
+        }
+
+        enableDisableControls.call(this);
+    }
+
     function augmentFilterControls() {
         var _this = this;
 
@@ -993,7 +1051,7 @@
             //Highlight selectecd event types in select.
             .each(function(d) {
                 if (d.value_col === context.config.event_col)
-                    d3$1
+                    d3
                         .select(this)
                         .selectAll('option')
                         .property('selected', function(di) {
@@ -1030,7 +1088,7 @@
         otherControls.each(function(d) {
             //Add labels to Y-axis control options.
             if (d.label === 'Y-axis') {
-                var options = d3$1.select(this).selectAll('option');
+                var options = d3.select(this).selectAll('option');
 
                 //Add labels to Y-axis sort.
                 if (d.description === 'sort')
@@ -1057,7 +1115,6 @@
                             : 'None';
                     });
             } else if (d.label === 'X-axis') {
-                console.log('triggered');
                 //Handle time scales.
                 if (context.config.time_scale === 'Study Day') {
                     context.config.x.type = 'linear';
@@ -1132,13 +1189,31 @@
     function onLayout() {
         var _this = this;
 
+        var context = this;
+
+        //Move control labels and descriptions inside a div to display them vertically, label on top of description.
+        this.controls.wrap.selectAll('.control-group').each(function(d) {
+            var controlGroup = d3.select(this),
+                label = controlGroup.select('.control-label'),
+                description = controlGroup.select('.span-description'),
+                container = controlGroup
+                    .insert('div', ':first-child')
+                    .classed('label-description', true);
+
+            container.node().appendChild(label.node());
+            container.node().appendChild(description.node());
+
+            if (d.value_col === context.config.event_col) controlGroup.classed('hidden', true);
+        });
+
+        //Add container for population details.
         this.populationDetails.wrap = this.controls.wrap
-            .append('div')
+            .insert('div', ':first-child')
             .classed('annotation population-details', true);
 
         //Add container for ID characteristics.
         this.participantDetails.wrap = this.controls.wrap
-            .append('div')
+            .insert('div', ':first-child')
             .classed('annotation participant-details hidden', true);
         this.participantDetails.wrap
             .append('div')
@@ -1173,8 +1248,7 @@
             .append('g')
             .classed('x-top axis linear', true)
             .append('text')
-            .classed('axis-title top', true)
-            .text('Study Day');
+            .classed('axis-title top', true);
     }
 
     function groupingData() {
@@ -1205,7 +1279,7 @@
                   ];
 
         //Capture each grouping and corresponding array of IDs.
-        this.groupings = d3$1
+        this.groupings = d3
             .set(
                 this.raw_data
                     .filter(function(d) {
@@ -1291,7 +1365,7 @@
                 this.initialSettings.range_band +
                 this.groupings.length *
                     2 /
-                    d3$1
+                    d3
                         .set(
                             this.wide_data
                                 .filter(function(d) {
@@ -1336,7 +1410,7 @@
     function onDatatransform() {
         var _this = this;
 
-        this.populationDetails.sample = d3$1
+        this.populationDetails.sample = d3
             .set(
                 this.filtered_data.map(function(d) {
                     return d[_this.config.id_col];
@@ -1353,7 +1427,7 @@
                 '</span> ' +
                 this.config.id_unit +
                 "(s) displayed (<span class = 'stats'>" +
-                d3$1.format('%')(this.populationDetails.rate) +
+                d3.format('%')(this.populationDetails.rate) +
                 '</span>)'
         );
     }
@@ -1387,14 +1461,18 @@
             //Sort IDs by grouping then earliest event start date if y-axis is grouped.
             if (this.config.y.grouping) {
                 //Nest data by grouping and ID.
-                var nestedData = d3$1
+                var nestedData = d3
                     .nest()
                     .key(function(d) {
                         return d[_this.config.y.grouping] + '|' + d[_this.config.id_col];
                     })
                     .rollup(function(d) {
-                        return d3$1.min(d, function(di) {
-                            return +di[_this.config.stdy_col];
+                        return d3.min(d, function(di) {
+                            return _this.config.time_scale === 'Study Day'
+                                ? +di[_this.config.stdy_col]
+                                : d3.time
+                                      .format(_this.config.date_format)
+                                      .parse(di[_this.config.stdt_col]);
                         });
                     })
                     .entries(filtered_data)
@@ -1430,14 +1508,18 @@
             } else {
                 //Otherwise sort IDs by earliest event start date.
                 //Set y-domain.
-                this.y_dom = d3$1
+                this.y_dom = d3
                     .nest()
                     .key(function(d) {
                         return d[_this.config.id_col];
                     })
                     .rollup(function(d) {
-                        return d3$1.min(d, function(di) {
-                            return +di[_this.config.stdy_col];
+                        return d3.min(d, function(di) {
+                            return _this.config.time_scale === 'Study Day'
+                                ? +di[_this.config.stdy_col]
+                                : d3.time
+                                      .format(_this.config.date_format)
+                                      .parse(di[_this.config.stdt_col]);
                         });
                     })
                     .entries(filtered_data)
@@ -1457,7 +1539,7 @@
             //Sort y-domain alphanumerically.
             //Sort IDs by grouping then alphanumerically if y-axis is grouped.
             if (this.config.y.grouping) {
-                this.y_dom = d3$1
+                this.y_dom = d3
                     .set(
                         filtered_data.map(function(d) {
                             return d[_this.config.id_col];
@@ -1514,6 +1596,9 @@
             if (this.config.y.grouping) this.config.margin.right = 40;
             else delete this.config.margin.right;
         }
+
+        //Update top x-axis.
+        this.svg.select('g.x-top.axis text.axis-title.top').text(this.config.time_scale);
     }
 
     function highlightEvent() {
@@ -1544,15 +1629,20 @@
                 return _this.config.color_dom.indexOf(a) - _this.config.color_dom.indexOf(b);
             }),
             // event type options
-            legendItems = this.wrap.selectAll('.legend-item').classed('selected', function(d) {
-                return eventTypeFilter.val instanceof Array
-                    ? eventTypeFilter.val.indexOf(d.label) > -1
-                    : true;
-            }); // legend items
+            legendItems = this.wrap
+                .selectAll('.legend-item')
+                .classed('hidden', function(d) {
+                    return d.label === 'None';
+                }) // Remove None legend item; not sure why it's showing up.
+                .classed('selected', function(d) {
+                    return eventTypeFilter.val instanceof Array
+                        ? eventTypeFilter.val.indexOf(d.label) > -1
+                        : true;
+                }); // legend items
 
         //Add event listener to legend items.
         legendItems.on('click', function(d) {
-            var legendItem = d3$1.select(this),
+            var legendItem = d3.select(this),
                 // clicked legend item
                 selected = !legendItem.classed('selected'); // selected boolean
 
@@ -1560,7 +1650,7 @@
 
             var selectedLegendItems = legendItems
                 .filter(function() {
-                    return d3$1.select(this).classed('selected');
+                    return d3.select(this).classed('selected');
                 })
                 .data()
                 .map(function(d) {
@@ -1579,6 +1669,33 @@
 
             context.draw();
         });
+    }
+
+    function drawTopXaxis() {
+        var topXaxis = d3.svg
+                .axis()
+                .scale(this.x)
+                .orient('top')
+                .tickFormat(
+                    this.config.time_scale === 'Date'
+                        ? d3.time.format(this.config.date_format)
+                        : d3.format('1d')
+                )
+                .innerTickSize(this.xAxis.innerTickSize())
+                .outerTickSize(this.xAxis.outerTickSize())
+                .ticks(this.xAxis.ticks()[0]),
+            topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');
+        topXaxisSelection.call(topXaxis);
+        topXaxisSelection
+            .select('text.axis-title.top')
+            .attr(
+                'transform',
+                'translate(' +
+                    (this.raw_width / 2 - this.margin.left) +
+                    ',-' +
+                    9 * this.config.margin.top / 16 +
+                    ')'
+            );
     }
 
     function tickClick() {
@@ -1609,7 +1726,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var participantData = d3$1
+        var IDdata = d3
             .nest()
             .key(function(d) {
                 return d.values[0].values.raw[0][_this.config.id_col];
@@ -1619,10 +1736,15 @@
             })
             .rollup(function(d) {
                 //Expose start and end point of line.
-                return {
-                    x1: +d[0].values[0].key,
-                    x2: +d[0].values[1].key
-                };
+                return _this.config.time_scale === 'Study Day'
+                    ? {
+                          x1: +d[0].values[0].key,
+                          x2: +d[0].values[1].key
+                      }
+                    : {
+                          x1: new Date(d[0].values[0].key),
+                          x2: new Date(d[0].values[1].key)
+                      };
             })
             .entries(
                 markData.filter(function(d) {
@@ -1630,9 +1752,9 @@
                 })
             );
 
-        //For each participant...
-        participantData.forEach(function(participantDatum) {
-            var lineData = participantDatum.values;
+        //For each ID...
+        IDdata.forEach(function(IDdatum) {
+            var lineData = IDdatum.values;
 
             //Attach line x-coordinates to line object.
             lineData.forEach(function(lineDatum) {
@@ -1706,7 +1828,7 @@
                         } else if (nOverlapping === currentlyOverlappingLines.length) {
                             //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
                             currentLine.offset =
-                                d3$1.max(currentlyOverlappingLines, function(d) {
+                                d3.max(currentlyOverlappingLines, function(d) {
                                     return d.offset;
                                 }) + 1;
                             currentlyOverlappingLines.push(currentLine);
@@ -1715,7 +1837,7 @@
                             currentlyOverlappingLines.forEach(function(d, i) {
                                 d.index = i;
                             });
-                            var minOffset = d3$1.min(
+                            var minOffset = d3.min(
                                     currentlyOverlappingLines.filter(function(d) {
                                         return !d.overlapping;
                                     }),
@@ -1735,7 +1857,7 @@
                     if (currentLine.offset > 0) {
                         //Capture line via its class name and offset vertically.
                         var className = currentLine.key + ' line',
-                            g = d3$1.select(document.getElementsByClassName(className)[0]),
+                            g = d3.select(document.getElementsByClassName(className)[0]),
                             line = g.select('path');
                         g.attr(
                             'transform',
@@ -1753,7 +1875,7 @@
         var _this = this;
 
         //Nest data by study day and filter on any nested object with more than one datum.
-        var overlapping = d3$1
+        var overlapping = d3
             .nest()
             .key(function(d) {
                 return d.total + '|' + d.values.raw[0][_this.config.id_col];
@@ -1781,7 +1903,7 @@
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
                 var className = di + ' point',
-                    g = d3$1.select(document.getElementsByClassName(className)[0]),
+                    g = d3.select(document.getElementsByClassName(className)[0]),
                     point = g.select('circle');
                 g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
             });
@@ -1888,7 +2010,7 @@
                 return d.ongoing === _this.config.ongo_val;
             })
             .each(function(d) {
-                var g = d3$1.select(this),
+                var g = d3.select(this),
                     endpoint = d.values[1],
                     x = context.x(+endpoint.key),
                     y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
@@ -1919,7 +2041,7 @@
             .classed('reference-lines', true);
 
         //Append reference line for each item in config.referenceLines.
-        this.config.referenceLines.forEach(function(studyDay, i) {
+        this.config.referenceLines.forEach(function(referenceLine, i) {
             var referenceLineGroup = referenceLinesGroup
                     .append('g')
                     .classed('reference-line', true)
@@ -1928,8 +2050,8 @@
                     .append('line')
                     .classed('visible-reference-line', true)
                     .attr({
-                        x1: _this.x(studyDay.studyDay),
-                        x2: _this.x(studyDay.studyDay),
+                        x1: _this.x(referenceLine.timepoint),
+                        x2: _this.x(referenceLine.timepoint),
                         y1: 0,
                         y2: _this.plot_height
                     }),
@@ -1937,25 +2059,27 @@
                     .append('line')
                     .classed('invisible-reference-line', true)
                     .attr({
-                        x1: _this.x(studyDay.studyDay),
-                        x2: _this.x(studyDay.studyDay),
+                        x1: _this.x(referenceLine.timepoint),
+                        x2: _this.x(referenceLine.timepoint),
                         y1: 0,
                         y2: _this.plot_height
                     }),
                 // invisible reference line has no dasharray and is much thicker to make hovering easier
                 direction =
-                    studyDay.studyDay <= (_this.x_dom[1] - _this.x_dom[0]) / 2 ? 'right' : 'left',
+                    referenceLine.timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2
+                        ? 'right'
+                        : 'left',
                 referenceLineLabel = referenceLineGroup
                     .append('text')
                     .classed('reference-line-label', true)
                     .attr({
-                        x: _this.x(studyDay.studyDay),
+                        x: _this.x(referenceLine.timepoint),
                         y: 0,
                         'text-anchor': direction === 'right' ? 'beginning' : 'end',
                         dx: direction === 'right' ? 15 : -15,
                         dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
                     })
-                    .text(studyDay.label),
+                    .text(referenceLine.label),
                 dimensions = referenceLineLabel.node().getBBox(),
                 referenceLineLabelBox = referenceLineGroup
                     .insert('rect', '.reference-line-label')
@@ -1998,45 +2122,14 @@
         //Add filter functionality to legend.
         legendFilter.call(this);
 
-        //Remove None legend item; not sure why it's showing up.
-        this.wrap
-            .selectAll('.legend-item')
-            .filter(function(d) {
-                return d.label === 'None';
-            })
-            .classed('hidden', true);
-
         //Draw second x-axis at top of chart.
-        var topXaxis = d3$1.svg
-                .axis()
-                .scale(this.x)
-                .orient('top')
-                .tickFormat(
-                    this.config.time_scale === 'Date'
-                        ? d3.time.format(this.config.date_format)
-                        : d3.format('1d')
-                )
-                .innerTickSize(this.xAxis.innerTickSize())
-                .outerTickSize(this.xAxis.outerTickSize())
-                .ticks(this.xAxis.ticks()[0]),
-            topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');
-        topXaxisSelection.call(topXaxis);
-        topXaxisSelection
-            .select('text.axis-title.top')
-            .attr(
-                'transform',
-                'translate(' +
-                    (this.raw_width / 2 - this.margin.left) +
-                    ',-' +
-                    9 * this.config.margin.top / 16 +
-                    ')'
-            );
+        drawTopXaxis.call(this);
 
         //Draw second chart when y-axis tick label is clicked.
         this.svg
             .selectAll('.y.axis .tick')
             .each(function(d) {
-                if (/^-/.test(d)) d3$1.select(this).remove();
+                if (/^-/.test(d)) d3.select(this).remove();
             })
             .on('click', function(d) {
                 _this.selected_id = d;
@@ -2212,7 +2305,7 @@
         var settings = arguments[1];
 
         //Define unique div within passed element argument.
-        var container = d3$1
+        var container = d3
                 .select(element)
                 .append('div')
                 .attr('id', 'clinical-timelines'),

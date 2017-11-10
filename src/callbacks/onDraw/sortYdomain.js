@@ -1,4 +1,4 @@
-import { nest, min, set } from 'd3';
+import { nest, min, time, set } from 'd3';
 
 export default function sortYdomain() {
     //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
@@ -25,7 +25,17 @@ export default function sortYdomain() {
             //Nest data by grouping and ID.
             const nestedData = nest()
                 .key(d => d[this.config.y.grouping] + '|' + d[this.config.id_col])
-                .rollup(d => min(d, di => +di[this.config.stdy_col]))
+                .rollup(d =>
+                    min(
+                        d,
+                        di =>
+                            this.config.time_scale === 'Study Day'
+                                ? +di[this.config.stdy_col]
+                                : time
+                                      .format(this.config.date_format)
+                                      .parse(di[this.config.stdt_col])
+                    )
+                )
                 .entries(filtered_data)
                 .sort((a, b) => {
                     const aGrouping = a.key.split('|')[0],
@@ -57,7 +67,17 @@ export default function sortYdomain() {
             //Set y-domain.
             this.y_dom = nest()
                 .key(d => d[this.config.id_col])
-                .rollup(d => min(d, di => +di[this.config.stdy_col]))
+                .rollup(d =>
+                    min(
+                        d,
+                        di =>
+                            this.config.time_scale === 'Study Day'
+                                ? +di[this.config.stdy_col]
+                                : time
+                                      .format(this.config.date_format)
+                                      .parse(di[this.config.stdt_col])
+                    )
+                )
                 .entries(filtered_data)
                 .sort((a, b) => {
                     const earliestEventSort =

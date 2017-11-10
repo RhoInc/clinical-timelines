@@ -81,11 +81,11 @@ export default function syncSettings(settings) {
     //Default filters.
     const defaultFilters = [
         { value_col: syncedSettings.id_col, label: syncedSettings.id_unitPropCased },
-        { value_col: syncedSettings.event_col, label: 'Event Type' },
-        { value_col: syncedSettings.site_col, label: 'Site' }
+        { value_col: syncedSettings.site_col, label: 'Site' },
+        { value_col: syncedSettings.event_col, label: 'Event Type' }
     ];
     if (syncedSettings.ongo_col)
-        defaultFilters.push({ value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
+        defaultFilters.splice(2, 0, { value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
     syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
 
     //Default groupings

@@ -12,6 +12,7 @@ export default function legendFilter() {
             .sort((a, b) => this.config.color_dom.indexOf(a) - this.config.color_dom.indexOf(b)), // event type options
         legendItems = this.wrap
             .selectAll('.legend-item')
+            .classed('hidden', d => d.label === 'None') // Remove None legend item; not sure why it's showing up.
             .classed(
                 'selected',
                 d =>

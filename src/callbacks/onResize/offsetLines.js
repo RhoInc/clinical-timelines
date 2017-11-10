@@ -1,22 +1,27 @@
-import { nest, select, min, max } from 'd3';
+import { nest, select, time, min, max } from 'd3';
 
 export default function offsetLines(mark, markData) {
     //Nest data by study day and filter on any nested object with more than one datum.
-    const participantData = nest()
+    const IDdata = nest()
         .key(d => d.values[0].values.raw[0][this.config.id_col])
         .key(d => d.key)
         .rollup(d => {
             //Expose start and end point of line.
-            return {
-                x1: +d[0].values[0].key,
-                x2: +d[0].values[1].key
-            };
+            return this.config.time_scale === 'Study Day'
+                ? {
+                      x1: +d[0].values[0].key,
+                      x2: +d[0].values[1].key
+                  }
+                : {
+                      x1: new Date(d[0].values[0].key),
+                      x2: new Date(d[0].values[1].key)
+                  };
         })
         .entries(markData.filter(d => d.values.length > 1));
 
-    //For each participant...
-    participantData.forEach(participantDatum => {
-        const lineData = participantDatum.values;
+    //For each ID...
+    IDdata.forEach(IDdatum => {
+        const lineData = IDdatum.values;
 
         //Attach line x-coordinates to line object.
         lineData.forEach(lineDatum => {

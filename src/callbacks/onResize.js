@@ -1,6 +1,7 @@
 import highlightEvent from './onResize/highlightEvent';
-import { svg, select } from 'd3';
 import legendFilter from './onResize/legendFilter';
+import drawTopXaxis from './onResize/drawTopXaxis';
+import { select } from 'd3';
 import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
@@ -17,37 +18,8 @@ export default function onResize() {
     //Add filter functionality to legend.
     legendFilter.call(this);
 
-    //Remove None legend item; not sure why it's showing up.
-    this.wrap
-        .selectAll('.legend-item')
-        .filter(d => d.label === 'None')
-        .classed('hidden', true);
-
     //Draw second x-axis at top of chart.
-    const topXaxis = svg
-            .axis()
-            .scale(this.x)
-            .orient('top')
-            .tickFormat(
-                this.config.time_scale === 'Date'
-                    ? d3.time.format(this.config.date_format)
-                    : d3.format('1d')
-            )
-            .innerTickSize(this.xAxis.innerTickSize())
-            .outerTickSize(this.xAxis.outerTickSize())
-            .ticks(this.xAxis.ticks()[0]),
-        topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');
-    topXaxisSelection.call(topXaxis);
-    topXaxisSelection
-        .select('text.axis-title.top')
-        .attr(
-            'transform',
-            'translate(' +
-                (this.raw_width / 2 - this.margin.left) +
-                ',-' +
-                9 * this.config.margin.top / 16 +
-                ')'
-        );
+    drawTopXaxis.call(this);
 
     //Draw second chart when y-axis tick label is clicked.
     this.svg

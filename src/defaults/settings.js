@@ -81,7 +81,7 @@ export default {
     color_dom: null, // set in syncSettings()
     legend: {
         location: 'top',
-        label: '',
+        label: 'Event Type',
         order: null, // set in syncSettings()
         mark: 'circle'
     },

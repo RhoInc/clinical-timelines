@@ -1,4 +1,5 @@
 import { select } from 'd3';
+import toggleView from './toggleView';
 import drawParticipantTimeline from '../functions/drawParticipantTimeline';
 
 export default function augmentFilterControls() {

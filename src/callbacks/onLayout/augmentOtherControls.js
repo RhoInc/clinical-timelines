@@ -1,5 +1,7 @@
 import { select } from 'd3';
 import defineData from '../functions/defineData';
+import drawIDtimeline from '../functions/drawIDtimeline';
+import timeScaleChange from './augmentOtherControls/timeScaleChange';
 
 export default function augmentOtherControls() {
     const context = this,
@@ -34,69 +36,12 @@ export default function augmentOtherControls() {
             }
         })
         .on('change', function(d) {
-            if (d.description === 'X-axis scale') {
-                // X-axis controls
-                if (context.config.time_scale === 'Study Day') {
-                    // Define study day settings and redraw.
-                    context.config.x.type = 'linear';
-                    context.config.x.label = 'Study Day';
-                    context.config.x.format = '1d';
-                    context.config.marks[0].tooltip =
-                        `Event: [${context.config.event_col}]` +
-                        `\nStart Day: [${context.config.stdy_col}]` +
-                        `\nStop Day: [${context.config.endy_col}]`;
-                    context.config.marks[0].values = {
-                        wc_category: [context.config.stdy_col, context.config.endy_col]
-                    };
-                    context.config.marks[1].tooltip =
-                        `Event: [${context.config.event_col}]` +
-                        `\nStudy Day: [${context.config.stdy_col}]`;
-                    context.config.marks[1].values = {
-                        wc_category: ['DY']
-                    };
-                    const st_detail = context.config.details.filter(
-                            detail => detail.value_col === context.config.stdt_col
-                        )[0],
-                        en_detail = context.config.details.filter(
-                            detail => detail.value_col === context.config.endt_col
-                        )[0];
-                    st_detail.value_col = context.config.stdy_col;
-                    st_detail.label = 'Start Day';
-                    en_detail.value_col = context.config.endy_col;
-                    en_detail.label = 'End Day';
-                    defineData.call(context);
-                    context.draw();
-                } else if (context.config.time_scale === 'Date') {
-                    // Define date settings and redraw.
-                    context.config.x.type = 'time';
-                    context.config.x.label = 'Date';
-                    context.config.x.format = context.config.date_format;
-                    context.config.marks[0].tooltip =
-                        `Event: [${context.config.event_col}]` +
-                        `\nStart Date: [${context.config.stdt_col}]` +
-                        `\nStop Date: [${context.config.endt_col}]`;
-                    context.config.marks[0].values = {
-                        wc_category: [context.config.stdt_col, context.config.endt_col]
-                    };
-                    context.config.marks[1].tooltip =
-                        `Event: [${context.config.event_col}]` +
-                        `\nStudy Date: [${context.config.stdt_col}]`;
-                    context.config.marks[1].values = {
-                        wc_category: ['DT']
-                    };
-                    const st_detail = context.config.details.filter(
-                            detail => detail.value_col === context.config.stdy_col
-                        )[0],
-                        en_detail = context.config.details.filter(
-                            detail => detail.value_col === context.config.endy_col
-                        )[0];
-                    st_detail.value_col = context.config.stdt_col;
-                    st_detail.label = 'Start Date';
-                    en_detail.value_col = context.config.endt_col;
-                    en_detail.label = 'End Date';
-                    defineData.call(context);
-                    context.draw();
-                }
+            if (d.description === 'Event highlighting') {
+                context.IDtimeline.config.event_highlighted = context.config.event_highlighted;
+                if (context.selected_id) drawIDtimeline.call(context);
+                else context.draw();
+            } else if (d.description === 'X-axis scale') {
+                timeScaleChange.call(context);
             }
         });
 }

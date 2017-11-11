@@ -6,7 +6,8 @@ export default function enableDisableControls() {
             control =>
                 control.value_col !== this.config.id_col &&
                 control.option !== 'event_highlighted' &&
-                control.option !== 'time_scale'
+                control.option !== 'time_scale' &&
+                control.value_col !== this.config.event_col
         )
         .selectAll('select,input')
         .property('disabled', !!this.selected_id);

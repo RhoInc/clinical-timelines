@@ -4,7 +4,7 @@ import callbacks from './callbacks/index';
 export default function IDtimeline(clinicalTimelines) {
     const IDtimeline = createChart(
         clinicalTimelines.rightSide.node(),
-        clinicalTimelines.config.IDsettings
+        clinicalTimelines.config.IDtimelineSettings
     );
 
     for (const callback in callbacks)

@@ -83,7 +83,7 @@ export default function onInit() {
         this.config.marks.forEach(mark => {
             mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
         });
-        this.config.IDsettings.marks.forEach(mark => {
+        this.config.IDtimelineSettings.marks.forEach(mark => {
             mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
         });
     }

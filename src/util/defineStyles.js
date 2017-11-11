@@ -75,6 +75,9 @@ export default function defineStyles() {
                 '    vertical-align: top;' +
                 '    float: right;' +
                 '}',
+            '#clinical-timelines > #left-side > .wc-controls .control-group .span-description {' +
+                '    font-size: 90%;' +
+                '}',
             '#clinical-timelines > #left-side > .wc-controls .control-group .changer {' +
                 '    margin-left: 5px;' +
                 '    width: 50%;' +

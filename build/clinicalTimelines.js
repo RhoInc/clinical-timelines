@@ -90,6 +90,9 @@
                     '    vertical-align: top;' +
                     '    float: right;' +
                     '}',
+                '#clinical-timelines > #left-side > .wc-controls .control-group .span-description {' +
+                    '    font-size: 90%;' +
+                    '}',
                 '#clinical-timelines > #left-side > .wc-controls .control-group .changer {' +
                     '    margin-left: 5px;' +
                     '    width: 50%;' +
@@ -548,52 +551,43 @@
         return validSetting;
     }
 
-    function syncSettings(settings) {
-        var syncedSettings = clone(settings);
-
-        /**-------------------------------------------------------------------------------------------\
-      Renderer-specific settings
-    \-------------------------------------------------------------------------------------------**/
-
+    function syncRendererSpecificSettings(settings) {
         //ID
-        var defaultId_characteristics = [{ value_col: syncedSettings.site_col, label: 'Site' }];
-        syncedSettings.id_characteristics = arrayOfVariablesCheck(
-            defaultId_characteristics,
-            syncedSettings.id_characteristics
+        var defaultID_characteristics = [{ value_col: settings.site_col, label: 'Site' }];
+        settings.id_characteristics = arrayOfVariablesCheck(
+            defaultID_characteristics,
+            settings.id_characteristics
         );
-        syncedSettings.id_unitPropCased =
-            syncedSettings.id_unit.substring(0, 1).toUpperCase() +
-            syncedSettings.id_unit.substring(1).toLowerCase();
+        settings.id_unitPropCased =
+            settings.id_unit.substring(0, 1).toUpperCase() +
+            settings.id_unit.substring(1).toLowerCase();
 
         //Events
-        if (!(syncedSettings.event_types instanceof Array && syncedSettings.event_types.length))
-            delete syncedSettings.event_types;
+        if (!(settings.event_types instanceof Array && settings.event_types.length))
+            delete settings.event_types;
 
         //Filters
         var defaultFilters = [
-            { value_col: syncedSettings.id_col, label: syncedSettings.id_unitPropCased },
-            { value_col: syncedSettings.site_col, label: 'Site' },
-            { value_col: syncedSettings.event_col, label: 'Event Type' }
+            { value_col: settings.id_col, label: settings.id_unitPropCased },
+            { value_col: settings.site_col, label: 'Site' },
+            { value_col: settings.event_col, label: 'Event Type' }
         ];
-        if (syncedSettings.ongo_col)
-            defaultFilters.splice(2, 0, { value_col: syncedSettings.ongo_col, label: 'Ongoing?' });
-        syncedSettings.filters = arrayOfVariablesCheck(defaultFilters, syncedSettings.filters);
+        if (settings.ongo_col)
+            defaultFilters.splice(2, 0, { value_col: settings.ongo_col, label: 'Ongoing?' });
+        settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
         //Groupings
-        var defaultGroupings = [{ value_col: syncedSettings.site_col, label: 'Site' }];
-        syncedSettings.groupings = arrayOfVariablesCheck(
-            defaultGroupings,
-            syncedSettings.groupings
-        );
-        if (['horizontal', 'vertical'].indexOf(syncedSettings.grouping_direction) === -1)
-            syncedSettings.grouping_direction = 'horizontal';
+        var defaultGroupings = [{ value_col: settings.site_col, label: 'Site' }];
+        settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
+        if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
+            settings.grouping_direction = 'horizontal';
 
         //Reference lines
-        if (syncedSettings.reference_lines) {
-            if (!(syncedSettings.reference_lines instanceof Array))
-                syncedSettings.reference_lines = [syncedSettings.reference_lines];
+        if (settings.reference_lines) {
+            if (!(settings.reference_lines instanceof Array))
+                settings.reference_lines = [settings.reference_lines];
 
-            syncedSettings.reference_lines = syncedSettings.reference_lines
+            settings.reference_lines = settings.reference_lines
                 .map(function(referenceLine) {
                     var referenceLineObject = {};
                     referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
@@ -606,123 +600,140 @@
                     return Number.isInteger(referenceLine.studyDay);
                 });
 
-            if (!syncedSettings.reference_lines.length) delete syncedSettings.reference_lines;
+            if (!settings.reference_lines.length) delete settings.reference_lines;
         }
 
         //Details
         var defaultDetails =
-            syncedSettings.time_scale === 'Study Day'
+            settings.time_scale === 'Study Day'
                 ? [
-                      { value_col: syncedSettings.event_col, label: 'Event Type' },
-                      { value_col: syncedSettings.stdy_col, label: 'Start Day' },
-                      { value_col: syncedSettings.endy_col, label: 'Stop Day' },
-                      { value_col: syncedSettings.seq_col, label: 'Sequence Number' }
+                      { value_col: settings.event_col, label: 'Event Type' },
+                      { value_col: settings.stdy_col, label: 'Start Day' },
+                      { value_col: settings.endy_col, label: 'Stop Day' },
+                      { value_col: settings.seq_col, label: 'Sequence Number' }
                   ]
                 : [
-                      { value_col: syncedSettings.event_col, label: 'Event Type' },
-                      { value_col: syncedSettings.stdt_col, label: 'Start Date' },
-                      { value_col: syncedSettings.endt_col, label: 'Stop Date' },
-                      { value_col: syncedSettings.seq_col, label: 'Sequence Number' }
+                      { value_col: settings.event_col, label: 'Event Type' },
+                      { value_col: settings.stdt_col, label: 'Start Date' },
+                      { value_col: settings.endt_col, label: 'Stop Date' },
+                      { value_col: settings.seq_col, label: 'Sequence Number' }
                   ];
-        syncedSettings.details = arrayOfVariablesCheck(defaultDetails, syncedSettings.details);
-        syncedSettings.filters.forEach(function(filter) {
+        settings.details = arrayOfVariablesCheck(defaultDetails, settings.details);
+        settings.filters.forEach(function(filter) {
             if (
-                syncedSettings.details
+                settings.details
                     .map(function(detail) {
                         return detail.value_col;
                     })
                     .indexOf(filter.value_col) === -1
             )
-                syncedSettings.details.push(filter);
+                settings.details.push(filter);
         });
+    }
+
+    function syncWebchartsSettings(settings) {
+        //X-axis
+        settings.x.type = settings.time_scale === 'Study Day' ? 'linear' : 'time';
+        settings.x.label = settings.time_scale;
+        settings.x.format = settings.time_scale === 'Study Day' ? '1d' : settings.date_format;
+
+        //Lines (events with duration)
+        settings.marks[0].tooltip =
+            settings.time_scale === 'Study Day'
+                ? 'Event: [' +
+                  settings.event_col +
+                  ']' +
+                  ('\nStart Day: [' + settings.stdy_col + ']') +
+                  ('\nStop Day: [' + settings.endy_col + ']')
+                : 'Event: [' +
+                  settings.event_col +
+                  ']' +
+                  ('\nStart Date: [' + settings.stdt_col + ']') +
+                  ('\nStop Date: [' + settings.endt_col + ']');
+        settings.marks[0].values =
+            settings.time_scale === 'Study Day'
+                ? { wc_category: [settings.stdy_col, settings.endy_col] }
+                : { wc_category: [settings.stdt_col, settings.endt_col] };
+
+        //Circles (events without duration)
+        settings.marks[1].tooltip =
+            settings.time_scale === 'Study Day'
+                ? 'Event: [' +
+                  settings.event_col +
+                  ']' +
+                  ('\nStudy Day: [' + settings.stdy_col + ']')
+                : 'Event: [' +
+                  settings.event_col +
+                  ']' +
+                  ('\nStudy Date: [' + settings.stdt_col + ']');
+        settings.marks[1].values =
+            settings.time_scale === 'Study Day' ? { wc_category: ['DY'] } : { wc_category: ['DT'] };
+
+        //Define right margin for vertical groupings and to prevent date tick label cutoff.
+        settings.margin.right = settings.y.grouping || settings.time_scale === 'Date' ? 40 : 0;
+    }
+
+    function syncSettings(settings) {
+        var syncedSettings = clone(settings);
+
+        /**-------------------------------------------------------------------------------------------\
+      Renderer-specific settings
+    \-------------------------------------------------------------------------------------------**/
+
+        syncRendererSpecificSettings(syncedSettings);
 
         /**-------------------------------------------------------------------------------------------\
       Standard webcharts settings
     \-------------------------------------------------------------------------------------------**/
 
-        //X-axis
-        syncedSettings.x.type = syncedSettings.time_scale === 'Study Day' ? 'linear' : 'time';
-        syncedSettings.x.label = syncedSettings.time_scale;
-        syncedSettings.x.format =
-            syncedSettings.time_scale === 'Study Day' ? '1d' : syncedSettings.date_format;
-
         //Y-axis
         syncedSettings.y.column = syncedSettings.id_col;
         syncedSettings.y.grouping = syncedSettings.grouping_initial;
 
-        //Lines (events with duration)
+        //Lines
         syncedSettings.marks[0].per = [
             syncedSettings.id_col,
             syncedSettings.event_col,
             syncedSettings.seq_col
         ];
-        syncedSettings.marks[0].tooltip =
-            syncedSettings.time_scale === 'Study Day'
-                ? 'Event: [' +
-                  syncedSettings.event_col +
-                  ']' +
-                  ('\nStart Day: [' + syncedSettings.stdy_col + ']') +
-                  ('\nStop Day: [' + syncedSettings.endy_col + ']')
-                : 'Event: [' +
-                  syncedSettings.event_col +
-                  ']' +
-                  ('\nStart Date: [' + syncedSettings.stdt_col + ']') +
-                  ('\nStop Date: [' + syncedSettings.endt_col + ']');
-        syncedSettings.marks[0].values =
-            syncedSettings.time_scale === 'Study Day'
-                ? { wc_category: [syncedSettings.stdy_col, syncedSettings.endy_col] }
-                : { wc_category: [syncedSettings.stdt_col, syncedSettings.endt_col] };
 
-        //Circles (events without duration)
+        //Circles
         syncedSettings.marks[1].per = [
             syncedSettings.id_col,
             syncedSettings.event_col,
             syncedSettings.seq_col,
             'wc_value'
         ];
-        syncedSettings.marks[1].tooltip =
-            syncedSettings.time_scale === 'Study Day'
-                ? 'Event: [' +
-                  syncedSettings.event_col +
-                  ']' +
-                  ('\nStudy Day: [' + syncedSettings.stdy_col + ']')
-                : 'Event: [' +
-                  syncedSettings.event_col +
-                  ']' +
-                  ('\nStudy Date: [' + syncedSettings.stdt_col + ']');
-        syncedSettings.marks[1].values =
-            syncedSettings.time_scale === 'Study Day'
-                ? { wc_category: ['DY'] }
-                : { wc_category: ['DT'] };
 
         //Define mark coloring and legend order.
         syncedSettings.color_by = syncedSettings.event_col;
 
         //Sync bottom margin with y-axis range band.
         syncedSettings.margin.bottom = syncedSettings.margin.top + syncedSettings.range_band;
-        syncedSettings.margin.right = syncedSettings.margin.right
-            ? syncedSettings.margin.right
-            : syncedSettings.time_scale === 'Date' ? 40 : 0;
+
+        //Time scale-related settings
+        syncWebchartsSettings(syncedSettings);
 
         /**-------------------------------------------------------------------------------------------\
       ID timeline settings
     \-------------------------------------------------------------------------------------------**/
 
-        syncedSettings.IDsettings = clone(syncedSettings);
-        syncedSettings.IDsettings.x.label = '';
-        syncedSettings.IDsettings.y.column = syncedSettings.IDsettings.seq_col;
-        syncedSettings.IDsettings.y.sort = 'alphabetical-descending';
-        syncedSettings.IDsettings.marks[0].per = [
-            syncedSettings.IDsettings.event_col,
-            syncedSettings.IDsettings.seq_col
+        syncedSettings.IDtimelineSettings = clone(syncedSettings);
+        syncedSettings.IDtimelineSettings.x.label = '';
+        syncedSettings.IDtimelineSettings.y.column = syncedSettings.IDtimelineSettings.seq_col;
+        syncedSettings.IDtimelineSettings.y.sort = 'alphabetical-descending';
+        syncedSettings.IDtimelineSettings.marks[0].per = [
+            syncedSettings.IDtimelineSettings.event_col,
+            syncedSettings.IDtimelineSettings.seq_col
         ];
-        syncedSettings.IDsettings.marks[1].per = [
-            syncedSettings.IDsettings.event_col,
-            syncedSettings.IDsettings.seq_col,
+        syncedSettings.IDtimelineSettings.marks[1].per = [
+            syncedSettings.IDtimelineSettings.event_col,
+            syncedSettings.IDtimelineSettings.seq_col,
             'wc_value'
         ];
-        syncedSettings.IDsettings.range_band = syncedSettings.range_band / 2;
-        syncedSettings.IDsettings.margin = { left: 25 };
+        syncedSettings.IDtimelineSettings.range_band =
+            syncedSettings.IDtimelineSettings.range_band / 2;
+        syncedSettings.IDtimelineSettings.margin = { left: 25 };
 
         /**-------------------------------------------------------------------------------------------\
       Listing settings
@@ -975,7 +986,7 @@
             this.config.marks.forEach(function(mark) {
                 mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
             });
-            this.config.IDsettings.marks.forEach(function(mark) {
+            this.config.IDtimelineSettings.marks.forEach(function(mark) {
                 mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
             });
         }
@@ -991,7 +1002,8 @@
                 return (
                     control.value_col !== _this.config.id_col &&
                     control.option !== 'event_highlighted' &&
-                    control.option !== 'time_scale'
+                    control.option !== 'time_scale' &&
+                    control.value_col !== _this.config.event_col
                 );
             })
             .selectAll('select,input')
@@ -1189,6 +1201,33 @@
             });
     }
 
+    function timeScaleChange() {
+        var _this = this;
+
+        //Sync settings
+        syncWebchartsSettings(this.config);
+        syncWebchartsSettings(this.IDtimeline.config);
+        this.listing.config.cols.forEach(function(col) {
+            if (col === _this.config.stdy_col) col = _this.config.stdt_col;
+            if (col === _this.config.endy_col) col = _this.config.endt_col;
+            if (col === _this.config.stdt_col) col = _this.config.stdy_col;
+            if (col === _this.config.endt_col) col = _this.config.endy_col;
+        });
+        this.listing.config.headers.forEach(function(header) {
+            if (header === 'Start Day') header = 'Start Date';
+            if (header === 'Stop Day') header = 'Stop Date';
+            if (header === 'Start Date') header = 'Start Day';
+            if (header === 'Stop Date') header = 'Stop Day';
+        });
+
+        //Redefine data.
+        defineData.call(this);
+
+        //Redraw.
+        if (this.selected_id) drawIDtimeline.call(this);
+        else this.draw();
+    }
+
     function augmentOtherControls() {
         var context = this,
             otherControls = this.controls.wrap.selectAll('.control-group').filter(function(d) {
@@ -1229,77 +1268,12 @@
                 }
             })
             .on('change', function(d) {
-                if (d.description === 'X-axis scale') {
-                    // X-axis controls
-                    if (context.config.time_scale === 'Study Day') {
-                        // Define study day settings and redraw.
-                        context.config.x.type = 'linear';
-                        context.config.x.label = 'Study Day';
-                        context.config.x.format = '1d';
-                        context.config.marks[0].tooltip =
-                            'Event: [' +
-                            context.config.event_col +
-                            ']' +
-                            ('\nStart Day: [' + context.config.stdy_col + ']') +
-                            ('\nStop Day: [' + context.config.endy_col + ']');
-                        context.config.marks[0].values = {
-                            wc_category: [context.config.stdy_col, context.config.endy_col]
-                        };
-                        context.config.marks[1].tooltip =
-                            'Event: [' +
-                            context.config.event_col +
-                            ']' +
-                            ('\nStudy Day: [' + context.config.stdy_col + ']');
-                        context.config.marks[1].values = {
-                            wc_category: ['DY']
-                        };
-                        var st_detail = context.config.details.filter(function(detail) {
-                                return detail.value_col === context.config.stdt_col;
-                            })[0],
-                            en_detail = context.config.details.filter(function(detail) {
-                                return detail.value_col === context.config.endt_col;
-                            })[0];
-                        st_detail.value_col = context.config.stdy_col;
-                        st_detail.label = 'Start Day';
-                        en_detail.value_col = context.config.endy_col;
-                        en_detail.label = 'End Day';
-                        defineData.call(context);
-                        context.draw();
-                    } else if (context.config.time_scale === 'Date') {
-                        // Define date settings and redraw.
-                        context.config.x.type = 'time';
-                        context.config.x.label = 'Date';
-                        context.config.x.format = context.config.date_format;
-                        context.config.marks[0].tooltip =
-                            'Event: [' +
-                            context.config.event_col +
-                            ']' +
-                            ('\nStart Date: [' + context.config.stdt_col + ']') +
-                            ('\nStop Date: [' + context.config.endt_col + ']');
-                        context.config.marks[0].values = {
-                            wc_category: [context.config.stdt_col, context.config.endt_col]
-                        };
-                        context.config.marks[1].tooltip =
-                            'Event: [' +
-                            context.config.event_col +
-                            ']' +
-                            ('\nStudy Date: [' + context.config.stdt_col + ']');
-                        context.config.marks[1].values = {
-                            wc_category: ['DT']
-                        };
-                        var _st_detail = context.config.details.filter(function(detail) {
-                                return detail.value_col === context.config.stdy_col;
-                            })[0],
-                            _en_detail = context.config.details.filter(function(detail) {
-                                return detail.value_col === context.config.endy_col;
-                            })[0];
-                        _st_detail.value_col = context.config.stdt_col;
-                        _st_detail.label = 'Start Date';
-                        _en_detail.value_col = context.config.endt_col;
-                        _en_detail.label = 'End Date';
-                        defineData.call(context);
-                        context.draw();
-                    }
+                if (d.description === 'Event highlighting') {
+                    context.IDtimeline.config.event_highlighted = context.config.event_highlighted;
+                    if (context.selected_id) drawIDtimeline.call(context);
+                    else context.draw();
+                } else if (d.description === 'X-axis scale') {
+                    timeScaleChange.call(context);
                 }
             });
     }
@@ -2483,7 +2457,7 @@
     function IDtimeline(clinicalTimelines) {
         var IDtimeline = webcharts.createChart(
             clinicalTimelines.rightSide.node(),
-            clinicalTimelines.config.IDsettings
+            clinicalTimelines.config.IDtimelineSettings
         );
 
         for (var callback in callbacks$1) {

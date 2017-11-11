@@ -3,7 +3,10 @@ export default function enableDisableControls() {
     this.controls.wrap
         .selectAll('.control-group')
         .filter(
-            control => [this.config.id_unitPropCased, 'Event Type'].indexOf(control.label) === -1
+            control =>
+                control.value_col !== this.config.id_col &&
+                control.option !== 'event_highlighted' &&
+                control.option !== 'time_scale'
         )
         .selectAll('select,input')
         .property('disabled', !!this.selected_id);

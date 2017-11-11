@@ -10,17 +10,17 @@ export default function augmentOtherControls() {
     //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
     otherControls
         .each(function(d) {
-            if (d.label === 'Y-axis') {
+            if (['Y-axis sort', 'Y-axis grouping'].indexOf(d.description) > -1) {
                 // Y-axis controls
                 const options = select(this).selectAll('option');
 
-                if (d.description === 'sort')
+                if (d.description === 'Y-axis sort')
                     // Add labels to Y-axis sort.
                     options.property(
                         'label',
                         di => d.relabels[d.values.filter(dii => dii !== 'None').indexOf(di)]
                     );
-                else if (d.description === 'grouping')
+                else if (d.description === 'Y-axis grouping')
                     // Add variable labels to Y-axis grouping options.
                     options.property(
                         'label',
@@ -34,7 +34,7 @@ export default function augmentOtherControls() {
             }
         })
         .on('change', function(d) {
-            if (d.label === 'X-axis') {
+            if (d.description === 'X-axis scale') {
                 // X-axis controls
                 if (context.config.time_scale === 'Study Day') {
                     // Define study day settings and redraw.

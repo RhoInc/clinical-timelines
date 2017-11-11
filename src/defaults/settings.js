@@ -52,7 +52,7 @@ export default {
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
             attributes: {
-                'stroke-width': 3,
+                'stroke-width': 4,
                 'stroke-opacity': 1
             }
         },

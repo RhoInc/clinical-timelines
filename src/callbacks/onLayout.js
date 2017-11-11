@@ -8,19 +8,39 @@ export default function onLayout() {
     const context = this;
 
     //Move control labels and descriptions inside a div to display them vertically, label on top of description.
-    this.controls.wrap.selectAll('.control-group').each(function(d) {
-        const controlGroup = select(this),
-            label = controlGroup.select('.control-label'),
-            description = controlGroup.select('.span-description'),
-            container = controlGroup
-                .insert('div', ':first-child')
-                .classed('label-description', true);
+    this.controls.wrap
+        .selectAll('.control-group')
+        .each(function(d) {
+            const
+                controlGroup = select(this),
+                label = controlGroup.select('.control-label'),
+                description = controlGroup.select('.span-description'),
+                container = controlGroup
+                    .append('div')
+                    .classed('label-description', true);
 
-        container.node().appendChild(label.node());
-        container.node().appendChild(description.node());
+            controlGroup.attr('class', `${controlGroup.attr('class')} {d.type}`);
 
-        if (d.value_col === context.config.event_col) controlGroup.classed('hidden', true);
-    });
+            container.node().appendChild(label.node());
+            container.node().appendChild(description.node());
+
+            //Add horizontal rule to group filters.
+            if (d.value_col === context.config.id_col)
+                context.controls.wrap
+                    .insert('div', ':first-child')
+                    .classed('controls horizontal-rule', true)
+                    .text('Controls');
+            else if (d.value_col === context.config.site_col) {
+                const
+                    filterRule = context.controls.wrap
+                        .append('div')
+                        .classed('filters horizontal-rule', true)
+                        .text('Filters');
+                context.controls.wrap
+                    .node()
+                    .insertBefore(filterRule.node(), this);
+            }
+        });
 
     //Add container for ID characteristics.
     this.IDdetails.wrap = this.leftSide
@@ -43,7 +63,7 @@ export default function onLayout() {
         .classed('annotation population-details', true);
 
     //Add back button to return from ID timeline to clinical timelines.
-    this.backButton = this.controls.wrap.append('div').classed('back-button hidden', true);
+    this.backButton = this.controls.wrap.insert('div', ':first-child').classed('back-button hidden', true);
     this.backButton
         .append('button')
         .html('&#8592; Back')

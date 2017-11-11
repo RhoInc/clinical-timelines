@@ -10,7 +10,8 @@ export default function augmentFilterControls() {
 
     //Set to selected event types specified in settings.event_types and handle clinical timelines and ID timeline toggle.
     filters
-        //Highlight selectecd event types in select.
+        .classed('ID', d => d.value_col === this.config.id_col)
+        //Highlight selected event types in select.
         .each(function(d) {
             if (d.value_col === context.config.event_col)
                 select(this)

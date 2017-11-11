@@ -23,7 +23,7 @@ export default function backButton() {
     //Highlight ID dropdown.
     this.controls.wrap
         .selectAll('.control-group')
-        .filter(control => control.label === this.config.id_unitPropCased)
+        .filter(control => control.description.indexOf(this.config.id_unitPropCased) > -1)
         .style({
             'font-weight': 'bold'
         })

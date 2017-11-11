@@ -60,9 +60,9 @@ export default function onInit() {
     this.controls.config.inputs = this.controls.config.inputs.filter(input => {
         if (input.type !== 'subsetter') {
             //Set values of Event Type highlighting control to event types present in the data.
-            if (input.label === 'Event Type' && input.description === 'highlighting')
+            if (input.description === 'Event highlighting')
                 input.values = this.config.color_dom;
-            else if (input.label === 'Y-axis' && input.description === 'grouping')
+            else if (input.description === 'Y-axis grouping')
                 input.values = this.config.groupings.map(grouping => grouping.value_col);
 
             return true;
@@ -80,8 +80,12 @@ export default function onInit() {
     });
 
     //Add data-driven tooltips.
-    if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col))
+    if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
         this.config.marks.forEach(mark => {
             mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
         });
+        this.config.IDsettings.marks.forEach(mark => {
+            mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
+        });
+    }
 }

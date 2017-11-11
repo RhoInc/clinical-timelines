@@ -54,23 +54,39 @@ export default function defineStyles() {
                 '    clear: left;' +
                 '}',
             '#clinical-timelines > #left-side > .wc-controls .control-group {' +
-                '    margin-bottom: 5px;' +
+                '    margin: 0 0 5px 0;' +
                 '    display: block;' +
                 '    float: right;' +
                 '    clear: both;' +
+                '    width: 100%;' +
+                '}',
+            '#clinical-timelines > #left-side > .wc-controls .horizontal-rule {' +
+                '    width: 100%;' +
+                '    display: inline-block;' +
+                '    margin-bottom: 5px;' +
+                '    font-size: 150%;' +
+                '    border-bottom: 1px solid black;' +
+                '}',
+            '#clinical-timelines > #left-side > .wc-controls .control-group.ID {' +
+                '    display: inline-block;' +
                 '}',
             '#clinical-timelines > #left-side > .wc-controls .control-group > * {' +
                 '    display: inline-block;' +
                 '    vertical-align: top;' +
+                '    float: right;' +
                 '}',
             '#clinical-timelines > #left-side > .wc-controls .control-group .changer {' +
                 '    margin-left: 5px;' +
+                '    width: 50%;' +
+                '    clear: right;' +
+                '}',
+            '#clinical-timelines > #left-side > .wc-controls .back-button {' +
+                '    display: inline-block;' +
                 '}',
             '#clinical-timelines > #left-side > .wc-controls .back-button button {' +
                 '    padding: 0 5px;' +
                 '    font-size: 14px;' +
                 '    float: left;' +
-                '    clear: left;' +
                 '    margin-top: 5px;' +
                 '}',
 

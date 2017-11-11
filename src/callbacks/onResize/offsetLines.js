@@ -113,7 +113,9 @@ export default function offsetLines(mark, markData) {
                         g = select(document.getElementsByClassName(className)[0]);
                     g.attr(
                         'transform',
-                        `translate(0,${currentLine.offset * +mark.attributes['stroke-width'] * 1.5})`
+                        `translate(0,${currentLine.offset *
+                            +mark.attributes['stroke-width'] *
+                            1.5})`
                     );
                 }
             });

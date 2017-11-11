@@ -3,7 +3,7 @@ import clone from '../util/clone';
 
 export default function syncControls(controls, settings) {
     settings.filters
-        .sort((a,b) => a.value_col === settings.event_col ? 1 : 0)
+        .sort((a, b) => (a.value_col === settings.event_col ? 1 : 0))
         .forEach(filter => {
             filter.type = 'subsetter';
             filter.description = filter.label;

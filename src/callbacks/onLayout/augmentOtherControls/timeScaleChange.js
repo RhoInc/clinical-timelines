@@ -1,11 +1,21 @@
-import syncWebchartsSettings from '../../../defaults/syncSettings/syncWebchartsSettings';
+import { select } from 'd3';
+import syncTimeScaleSettings from '../../../defaults/syncSettings/syncTimeScaleSettings';
 import defineData from '../../functions/defineData';
 import drawIDtimeline from '../../functions/drawIDtimeline';
 
-export default function timeScaleChange() {
-    //Sync settings
-    syncWebchartsSettings(this.config);
-    syncWebchartsSettings(this.IDtimeline.config);
+export default function timeScaleChange(dropdown, d) {
+    //Update clinical timelines time scale settings
+    this.config.time_scale = select(dropdown).select('option:checked').text();
+    syncTimeScaleSettings(this.config);
+
+    //Update ID timeline time scale settings
+    this.IDtimeline.multiples
+        .forEach(multiple => {
+            multiple.config.time_scale = this.config.time_scale;
+            syncTimeScaleSettings(multiple.config);
+        });
+
+    //Update listing time scale settings
     this.listing.config.cols.forEach(col => {
         if (col === this.config.stdy_col) col = this.config.stdt_col;
         if (col === this.config.endy_col) col = this.config.endt_col;
@@ -23,6 +33,8 @@ export default function timeScaleChange() {
     defineData.call(this);
 
     //Redraw.
-    if (this.selected_id) drawIDtimeline.call(this);
-    else this.draw();
+    if (this.selected_id)
+        drawIDtimeline.call(this);
+    else
+        this.draw();
 }

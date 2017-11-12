@@ -27,7 +27,7 @@ export default function onResize() {
     this.svg.selectAll('.highlight-overlay').remove();
     this.svg
         .selectAll('.wc-data-mark, .ongoing-event')
-        .classed('highlighted', d => d.key.indexOf(this.config.event_highlighted) > -1)
+        .classed('highlighted', d => d.key.indexOf(this.parent.config.event_highlighted) > -1)
         .filter(function() {
             return (
                 this.tagName === 'path' && this.getAttribute('class').indexOf('highlighted') > -1

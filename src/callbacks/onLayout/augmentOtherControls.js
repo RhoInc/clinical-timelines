@@ -5,8 +5,7 @@ import eventHighlightingChange from './augmentOtherControls/eventHighlightingCha
 import timeScaleChange from './augmentOtherControls/timeScaleChange';
 
 export default function augmentOtherControls() {
-    const
-        context = this,
+    const context = this,
         otherControls = this.controls.wrap
             .selectAll('.control-group')
             .filter(d => d.type !== 'subsetter');
@@ -31,13 +30,13 @@ export default function augmentOtherControls() {
                     di =>
                         di !== 'None'
                             ? context.config.groupings[
-                                    context.config.groupings.map(dii => dii.value_col).indexOf(di)
-                                ].label
+                                  context.config.groupings.map(dii => dii.value_col).indexOf(di)
+                              ].label
                             : 'None'
                 );
         });
 
-  //Redefine event highlighting event listener.
+    //Redefine event highlighting event listener.
     otherControls
         .filter(d => d.option === 'event_highlighted')
         .select('select')
@@ -45,7 +44,7 @@ export default function augmentOtherControls() {
             eventHighlightingChange.call(context, this, d);
         });
 
-  //Redefine time scale event listener.
+    //Redefine time scale event listener.
     otherControls
         .filter(d => d.option === 'time_scale')
         .select('select')

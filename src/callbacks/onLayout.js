@@ -34,6 +34,11 @@ export default function onLayout() {
         }
     });
 
+    //Add container for population details.
+    this.populationDetails.wrap = this.leftSide
+        .insert('div', ':first-child')
+        .classed('annotation population-details', true);
+
     //Add container for ID characteristics.
     this.IDdetails.wrap = this.leftSide
         .insert('div', ':first-child')
@@ -49,13 +54,8 @@ export default function onLayout() {
         .classed('characteristic', true)
         .html(d => `${d.label}: <span id = '${d.value_col}'></span>`);
 
-    //Add container for population details.
-    this.populationDetails.wrap = this.leftSide
-        .insert('div', ':first-child')
-        .classed('annotation population-details', true);
-
     //Add back button to return from ID timeline to clinical timelines.
-    this.backButton = this.controls.wrap
+    this.backButton = this.IDdetails.wrap
         .insert('div', ':first-child')
         .classed('back-button hidden', true);
     this.backButton

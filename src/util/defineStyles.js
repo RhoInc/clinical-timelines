@@ -83,14 +83,13 @@ export default function defineStyles() {
                 '    width: 50%;' +
                 '    clear: right;' +
                 '}',
-            '#clinical-timelines > #left-side > .wc-controls .back-button {' +
+            '#clinical-timelines > #left-side > .ID-details .back-button {' +
                 '    display: inline-block;' +
+                '    float: left;' +
                 '}',
-            '#clinical-timelines > #left-side > .wc-controls .back-button button {' +
+            '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                 '    padding: 0 5px;' +
                 '    font-size: 14px;' +
-                '    float: left;' +
-                '    margin-top: 5px;' +
                 '}',
 
             /***--------------------------------------------------------------------------------------\
@@ -128,11 +127,14 @@ export default function defineStyles() {
                 '}',
 
             //Mark highlighting
-            '#clinical-timelines .highlighted {' + '    stroke: black;' + '}',
-            '#clinical-timelines path.highlighted {' + '    stroke-width: 5px;' + '}',
+            '#clinical-timelines path.highlighted {' + '    stroke: black;' + '}',
             '#clinical-timelines line.highlight-overlay {' + '    stroke-width: 2px;' + '}',
-            '#clinical-timelines circle.highlighted {' + '    stroke-width: 2px;' + '}',
-            '#clinical-timelines polygon.highlighted {' + '    stroke-width: 2px;' + '}',
+            '#clinical-timelines circle.highlighted {' +
+                '    stroke: black;' +
+                '    stroke-width: 2px;' +
+                '}',
+            '#clinical-timelines polygon.highlighted {' + '    stroke: black;' + '}',
+            '    stroke-width: 2px;' + '}',
 
             //Grouping
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +

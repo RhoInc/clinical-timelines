@@ -16,8 +16,7 @@ export default function drawIDtimeline() {
     this.wrap.select('svg.wc-svg').classed('hidden', true);
 
     //Define ID data.
-    const
-        longIDdata = this.raw_data.filter(di => di[this.config.id_col] === this.selected_id),
+    const longIDdata = this.raw_data.filter(di => di[this.config.id_col] === this.selected_id),
         wideIDdata = this.wide_data.filter(di => di[this.config.id_col] === this.selected_id);
 
     //Draw row identifier characteristics.

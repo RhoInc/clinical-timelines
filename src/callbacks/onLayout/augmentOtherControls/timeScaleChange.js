@@ -1,19 +1,20 @@
 import { select } from 'd3';
+import clone from '../../../util/clone';
+import syncIDtimelineSettings from '../../../defaults/syncSettings/syncTimeScaleSettings';
 import syncTimeScaleSettings from '../../../defaults/syncSettings/syncTimeScaleSettings';
 import defineData from '../../functions/defineData';
 import drawIDtimeline from '../../functions/drawIDtimeline';
 
 export default function timeScaleChange(dropdown, d) {
     //Update clinical timelines time scale settings
-    this.config.time_scale = select(dropdown).select('option:checked').text();
+    this.config.time_scale = select(dropdown)
+        .select('option:checked')
+        .text();
     syncTimeScaleSettings(this.config);
 
     //Update ID timeline time scale settings
-    this.IDtimeline.multiples
-        .forEach(multiple => {
-            multiple.config.time_scale = this.config.time_scale;
-            syncTimeScaleSettings(multiple.config);
-        });
+    this.IDtimeline.config.time_scale = this.config.time_scale;
+    syncTimeScaleSettings(this.IDtimeline.config);
 
     //Update listing time scale settings
     this.listing.config.cols.forEach(col => {
@@ -33,8 +34,6 @@ export default function timeScaleChange(dropdown, d) {
     defineData.call(this);
 
     //Redraw.
-    if (this.selected_id)
-        drawIDtimeline.call(this);
-    else
-        this.draw();
+    if (this.selected_id) drawIDtimeline.call(this);
+    else this.draw();
 }

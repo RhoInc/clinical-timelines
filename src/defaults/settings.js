@@ -62,8 +62,10 @@ export default {
             tooltip: null, // set in syncSettings()
             radius: '3',
             attributes: {
+                fill: 'white',
                 'fill-opacity': 1,
-                'stroke-opacity': 1
+                'stroke-opacity': 1,
+                'stroke-width': 2
             }
         }
     ],
@@ -88,5 +90,5 @@ export default {
     gridlines: 'y',
     range_band: 24,
     margin: { top: 50 }, // for second x-axis
-    resizable: true
+    resizable: false // can't be resizable so the multiples aren't overlapped by their titles
 };

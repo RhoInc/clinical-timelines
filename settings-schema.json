@@ -122,7 +122,7 @@
         {"title": "Time Scale"
         ,"description": "the time scale on which to plot events"
         ,"type": "string"
-        ,"default": "study day"
+        ,"default": "Study Day"
         }
         ,"stdy_col":
             {"title": "Start Day"

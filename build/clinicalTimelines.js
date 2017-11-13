@@ -706,12 +706,20 @@
     }
 
     function syncListingSettings(settings) {
+        settings.details_config = settings.details_config || {
+            cols: settings.details.map(function(detail) {
+                return detail.value_col;
+            }),
+            headers: settings.details.map(function(detail) {
+                return detail.label;
+            })
+        };
         //Define listing columns and headers if not already defined.
         if (!settings.hasOwnProperty('cols')) {
-            settings.cols = syncedSettings.details.map(function(detail) {
+            settings.details_config.cols = settings.details.map(function(detail) {
                 return detail.value_col;
             });
-            settings.headers = syncedSettings.details.map(function(detail) {
+            settings.details_config.headers = settings.details.map(function(detail) {
                 return detail.label;
             });
         }
@@ -730,15 +738,7 @@
         syncIDtimelineSettings(syncedSettings.IDtimelineSettings);
 
         //Listing
-        syncedSettings.details_config = syncedSettings.details_config || {
-            cols: syncedSettings.details.map(function(detail) {
-                return detail.value_col;
-            }),
-            headers: syncedSettings.details.map(function(detail) {
-                return detail.label;
-            })
-        };
-        syncListingSettings(syncedSettings.details_config);
+        syncListingSettings(syncedSettings);
 
         return syncedSettings;
     }

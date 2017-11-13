@@ -19,11 +19,7 @@ export default function syncSettings(settings) {
     syncIDtimelineSettings(syncedSettings.IDtimelineSettings);
 
     //Listing
-    syncedSettings.details_config = syncedSettings.details_config || {
-        cols: syncedSettings.details.map(detail => detail.value_col),
-        headers: syncedSettings.details.map(detail => detail.label)
-    };
-    syncListingSettings(syncedSettings.details_config);
+    syncListingSettings(syncedSettings);
 
     return syncedSettings;
 }

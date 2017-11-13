@@ -1,4 +1,4 @@
-import { set } from 'd3';
+import { set, min, max, time } from 'd3';
 import defineData from './functions/defineData';
 import handleEventTypes from './onInit/handleEventTypes';
 import removeFilters from './onInit/removeFilters';
@@ -41,6 +41,17 @@ export default function onInit() {
             !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
             !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
     );
+
+    //Define x-domain.
+    this.config.study_day_range = this.config.study_day_range || [
+        min(this.raw_data, d => d[this.config.stdy_col]),
+        max(this.raw_data, d => d[this.config.endy_col])
+    ];
+    this.config.date_range = this.config.date_range instanceof Array && this.config.date_range.length === 2
+        ? this.config.date_range
+            .map(date => time.format(this.config.date_format).parse(date))
+        : [min(this.raw_data, d => time.format(this.config.date_format).parse(d[this.config.stdt_col]))
+          ,max(this.raw_data, d => time.format(this.config.date_format).parse(d[this.config.endt_col]))]
 
     //Define a record for each start day and stop day.
     defineData.call(this);

@@ -18,8 +18,10 @@ export default {
     time_scale: 'Study Day',
     stdy_col: 'STDY',
     endy_col: 'ENDY',
+    study_day_range: null,
     stdt_col: 'STDT',
     endt_col: 'ENDT',
+    date_range: null,
     date_format: '%Y-%m-%d',
 
     seq_col: 'SEQ',

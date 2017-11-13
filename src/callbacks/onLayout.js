@@ -19,18 +19,18 @@ export default function onLayout() {
         container.node().appendChild(label.node());
         container.node().appendChild(description.node());
 
-        //Add horizontal rule to group filters.
+        //Add horizontal rule to group controls and filters.
         if (d.value_col === context.config.id_col)
             context.controls.wrap
                 .insert('div', ':first-child')
                 .classed('controls horizontal-rule', true)
                 .text('Controls');
-        else if (d.value_col === context.config.site_col) {
+        else if (d.option === 'y.grouping') {
             const filterRule = context.controls.wrap
                 .append('div')
                 .classed('filters horizontal-rule', true)
                 .text('Filters');
-            context.controls.wrap.node().insertBefore(filterRule.node(), this);
+            context.controls.wrap.node().insertBefore(filterRule.node(), this.nextSibling);
         }
     });
 

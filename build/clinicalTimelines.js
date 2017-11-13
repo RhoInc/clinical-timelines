@@ -864,6 +864,102 @@
         this.raw_data = d3.merge([singleDayEvents, multiDayEvents]);
     }
 
+    function handleEventTypes() {
+        var _this = this;
+
+        this.allEventTypes = d3
+            .set(
+                this.raw_data.map(function(d) {
+                    return d[_this.config.event_col];
+                })
+            )
+            .values()
+            .sort();
+        this.currentEventTypes = this.config.event_types || this.allEventTypes;
+        this.config.color_dom =
+            this.currentEventTypes !== 'All'
+                ? this.currentEventTypes.concat(
+                      this.allEventTypes
+                          .filter(function(eventType) {
+                              return _this.currentEventTypes.indexOf(eventType) === -1;
+                          })
+                          .sort()
+                  )
+                : this.allEventTypes;
+        this.config.legend.order = this.config.color_dom;
+    }
+
+    function removeFilters() {
+        var _this = this;
+
+        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
+            if (input.type !== 'subsetter') {
+                //Set values of Event Type highlighting control to event types present in the data.
+                if (input.description === 'Event highlighting')
+                    input.values = _this.config.color_dom;
+                else if (input.description === 'Y-axis grouping')
+                    input.values = _this.config.groupings.map(function(grouping) {
+                        return grouping.value_col;
+                    });
+
+                return true;
+            } else if (!_this.raw_data[0].hasOwnProperty(input.value_col)) {
+                console.warn(
+                    input.value_col + ' filter removed because the variable does not exist.'
+                );
+
+                return false;
+            } else {
+                var levels = d3
+                    .set(
+                        _this.raw_data.map(function(d) {
+                            return d[input.value_col];
+                        })
+                    )
+                    .values();
+
+                if (levels.length < 2) {
+                    console.warn(
+                        input.value_col + ' filter removed because the variable has only one level.'
+                    );
+                }
+
+                return levels.length > 1;
+            }
+        });
+    }
+
+    function removeSiteReferences() {
+        var _this = this;
+
+        if (!this.raw_data[0].hasOwnProperty(this.config.site_col)) {
+            this.config.id_characteristics = this.config.id_characteristics.filter(function(
+                id_characteristic
+            ) {
+                return id_characteristic.value_col !== _this.config.site_col;
+            });
+            this.listing.config.cols = this.listing.config.cols.filter(function(col) {
+                return col !== _this.config.site_col;
+            });
+            this.listing.config.headers = this.listing.config.headers.filter(function(header) {
+                return header !== 'Site';
+            });
+        }
+    }
+
+    function addDataDrivenTooltips() {
+        var _this = this;
+
+        if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
+            this.config.marks.forEach(function(mark) {
+                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
+            });
+            this.config.IDtimelineSettings.marks.forEach(function(mark) {
+                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
+            });
+        }
+    }
+
     function onInit() {
         var _this = this;
 
@@ -913,67 +1009,16 @@
         defineData.call(this);
 
         //Default event types to 'All'.
-        this.allEventTypes = d3
-            .set(
-                this.raw_data.map(function(d) {
-                    return d[_this.config.event_col];
-                })
-            )
-            .values()
-            .sort();
-        this.currentEventTypes = this.config.event_types || this.allEventTypes;
-        this.config.color_dom =
-            this.currentEventTypes !== 'All'
-                ? this.currentEventTypes.concat(
-                      this.allEventTypes
-                          .filter(function(eventType) {
-                              return _this.currentEventTypes.indexOf(eventType) === -1;
-                          })
-                          .sort()
-                  )
-                : this.allEventTypes;
-        this.config.legend.order = this.config.color_dom;
+        handleEventTypes.call(this);
 
         //Remove filters for variables fewer than two levels.
-        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
-            if (input.type !== 'subsetter') {
-                //Set values of Event Type highlighting control to event types present in the data.
-                if (input.description === 'Event highlighting')
-                    input.values = _this.config.color_dom;
-                else if (input.description === 'Y-axis grouping')
-                    input.values = _this.config.groupings.map(function(grouping) {
-                        return grouping.value_col;
-                    });
+        removeFilters.call(this);
 
-                return true;
-            } else {
-                var levels = d3
-                    .set(
-                        _this.raw_data.map(function(d) {
-                            return d[input.value_col];
-                        })
-                    )
-                    .values();
-
-                if (levels.length < 2) {
-                    console.warn(
-                        input.value_col + ' filter removed because the variable has only one level.'
-                    );
-                }
-
-                return levels.length > 1;
-            }
-        });
+        //Remove references to site_col if column does not exist.
+        removeSiteReferences.call(this);
 
         //Add data-driven tooltips.
-        if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
-            this.config.marks.forEach(function(mark) {
-                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
-            });
-            this.config.IDtimelineSettings.marks.forEach(function(mark) {
-                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
-            });
-        }
+        addDataDrivenTooltips.call(this);
     }
 
     function enableDisableControls() {
@@ -1313,18 +1358,18 @@
             container.node().appendChild(label.node());
             container.node().appendChild(description.node());
 
-            //Add horizontal rule to group filters.
+            //Add horizontal rule to group controls and filters.
             if (d.value_col === context.config.id_col)
                 context.controls.wrap
                     .insert('div', ':first-child')
                     .classed('controls horizontal-rule', true)
                     .text('Controls');
-            else if (d.value_col === context.config.site_col) {
+            else if (d.option === 'y.grouping') {
                 var filterRule = context.controls.wrap
                     .append('div')
                     .classed('filters horizontal-rule', true)
                     .text('Filters');
-                context.controls.wrap.node().insertBefore(filterRule.node(), this);
+                context.controls.wrap.node().insertBefore(filterRule.node(), this.nextSibling);
             }
         });
 

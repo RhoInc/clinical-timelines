@@ -1,4 +1,5 @@
 import { select } from 'd3';
+import drawIDtimeline from '../functions/drawIDtimeline';
 
 export default function legendFilter() {
     //Filter data by clicking on legend.
@@ -6,19 +7,21 @@ export default function legendFilter() {
         eventTypeFilter = this.filters.filter(filter => filter.col === this.config.event_col)[0], // event type filter object
         eventTypeControl = this.controls.wrap
             .selectAll('.control-group')
-            .filter(d => d.label === 'Event Type'), // event type control
+            .filter(d => d.description === 'Event Type'), // event type control
         eventTypes = eventTypeControl
             .selectAll('.changer option')
             .sort((a, b) => this.config.color_dom.indexOf(a) - this.config.color_dom.indexOf(b)), // event type options
         legendItems = this.wrap
             .selectAll('.legend-item')
+            .classed('ct-button', true)
             .classed(
                 'selected',
                 d =>
                     eventTypeFilter.val instanceof Array
                         ? eventTypeFilter.val.indexOf(d.label) > -1
                         : true
-            ); // legend items
+            )
+            .classed('hidden', d => d.label === 'None'); // Remove None legend item; not sure why it's showing up.
 
     //Add event listener to legend items.
     legendItems.on('click', function(d) {
@@ -42,6 +45,7 @@ export default function legendFilter() {
         eventTypeFilter.val = selectedLegendItems; // update filter object
         context.currentEventTypes = selectedLegendItems;
 
-        context.draw();
+        if (context.selected_id) drawIDtimeline.call(context);
+        else context.draw();
     });
 }

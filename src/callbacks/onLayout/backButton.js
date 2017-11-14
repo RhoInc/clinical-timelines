@@ -1,38 +1,29 @@
+import enableDisableControls from '../functions/enableDisableControls';
+import updateIDfilter from '../functions/updateIDfilter';
+
 export default function backButton() {
     delete this.selected_id;
 
-    //Enable/Disable controls other than Participant and Event Type filters.
-    this.controls.wrap
-        .selectAll('.control-group')
-        .filter(control => ['Participant', 'Event Type'].indexOf(control.label) === -1)
-        .selectAll('select,input')
-        .property('disabled', false);
+    enableDisableControls.call(this);
+    updateIDfilter.call(this);
 
-    //Update participant filter.
-    this.controls.wrap
-        .selectAll('.control-group')
-        .filter(control => control.value_col === this.config.id_col)
-        .selectAll('option')
-        .property('selected', option => option === 'All');
-    this.filters.filter(filter => filter.col === this.config.id_col)[0].val = 'All';
-
-    //Hide participant timelines.
-    this.participantDetails.wrap.classed('hidden', true);
-    this.participantTimeline.wrap.classed('hidden', true);
+    //Hide ID timelines.
+    this.IDdetails.wrap.classed('hidden', true);
+    this.IDtimeline.wrap.classed('hidden', true);
     this.listing.wrap.classed('hidden', true);
     this.backButton.classed('hidden', true);
 
     //Display population timelines.
     this.populationDetails.wrap.classed('hidden', false);
-    this.wrap.classed('hidden', false);
+    this.wrap.select('svg.wc-svg').classed('hidden', false);
 
     //Redraw clinical timelines.
     this.draw();
 
-    //Highlight participant dropdown.
+    //Highlight ID dropdown.
     this.controls.wrap
         .selectAll('.control-group')
-        .filter(control => control.label === 'Participant')
+        .filter(control => control.description.indexOf(this.config.id_unitPropCased) > -1)
         .style({
             'font-weight': 'bold'
         })

@@ -1,12 +1,22 @@
-import { set } from 'd3';
+import { min, max, time, set } from 'd3';
 import clone from '../../util/clone';
 
 export default function groupingData() {
     //Calculate x-domain.
-    const xDomain = [
-        d3.min(this.raw_data, d => Math.min(d[this.config.stdy_col], d[this.config.endy_col])),
-        d3.max(this.raw_data, d => Math.max(d[this.config.stdy_col], d[this.config.endy_col]))
-    ];
+    const xDomain =
+        this.config.time_scale === 'Study Day'
+            ? [
+                  min(this.raw_data, d => +d[this.config.stdy_col]),
+                  max(this.raw_data, d => +d[this.config.endy_col])
+              ]
+            : [
+                  min(this.raw_data, d =>
+                      time.format(this.config.date_format).parse(d[this.config.stdt_col])
+                  ),
+                  max(this.raw_data, d =>
+                      time.format(this.config.date_format).parse(d[this.config.endt_col])
+                  )
+              ];
 
     //Capture each grouping and corresponding array of IDs.
     this.groupings = set(
@@ -92,6 +102,27 @@ export default function groupingData() {
             this.initialSettings.range_band +
             this.groupings.length *
                 2 /
-                set(this.wide_data.map(d => d[this.config.id_col])).values().length *
+                set(
+                    this.wide_data
+                        .filter(d => {
+                            let filtered = false;
+
+                            this.filters.forEach(di => {
+                                if (
+                                    filtered === false &&
+                                    di.val !== 'All' &&
+                                    d[this.config.event_col] !== 'Grouping'
+                                ) {
+                                    filtered =
+                                        di.val instanceof Array
+                                            ? di.val.indexOf(d[di.col]) === -1
+                                            : di.val !== d[di.col];
+                                }
+                            });
+
+                            return !filtered;
+                        })
+                        .map(d => d[this.config.id_col])
+                ).values().length *
                 this.initialSettings.range_band;
 }

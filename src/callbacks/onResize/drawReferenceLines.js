@@ -8,7 +8,7 @@ export default function drawReferenceLines() {
         .classed('reference-lines', true);
 
     //Append reference line for each item in config.referenceLines.
-    this.config.referenceLines.forEach((studyDay, i) => {
+    this.config.referenceLines.forEach((referenceLine, i) => {
         const referenceLineGroup = referenceLinesGroup
                 .append('g')
                 .classed('reference-line', true)
@@ -17,8 +17,8 @@ export default function drawReferenceLines() {
                 .append('line')
                 .classed('visible-reference-line', true)
                 .attr({
-                    x1: this.x(studyDay.studyDay),
-                    x2: this.x(studyDay.studyDay),
+                    x1: this.x(referenceLine.timepoint),
+                    x2: this.x(referenceLine.timepoint),
                     y1: 0,
                     y2: this.plot_height
                 }),
@@ -26,23 +26,24 @@ export default function drawReferenceLines() {
                 .append('line')
                 .classed('invisible-reference-line', true)
                 .attr({
-                    x1: this.x(studyDay.studyDay),
-                    x2: this.x(studyDay.studyDay),
+                    x1: this.x(referenceLine.timepoint),
+                    x2: this.x(referenceLine.timepoint),
                     y1: 0,
                     y2: this.plot_height
                 }), // invisible reference line has no dasharray and is much thicker to make hovering easier
-            direction = studyDay.studyDay <= (this.x_dom[1] - this.x_dom[0]) / 2 ? 'right' : 'left',
+            direction =
+                referenceLine.timepoint <= (this.x_dom[1] - this.x_dom[0]) / 2 ? 'right' : 'left',
             referenceLineLabel = referenceLineGroup
                 .append('text')
                 .classed('reference-line-label', true)
                 .attr({
-                    x: this.x(studyDay.studyDay),
+                    x: this.x(referenceLine.timepoint),
                     y: 0,
                     'text-anchor': direction === 'right' ? 'beginning' : 'end',
                     dx: direction === 'right' ? 15 : -15,
                     dy: this.config.range_band * (this.parent ? 1.5 : 1)
                 })
-                .text(studyDay.label),
+                .text(referenceLine.label),
             dimensions = referenceLineLabel.node().getBBox(),
             referenceLineLabelBox = referenceLineGroup
                 .insert('rect', '.reference-line-label')

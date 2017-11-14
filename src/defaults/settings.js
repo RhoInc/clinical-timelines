@@ -1,5 +1,5 @@
-export default //Renderer-specific settings
-{
+export default {
+    //Renderer-specific settings
     id_col: 'USUBJID',
     id_unit: 'participant',
     id_characteristics: null,
@@ -8,21 +8,24 @@ export default //Renderer-specific settings
     event_types: null,
     event_highlighted: null,
 
-    site_col: 'SITE',
     filters: null,
+    site_col: 'SITE',
 
     groupings: null,
     grouping_initial: null,
     grouping_direction: 'horizontal',
 
+    time_scale: 'Study Day',
     stdy_col: 'STDY',
     endy_col: 'ENDY',
+    stdt_col: 'STDT',
+    endt_col: 'ENDT',
+    date_format: '%Y-%m-%d',
+
     seq_col: 'SEQ',
     tooltip_col: 'TOOLTIP',
-
     ongo_col: 'ONGO',
     ongo_val: 'Y',
-
     reference_lines: null,
 
     details: null,
@@ -30,9 +33,10 @@ export default //Renderer-specific settings
 
     //Standard webcharts settings
     x: {
-        type: 'linear',
+        type: null, // set in syncSettings()
         column: 'wc_value',
-        label: 'Study Day'
+        label: null, // set in syncSettings()
+        format: null // set in syncSettings()
     },
     y: {
         type: 'ordinal', // set in syncSettings()
@@ -48,7 +52,7 @@ export default //Renderer-specific settings
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
             attributes: {
-                'stroke-width': 3,
+                'stroke-width': 4,
                 'stroke-opacity': 1
             }
         },
@@ -58,8 +62,10 @@ export default //Renderer-specific settings
             tooltip: null, // set in syncSettings()
             radius: '3',
             attributes: {
+                fill: 'white',
                 'fill-opacity': 1,
-                'stroke-opacity': 1
+                'stroke-opacity': 1,
+                'stroke-width': 2
             }
         }
     ],
@@ -77,12 +83,12 @@ export default //Renderer-specific settings
     color_dom: null, // set in syncSettings()
     legend: {
         location: 'top',
-        label: '',
-        mark: 'circle',
-        order: null
-    }, // set in syncSettings()
+        label: 'Event Type',
+        order: null, // set in syncSettings()
+        mark: 'circle'
+    },
     gridlines: 'y',
     range_band: 24,
     margin: { top: 50 }, // for second x-axis
-    resizable: true
+    resizable: false // can't be resizable so the multiples aren't overlapped by their titles
 };

@@ -35,6 +35,9 @@ export default function syncRendererSpecificSettings(settings) {
     if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
         settings.grouping_direction = 'horizontal';
 
+    //Time settings
+    settings.date_display_format = settings.date_display_format || settings.date_format;
+
     //Reference lines
     if (settings.reference_lines) {
         if (!(settings.reference_lines instanceof Array))

@@ -7,7 +7,7 @@ export default function drawTopXaxis() {
             .orient('top')
             .tickFormat(
                 this.config.time_scale === 'Date'
-                    ? time.format(this.config.date_format)
+                    ? time.format(this.config.x.date_display_format)
                     : format('1d')
             )
             .innerTickSize(this.xAxis.innerTickSize())

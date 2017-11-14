@@ -463,6 +463,7 @@
         endt_col: 'ENDT',
         date_range: null,
         date_format: '%Y-%m-%d',
+        date_display_format: null, // sync in syncSettings()
 
         seq_col: 'SEQ',
         tooltip_col: 'TOOLTIP',
@@ -608,6 +609,9 @@
         if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
             settings.grouping_direction = 'horizontal';
 
+        //Time settings
+        settings.date_display_format = settings.date_display_format || settings.date_format;
+
         //Reference lines
         if (settings.reference_lines) {
             if (!(settings.reference_lines instanceof Array))
@@ -679,7 +683,8 @@
         //X-axis
         settings.x.type = settings.time_scale === 'Study Day' ? 'linear' : 'time';
         settings.x.label = settings.time_scale;
-        settings.x.format = settings.time_scale === 'Study Day' ? '1d' : settings.date_format;
+        settings.x.format =
+            settings.time_scale === 'Study Day' ? '1d' : settings.date_display_format;
 
         //Lines (events with duration)
         settings.marks[0].tooltip =
@@ -2078,7 +2083,7 @@
                 .orient('top')
                 .tickFormat(
                     this.config.time_scale === 'Date'
-                        ? d3.time.format(this.config.date_format)
+                        ? d3.time.format(this.config.x.date_display_format)
                         : d3.format('1d')
                 )
                 .innerTickSize(this.xAxis.innerTickSize())

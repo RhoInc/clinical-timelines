@@ -2,7 +2,7 @@ export default function syncTimeScaleSettings(settings) {
     //X-axis
     settings.x.type = settings.time_scale === 'Study Day' ? 'linear' : 'time';
     settings.x.label = settings.time_scale;
-    settings.x.format = settings.time_scale === 'Study Day' ? '1d' : settings.date_format;
+    settings.x.format = settings.time_scale === 'Study Day' ? '1d' : settings.date_display_format;
 
     //Lines (events with duration)
     settings.marks[0].tooltip =

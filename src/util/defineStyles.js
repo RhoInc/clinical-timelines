@@ -172,6 +172,10 @@ export default function defineStyles() {
                 '    fill: blue;' +
                 '    text-decoration: underline;' +
                 '}',
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
+                '    fill: #bbb;' +
+                '    opacity: .5;' +
+                '}',
 
             //Reference lines
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line {' +

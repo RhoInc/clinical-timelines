@@ -187,6 +187,10 @@
                     '    fill: blue;' +
                     '    text-decoration: underline;' +
                     '}',
+                '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
+                    '    fill: #bbb;' +
+                    '    opacity: .5;' +
+                    '}',
 
                 //Reference lines
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line {' +
@@ -535,8 +539,7 @@
             order: null, // set in syncSettings()
             mark: 'circle'
         },
-        gridlines: 'y',
-        range_band: 24,
+        range_band: 30,
         margin: { top: 50 }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
     };
@@ -731,6 +734,7 @@
         settings.y.sort = 'alphabetical-descending';
         settings.marks[0].per = [settings.event_col, settings.seq_col];
         settings.marks[1].per = [settings.event_col, settings.seq_col, 'wc_value'];
+        settings.gridlines = 'y';
         settings.range_band = settings.range_band / 2;
         settings.margin = { left: 25 };
     }
@@ -2539,10 +2543,30 @@
     function onResize() {
         var _this = this;
 
+        var context = this;
+
+        //Add filter functionality to legend.
         legendFilter.call(this);
 
         //Draw second x-axis at top of chart.
         drawTopXaxis.call(this);
+
+        //Distinguish each timeline with striping.
+        this.svg.selectAll('.ct-stripe').remove();
+        var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
+            if (i % 2 - 1)
+                d3
+                    .select(this)
+                    .insert('rect', ':first-child')
+                    .classed('ct-stripe', true)
+                    .attr({
+                        id: d,
+                        x: -context.margin.left,
+                        y: -context.y.rangeBand() / 3,
+                        width: context.plot_width + context.margin.left,
+                        height: context.y.rangeBand() + 10
+                    });
+        });
 
         //Offset overlapping marks.
         this.config.marks.forEach(function(mark, i) {
@@ -2569,7 +2593,7 @@
         this.svg
             .selectAll('.y.axis .tick')
             .each(function(d) {
-                if (/^-/.test(d)) d3.select(this).remove();
+                if (/^-g\d/.test(d)) d3.select(this).remove();
             })
             .on('click', function(d) {
                 _this.selected_id = d;

@@ -92,8 +92,7 @@ export default {
         order: null, // set in syncSettings()
         mark: 'circle'
     },
-    gridlines: 'y',
-    range_band: 24,
+    range_band: 30,
     margin: { top: 50 }, // for second x-axis
     resizable: false // can't be resizable so the multiples aren't overlapped by their titles
 };

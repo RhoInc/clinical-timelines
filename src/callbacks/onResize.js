@@ -18,6 +18,22 @@ export default function onResize() {
     //Draw second x-axis at top of chart.
     drawTopXaxis.call(this);
 
+    //Distinguish each timeline with striping.
+    this.svg.selectAll('.ct-stripe').remove();
+    const yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
+        if (i % 2 - 1)
+            select(this)
+                .insert('rect', ':first-child')
+                .classed('ct-stripe', true)
+                .attr({
+                    id: d,
+                    x: -context.margin.left,
+                    y: -context.y.rangeBand() / 3,
+                    width: context.plot_width + context.margin.left,
+                    height: context.y.rangeBand() + 10
+                });
+    });
+
     //Offset overlapping marks.
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
@@ -43,7 +59,7 @@ export default function onResize() {
     this.svg
         .selectAll('.y.axis .tick')
         .each(function(d) {
-            if (/^-/.test(d)) select(this).remove();
+            if (/^-g\d/.test(d)) select(this).remove();
         })
         .on('click', d => {
             this.selected_id = d;

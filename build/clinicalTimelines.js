@@ -737,7 +737,7 @@
             })
         };
         //Define listing columns and headers if not already defined.
-        if (!settings.hasOwnProperty('cols')) {
+        if (!settings.details_config.hasOwnProperty('cols')) {
             settings.details_config.cols = settings.details.map(function(detail) {
                 return detail.value_col;
             });

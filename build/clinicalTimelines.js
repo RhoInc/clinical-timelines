@@ -54,7 +54,7 @@
 
                 //Annotations
                 '#clinical-timelines > #left-side > .annotation {' +
-                    '    font-size: small;' +
+                    '    font-size: 90%;' +
                     '    text-align: right;' +
                     '}',
                 '#clinical-timelines > #left-side > .annotation .ct-stats,' +
@@ -118,7 +118,7 @@
                     '}',
                 '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                     '    padding: 0 5px;' +
-                    '    font-size: 14px;' +
+                    '    font-size: 110%;' +
                     '}',
 
                 /***--------------------------------------------------------------------------------------\
@@ -162,8 +162,10 @@
                     '    stroke: black;' +
                     '    stroke-width: 2px;' +
                     '}',
-                '#clinical-timelines polygon.highlighted {' + '    stroke: black;' + '}',
-                '    stroke-width: 2px;' + '}',
+                '#clinical-timelines polygon.highlighted {' +
+                    '    stroke: black;' +
+                    '    stroke-width: 2px;' +
+                    '}',
 
                 //Grouping
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +
@@ -171,9 +173,9 @@
                     '    stroke-width: 2px;' +
                     '}',
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .annotation {' +
-                    '    font-size: 24px;' +
-                    '    font-weight: bold;' +
-                    '    text-anchor: beginning;' +
+                    '    font-size: 150%;' +
+                    '    font-weight: normal;' +
+                    '    text-anchor: start;' +
                     '}',
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping.vertical .annotation {' +
                     '    writing-mode: tb-rl;' +
@@ -222,7 +224,8 @@
                 '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-chart-title {' +
                     '    float: right;' +
                     '    text-align: left;' +
-                    '    font-size: 21px;' +
+                    '    font-size: 150%;' +
+                    '    font-weight: normal;' +
                     '    padding-left: 10px;' +
                     '    width: 24%;' +
                     '}',
@@ -1689,7 +1692,7 @@
                 })
             )
             .values()
-            .map(function(d) {
+            .map(function(d, i) {
                 var groupingObject = {
                     key: d,
                     IDs: []
@@ -1731,41 +1734,26 @@
                         groupingEnd2 = clone(groupingEnd);
 
                     //First placeholder row
-                    groupingStart1[_this.config.id_col] = '--' + d;
+                    groupingStart1[_this.config.id_col] = '-g' + i + 'a';
                     _this.raw_data.push(groupingStart1);
                     _this.longDataInsideTimeRange.push(groupingStart1);
 
-                    groupingEnd1[_this.config.id_col] = '--' + d;
+                    groupingEnd1[_this.config.id_col] = '-g' + i + 'a';
                     _this.raw_data.push(groupingEnd1);
                     _this.longDataInsideTimeRange.push(groupingEnd1);
 
                     //Second placeholder row
-                    groupingStart2[_this.config.id_col] = '-' + d;
+                    groupingStart2[_this.config.id_col] = '-g' + i + 'b';
                     _this.raw_data.push(groupingStart2);
                     _this.longDataInsideTimeRange.push(groupingStart2);
 
-                    groupingEnd2[_this.config.id_col] = '-' + d;
+                    groupingEnd2[_this.config.id_col] = '-g' + i + 'b';
                     _this.raw_data.push(groupingEnd2);
                     _this.longDataInsideTimeRange.push(groupingEnd2);
                 }
 
                 return groupingObject;
             });
-
-        //range_band hack
-        if (this.config.grouping_direction === 'horizontal')
-            this.config.range_band =
-                this.initialSettings.range_band +
-                this.groupings.length *
-                    2 /
-                    d3
-                        .set(
-                            this.wideDataInsideTimeRange.map(function(d) {
-                                return d[_this.config.id_col];
-                            })
-                        )
-                        .values().length *
-                    this.initialSettings.range_band;
     }
 
     function onPreprocess() {
@@ -1788,10 +1776,7 @@
 
         //Insert groupings into data to draw empty rows in which to draw groupings.
         if (this.config.y.grouping) defineGroupingData.call(this);
-        else {
-            delete this.groupings;
-            this.config.range_band = this.initialSettings.range_band;
-        }
+        else delete this.groupings;
     }
 
     function onDatatransform() {}
@@ -2319,34 +2304,53 @@
     function horizontally() {
         var _this = this;
 
-        this.groupings.forEach(function(d) {
-            if (d.IDs.length) {
-                var nIDs = d.IDs.length,
-                    firstID = d.IDs[nIDs - 1],
-                    y1 = _this.y(firstID),
-                    y2 = _this.y(d.IDs[0]),
-                    g = _this.svg
-                        .append('g')
-                        .classed('grouping horizontal', true)
-                        .attr('id', d.key.replace(/ /g, '-')),
-                    annotation = g
-                        .append('text')
-                        .classed('annotation', true)
-                        .attr({
-                            x: 0,
-                            dx: -_this.margin.left,
-                            y: y1,
-                            dy: _this.y.rangeBand() * 1.75
-                        })
-                        .text(d.key);
-            }
-        });
+        this.groupings
+            .sort(function(a, b) {
+                return a.key < b.key ? -1 : 1;
+            })
+            .forEach(function(d, i) {
+                if (d.IDs.length) {
+                    var nIDs = d.IDs.length,
+                        firstID = d.IDs[nIDs - 1],
+                        y1 = _this.y(firstID),
+                        y2 = _this.y(d.IDs[0]),
+                        g = _this.svg
+                            .append('g')
+                            .classed('grouping horizontal', true)
+                            .attr('id', d.key.replace(/ /g, '-')),
+                        annotation = g
+                            .append('text')
+                            .classed('annotation', true)
+                            .attr({
+                                x: 0,
+                                y: y1,
+                                dy: _this.y.rangeBand() * 1.75
+                            })
+                            .text(
+                                _this.config.groupings.filter(function(grouping) {
+                                    return grouping.value_col === _this.config.y.grouping;
+                                })[0].label +
+                                    ': ' +
+                                    d.key
+                            ),
+                        rule = g
+                            .append('line')
+                            .classed('boundary horizontal', true)
+                            .attr({
+                                x1: 0,
+                                y1: y1 + _this.y.rangeBand() / 2,
+                                x2: _this.plot_width,
+                                y2: y1 + _this.y.rangeBand() / 2
+                            });
+                }
+            });
     }
 
     function vertically() {
         var _this = this;
 
         this.groupings.forEach(function(d) {
+            console.log(d);
             if (d.IDs.length) {
                 var nIDs = d.IDs.length,
                     firstID = d.IDs[nIDs - 1],
@@ -2392,7 +2396,13 @@
                             y: y1,
                             dy: _this.y.rangeBand() / 2
                         })
-                        .text(d.key);
+                        .text(
+                            _this.config.groupings.filter(function(grouping) {
+                                return grouping.value_col === _this.config.y.grouping;
+                            })[0].label +
+                                ': ' +
+                                d.key
+                        );
             }
         });
     }

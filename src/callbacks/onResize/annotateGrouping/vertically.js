@@ -1,5 +1,6 @@
 export default function vertically() {
     this.groupings.forEach(d => {
+        console.log(d);
         if (d.IDs.length) {
             const nIDs = d.IDs.length,
                 firstID = d.IDs[nIDs - 1],
@@ -45,7 +46,11 @@ export default function vertically() {
                         y: y1,
                         dy: this.y.rangeBand() / 2
                     })
-                    .text(d.key);
+                    .text(
+                        `${this.config.groupings.filter(
+                            grouping => grouping.value_col === this.config.y.grouping
+                        )[0].label}: ${d.key}`
+                    );
         }
     });
 }

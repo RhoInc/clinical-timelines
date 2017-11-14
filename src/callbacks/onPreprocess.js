@@ -26,8 +26,5 @@ export default function onPreprocess() {
 
     //Insert groupings into data to draw empty rows in which to draw groupings.
     if (this.config.y.grouping) defineGroupingData.call(this);
-    else {
-        delete this.groupings;
-        this.config.range_band = this.initialSettings.range_band;
-    }
+    else delete this.groupings;
 }

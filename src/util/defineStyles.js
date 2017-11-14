@@ -39,7 +39,7 @@ export default function defineStyles() {
 
             //Annotations
             '#clinical-timelines > #left-side > .annotation {' +
-                '    font-size: small;' +
+                '    font-size: 90%;' +
                 '    text-align: right;' +
                 '}',
             '#clinical-timelines > #left-side > .annotation .ct-stats,' +
@@ -103,7 +103,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                 '    padding: 0 5px;' +
-                '    font-size: 14px;' +
+                '    font-size: 110%;' +
                 '}',
 
             /***--------------------------------------------------------------------------------------\
@@ -147,8 +147,10 @@ export default function defineStyles() {
                 '    stroke: black;' +
                 '    stroke-width: 2px;' +
                 '}',
-            '#clinical-timelines polygon.highlighted {' + '    stroke: black;' + '}',
-            '    stroke-width: 2px;' + '}',
+            '#clinical-timelines polygon.highlighted {' +
+                '    stroke: black;' +
+                '    stroke-width: 2px;' +
+                '}',
 
             //Grouping
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +
@@ -156,9 +158,9 @@ export default function defineStyles() {
                 '    stroke-width: 2px;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .annotation {' +
-                '    font-size: 24px;' +
-                '    font-weight: bold;' +
-                '    text-anchor: beginning;' +
+                '    font-size: 150%;' +
+                '    font-weight: normal;' +
+                '    text-anchor: start;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping.vertical .annotation {' +
                 '    writing-mode: tb-rl;' +
@@ -207,7 +209,8 @@ export default function defineStyles() {
             '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-chart-title {' +
                 '    float: right;' +
                 '    text-align: left;' +
-                '    font-size: 21px;' +
+                '    font-size: 150%;' +
+                '    font-weight: normal;' +
                 '    padding-left: 10px;' +
                 '    width: 24%;' +
                 '}',

@@ -1,7 +1,6 @@
 import { select } from 'd3';
 import backButton from './onLayout/backButton';
-import toggleView from './onLayout/toggleView';
-import augmentFilterControls from './onLayout/augmentFilterControls';
+import augmentFilters from './onLayout/augmentFilters';
 import augmentOtherControls from './onLayout/augmentOtherControls';
 
 export default function onLayout() {
@@ -66,7 +65,7 @@ export default function onLayout() {
         });
 
     //Add additional functionality to filter event listeners.
-    augmentFilterControls.call(this);
+    augmentFilters.call(this);
 
     //Add additional functionality to other control event listeners.
     augmentOtherControls.call(this);

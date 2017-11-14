@@ -7,9 +7,13 @@ export default function syncRendererSpecificSettings(settings) {
         defaultID_characteristics,
         settings.id_characteristics
     );
+    settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
     settings.id_unitPropCased =
         settings.id_unit.substring(0, 1).toUpperCase() +
         settings.id_unit.substring(1).toLowerCase();
+    settings.id_unitPlural = /y$/.test(settings.id_unit)
+        ? settings.id_unit.substring(0, settings.id_unit.length - 1) + 'ies'
+        : settings.id_unit + 's';
 
     //Events
     if (!(settings.event_types instanceof Array && settings.event_types.length))

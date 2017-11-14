@@ -47,11 +47,20 @@ export default function onInit() {
         min(this.raw_data, d => d[this.config.stdy_col]),
         max(this.raw_data, d => d[this.config.endy_col])
     ];
-    this.config.date_range = this.config.date_range instanceof Array && this.config.date_range.length === 2
-        ? this.config.date_range
-            .map(date => time.format(this.config.date_format).parse(date))
-        : [min(this.raw_data, d => time.format(this.config.date_format).parse(d[this.config.stdt_col]))
-          ,max(this.raw_data, d => time.format(this.config.date_format).parse(d[this.config.endt_col]))]
+    this.config.date_range =
+        this.config.date_range instanceof Array && this.config.date_range.length === 2
+            ? this.config.date_range.map(
+                  date =>
+                      date instanceof Date ? date : time.format(this.config.date_format).parse(date)
+              )
+            : [
+                  min(this.raw_data, d =>
+                      time.format(this.config.date_format).parse(d[this.config.stdt_col])
+                  ),
+                  max(this.raw_data, d =>
+                      time.format(this.config.date_format).parse(d[this.config.endt_col])
+                  )
+              ];
 
     //Define a record for each start day and stop day.
     defineData.call(this);

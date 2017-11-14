@@ -1,7 +1,13 @@
-import drawIDtimeline from '../functions/drawIDtimeline';
-import enableDisableControls from '../functions/enableDisableControls';
+import drawIDtimeline from '../../functions/drawIDtimeline';
+import enableDisableControls from '../../functions/enableDisableControls';
 
-export default function toggleView() {
+export default function IDchange(select, d) {
+    const filter = this.filters.filter(filter => filter.col === d.value_col)[0];
+
+    //Update currently selected ID and toggle view.
+    this.selected_id = filter.val !== 'All' ? filter.val : null;
+
+    //Redraw.
     if (this.selected_id && this.selected_id !== 'All') {
         drawIDtimeline.call(this);
     } else {
@@ -30,5 +36,6 @@ export default function toggleView() {
         this.listing.wrap.classed('hidden', true);
     }
 
+    //Update controls given the current view.
     enableDisableControls.call(this);
 }

@@ -1,46 +1,9 @@
 import { min, max, time, set } from 'd3';
 import clone from '../../util/clone';
 
-export default function groupingData() {
-    //Calculate x-domain.
-    const xDomain =
-        this.config.time_scale === 'Study Day'
-            ? [
-                  min(this.raw_data, d => +d[this.config.stdy_col]),
-                  max(this.raw_data, d => +d[this.config.endy_col])
-              ]
-            : [
-                  min(this.raw_data, d =>
-                      time.format(this.config.date_format).parse(d[this.config.stdt_col])
-                  ),
-                  max(this.raw_data, d =>
-                      time.format(this.config.date_format).parse(d[this.config.endt_col])
-                  )
-              ];
-
+export default function defineGroupingData() {
     //Capture each grouping and corresponding array of IDs.
-    this.groupings = set(
-        this.raw_data
-            .filter(d => {
-                let filtered = false;
-
-                this.filters.forEach(di => {
-                    if (
-                        filtered === false &&
-                        di.val !== 'All' &&
-                        d[this.config.event_col] !== 'Grouping'
-                    ) {
-                        filtered =
-                            di.val instanceof Array
-                                ? di.val.indexOf(d[di.col]) === -1
-                                : di.val !== d[di.col];
-                    }
-                });
-
-                return !filtered;
-            })
-            .map(d => d[this.config.y.grouping])
-    )
+    this.groupings = set(this.longDataInsideTimeRange.map(d => d[this.config.y.grouping]))
         .values()
         .map(d => {
             const groupingObject = {
@@ -74,8 +37,8 @@ export default function groupingData() {
                 const groupingStart = clone(groupingObject),
                     groupingEnd = clone(groupingObject);
 
-                groupingStart.wc_value = xDomain[0];
-                groupingEnd.wc_value = xDomain[0];
+                groupingStart.wc_value = this.config.x.domain[0];
+                groupingEnd.wc_value = this.config.x.domain[0];
 
                 //Push two start and two end data to raw_data to create space to annotate grouping.
                 const groupingStart1 = clone(groupingStart),
@@ -83,14 +46,23 @@ export default function groupingData() {
                     groupingEnd1 = clone(groupingEnd),
                     groupingEnd2 = clone(groupingEnd);
 
+                //First placeholder row
                 groupingStart1[this.config.id_col] = '--' + d;
                 this.raw_data.push(groupingStart1);
-                groupingStart2[this.config.id_col] = '-' + d;
-                this.raw_data.push(groupingStart2);
+                this.longDataInsideTimeRange.push(groupingStart1);
+
                 groupingEnd1[this.config.id_col] = '--' + d;
                 this.raw_data.push(groupingEnd1);
+                this.longDataInsideTimeRange.push(groupingEnd1);
+
+                //Second placeholder row
+                groupingStart2[this.config.id_col] = '-' + d;
+                this.raw_data.push(groupingStart2);
+                this.longDataInsideTimeRange.push(groupingStart2);
+
                 groupingEnd2[this.config.id_col] = '-' + d;
                 this.raw_data.push(groupingEnd2);
+                this.longDataInsideTimeRange.push(groupingEnd2);
             }
 
             return groupingObject;
@@ -102,27 +74,6 @@ export default function groupingData() {
             this.initialSettings.range_band +
             this.groupings.length *
                 2 /
-                set(
-                    this.wide_data
-                        .filter(d => {
-                            let filtered = false;
-
-                            this.filters.forEach(di => {
-                                if (
-                                    filtered === false &&
-                                    di.val !== 'All' &&
-                                    d[this.config.event_col] !== 'Grouping'
-                                ) {
-                                    filtered =
-                                        di.val instanceof Array
-                                            ? di.val.indexOf(d[di.col]) === -1
-                                            : di.val !== d[di.col];
-                                }
-                            });
-
-                            return !filtered;
-                        })
-                        .map(d => d[this.config.id_col])
-                ).values().length *
+                set(this.wideDataInsideTimeRange.map(d => d[this.config.id_col])).values().length *
                 this.initialSettings.range_band;
 }

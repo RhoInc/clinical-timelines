@@ -26,5 +26,6 @@ export default function defineData() {
                 ? [this.config.stdy_col, this.config.endy_col]
                 : [this.config.stdt_col, this.config.endt_col]
         );
-    this.raw_data = merge([singleDayEvents, multiDayEvents]);
+    this.long_data = merge([singleDayEvents, multiDayEvents]);
+    this.raw_data = this.long_data;
 }

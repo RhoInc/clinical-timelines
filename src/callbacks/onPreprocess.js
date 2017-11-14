@@ -1,34 +1,31 @@
-import groupingData from './onPreprocess/groupingData';
+import defineFilteredData from './onPreprocess/defineFilteredData';
+import definePopulationDetails from './onPreprocess/definePopulationDetails';
+import defineDataInsideTimeRange from './onPreprocess/defineDataInsideTimeRange';
+import defineGroupingData from './onPreprocess/defineGroupingData';
 
 export default function onPreprocess() {
     const context = this;
 
-    //Remove groupings from data.
-    this.raw_data = this.raw_data
-        .filter(d => d[this.config.event_col] !== 'Grouping');
+    //Set x-domain.
+    this.config.x.domain =
+        this.config.time_scale === 'Study Day'
+            ? this.config.study_day_range
+            : this.config.date_range;
 
-    //Define true filtered data, disregarding individual mark filtering.
-    this.true_filtered_data = this.raw_data
-        .filter(d => {
-            let filtered = false;
+    //Reset raw data array.
+    this.raw_data = this.long_data;
 
-            this.filters.forEach(di => {
-                if (filtered === false && di.val !== 'All') {
-                    filtered =
-                        di.val instanceof Array
-                            ? di.val.indexOf(d[di.col]) === -1
-                            : di.val !== d[di.col];
-                }
-            });
+    //Define filtered data irrespective of individual mark filtering.
+    defineFilteredData.call(this);
 
-            return !filtered;
-        });
-    console.log(this.raw_data.length);
-    console.log(this.true_filtered_data.length);
+    //Define population details data.
+    definePopulationDetails.call(this);
+
+    //Define data inside time range.
+    defineDataInsideTimeRange.call(this);
 
     //Insert groupings into data to draw empty rows in which to draw groupings.
-    if (this.config.y.grouping)
-        groupingData.call(this);
+    if (this.config.y.grouping) defineGroupingData.call(this);
     else {
         delete this.groupings;
         this.config.range_band = this.initialSettings.range_band;

@@ -28,6 +28,7 @@ export default function highlightMarks() {
                         .append('line')
                         .classed('highlight-overlay', true)
                         .attr({
+                            'clip-path': 'url(#1)',
                             x1: context.x(
                                 context.config.time_scale === 'Study Day'
                                     ? +d.values[0].key

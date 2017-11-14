@@ -1,6 +1,4 @@
 import { select } from 'd3';
-import clone from '../../../util/clone';
-import syncIDtimelineSettings from '../../../defaults/syncSettings/syncTimeScaleSettings';
 import syncTimeScaleSettings from '../../../defaults/syncSettings/syncTimeScaleSettings';
 import defineData from '../../functions/defineData';
 import drawIDtimeline from '../../functions/drawIDtimeline';

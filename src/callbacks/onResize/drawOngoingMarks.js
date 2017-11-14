@@ -24,6 +24,7 @@ export default function drawOngoingMarks() {
                 .datum(d)
                 .classed('ongoing-event', true)
                 .attr({
+                    'clip-path': 'url(#1)',
                     points: arrow.map(coordinate => coordinate.join(',')).join(' '),
                     fill: color,
                     stroke: color

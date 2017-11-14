@@ -39,7 +39,7 @@ export default function defineStyles() {
 
             //Annotations
             '#clinical-timelines > #left-side > .annotation {' +
-                '    font-size: 16px;' +
+                '    font-size: small;' +
                 '    text-align: right;' +
                 '}',
             '#clinical-timelines > #left-side > .annotation .stats,' +

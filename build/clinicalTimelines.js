@@ -57,10 +57,24 @@
                     '    font-size: small;' +
                     '    text-align: right;' +
                     '}',
-                '#clinical-timelines > #left-side > .annotation .stats,' +
+                '#clinical-timelines > #left-side > .annotation .ct-stats,' +
                     '#clinical-timelines > #left-side > .annotation #ID,' +
                     '#clinical-timelines > #left-side > .annotation .characteristic span {' +
                     '    font-weight: bold;' +
+                    '}',
+                '#clinical-timelines > #left-side > .annotation .ct-stats.sample {' +
+                    '    color: green;' +
+                    '}',
+                '#clinical-timelines > #left-side > .annotation .ct-stats.sample-inside-time-range {' +
+                    '    color: blue;' +
+                    '}',
+                '#clinical-timelines > #left-side > .annotation .ct-stats.sample-outside-time-range {' +
+                    '    color: red;' +
+                    '}',
+                '#clinical-timelines > #left-side > .annotation .ct-info-icon {' +
+                    '    font-weight: bold;' +
+                    '    color: blue;' +
+                    '    cursor: help;' +
                     '}',
 
                 //Controls
@@ -1153,7 +1167,7 @@
         this.wrap.select('svg.wc-svg').classed('hidden', true);
 
         //Define ID data.
-        var longIDdata = this.raw_data.filter(function(di) {
+        var longIDdata = this.long_data.filter(function(di) {
                 return di[_this.config.id_col] === _this.selected_id;
             }),
             wideIDdata = this.wide_data.filter(function(di) {
@@ -1276,8 +1290,8 @@
                         });
             })
             .on('change', function(d) {
-                if (filter.col === this.config.id_col) IDchange.call(context, this, d);
-                else if (d.value_col === this.config.event_col)
+                if (d.value_col === context.config.id_col) IDchange.call(context, this, d);
+                else if (d.value_col === context.config.event_col)
                     eventTypeChange.call(context, this, d);
             });
     }
@@ -1286,7 +1300,7 @@
         //Update event highlighting settings.
         this.config.event_highlighted = d3
             .select(select$$1)
-            .d3select('option:checked')
+            .select('option:checked')
             .text();
         this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
 
@@ -1513,6 +1527,48 @@
         });
     }
 
+    function updatePopulationDetails() {
+        var sample =
+                "<span class = 'ct-stats sample'>" +
+                this.populationDetails.n +
+                "</span> of <span class = 'ct-stats'>" +
+                this.populationDetails.N +
+                '</span> ' +
+                (this.populationDetails.N > 1 ? this.config.id_unitPlural : this.config.id_unit) +
+                " (<span class = 'ct-stats'>" +
+                d3.format('%')(this.populationDetails.rate) +
+                "</span>) <span class = 'ct-info-icon' title = 'These " +
+                this.config.id_unitPlural +
+                " have data that meet the current filter criteria.'>&#9432;</span>",
+            sampleInsideTimeRange =
+                this.populationDetails.nInsideTimeRange < this.populationDetails.n
+                    ? "<span class = 'ct-stats sample-inside-time-range'>" +
+                      this.populationDetails.nInsideTimeRange +
+                      "</span> of <span class = 'ct-stats sample'>" +
+                      this.populationDetails.n +
+                      "</span> displayed (<span class = 'ct-stats'>" +
+                      d3.format('%')(this.populationDetails.rateInsideTimeRange) +
+                      "</span>) <span class = 'ct-info-icon' title = 'These " +
+                      this.config.id_unitPlural +
+                      " have events that occur in the current time range.'>&#9432;</span>"
+                    : '',
+            sampleOutsideTimeRange = this.populationDetails.nOutsideTimeRange
+                ? "<span class = 'ct-stats sample-outside-time-range'>" +
+                  this.populationDetails.nOutsideTimeRange +
+                  "</span> of <span class = 'ct-stats sample'>" +
+                  this.populationDetails.n +
+                  "</span> hidden (<span class = 'ct-stats'>" +
+                  d3.format('%')(this.populationDetails.rateOutsideTimeRange) +
+                  "</span>) <span class = 'ct-info-icon' title = 'These " +
+                  this.config.id_unitPlural +
+                  " do not have events that occur in the current time range.'>&#9432;</span>"
+                : '';
+
+        this.populationDetails.wrap.html(
+            [sample, sampleInsideTimeRange, sampleOutsideTimeRange].join('</br>')
+        );
+    }
+
     function definePopulationDetails() {
         var _this = this;
 
@@ -1569,7 +1625,7 @@
             });
         this.populationDetails.nInsideTimeRange = this.populationDetails.sampleInsideTimeRange.length;
         this.populationDetails.rateInsideTimeRange =
-            this.populationDetails.nInsideTimeRange / this.populationDetails.N;
+            this.populationDetails.nInsideTimeRange / this.populationDetails.n;
 
         //Define sample given current filters of IDs without an event inside the current time range.
         this.populationDetails.sampleOutsideTimeRange = this.populationDetails.sample
@@ -1581,31 +1637,10 @@
             });
         this.populationDetails.nOutsideTimeRange = this.populationDetails.sampleOutsideTimeRange.length;
         this.populationDetails.rateOutsideTimeRange =
-            this.populationDetails.nOutsideTimeRange / this.populationDetails.N;
+            this.populationDetails.nOutsideTimeRange / this.populationDetails.n;
 
         //Update population details.
-        this.populationDetails.wrap.html(
-            "<span class = 'stats'>" +
-                this.populationDetails.n +
-                "</span> of <span class = 'stats'>" +
-                this.populationDetails.N +
-                '</span> ' +
-                (this.populationDetails.N > 1 ? this.config.id_unitPlural : this.config.id_unit) +
-                " (<span class = 'stats'>" +
-                d3.format('%')(this.populationDetails.rate) +
-                '</span>)' +
-                (this.populationDetails.nOutsideTimeRange
-                    ? "<br><span class = 'stats'>" +
-                      this.populationDetails.nOutsideTimeRange +
-                      '</span> ' +
-                      (this.populationDetails.nOutsideTimeRange > 1
-                          ? this.config.id_unitPlural
-                          : this.config.id_unit) +
-                      " (<span class = 'stats'>" +
-                      d3.format('%')(this.populationDetails.rateOutsideTimeRange) +
-                      '</span>) have no events in current time range'
-                    : '')
-        );
+        updatePopulationDetails.call(this);
     }
 
     function defineDataInsideTimeRange() {
@@ -1827,8 +1862,8 @@
             }
         } else {
             /**-------------------------------------------------------------------------------------------\
-      Sort y-domain alphanumerically.
-    \-------------------------------------------------------------------------------------------**/
+        Sort y-domain alphanumerically.
+        \-------------------------------------------------------------------------------------------**/
 
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then alphanumerically if y-axis is grouped.
@@ -2561,20 +2596,6 @@
     };
 
     function onInit$1() {
-        var _this = this;
-
-        this.config.x.domain = [
-            d3.min(this.parent.clinicalTimelines.raw_data, function(d) {
-                return _this.config.time_scale === 'Study Day'
-                    ? +d[_this.config.stdy_col]
-                    : d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
-            }),
-            d3.max(this.parent.clinicalTimelines.raw_data, function(d) {
-                return _this.config.time_scale === 'Study Day'
-                    ? +d[_this.config.endy_col]
-                    : d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
-            })
-        ];
         this.config.color_dom = this.parent.clinicalTimelines.config.color_dom;
         this.config.legend.order = this.parent.clinicalTimelines.config.legend.order;
     }

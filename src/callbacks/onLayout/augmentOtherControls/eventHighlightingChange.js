@@ -4,7 +4,7 @@ import drawIDtimeline from '../../functions/drawIDtimeline';
 export default function eventHighlightingChange(select, d) {
     //Update event highlighting settings.
     this.config.event_highlighted = d3select(select)
-        .d3select('option:checked')
+        .select('option:checked')
         .text();
     this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
 

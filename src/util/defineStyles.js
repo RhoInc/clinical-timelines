@@ -42,10 +42,24 @@ export default function defineStyles() {
                 '    font-size: small;' +
                 '    text-align: right;' +
                 '}',
-            '#clinical-timelines > #left-side > .annotation .stats,' +
+            '#clinical-timelines > #left-side > .annotation .ct-stats,' +
                 '#clinical-timelines > #left-side > .annotation #ID,' +
                 '#clinical-timelines > #left-side > .annotation .characteristic span {' +
                 '    font-weight: bold;' +
+                '}',
+            '#clinical-timelines > #left-side > .annotation .ct-stats.sample {' +
+                '    color: green;' +
+                '}',
+            '#clinical-timelines > #left-side > .annotation .ct-stats.sample-inside-time-range {' +
+                '    color: blue;' +
+                '}',
+            '#clinical-timelines > #left-side > .annotation .ct-stats.sample-outside-time-range {' +
+                '    color: red;' +
+                '}',
+            '#clinical-timelines > #left-side > .annotation .ct-info-icon {' +
+                '    font-weight: bold;' +
+                '    color: blue;' +
+                '    cursor: help;' +
                 '}',
 
             //Controls

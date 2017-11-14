@@ -1,4 +1,5 @@
-import { set, time, format } from 'd3';
+import { set, time } from 'd3';
+import updatePopulationDetails from './definePopulationDetails/updatePopulationDetails';
 
 export default function definePopulationDetails() {
     //Define sample given current filters.
@@ -38,7 +39,7 @@ export default function definePopulationDetails() {
         .map(d => d.ID);
     this.populationDetails.nInsideTimeRange = this.populationDetails.sampleInsideTimeRange.length;
     this.populationDetails.rateInsideTimeRange =
-        this.populationDetails.nInsideTimeRange / this.populationDetails.N;
+        this.populationDetails.nInsideTimeRange / this.populationDetails.n;
 
     //Define sample given current filters of IDs without an event inside the current time range.
     this.populationDetails.sampleOutsideTimeRange = this.populationDetails.sample
@@ -46,23 +47,8 @@ export default function definePopulationDetails() {
         .map(d => d.ID);
     this.populationDetails.nOutsideTimeRange = this.populationDetails.sampleOutsideTimeRange.length;
     this.populationDetails.rateOutsideTimeRange =
-        this.populationDetails.nOutsideTimeRange / this.populationDetails.N;
+        this.populationDetails.nOutsideTimeRange / this.populationDetails.n;
 
     //Update population details.
-    this.populationDetails.wrap.html(
-        `<span class = 'stats'>${this.populationDetails.n}</span> of <span class = 'stats'>${this
-            .populationDetails.N}</span> ${this.populationDetails.N > 1
-            ? this.config.id_unitPlural
-            : this.config.id_unit} (<span class = 'stats'>${format('%')(
-            this.populationDetails.rate
-        )}</span>)` +
-            (this.populationDetails.nOutsideTimeRange
-                ? `<br><span class = 'stats'>${this.populationDetails
-                      .nOutsideTimeRange}</span> ${this.populationDetails.nOutsideTimeRange > 1
-                      ? this.config.id_unitPlural
-                      : this.config.id_unit} (<span class = 'stats'>${format('%')(
-                      this.populationDetails.rateOutsideTimeRange
-                  )}</span>) have no events in current time range`
-                : ``)
-    );
+    updatePopulationDetails.call(this);
 }

@@ -25,7 +25,8 @@ export default function augmentFilters() {
                     });
         })
         .on('change', function(d) {
-            if (filter.col === this.config.id_col) IDchange.call(context, this, d);
-            else if (d.value_col === this.config.event_col) eventTypeChange.call(context, this, d);
+            if (d.value_col === context.config.id_col) IDchange.call(context, this, d);
+            else if (d.value_col === context.config.event_col)
+                eventTypeChange.call(context, this, d);
         });
 }

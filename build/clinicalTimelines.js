@@ -2083,7 +2083,7 @@
                 .orient('top')
                 .tickFormat(
                     this.config.time_scale === 'Date'
-                        ? d3.time.format(this.config.x.date_display_format)
+                        ? d3.time.format(this.config.date_display_format)
                         : d3.format('1d')
                 )
                 .innerTickSize(this.xAxis.innerTickSize())

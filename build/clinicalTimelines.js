@@ -956,6 +956,20 @@
         var _this = this;
 
         if (!this.raw_data[0].hasOwnProperty(this.config.site_col)) {
+            this.config.groupings = this.config.groupings.filter(function(grouping) {
+                return grouping.value_col !== _this.config.site_col;
+            });
+            var yAxisGrouping = this.controls.config.inputs
+                .filter(function(input) {
+                    return input.option === 'y.grouping';
+                })
+                .pop();
+            yAxisGrouping.values = yAxisGrouping.values.filter(function(value) {
+                return value !== _this.config.site_col;
+            });
+            this.config.filters = this.config.filters.filter(function(filter) {
+                return filter.value_col !== _this.config.site_col;
+            });
             this.config.id_characteristics = this.config.id_characteristics.filter(function(
                 id_characteristic
             ) {

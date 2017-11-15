@@ -173,8 +173,9 @@ export default function defineStyles() {
                 '    text-decoration: underline;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
-                '    fill: #bbb;' +
-                '    opacity: .5;' +
+                '    stroke: #aaa;' +
+                '    stroke-width: 2;' +
+                '    fill: #eee;' +
                 '}',
 
             //Reference lines

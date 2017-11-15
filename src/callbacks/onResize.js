@@ -21,6 +21,7 @@ export default function onResize() {
     //Distinguish each timeline with striping.
     this.svg.selectAll('.ct-stripe').remove();
     const yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
+        select(this).select('text').attr('dy', context.y.rangeBand()/2)
         if (i % 2 - 1)
             select(this)
                 .insert('rect', ':first-child')

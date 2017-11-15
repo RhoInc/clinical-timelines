@@ -7,6 +7,7 @@ export default {
     event_col: 'DOMAIN',
     event_types: null,
     event_highlighted: null,
+    event_highlight_color: 'black',
 
     filters: null,
     site_col: 'SITE',
@@ -55,21 +56,15 @@ export default {
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
             attributes: {
-                'clip-path': 'url(#1)',
-                'stroke-width': 4,
-                'stroke-opacity': 1
+                'stroke-width': 4
             }
         },
         {
             type: 'circle',
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
-            radius: '3',
+            radius: 4,
             attributes: {
-                'clip-path': 'url(#1)',
-                fill: 'white',
-                'fill-opacity': 1,
-                'stroke-opacity': 1,
                 'stroke-width': 2
             }
         }

@@ -1,3 +1,4 @@
+import { select } from 'd3';
 import drawIDtimeline from '../functions/drawIDtimeline';
 import updateIDfilter from '../functions/updateIDfilter';
 import enableDisableControls from '../functions/enableDisableControls';

@@ -198,6 +198,7 @@
                     '    stroke-width: 7;' +
                     '}',
                 '#clinical-timelines line.highlight-overlay {' +
+                    '    clip-path: url(#1);' +
                     '    stroke-width: 3;' +
                     '    stroke-linecap: round;' +
                     '}',

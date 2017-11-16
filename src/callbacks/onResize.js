@@ -1,13 +1,13 @@
-import highlightMarks from './onResize/highlightMarks';
 import legendFilter from './onResize/legendFilter';
 import drawTopXaxis from './onResize/drawTopXaxis';
-import { select } from 'd3';
+import addStriping from './onResize/addStriping';
 import tickClick from './onResize/tickClick';
-import offsetLines from './onResize/offsetLines';
-import offsetCircles from './onResize/offsetCircles';
 import annotateGrouping from './onResize/annotateGrouping';
+import offsetOverlappingMarks from './onResize/offsetOverlappingMarks';
 import drawOngoingMarks from './onResize/drawOngoingMarks';
+import highlightMarks from './onResize/highlightMarks';
 import drawReferenceLines from './onResize/drawReferenceLines';
+import offsetBottomXaxis from './onResize/offsetBottomXaxis';
 
 export default function onResize() {
     const context = this;
@@ -19,82 +19,26 @@ export default function onResize() {
     drawTopXaxis.call(this);
 
     //Distinguish each timeline with striping.
-    this.svg.selectAll('.ct-stripe').remove();
-    const yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
-        select(this)
-            .select('text')
-            .attr('dy', context.y.rangeBand() / 2);
-        select(this)
-            .insert('rect', ':first-child')
-            .attr({
-                id: d,
-                x: -context.margin.left,
-                y: -context.config.marks[0].attributes['stroke-width'],
-                width: context.plot_width + context.margin.left,
-                height: context.y.rangeBand() + context.config.marks[0].attributes['stroke-width']
-            })
-            .classed('ct-stripe', true);
-    });
+    addStriping.call(this);
+
+    //Draw second chart when y-axis tick label is clicked.
+    tickClick.call(this);
+
+    //Annotate grouping.
+    annotateGrouping.call(this);
 
     //Offset overlapping marks.
-    this.config.marks.forEach((mark, i) => {
-        const markData = this.marks[i].data;
-        if (mark.type === 'line') {
-            //Identify marks which represent ongoing events.
-            if (this.config.ongo_col)
-                markData.forEach(d => {
-                    d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
-                });
-            offsetLines.call(this, mark, markData);
-        } else if (mark.type === 'circle') {
-            offsetCircles.call(this, mark, markData);
-        }
-    });
+    offsetOverlappingMarks.call(this);
 
     //Draw ongoing marks.
-    if (this.config.ongo_col) drawOngoingMarks.call(this);
+    drawOngoingMarks.call(this);
 
     //Highlight events.
     highlightMarks.call(this);
 
-    //Draw second chart when y-axis tick label is clicked.
-    this.svg
-        .selectAll('.y.axis .tick')
-        .each(function(d) {
-            if (/^-g\d/.test(d)) select(this).remove();
-        })
-        .on('click', d => {
-            this.selected_id = d;
-            tickClick.call(this);
-        });
-
-    //Annotate grouping.
-    if (this.config.y.grouping) annotateGrouping.call(this);
-
     //Draw reference lines.
-    if (this.config.reference_lines) drawReferenceLines.call(this);
+    drawReferenceLines.call(this);
 
     //Offset bottom x-axis to prevent overlap with final ID.
-    const bottomXaxis = this.svg.select('.x.axis'),
-        bottomXaxisTitle = bottomXaxis.select('.axis-title');
-    bottomXaxis.attr(
-        'transform',
-        `translate(0,${+bottomXaxis
-            .attr('transform')
-            .split(',')[1]
-            .split(')')[0] + this.y.rangeBand()})`
-    );
-    bottomXaxisTitle.attr(
-        'transform',
-        `translate(
-            ${+bottomXaxisTitle
-                .attr('transform')
-                .split(',')[0]
-                .split('(')[1]},
-            ${+bottomXaxisTitle
-                .attr('transform')
-                .split(',')[1]
-                .split(')')[0] -
-                7 * this.margin.bottom / 16})`
-    );
+    offsetBottomXaxis.call(this);
 }

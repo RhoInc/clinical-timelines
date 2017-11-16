@@ -15,7 +15,7 @@ export default function horizontally() {
                     .attr({
                         x: 0,
                         y: y1,
-                        dy: this.y.rangeBand() * 1.75
+                        dy: this.y.rangeBand() * 1.25
                     })
                     .text(
                         `${this.config.groupings.filter(
@@ -27,9 +27,9 @@ export default function horizontally() {
                     .classed('boundary horizontal', true)
                     .attr({
                         x1: 0,
-                        y1: y1 + this.y.rangeBand() / 2,
+                        y1: y1 + this.y.rangeBand() / 4,
                         x2: this.plot_width,
-                        y2: y1 + this.y.rangeBand() / 2
+                        y2: y1 + this.y.rangeBand() / 4
                     });
         }
     });

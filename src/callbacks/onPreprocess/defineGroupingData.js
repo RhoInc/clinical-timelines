@@ -46,7 +46,7 @@ export default function defineGroupingData() {
                     groupingEnd1 = clone(groupingEnd),
                     groupingEnd2 = clone(groupingEnd);
 
-                //First placeholder row
+                //Placeholder row in which to print grouping.
                 groupingStart1[this.config.id_col] = '-g' + i + 'a';
                 this.raw_data.push(groupingStart1);
                 this.longDataInsideTimeRange.push(groupingStart1);
@@ -54,15 +54,6 @@ export default function defineGroupingData() {
                 groupingEnd1[this.config.id_col] = '-g' + i + 'a';
                 this.raw_data.push(groupingEnd1);
                 this.longDataInsideTimeRange.push(groupingEnd1);
-
-                //Second placeholder row
-                groupingStart2[this.config.id_col] = '-g' + i + 'b';
-                this.raw_data.push(groupingStart2);
-                this.longDataInsideTimeRange.push(groupingStart2);
-
-                groupingEnd2[this.config.id_col] = '-g' + i + 'b';
-                this.raw_data.push(groupingEnd2);
-                this.longDataInsideTimeRange.push(groupingEnd2);
             }
 
             return groupingObject;

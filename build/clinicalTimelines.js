@@ -159,6 +159,10 @@
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick {' +
                     '    cursor: pointer;' +
                     '    fill: blue;' +
+                    '    text-decoration: none;' +
+                    '    font-weight: bolder;' +
+                    '}',
+                '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:hover {' +
                     '    text-decoration: underline;' +
                     '}',
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
@@ -1251,7 +1255,7 @@
         );
     }
 
-    function IDchange(select$$1, d) {
+    function IDchange(select, d) {
         var filter = this.filters.filter(function(filter) {
             return filter.col === d.value_col;
         })[0];
@@ -1292,7 +1296,7 @@
         enableDisableControls.call(this);
     }
 
-    function eventTypeChange(select$$1, d) {
+    function eventTypeChange(select, d) {
         var filter = this.filters.filter(function(filter) {
             return filter.col === d.value_col;
         })[0];
@@ -1340,10 +1344,10 @@
             });
     }
 
-    function eventHighlightingChange(select$$1, d) {
+    function eventHighlightingChange(select, d) {
         //Update event highlighting settings.
         this.config.event_highlighted = d3
-            .select(select$$1)
+            .select(select)
             .select('option:checked')
             .text();
         this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
@@ -1755,7 +1759,7 @@
                         groupingEnd1 = clone(groupingEnd),
                         groupingEnd2 = clone(groupingEnd);
 
-                    //First placeholder row
+                    //Placeholder row in which to print grouping.
                     groupingStart1[_this.config.id_col] = '-g' + i + 'a';
                     _this.raw_data.push(groupingStart1);
                     _this.longDataInsideTimeRange.push(groupingStart1);
@@ -1763,15 +1767,6 @@
                     groupingEnd1[_this.config.id_col] = '-g' + i + 'a';
                     _this.raw_data.push(groupingEnd1);
                     _this.longDataInsideTimeRange.push(groupingEnd1);
-
-                    //Second placeholder row
-                    groupingStart2[_this.config.id_col] = '-g' + i + 'b';
-                    _this.raw_data.push(groupingStart2);
-                    _this.longDataInsideTimeRange.push(groupingStart2);
-
-                    groupingEnd2[_this.config.id_col] = '-g' + i + 'b';
-                    _this.raw_data.push(groupingEnd2);
-                    _this.longDataInsideTimeRange.push(groupingEnd2);
                 }
 
                 return groupingObject;
@@ -1954,94 +1949,6 @@
         this.svg.select('g.x-top.axis text.axis-title.top').text(this.config.time_scale);
     }
 
-    function highlightMarks() {
-        var _this = this;
-
-        var context = this;
-
-        this.svg.selectAll('.highlight-overlay').remove();
-
-        //Highlight legend.
-        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
-            return d.label === _this.config.event_highlighted;
-        });
-
-        //Highlight marks.
-        var highlightedMarks = this.svg
-                .selectAll('.wc-data-mark, .ongoing-event')
-                .classed('highlighted', function(d) {
-                    return d.key.indexOf(_this.config.event_highlighted) > -1;
-                })
-                .filter(function(d) {
-                    return d.key.indexOf(_this.config.event_highlighted) > -1;
-                }),
-            paths = highlightedMarks
-                .filter(function() {
-                    return (
-                        this.tagName === 'path' &&
-                        this.getAttribute('class').indexOf('highlighted') > -1
-                    );
-                })
-                .each(function(d) {
-                    var g = d3.select(this.parentNode),
-                        x1 = context.x(
-                            context.config.time_scale === 'Study Day'
-                                ? +d.values[0].key
-                                : new Date(d.values[0].key)
-                        ),
-                        x2 = context.x(
-                            context.config.time_scale === 'Study Day'
-                                ? +d.values[1].key
-                                : new Date(d.values[1].key)
-                        ),
-                        y =
-                            context.y(d.values[0].values.raw[0][context.config.id_col]) +
-                            context.y.rangeBand() / 2,
-                        color = context.config.event_highlight_color,
-                        line = g
-                            .append('line')
-                            .classed('highlight-overlay', true)
-                            .attr({
-                                x1: x1,
-                                x2: x2,
-                                y1: y,
-                                y2: y,
-                                stroke: color
-                            });
-
-                    if (d.ongoing === context.config.ongo_val) {
-                        var arrow = [[x2 + 7, y], [x2, y - 2.5], [x2, y + 2.5]],
-                            polygon = g
-                                .append('polygon')
-                                .datum(d)
-                                .classed('highlighted ongoing-event', true)
-                                .attr({
-                                    points: arrow
-                                        .map(function(coordinate) {
-                                            return coordinate.join(',');
-                                        })
-                                        .join(' '),
-                                    fill: color
-                                });
-                    }
-                }),
-            circles = highlightedMarks
-                .filter(function() {
-                    return (
-                        this.tagName === 'circle' &&
-                        this.getAttribute('class').indexOf('highlighted') > -1
-                    );
-                })
-                .attr({
-                    stroke: function stroke(d) {
-                        return _this.colorScale(d.values.raw[0][_this.config.event_col]);
-                    },
-                    fill: function fill(d) {
-                        return _this.config.event_highlight_color;
-                    }
-                });
-    }
-
     function legendFilter() {
         var _this = this;
 
@@ -2130,30 +2037,215 @@
             );
     }
 
+    function addStriping() {
+        var context = this;
+        this.svg.selectAll('.ct-stripe').remove();
+        var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
+            d3
+                .select(this)
+                .select('text')
+                .attr('dy', context.y.rangeBand() / 2);
+            d3
+                .select(this)
+                .insert('rect', ':first-child')
+                .attr({
+                    id: d,
+                    x: -context.margin.left,
+                    y: -context.config.marks[0].attributes['stroke-width'],
+                    width: context.plot_width + context.margin.left,
+                    height:
+                        context.y.rangeBand() + context.config.marks[0].attributes['stroke-width']
+                })
+                .classed('ct-stripe', true);
+        });
+    }
+
     function tickClick() {
         var _this = this;
 
-        drawIDtimeline.call(this);
-        enableDisableControls.call(this);
-        updateIDfilter.call(this);
+        this.svg
+            .selectAll('.y.axis .tick')
+            .each(function(d) {
+                if (/^-g\d/.test(d)) select(this).remove();
+            })
+            .on('click', function(d) {
+                _this.selected_id = d;
 
-        //Highlight ID dropdown.
-        this.controls.wrap
-            .selectAll('.control-group')
-            .filter(function(control) {
-                return control.value_col === _this.config.id_col;
+                drawIDtimeline.call(_this);
+                enableDisableControls.call(_this);
+                updateIDfilter.call(_this);
+
+                //Highlight ID dropdown.
+                _this.controls.wrap
+                    .selectAll('.control-group')
+                    .filter(function(control) {
+                        return control.value_col === _this.config.id_col;
+                    })
+                    .style({
+                        'font-weight': 'bold'
+                    })
+                    .transition()
+                    .delay(500)
+                    .style({
+                        'font-weight': 'normal'
+                    })
+                    .select('select')
+                    .node()
+                    .focus();
+            });
+    }
+
+    function horizontally() {
+        var _this = this;
+
+        this.groupings
+            .sort(function(a, b) {
+                return a.key < b.key ? -1 : 1;
             })
-            .style({
-                'font-weight': 'bold'
+            .forEach(function(d, i) {
+                if (d.IDs.length) {
+                    var nIDs = d.IDs.length,
+                        firstID = d.IDs[nIDs - 1],
+                        y1 = _this.y(firstID),
+                        y2 = _this.y(d.IDs[0]),
+                        g = _this.svg
+                            .append('g')
+                            .classed('grouping horizontal', true)
+                            .attr('id', d.key.replace(/ /g, '-')),
+                        annotation = g
+                            .append('text')
+                            .classed('annotation', true)
+                            .attr({
+                                x: 0,
+                                y: y1,
+                                dy: _this.y.rangeBand() * 1.25
+                            })
+                            .text(
+                                _this.config.groupings.filter(function(grouping) {
+                                    return grouping.value_col === _this.config.y.grouping;
+                                })[0].label +
+                                    ': ' +
+                                    d.key
+                            ),
+                        rule = g
+                            .append('line')
+                            .classed('boundary horizontal', true)
+                            .attr({
+                                x1: 0,
+                                y1: y1 + _this.y.rangeBand() / 4,
+                                x2: _this.plot_width,
+                                y2: y1 + _this.y.rangeBand() / 4
+                            });
+                }
+            });
+    }
+
+    function vertically() {
+        var _this = this;
+
+        this.groupings.forEach(function(d) {
+            if (d.IDs.length) {
+                var nIDs = d.IDs.length,
+                    firstID = d.IDs[nIDs - 1],
+                    y1 = _this.y(firstID),
+                    y2 = _this.y(d.IDs[0]),
+                    g = _this.svg
+                        .append('g')
+                        .classed('grouping vertical', true)
+                        .attr('id', d.key.replace(/ /g, '-')),
+                    topBoundary = g
+                        .append('line')
+                        .classed('boundary horizontal', true)
+                        .attr({
+                            x1: _this.plot_width,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y1 + 3 * _this.y.rangeBand() / 4,
+                            y2: y1 + 3 * _this.y.rangeBand() / 4
+                        }),
+                    span = g
+                        .append('line')
+                        .classed('boundary vertical', true)
+                        .attr({
+                            x1: _this.plot_width + _this.margin.right / 8,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y1 + 3 * _this.y.rangeBand() / 4,
+                            y2: y2 + _this.y.rangeBand()
+                        }),
+                    bottomBoundary = g
+                        .append('line')
+                        .classed('boundary horizontal', true)
+                        .attr({
+                            x1: _this.plot_width,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y2 + _this.y.rangeBand(),
+                            y2: y2 + _this.y.rangeBand()
+                        }),
+                    annotation = g
+                        .append('text')
+                        .classed('annotation', true)
+                        .attr({
+                            x: _this.plot_width,
+                            dx: 4 * _this.margin.right / 8,
+                            y: y1,
+                            dy: _this.y.rangeBand()
+                        })
+                        .text(
+                            _this.config.groupings.filter(function(grouping) {
+                                return grouping.value_col === _this.config.y.grouping;
+                            })[0].label +
+                                ': ' +
+                                d.key
+                        );
+            }
+        });
+    }
+
+    function annotateGrouping() {
+        if (this.config.y.grouping) {
+            this.svg.selectAll('.grouping').remove();
+
+            if (this.config.grouping_direction === 'horizontal') horizontally.call(this);
+            else if (this.config.grouping_direction === 'vertical') vertically.call(this);
+        }
+    }
+
+    function offsetCircles(mark, markData) {
+        var _this = this;
+
+        //Nest data by study day and filter on any nested object with more than one datum.
+        var overlapping = d3
+            .nest()
+            .key(function(d) {
+                return d.total + '|' + d.values.raw[0][_this.config.id_col];
             })
-            .transition()
-            .delay(500)
-            .style({
-                'font-weight': 'normal'
+            .rollup(function(d) {
+                return {
+                    n: d.length,
+                    keys: d.map(function(di) {
+                        return di.key;
+                    })
+                };
             })
-            .select('select')
-            .node()
-            .focus();
+            .entries(markData)
+            .filter(function(d) {
+                return d.values.n > 1;
+            });
+
+        //For each study day with more than one event...
+        overlapping.forEach(function(d) {
+            var x = d.key.split('|')[0],
+                // study day
+                y = d.key.split('|')[1]; // ID
+
+            //For each overlapping point...
+            d.values.keys.forEach(function(di, i) {
+                //Capture point via its class name and offset vertically.
+                var className = di + ' point',
+                    g = d3.select(document.getElementsByClassName(className)[0]),
+                    point = g.select('circle');
+                g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
+            });
+        });
     }
 
     function offsetLines(mark, markData) {
@@ -2304,312 +2396,9 @@
         });
     }
 
-    function offsetCircles(mark, markData) {
+    function offsetOverlappingMarks() {
         var _this = this;
 
-        //Nest data by study day and filter on any nested object with more than one datum.
-        var overlapping = d3
-            .nest()
-            .key(function(d) {
-                return d.total + '|' + d.values.raw[0][_this.config.id_col];
-            })
-            .rollup(function(d) {
-                return {
-                    n: d.length,
-                    keys: d.map(function(di) {
-                        return di.key;
-                    })
-                };
-            })
-            .entries(markData)
-            .filter(function(d) {
-                return d.values.n > 1;
-            });
-
-        //For each study day with more than one event...
-        overlapping.forEach(function(d) {
-            var x = d.key.split('|')[0],
-                // study day
-                y = d.key.split('|')[1]; // ID
-
-            //For each overlapping point...
-            d.values.keys.forEach(function(di, i) {
-                //Capture point via its class name and offset vertically.
-                var className = di + ' point',
-                    g = d3.select(document.getElementsByClassName(className)[0]),
-                    point = g.select('circle');
-                g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
-            });
-        });
-    }
-
-    function horizontally() {
-        var _this = this;
-
-        this.groupings
-            .sort(function(a, b) {
-                return a.key < b.key ? -1 : 1;
-            })
-            .forEach(function(d, i) {
-                if (d.IDs.length) {
-                    var nIDs = d.IDs.length,
-                        firstID = d.IDs[nIDs - 1],
-                        y1 = _this.y(firstID),
-                        y2 = _this.y(d.IDs[0]),
-                        g = _this.svg
-                            .append('g')
-                            .classed('grouping horizontal', true)
-                            .attr('id', d.key.replace(/ /g, '-')),
-                        annotation = g
-                            .append('text')
-                            .classed('annotation', true)
-                            .attr({
-                                x: 0,
-                                y: y1,
-                                dy: _this.y.rangeBand() * 1.75
-                            })
-                            .text(
-                                _this.config.groupings.filter(function(grouping) {
-                                    return grouping.value_col === _this.config.y.grouping;
-                                })[0].label +
-                                    ': ' +
-                                    d.key
-                            ),
-                        rule = g
-                            .append('line')
-                            .classed('boundary horizontal', true)
-                            .attr({
-                                x1: 0,
-                                y1: y1 + _this.y.rangeBand() / 2,
-                                x2: _this.plot_width,
-                                y2: y1 + _this.y.rangeBand() / 2
-                            });
-                }
-            });
-    }
-
-    function vertically() {
-        var _this = this;
-
-        this.groupings.forEach(function(d) {
-            console.log(d);
-            if (d.IDs.length) {
-                var nIDs = d.IDs.length,
-                    firstID = d.IDs[nIDs - 1],
-                    y1 = _this.y(firstID),
-                    y2 = _this.y(d.IDs[0]),
-                    g = _this.svg
-                        .append('g')
-                        .classed('grouping vertical', true)
-                        .attr('id', d.key.replace(/ /g, '-')),
-                    topBoundary = g
-                        .append('line')
-                        .classed('boundary horizontal', true)
-                        .attr({
-                            x1: _this.plot_width,
-                            x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y1 + _this.y.rangeBand() / 4,
-                            y2: y1 + _this.y.rangeBand() / 4
-                        }),
-                    span = g
-                        .append('line')
-                        .classed('boundary vertical', true)
-                        .attr({
-                            x1: _this.plot_width + _this.margin.right / 8,
-                            x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y1 + _this.y.rangeBand() / 4,
-                            y2: y2 + 3 * _this.y.rangeBand() / 4
-                        }),
-                    bottomBoundary = g
-                        .append('line')
-                        .classed('boundary horizontal', true)
-                        .attr({
-                            x1: _this.plot_width,
-                            x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y2 + 3 * _this.y.rangeBand() / 4,
-                            y2: y2 + 3 * _this.y.rangeBand() / 4
-                        }),
-                    annotation = g
-                        .append('text')
-                        .classed('annotation', true)
-                        .attr({
-                            x: _this.plot_width,
-                            dx: 5 * _this.margin.right / 8,
-                            y: y1,
-                            dy: _this.y.rangeBand() / 2
-                        })
-                        .text(
-                            _this.config.groupings.filter(function(grouping) {
-                                return grouping.value_col === _this.config.y.grouping;
-                            })[0].label +
-                                ': ' +
-                                d.key
-                        );
-            }
-        });
-    }
-
-    function annotateGrouping() {
-        this.svg.selectAll('.grouping').remove();
-
-        if (this.config.grouping_direction === 'horizontal') horizontally.call(this);
-        else if (this.config.grouping_direction === 'vertical') vertically.call(this);
-    }
-
-    function drawOngoingMarks() {
-        var _this = this;
-
-        var context = this;
-
-        this.svg.selectAll('.ongoing-event').remove();
-        this.svg
-            .selectAll('.line-supergroup .line')
-            .filter(function(d) {
-                return d.ongoing === _this.config.ongo_val;
-            })
-            .each(function(d) {
-                var g = d3.select(this),
-                    endpoint = d.values[1],
-                    x = context.x(
-                        context.config.time_scale === 'Study Day'
-                            ? +endpoint.key
-                            : new Date(endpoint.key)
-                    ),
-                    y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
-                    color = context.colorScale(endpoint.values.raw[0][context.config.event_col]),
-                    arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
-
-                g
-                    .append('polygon')
-                    .datum(d)
-                    .classed('ongoing-event', true)
-                    .attr({
-                        points: arrow
-                            .map(function(coordinate) {
-                                return coordinate.join(',');
-                            })
-                            .join(' '),
-                        fill: color,
-                        stroke: color
-                    });
-            });
-    }
-
-    function drawReferenceLines() {
-        var _this = this;
-
-        this.svg.select('.reference-lines').remove();
-        var referenceLinesGroup = this.svg
-            .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
-            .classed('reference-lines', true);
-
-        //Append reference line for each item in config.referenceLines.
-        this.config.referenceLines.forEach(function(referenceLine, i) {
-            var referenceLineGroup = referenceLinesGroup
-                    .append('g')
-                    .classed('reference-line', true)
-                    .attr('id', 'reference-line-' + i),
-                visibleReferenceLine = referenceLineGroup
-                    .append('line')
-                    .classed('visible-reference-line', true)
-                    .attr({
-                        x1: _this.x(referenceLine.timepoint),
-                        x2: _this.x(referenceLine.timepoint),
-                        y1: 0,
-                        y2: _this.plot_height
-                    }),
-                invisibleReferenceLine = referenceLineGroup
-                    .append('line')
-                    .classed('invisible-reference-line', true)
-                    .attr({
-                        x1: _this.x(referenceLine.timepoint),
-                        x2: _this.x(referenceLine.timepoint),
-                        y1: 0,
-                        y2: _this.plot_height
-                    }),
-                // invisible reference line has no dasharray and is much thicker to make hovering easier
-                direction =
-                    referenceLine.timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2
-                        ? 'right'
-                        : 'left',
-                referenceLineLabel = referenceLineGroup
-                    .append('text')
-                    .classed('reference-line-label', true)
-                    .attr({
-                        x: _this.x(referenceLine.timepoint),
-                        y: 0,
-                        'text-anchor': direction === 'right' ? 'beginning' : 'end',
-                        dx: direction === 'right' ? 15 : -15,
-                        dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
-                    })
-                    .text(referenceLine.label),
-                dimensions = referenceLineLabel.node().getBBox(),
-                referenceLineLabelBox = referenceLineGroup
-                    .insert('rect', '.reference-line-label')
-                    .classed('reference-line-label-box', true)
-                    .attr({
-                        x: dimensions.x - 10,
-                        y: dimensions.y - 5,
-                        width: dimensions.width + 20,
-                        height: dimensions.height + 10
-                    });
-
-            //Display reference line label on hover.
-            invisibleReferenceLine
-                .on('mouseover', function() {
-                    visibleReferenceLine.classed('hover', true);
-                    referenceLineLabel.classed('hidden', false);
-                    referenceLineLabelBox.classed('hidden', false);
-                    _this.svg.node().appendChild(referenceLineLabelBox.node());
-                    _this.svg.node().appendChild(referenceLineLabel.node());
-                })
-                .on('mouseout', function() {
-                    visibleReferenceLine.classed('hover', false);
-                    referenceLineLabel.classed('hidden', true);
-                    referenceLineLabelBox.classed('hidden', true);
-                    referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
-                    referenceLineGroup.node().appendChild(referenceLineLabel.node());
-                });
-
-            //Hide reference labels initially.
-            referenceLineLabel.classed('hidden', true);
-            referenceLineLabelBox.classed('hidden', true);
-        });
-    }
-
-    function onResize() {
-        var _this = this;
-
-        var context = this;
-
-        //Add filter functionality to legend.
-        legendFilter.call(this);
-
-        //Draw second x-axis at top of chart.
-        drawTopXaxis.call(this);
-
-        //Distinguish each timeline with striping.
-        this.svg.selectAll('.ct-stripe').remove();
-        var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
-            d3
-                .select(this)
-                .select('text')
-                .attr('dy', context.y.rangeBand() / 2);
-            d3
-                .select(this)
-                .insert('rect', ':first-child')
-                .attr({
-                    id: d,
-                    x: -context.margin.left,
-                    y: -context.config.marks[0].attributes['stroke-width'],
-                    width: context.plot_width + context.margin.left,
-                    height:
-                        context.y.rangeBand() + context.config.marks[0].attributes['stroke-width']
-                })
-                .classed('ct-stripe', true);
-        });
-
-        //Offset overlapping marks.
         this.config.marks.forEach(function(mark, i) {
             var markData = _this.marks[i].data;
             if (mark.type === 'line') {
@@ -2623,31 +2412,224 @@
                 offsetCircles.call(_this, mark, markData);
             }
         });
+    }
 
-        //Draw ongoing marks.
-        if (this.config.ongo_col) drawOngoingMarks.call(this);
+    function drawOngoingMarks() {
+        var _this = this;
 
-        //Highlight events.
-        highlightMarks.call(this);
+        if (this.config.ongo_col && this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
+            var context = this;
 
-        //Draw second chart when y-axis tick label is clicked.
-        this.svg
-            .selectAll('.y.axis .tick')
-            .each(function(d) {
-                if (/^-g\d/.test(d)) d3.select(this).remove();
-            })
-            .on('click', function(d) {
-                _this.selected_id = d;
-                tickClick.call(_this);
+            this.svg.selectAll('.ongoing-event').remove();
+            this.svg
+                .selectAll('.line-supergroup .line')
+                .filter(function(d) {
+                    return d.ongoing === _this.config.ongo_val;
+                })
+                .each(function(d) {
+                    var g = d3.select(this),
+                        endpoint = d.values[1],
+                        x = context.x(
+                            context.config.time_scale === 'Study Day'
+                                ? +endpoint.key
+                                : new Date(endpoint.key)
+                        ),
+                        y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
+                        color = context.colorScale(
+                            endpoint.values.raw[0][context.config.event_col]
+                        ),
+                        arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
+
+                    g
+                        .append('polygon')
+                        .datum(d)
+                        .classed('ongoing-event', true)
+                        .attr({
+                            points: arrow
+                                .map(function(coordinate) {
+                                    return coordinate.join(',');
+                                })
+                                .join(' '),
+                            fill: color,
+                            stroke: color
+                        });
+                });
+        }
+    }
+
+    function highlightMarks() {
+        var _this = this;
+
+        var context = this;
+
+        this.svg.selectAll('.highlight-overlay').remove();
+
+        //Highlight legend.
+        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
+            return d.label === _this.config.event_highlighted;
+        });
+
+        //Highlight marks.
+        var highlightedMarks = this.svg
+                .selectAll('.wc-data-mark, .ongoing-event')
+                .classed('highlighted', function(d) {
+                    return d.key.indexOf(_this.config.event_highlighted) > -1;
+                })
+                .filter(function(d) {
+                    return d.key.indexOf(_this.config.event_highlighted) > -1;
+                }),
+            paths = highlightedMarks
+                .filter(function() {
+                    return (
+                        this.tagName === 'path' &&
+                        this.getAttribute('class').indexOf('highlighted') > -1
+                    );
+                })
+                .each(function(d) {
+                    var g = d3.select(this.parentNode),
+                        x1 = context.x(
+                            context.config.time_scale === 'Study Day'
+                                ? +d.values[0].key
+                                : new Date(d.values[0].key)
+                        ),
+                        x2 = context.x(
+                            context.config.time_scale === 'Study Day'
+                                ? +d.values[1].key
+                                : new Date(d.values[1].key)
+                        ),
+                        y =
+                            context.y(d.values[0].values.raw[0][context.config.id_col]) +
+                            context.y.rangeBand() / 2,
+                        color = context.config.event_highlight_color,
+                        line = g
+                            .append('line')
+                            .classed('highlight-overlay', true)
+                            .attr({
+                                x1: x1,
+                                x2: x2,
+                                y1: y,
+                                y2: y,
+                                stroke: color
+                            });
+
+                    if (d.ongoing === context.config.ongo_val) {
+                        var arrow = [[x2 + 7, y], [x2, y - 2.5], [x2, y + 2.5]],
+                            polygon = g
+                                .append('polygon')
+                                .datum(d)
+                                .classed('highlighted ongoing-event', true)
+                                .attr({
+                                    points: arrow
+                                        .map(function(coordinate) {
+                                            return coordinate.join(',');
+                                        })
+                                        .join(' '),
+                                    fill: color
+                                });
+                    }
+                }),
+            circles = highlightedMarks
+                .filter(function() {
+                    return (
+                        this.tagName === 'circle' &&
+                        this.getAttribute('class').indexOf('highlighted') > -1
+                    );
+                })
+                .attr({
+                    stroke: function stroke(d) {
+                        return _this.colorScale(d.values.raw[0][_this.config.event_col]);
+                    },
+                    fill: function fill(d) {
+                        return _this.config.event_highlight_color;
+                    }
+                });
+    }
+
+    function drawReferenceLines() {
+        var _this = this;
+
+        if (this.config.reference_lines) {
+            this.svg.select('.reference-lines').remove();
+            var referenceLinesGroup = this.svg
+                .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+                .classed('reference-lines', true);
+
+            //Append reference line for each item in config.referenceLines.
+            this.config.referenceLines.forEach(function(referenceLine, i) {
+                var referenceLineGroup = referenceLinesGroup
+                        .append('g')
+                        .classed('reference-line', true)
+                        .attr('id', 'reference-line-' + i),
+                    visibleReferenceLine = referenceLineGroup
+                        .append('line')
+                        .classed('visible-reference-line', true)
+                        .attr({
+                            x1: _this.x(referenceLine.timepoint),
+                            x2: _this.x(referenceLine.timepoint),
+                            y1: 0,
+                            y2: _this.plot_height
+                        }),
+                    invisibleReferenceLine = referenceLineGroup
+                        .append('line')
+                        .classed('invisible-reference-line', true)
+                        .attr({
+                            x1: _this.x(referenceLine.timepoint),
+                            x2: _this.x(referenceLine.timepoint),
+                            y1: 0,
+                            y2: _this.plot_height
+                        }),
+                    // invisible reference line has no dasharray and is much thicker to make hovering easier
+                    direction =
+                        referenceLine.timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2
+                            ? 'right'
+                            : 'left',
+                    referenceLineLabel = referenceLineGroup
+                        .append('text')
+                        .classed('reference-line-label', true)
+                        .attr({
+                            x: _this.x(referenceLine.timepoint),
+                            y: 0,
+                            'text-anchor': direction === 'right' ? 'beginning' : 'end',
+                            dx: direction === 'right' ? 15 : -15,
+                            dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                        })
+                        .text(referenceLine.label),
+                    dimensions = referenceLineLabel.node().getBBox(),
+                    referenceLineLabelBox = referenceLineGroup
+                        .insert('rect', '.reference-line-label')
+                        .classed('reference-line-label-box', true)
+                        .attr({
+                            x: dimensions.x - 10,
+                            y: dimensions.y - 5,
+                            width: dimensions.width + 20,
+                            height: dimensions.height + 10
+                        });
+
+                //Display reference line label on hover.
+                invisibleReferenceLine
+                    .on('mouseover', function() {
+                        visibleReferenceLine.classed('hover', true);
+                        referenceLineLabel.classed('hidden', false);
+                        referenceLineLabelBox.classed('hidden', false);
+                        _this.svg.node().appendChild(referenceLineLabelBox.node());
+                        _this.svg.node().appendChild(referenceLineLabel.node());
+                    })
+                    .on('mouseout', function() {
+                        visibleReferenceLine.classed('hover', false);
+                        referenceLineLabel.classed('hidden', true);
+                        referenceLineLabelBox.classed('hidden', true);
+                        referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
+                        referenceLineGroup.node().appendChild(referenceLineLabel.node());
+                    });
+
+                //Hide reference labels initially.
+                referenceLineLabel.classed('hidden', true);
+                referenceLineLabelBox.classed('hidden', true);
             });
+        }
+    }
 
-        //Annotate grouping.
-        if (this.config.y.grouping) annotateGrouping.call(this);
-
-        //Draw reference lines.
-        if (this.config.reference_lines) drawReferenceLines.call(this);
-
-        //Offset bottom x-axis to prevent overlap with final ID.
+    function offsetBottomXaxis() {
         var bottomXaxis = this.svg.select('.x.axis'),
             bottomXaxisTitle = bottomXaxis.select('.axis-title');
         bottomXaxis.attr(
@@ -2675,6 +2657,37 @@
                     7 * this.margin.bottom / 16) +
                 ')'
         );
+    }
+
+    function onResize() {
+        legendFilter.call(this);
+
+        //Draw second x-axis at top of chart.
+        drawTopXaxis.call(this);
+
+        //Distinguish each timeline with striping.
+        addStriping.call(this);
+
+        //Draw second chart when y-axis tick label is clicked.
+        tickClick.call(this);
+
+        //Annotate grouping.
+        annotateGrouping.call(this);
+
+        //Offset overlapping marks.
+        offsetOverlappingMarks.call(this);
+
+        //Draw ongoing marks.
+        drawOngoingMarks.call(this);
+
+        //Highlight events.
+        highlightMarks.call(this);
+
+        //Draw reference lines.
+        drawReferenceLines.call(this);
+
+        //Offset bottom x-axis to prevent overlap with final ID.
+        offsetBottomXaxis.call(this);
     }
 
     function onDestroy() {}

@@ -145,6 +145,10 @@ export default function defineStyles() {
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick {' +
                 '    cursor: pointer;' +
                 '    fill: blue;' +
+                '    text-decoration: none;' +
+                '    font-weight: bolder;' +
+                '}',
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:hover {' +
                 '    text-decoration: underline;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +

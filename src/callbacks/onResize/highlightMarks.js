@@ -22,7 +22,7 @@ export default function highlightMarks() {
                     this.getAttribute('class').indexOf('highlighted') > -1
                 );
             })
-            .each(function(d) {
+            .each(function(d, i) {
                 const g = select(this.parentNode),
                     x1 = context.x(
                         context.config.time_scale === 'Study Day'
@@ -35,7 +35,11 @@ export default function highlightMarks() {
                             : new Date(d.values[1].key)
                     ),
                     y =
-                        context.y(d.values[0].values.raw[0][context.config.id_col]) +
+                        context.y(
+                            d.values[0].values.raw[0][
+                                context.parent ? context.config.seq_col : context.config.id_col
+                            ]
+                        ) +
                         context.y.rangeBand() / 2,
                     color = context.config.event_highlight_color,
                     line = g

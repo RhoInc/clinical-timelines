@@ -80,28 +80,36 @@ export default function onLayout() {
         });
 
     //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-    otherControls.each(function(d) {
-        const control = select(this),
-            options = control.selectAll('option');
+    otherControls
+        .each(function(d) {
+            const control = select(this),
+                options = control.selectAll('option');
 
-        if (d.label === 'Y-axis') {
-            //Add labels to Y-axis sort.
-            if (d.description === 'sort')
-                options.property(
-                    'label',
-                    di => d.relabels[d.values.filter(dii => dii !== 'None').indexOf(di)]
-                );
-            else if (d.description === 'grouping')
-                //Add variable labels to Y-axis grouping options.
-                options.property(
-                    'label',
-                    di =>
-                        di !== 'None'
-                            ? context.config.groupings[
-                                  context.config.groupings.map(dii => dii.value_col).indexOf(di)
-                              ].label
-                            : 'None'
-                );
-        }
-    });
+            if (d.label === 'Y-axis') {
+                //Add labels to Y-axis sort.
+                if (d.description === 'sort')
+                    options.property(
+                        'label',
+                        di => d.relabels[d.values.filter(dii => dii !== 'None').indexOf(di)]
+                    );
+                else if (d.description === 'grouping')
+                    //Add variable labels to Y-axis grouping options.
+                    options.property(
+                        'label',
+                        di =>
+                            di !== 'None'
+                                ? context.config.groupings[
+                                      context.config.groupings.map(dii => dii.value_col).indexOf(di)
+                                  ].label
+                                : 'None'
+                    );
+            }
+        })
+        .on('change', function(d) {
+            if (d.label === 'Event Type') {
+                context.participantTimeline.config.event_highlighted =
+                    context.config.event_highlighted;
+                if (context.selected_id) drawParticipantTimeline.call(context);
+            }
+        });
 }

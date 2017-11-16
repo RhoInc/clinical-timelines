@@ -498,7 +498,7 @@
         endt_col: 'ENDT',
         date_range: null,
         date_format: '%Y-%m-%d',
-        date_display_format: null, // sync in syncSettings()
+        date_display_format: '%b %y', // sync in syncSettings()
 
         seq_col: 'SEQ',
         tooltip_col: 'TOOLTIP',

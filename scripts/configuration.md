@@ -63,6 +63,15 @@ highlighted event type
 
 
 
+## settings.event_highlight_color
+`string`
+
+fill color of highlighted events
+
+**default:** none
+
+
+
 ## settings.filters
 `array`
 
@@ -157,6 +166,15 @@ end day variable name
 
 
 
+## settings.study_day_range
+`array`
+
+start and stop days with which to define the x-axis domain
+
+**default:** none
+
+
+
 ## settings.stdt_col
 `string`
 
@@ -175,10 +193,28 @@ end date variable name
 
 
 
+## settings.date_range
+`array`
+
+start and stop dates with which to define the x-axis domain and which match settings.date_format
+
+**default:** none
+
+
+
 ## settings.date_format
 `string`
 
-format of date variables
+date format of input variables
+
+**default:** `"%Y-%m-%d"`
+
+
+
+## settings.date_display_format
+`string`
+
+date format of x-axis
 
 **default:** `"%Y-%m-%d"`
 

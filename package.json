@@ -1,7 +1,7 @@
 {
   "name": "clinical-timelines",
   "description": "A general purpose graphical timeline library",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "author": "Rho, Inc.",
   "license": "MIT",
   "homepage": "https://github.com/RhoInc/clinical-timelines",
@@ -19,7 +19,8 @@
     "webcharts": "^1.8"
   },
   "scripts": {
-    "build": "npm run bundle && npm run format",
+    "build": "npm run bundle && npm run format && npm run build-md",
+    "build-md": "node ./scripts/configuration-markdown.js",
     "bundle": "rollup -c",
     "format": "npm run format-src && npm run format-build",
     "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write src/**/*.js",

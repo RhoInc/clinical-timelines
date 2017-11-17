@@ -6,7 +6,7 @@ export default function legendFilter() {
         eventTypeFilter = this.filters.filter(filter => filter.col === this.config.event_col)[0], // event type filter object
         eventTypeControl = this.controls.wrap
             .selectAll('.control-group')
-            .filter(d => d.label === 'Event Type'), // event type control
+            .filter(d => d.label === 'Event Type' && d.description === 'filter'), // event type control
         eventTypes = eventTypeControl
             .selectAll('.changer option')
             .sort((a, b) => this.config.color_dom.indexOf(a) - this.config.color_dom.indexOf(b)), // event type options

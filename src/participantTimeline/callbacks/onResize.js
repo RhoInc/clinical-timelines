@@ -20,5 +20,10 @@ export default function onResize() {
     drawOngoingMarks.call(this);
 
     //Draw reference lines.
-    if (this.config.referenceLines) drawReferenceLines.call(this);
+    if (this.config.reference_lines) drawReferenceLines.call(this);
+
+    //Highlight events
+    this.svg
+        .selectAll('.wc-data-mark')
+        .classed('highlighted', d => d.key.indexOf(this.config.event_highlighted) > -1);
 }

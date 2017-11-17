@@ -52,11 +52,24 @@ export default function defineStyles() {
                 '    border-radius: 4px;' +
                 '    padding: 5px;' +
                 '}',
+            '#clinical-timelines > .wc-chart .wc-svg .grouping .boundary {' +
+                '    stroke: black;' +
+                '    stroke-width: 2px;' +
+                '}',
+            '#clinical-timelines > .wc-chart .wc-svg .grouping .annotation {' +
+                '    font-size: 24px;' +
+                '    font-weight: bold;' +
+                '    text-anchor: beginning;' +
+                '}',
+            '#clinical-timelines > .wc-chart .wc-svg .grouping.vertical .annotation {' +
+                '    writing-mode: tb-rl;' +
+                '}',
             '#clinical-timelines > .wc-chart .wc-svg .y.axis .tick {' +
                 '    cursor: pointer;' +
                 '    fill: blue;' +
                 '    text-decoration: underline;' +
                 '}',
+            '#clinical-timelines .wc-chart .wc-svg title {' + '    white-space: pre;' + '}',
             '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                 '    stroke: black;' +
                 '    stroke-width: 3px;' +

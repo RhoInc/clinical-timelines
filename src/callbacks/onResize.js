@@ -1,9 +1,10 @@
 import highlightEvent from './onResize/highlightEvent';
-import { svg } from 'd3';
+import { svg, select } from 'd3';
 import legendFilter from './onResize/legendFilter';
 import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
+import annotateGrouping from './onResize/annotateGrouping';
 import drawOngoingMarks from './onResize/drawOngoingMarks';
 import drawReferenceLines from './onResize/drawReferenceLines';
 
@@ -20,7 +21,7 @@ export default function onResize() {
     this.wrap
         .selectAll('.legend-item')
         .filter(d => d.label === 'None')
-        .remove();
+        .classed('hidden', true);
 
     //Draw second x-axis at top of chart.
     const topXaxis = svg
@@ -40,33 +41,80 @@ export default function onResize() {
             'translate(' +
                 (this.raw_width / 2 - this.margin.left) +
                 ',-' +
-                this.config.margin.top / 2 +
+                9 * this.config.margin.top / 16 +
                 ')'
         );
 
     //Draw second chart when y-axis tick label is clicked.
-    this.svg.selectAll('.y.axis .tick').on('click', d => {
-        this.selected_id = d;
-        tickClick.call(this);
-    });
+    this.svg
+        .selectAll('.y.axis .tick')
+        .each(function(d) {
+            if (/^-/.test(d)) select(this).remove();
+        })
+        .on('click', d => {
+            this.selected_id = d;
+            tickClick.call(this);
+        });
 
     //Offset overlapping marks.
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {
             //Identify marks which represent ongoing events.
-            markData.forEach(d => {
-                d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
-            });
+            if (this.config.ongo_col)
+                markData.forEach(d => {
+                    d.ongoing = d.values[0].values.raw[0][this.config.ongo_col];
+                });
             offsetLines.call(this, mark, markData);
         } else if (mark.type === 'circle') {
             offsetCircles.call(this, mark, markData);
         }
     });
 
+    //Annotate grouping.
+    if (this.config.y.grouping) annotateGrouping.call(this);
+
     //Draw ongoing marks.
-    drawOngoingMarks.call(this);
+    if (this.config.ongo_col) drawOngoingMarks.call(this);
 
     //Draw reference lines.
-    if (this.config.referenceLines) drawReferenceLines.call(this);
+    if (this.config.reference_lines) drawReferenceLines.call(this);
+
+    //Offset bottom x-axis to prevent overlap with final ID.
+    const bottomXaxis = this.svg.select('.x.axis'),
+        bottomXaxisTransform = bottomXaxis.attr('transform'),
+        bottomXaxisTransformX =
+            bottomXaxisTransform.indexOf(',') > -1
+                ? +bottomXaxisTransform.split(',')[0].split('(')[1]
+                : +bottomXaxisTransform.split(' ')[0].split('(')[1],
+        bottomXaxisTransformY =
+            bottomXaxisTransform.indexOf(',') > -1
+                ? +bottomXaxisTransform.split(',')[1].split(')')[0]
+                : +bottomXaxisTransform.split(' ')[1].split(')')[0],
+        bottomXaxisTitle = bottomXaxis.select('.axis-title'),
+        bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
+        bottomXaxisTitleTransformX =
+            bottomXaxisTitleTransform.indexOf(',') > -1
+                ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
+                : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
+        bottomXaxisTitleTransformY =
+            bottomXaxisTitleTransform.indexOf(',') > -1
+                ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
+                : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
+    bottomXaxis.attr('transform', `translate(0,${bottomXaxisTransformY + this.y.rangeBand()})`);
+    bottomXaxisTitle.attr(
+        'transform',
+        `translate(${bottomXaxisTitleTransformX},${bottomXaxisTitleTransformY -
+            7 * this.margin.bottom / 16})`
+    );
+
+    //Replace newline characters with html line break entities to cater to Internet Explorer.
+    if (!!document.documentMode)
+        this.svg.selectAll('.line,.point').each(function(d) {
+            console.log(d);
+            const mark = select(this),
+                tooltip = mark.select('title'),
+                text = tooltip.text().split('\n');
+            tooltip.text(text.join('--|--'));
+        });
 }

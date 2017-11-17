@@ -9,25 +9,55 @@
         ,"default": "USUBJID"
         ,"type": "string"
         }
-    ,"unit":
+    ,"id_unit":
         {"title": "ID Unit"
         ,"description": "unique identifier unit"
         ,"default": "participant"
         ,"type": "string"
         }
+    ,"id_characteristics":
+        {"title": "ID Characteristics"
+        ,"description": "an array of identifier characteristic variables and associated metadata"
+        ,"type": "array"
+        ,"items":
+            {"type": "object"
+            ,"properties":
+                {"value_col":
+                    {"title": "Variable name"
+                    ,"type": "string"
+                    }
+                ,"label":
+                    {"title": "Variable label"
+                    ,"type": "string"
+                    }
+                }
+            }
+        }
+
+
+
     ,"event_col":
         {"title": "Event Type"
         ,"description": "event type variable name"
         ,"default": "DOMAIN"
         ,"type": "string"
         }
-    ,"eventTypes":
+    ,"event_types":
         {"title": "Initial Event Types"
         ,"description": "an array of event types displayed initially"
         ,"type": "array"
         ,"items":
             {"type": "string"}
         }
+    ,"event_highlighted":
+        {"title": "Highlighted Event"
+        ,"description": "highlighted event type"
+        ,"default": null
+        ,"type": "string"
+        }
+
+
+
     ,"site_col":
         {"title": "Site"
         ,"description": "site variable name"
@@ -52,12 +82,42 @@
                 }
             }
         }
-    ,"highlightedEvent":
-        {"title": "Highlighted Event"
-        ,"description": "highlighted event type"
+
+
+
+    ,"groupings":
+        {"title": "ID grouping"
+        ,"description": "an array of categorical ID characteristic variables with which to group IDs"
+        ,"type": "array"
+        ,"items":
+            {"type": "object"
+            ,"properties":
+                {"value_col":
+                    {"title": "Variable name"
+                    ,"type": "string"
+                    }
+                ,"label":
+                    {"title": "Variable label"
+                    ,"type": "string"
+                    }
+                }
+            }
+        }
+    ,"grouping_initial":
+        {"title": "Initial ID grouping"
+        ,"description": "initial ID grouping variable"
         ,"default": null
         ,"type": "string"
         }
+    ,"grouping_direction":
+        {"title": "Grouping annotation placement"
+        ,"description": "grouping annotation placement, 'horizontal' or 'vertical'"
+        ,"default": "horizontal"
+        ,"type": "string"
+        }
+
+
+
     ,"stdy_col":
         {"title": "Start Day"
         ,"description": "start day variable name"
@@ -76,15 +136,33 @@
         ,"default": "SEQ"
         ,"type": "string"
         }
+    ,"tooltip_col":
+        {"title": "Event Details"
+        ,"description": "hovering over a mark displays a tooltip with the details of the event"
+        ,"default": "TOOLTIP"
+        ,"type": "string"
+        }
+
+
+
     ,"ongo_col":
         {"title": "Ongoing?"
         ,"description": "ongoing event indicator variable name"
         ,"default": "ONGO"
         ,"type": "string"
         }
-    ,"referenceLines":
-        {"title": "Reference Days"
-        ,"description": "an array of reference days and associated description"
+    ,"ongo_val":
+        {"title": "Ongoing Value"
+        ,"description": "ongoing event indicator value"
+        ,"default": "Y"
+        ,"type": "string"
+        }
+
+
+
+    ,"reference_lines":
+        {"title": "Reference Timepoints"
+        ,"description": "an array of reference timepoints and associated descriptions"
         ,"type": "array"
         ,"items":
             {"type": "object"
@@ -100,9 +178,12 @@
                 }
             }
         }
-    ,"id_characteristics":
-        {"title": "ID Characteristics"
-        ,"description": "an array of identifier characteristic variables and associated metadata"
+
+
+
+    ,"details":
+        {"title": "Details Listing"
+        ,"description": "an array of detail listing variables and associated metadata"
         ,"type": "array"
         ,"items":
             {"type": "object"
@@ -118,21 +199,38 @@
                 }
             }
         }
-    ,"details":
-        {"title": "Details"
-        ,"description": "an array of listing variables and associated metadata"
-        ,"type": "array"
-        ,"items":
-            {"type": "object"
-            ,"properties":
-                {"value_col":
-                    {"title": "Variable name"
-                    ,"type": "string"
-                    }
-                ,"label":
-                    {"title": "Variable label"
-                    ,"type": "string"
-                    }
+    ,"details_config":
+        {"title": "Details Listing Settings"
+        ,"description": "a webcharts table settings object"
+        ,"type": "object"
+        ,"properties":
+            {"cols":
+                {"title": "List of variables"
+                ,"type": "array"
+                ,"items":
+                    {"type": "string"}
+                }
+            ,"headers":
+                {"title": "List of headers"
+                ,"type": "string"
+                ,"items":
+                    {"type": "string"}
+                }
+            ,"searchable":
+                {"title": "Searchable?"
+                ,"type": "boolean"
+                }
+            ,"sortable":
+                {"title": "sortable?"
+                ,"type": "boolean"
+                }
+            ,"pagination":
+                {"title": "Paginated?"
+                ,"type": "boolean"
+                }
+            ,"exportable":
+                {"title": "Exportable?"
+                ,"type": "boolean"
                 }
             }
         }

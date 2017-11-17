@@ -1,9 +1,8 @@
 import drawParticipantTimeline from '../functions/drawParticipantTimeline';
+import enableDisableControls from '../functions/enableDisableControls';
 
 export default function toggleView() {
-    this.selected_id = this.filters.filter(filter => filter.col === this.config.id_col)[0].val;
-
-    if (this.selected_id !== 'All') {
+    if (this.selected_id && this.selected_id !== 'All') {
         drawParticipantTimeline.call(this);
     } else {
         delete this.selected_id;
@@ -31,10 +30,5 @@ export default function toggleView() {
         this.listing.wrap.classed('hidden', true);
     }
 
-    //Enable/Disable controls other than Participant and Event Type filters.
-    this.controls.wrap
-        .selectAll('.control-group')
-        .filter(control => [this.config.unitPropCased, 'Event Type'].indexOf(control.label) === -1)
-        .selectAll('select,input')
-        .property('disabled', !!this.selected_id);
+    enableDisableControls.call(this);
 }

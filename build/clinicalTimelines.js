@@ -78,6 +78,7 @@
                     '    fill: blue;' +
                     '    text-decoration: underline;' +
                     '}',
+                '#clinical-timelines .wc-chart .wc-svg title {' + '    white-space: pre;' + '}',
                 '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                     '    stroke: black;' +
                     '    stroke-width: 3px;' +
@@ -417,7 +418,7 @@
             gridlines: 'y',
             range_band: 24,
             margin: { top: 50 }, // for second x-axis
-            resizable: true
+            resizable: false
         };
 
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
@@ -455,6 +456,12 @@
 
         return validSetting;
     }
+
+    Number.isInteger =
+        Number.isInteger ||
+        function(value) {
+            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+        };
 
     function syncSettings(settings) {
         var syncedSettings = clone(settings);
@@ -792,10 +799,14 @@
         });
 
         //Add data-driven tooltips.
-        if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col))
+        if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
             this.config.marks.forEach(function(mark) {
                 mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
             });
+            this.config.participantSettings.marks.forEach(function(mark) {
+                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
+            });
+        }
     }
 
     function enableDisableControls() {
@@ -1045,37 +1056,45 @@
             });
 
         //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-        otherControls.each(function(d) {
-            var control = d3$1.select(this),
-                options = control.selectAll('option');
+        otherControls
+            .each(function(d) {
+                var control = d3$1.select(this),
+                    options = control.selectAll('option');
 
-            if (d.label === 'Y-axis') {
-                //Add labels to Y-axis sort.
-                if (d.description === 'sort')
-                    options.property('label', function(di) {
-                        return d.relabels[
-                            d.values
-                                .filter(function(dii) {
-                                    return dii !== 'None';
-                                })
-                                .indexOf(di)
-                        ];
-                    });
-                else if (d.description === 'grouping')
-                    //Add variable labels to Y-axis grouping options.
-                    options.property('label', function(di) {
-                        return di !== 'None'
-                            ? context.config.groupings[
-                                  context.config.groupings
-                                      .map(function(dii) {
-                                          return dii.value_col;
-                                      })
-                                      .indexOf(di)
-                              ].label
-                            : 'None';
-                    });
-            }
-        });
+                if (d.label === 'Y-axis') {
+                    //Add labels to Y-axis sort.
+                    if (d.description === 'sort')
+                        options.property('label', function(di) {
+                            return d.relabels[
+                                d.values
+                                    .filter(function(dii) {
+                                        return dii !== 'None';
+                                    })
+                                    .indexOf(di)
+                            ];
+                        });
+                    else if (d.description === 'grouping')
+                        //Add variable labels to Y-axis grouping options.
+                        options.property('label', function(di) {
+                            return di !== 'None'
+                                ? context.config.groupings[
+                                      context.config.groupings
+                                          .map(function(dii) {
+                                              return dii.value_col;
+                                          })
+                                          .indexOf(di)
+                                  ].label
+                                : 'None';
+                        });
+                }
+            })
+            .on('change', function(d) {
+                if (d.label === 'Event Type') {
+                    context.participantTimeline.config.event_highlighted =
+                        context.config.event_highlighted;
+                    if (context.selected_id) drawParticipantTimeline.call(context);
+                }
+            });
     }
 
     function groupingData() {
@@ -1806,7 +1825,7 @@
             .classed('reference-lines', true);
 
         //Append reference line for each item in config.referenceLines.
-        this.config.referenceLines.forEach(function(studyDay, i) {
+        this.config.reference_lines.forEach(function(studyDay, i) {
             var referenceLineGroup = referenceLinesGroup
                     .append('g')
                     .classed('reference-line', true)
@@ -1952,32 +1971,47 @@
 
         //Offset bottom x-axis to prevent overlap with final ID.
         var bottomXaxis = this.svg.select('.x.axis'),
-            bottomXaxisTitle = bottomXaxis.select('.axis-title');
+            bottomXaxisTransform = bottomXaxis.attr('transform'),
+            bottomXaxisTransformX =
+                bottomXaxisTransform.indexOf(',') > -1
+                    ? +bottomXaxisTransform.split(',')[0].split('(')[1]
+                    : +bottomXaxisTransform.split(' ')[0].split('(')[1],
+            bottomXaxisTransformY =
+                bottomXaxisTransform.indexOf(',') > -1
+                    ? +bottomXaxisTransform.split(',')[1].split(')')[0]
+                    : +bottomXaxisTransform.split(' ')[1].split(')')[0],
+            bottomXaxisTitle = bottomXaxis.select('.axis-title'),
+            bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
+            bottomXaxisTitleTransformX =
+                bottomXaxisTitleTransform.indexOf(',') > -1
+                    ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
+                    : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
+            bottomXaxisTitleTransformY =
+                bottomXaxisTitleTransform.indexOf(',') > -1
+                    ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
+                    : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
         bottomXaxis.attr(
             'transform',
-            'translate(0,' +
-                (+bottomXaxis
-                    .attr('transform')
-                    .split(',')[1]
-                    .split(')')[0] +
-                    this.y.rangeBand()) +
-                ')'
+            'translate(0,' + (bottomXaxisTransformY + this.y.rangeBand()) + ')'
         );
         bottomXaxisTitle.attr(
             'transform',
-            'translate(\n            ' +
-                +bottomXaxisTitle
-                    .attr('transform')
-                    .split(',')[0]
-                    .split('(')[1] +
-                ',\n            ' +
-                (+bottomXaxisTitle
-                    .attr('transform')
-                    .split(',')[1]
-                    .split(')')[0] -
-                    7 * this.margin.bottom / 16) +
+            'translate(' +
+                bottomXaxisTitleTransformX +
+                ',' +
+                (bottomXaxisTitleTransformY - 7 * this.margin.bottom / 16) +
                 ')'
         );
+
+        //Replace newline characters with html line break entities to cater to Internet Explorer.
+        if (!!document.documentMode)
+            this.svg.selectAll('.line,.point').each(function(d) {
+                console.log(d);
+                var mark = d3$1.select(this),
+                    tooltip = mark.select('title'),
+                    text = tooltip.text().split('\n');
+                tooltip.text(text.join('--|--'));
+            });
     }
 
     function onDestroy() {}
@@ -2029,7 +2063,12 @@
         drawOngoingMarks.call(this);
 
         //Draw reference lines.
-        if (this.config.referenceLines) drawReferenceLines.call(this);
+        if (this.config.reference_lines) drawReferenceLines.call(this);
+
+        //Highlight events
+        this.svg.selectAll('.wc-data-mark').classed('highlighted', function(d) {
+            return d.key.indexOf(_this.config.event_highlighted) > -1;
+        });
     }
 
     function onDestroy$1() {}

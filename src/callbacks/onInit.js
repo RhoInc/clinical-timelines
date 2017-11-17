@@ -83,8 +83,12 @@ export default function onInit() {
     });
 
     //Add data-driven tooltips.
-    if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col))
+    if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
         this.config.marks.forEach(mark => {
             mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
         });
+        this.config.participantSettings.marks.forEach(mark => {
+            mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
+        });
+    }
 }

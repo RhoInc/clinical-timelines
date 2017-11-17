@@ -69,6 +69,7 @@ export default function defineStyles() {
                 '    fill: blue;' +
                 '    text-decoration: underline;' +
                 '}',
+            '#clinical-timelines .wc-chart .wc-svg title {' + '    white-space: pre;' + '}',
             '#clinical-timelines .wc-chart .wc-svg .wc-data-mark.highlighted {' +
                 '    stroke: black;' +
                 '    stroke-width: 3px;' +

@@ -1,6 +1,7 @@
 import clone from '../util/clone';
 import { merge } from 'd3';
 import arrayOfVariablesCheck from './functions/arrayOfVariablesCheck';
+import '../util/number-isinteger';
 
 export default function syncSettings(settings) {
     const syncedSettings = clone(settings);

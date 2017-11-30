@@ -1,6 +1,7 @@
-import highlightEvent from './onResize/highlightEvent';
-import { svg, select } from 'd3';
+import highlightMarks from './onResize/highlightMarks';
 import legendFilter from './onResize/legendFilter';
+import drawTopXaxis from './onResize/drawTopXaxis';
+import { select } from 'd3';
 import tickClick from './onResize/tickClick';
 import offsetLines from './onResize/offsetLines';
 import offsetCircles from './onResize/offsetCircles';
@@ -11,50 +12,11 @@ import drawReferenceLines from './onResize/drawReferenceLines';
 export default function onResize() {
     const context = this;
 
-    //Highlight events.
-    highlightEvent.call(this);
-
     //Add filter functionality to legend.
     legendFilter.call(this);
 
-    //Remove None legend item; not sure why it's showing up.
-    this.wrap
-        .selectAll('.legend-item')
-        .filter(d => d.label === 'None')
-        .classed('hidden', true);
-
     //Draw second x-axis at top of chart.
-    const topXaxis = svg
-            .axis()
-            .scale(this.x)
-            .orient('top')
-            .tickFormat(this.xAxis.tickFormat())
-            .innerTickSize(this.xAxis.innerTickSize())
-            .outerTickSize(this.xAxis.outerTickSize())
-            .ticks(this.xAxis.ticks()[0]),
-        topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');
-    topXaxisSelection.call(topXaxis);
-    topXaxisSelection
-        .select('text.axis-title.top')
-        .attr(
-            'transform',
-            'translate(' +
-                (this.raw_width / 2 - this.margin.left) +
-                ',-' +
-                9 * this.config.margin.top / 16 +
-                ')'
-        );
-
-    //Draw second chart when y-axis tick label is clicked.
-    this.svg
-        .selectAll('.y.axis .tick')
-        .each(function(d) {
-            if (/^-/.test(d)) select(this).remove();
-        })
-        .on('click', d => {
-            this.selected_id = d;
-            tickClick.call(this);
-        });
+    drawTopXaxis.call(this);
 
     //Offset overlapping marks.
     this.config.marks.forEach((mark, i) => {
@@ -71,36 +33,64 @@ export default function onResize() {
         }
     });
 
-    //Annotate grouping.
-    if (this.config.y.grouping) annotateGrouping.call(this);
-
     //Draw ongoing marks.
     if (this.config.ongo_col) drawOngoingMarks.call(this);
+
+    //Highlight events.
+    highlightMarks.call(this);
+
+    //Draw second chart when y-axis tick label is clicked.
+    this.svg
+        .selectAll('.y.axis .tick')
+        .each(function(d) {
+            if (/^-/.test(d)) select(this).remove();
+        })
+        .on('click', d => {
+            this.selected_id = d;
+            tickClick.call(this);
+        });
+
+    //Annotate grouping.
+    if (this.config.y.grouping) annotateGrouping.call(this);
 
     //Draw reference lines.
     if (this.config.reference_lines) drawReferenceLines.call(this);
 
     //Offset bottom x-axis to prevent overlap with final ID.
     const bottomXaxis = this.svg.select('.x.axis'),
-        bottomXaxisTitle = bottomXaxis.select('.axis-title');
-    bottomXaxis.attr(
-        'transform',
-        `translate(0,${+bottomXaxis
-            .attr('transform')
-            .split(',')[1]
-            .split(')')[0] + this.y.rangeBand()})`
-    );
+        bottomXaxisTransform = bottomXaxis.attr('transform'),
+        bottomXaxisTransformX =
+            bottomXaxisTransform.indexOf(',') > -1
+                ? +bottomXaxisTransform.split(',')[0].split('(')[1]
+                : +bottomXaxisTransform.split(' ')[0].split('(')[1],
+        bottomXaxisTransformY =
+            bottomXaxisTransform.indexOf(',') > -1
+                ? +bottomXaxisTransform.split(',')[1].split(')')[0]
+                : +bottomXaxisTransform.split(' ')[1].split(')')[0],
+        bottomXaxisTitle = bottomXaxis.select('.axis-title'),
+        bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
+        bottomXaxisTitleTransformX =
+            bottomXaxisTitleTransform.indexOf(',') > -1
+                ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
+                : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
+        bottomXaxisTitleTransformY =
+            bottomXaxisTitleTransform.indexOf(',') > -1
+                ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
+                : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
+    bottomXaxis.attr('transform', `translate(0,${bottomXaxisTransformY + this.y.rangeBand()})`);
     bottomXaxisTitle.attr(
         'transform',
-        `translate(
-            ${+bottomXaxisTitle
-                .attr('transform')
-                .split(',')[0]
-                .split('(')[1]},
-            ${+bottomXaxisTitle
-                .attr('transform')
-                .split(',')[1]
-                .split(')')[0] -
-                7 * this.margin.bottom / 16})`
+        `translate(${bottomXaxisTitleTransformX},${bottomXaxisTitleTransformY -
+            7 * this.margin.bottom / 16})`
     );
+
+    //Replace newline characters with html line break entities to cater to Internet Explorer.
+    if (!!document.documentMode)
+        this.svg.selectAll('.line,.point').each(function(d) {
+            console.log(d);
+            const mark = select(this),
+                tooltip = mark.select('title'),
+                text = tooltip.text().split('\n');
+            tooltip.text(text.join('--|--'));
+        });
 }

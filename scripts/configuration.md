@@ -63,15 +63,6 @@ highlighted event type
 
 
 
-## settings.site_col
-`string`
-
-site variable name
-
-**default:** `"SITE"`
-
-
-
 ## settings.filters
 `array`
 
@@ -89,6 +80,15 @@ Variable name
 Variable label
 
 
+
+
+
+## settings.site_col
+`string`
+
+site variable name
+
+**default:** `"SITE"`
 
 
 
@@ -130,6 +130,15 @@ grouping annotation placement, 'horizontal' or 'vertical'
 
 
 
+## settings.time_scale
+`string`
+
+the time scale on which to plot events
+
+**default:** `"Study Day"`
+
+
+
 ## settings.stdy_col
 `string`
 
@@ -145,6 +154,33 @@ start day variable name
 end day variable name
 
 **default:** `"ENDY"`
+
+
+
+## settings.stdt_col
+`string`
+
+start date variable name
+
+**default:** `"STDT"`
+
+
+
+## settings.endt_col
+`string`
+
+end date variable name
+
+**default:** `"ENDT"`
+
+
+
+## settings.date_format
+`string`
+
+format of date variables
+
+**default:** `"%Y-%m-%d"`
 
 
 

@@ -1,4 +1,5 @@
 import arrayOfVariablesCheck from './arrayOfVariablesCheck';
+import '../../util/number-isinteger';
 
 export default function syncRendererSpecificSettings(settings) {
     //ID

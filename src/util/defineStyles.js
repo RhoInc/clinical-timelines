@@ -158,6 +158,9 @@ export default function defineStyles() {
                 '}',
 
             //Reference lines
+            '#clinical-timelines .wc-chart .wc-svg title {' +
+                '    white-space: pre;' +
+                '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 2px;' +

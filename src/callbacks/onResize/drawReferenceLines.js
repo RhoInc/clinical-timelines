@@ -7,8 +7,8 @@ export default function drawReferenceLines() {
         .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
         .classed('reference-lines', true);
 
-    //Append reference line for each item in config.referenceLines.
-    this.config.referenceLines.forEach((referenceLine, i) => {
+    //Append reference line for each item in config.reference_lines.
+    this.config.reference_lines.forEach((studyDay, i) => {
         const referenceLineGroup = referenceLinesGroup
                 .append('g')
                 .classed('reference-line', true)

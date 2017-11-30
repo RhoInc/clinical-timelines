@@ -874,19 +874,14 @@
     function onInit() {
         var _this = this;
 
-        this.raw_data.forEach(function(d) {
-            d[_this.config.stdy_col] = /^ *\d+ *$/.test(d[_this.config.stdy_col])
-                ? +d[_this.config.stdy_col]
-                : NaN;
-            d[_this.config.endy_col] = /^ *\d+ *$/.test(d[_this.config.endy_col])
-                ? +d[_this.config.endy_col]
-                : d[_this.config.stdy_col];
-            d[_this.config.stdt_col] = /^\d{4}-\d\d-\d\d *$/.test(d[_this.config.stdt_col])
-                ? d[_this.config.stdt_col]
-                : '';
-            d[_this.config.endt_col] = /^\d{4}-\d\d-\d\d *$/.test(d[_this.config.endt_col])
-                ? d[_this.config.endt_col]
-                : d[_this.config.stdt_col];
+        this.raw_data.forEach(function(d, i) {
+            if (!/^ *\d+ *$/.test(d[_this.config.stdy_col])) d[_this.config.stdy_col] = '';
+            if (!/^ *\d+ *$/.test(d[_this.config.endy_col]))
+                d[_this.config.endy_col] = d[_this.config.stdy_col];
+            if (!d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]))
+                d[_this.config.stdt_col] = '';
+            if (!d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]))
+                d[_this.config.endt_col] = d[_this.config.stdt_col];
         });
 
         //Calculate number of total IDs and number of IDs with any event.
@@ -906,15 +901,30 @@
         this.wide_data = this.raw_data.filter(
             function(d) {
                 return (
-                    d[_this.config.stdy_col] !== NaN &&
-                    d[_this.config.endy_col] !== NaN &&
-                    !(d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] == '') &&
-                    !(d.hasOwnProperty(_this.config.endt_col) && d[_this.config.endt_col] == '') &&
+                    !(d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] === '') &&
+                    !(d.hasOwnProperty(_this.config.endy_col) && d[_this.config.endy_col] === '') &&
+                    !(d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] === '') &&
+                    !(d.hasOwnProperty(_this.config.endt_col) && d[_this.config.endt_col] === '') &&
                     !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
                     !/^\s*$/.test(d[_this.config.event_col])
                 );
             } // remove records with missing [event_col]
         );
+
+        if (this.wide_data.length < this.raw_data.length) {
+            console.warn(
+                this.raw_data.length -
+                    this.wide_data.length +
+                    ' records have been removed due to invalid data.\n' +
+                    'Possible issues include\n' +
+                    '  - missing or invalid study day variable values\n' +
+                    '  - missing or invalid date variable values\n' +
+                    '  - date variable values that do not match settings.date_format (' +
+                    this.config.date_format +
+                    ')\n' +
+                    '  - missing identifiers or event types'
+            );
+        }
 
         //Define a record for each start day and stop day.
         defineData.call(this);
@@ -997,8 +1007,7 @@
                     control.value_col !== _this.config.event_col
                 );
             })
-            .selectAll('select,input')
-            .property('disabled', !!this.selected_id);
+            .classed('hidden', !!this.selected_id);
     }
 
     function updateIDfilter() {
@@ -1220,17 +1229,21 @@
         syncTimeScaleSettings(this.IDtimeline.config);
 
         //Update listing time scale settings
-        this.listing.config.cols.forEach(function(col) {
+        this.listing.config.cols = this.listing.config.cols.map(function(col) {
             if (col === _this.config.stdy_col) col = _this.config.stdt_col;
+            else if (col === _this.config.stdt_col) col = _this.config.stdy_col;
             if (col === _this.config.endy_col) col = _this.config.endt_col;
-            if (col === _this.config.stdt_col) col = _this.config.stdy_col;
-            if (col === _this.config.endt_col) col = _this.config.endy_col;
+            else if (col === _this.config.endt_col) col = _this.config.endy_col;
+
+            return col;
         });
-        this.listing.config.headers.forEach(function(header) {
+        this.listing.config.headers = this.listing.config.headers.map(function(header) {
             if (header === 'Start Day') header = 'Start Date';
+            else if (header === 'Start Date') header = 'Start Day';
             if (header === 'Stop Day') header = 'Stop Date';
-            if (header === 'Start Date') header = 'Start Day';
-            if (header === 'Stop Date') header = 'Stop Day';
+            else if (header === 'Stop Date') header = 'Stop Day';
+
+            return header;
         });
 
         //Redefine data.
@@ -1315,7 +1328,7 @@
                 description = controlGroup.select('.span-description'),
                 container = controlGroup.append('div').classed('label-description', true);
 
-            controlGroup.attr('class', controlGroup.attr('class') + ' {d.type}');
+            controlGroup.attr('class', controlGroup.attr('class') + ' ' + d.type);
 
             container.node().appendChild(label.node());
             container.node().appendChild(description.node());
@@ -1326,12 +1339,12 @@
                     .insert('div', ':first-child')
                     .classed('controls horizontal-rule', true)
                     .text('Controls');
-            else if (d.value_col === context.config.site_col) {
+            else if (d.option === 'y.grouping') {
                 var filterRule = context.controls.wrap
                     .append('div')
                     .classed('filters horizontal-rule', true)
                     .text('Filters');
-                context.controls.wrap.node().insertBefore(filterRule.node(), this);
+                context.controls.wrap.node().insertBefore(filterRule.node(), this.nextSibling);
             }
         });
 
@@ -2464,7 +2477,7 @@
         drawOngoingMarks.call(this);
 
         //Draw reference lines.
-        if (this.config.referenceLines) drawReferenceLines.call(this);
+        if (this.config.reference_lines) drawReferenceLines.call(this);
 
         //Highlight marks.
         this.svg.selectAll('.highlight-overlay').remove();

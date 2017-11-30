@@ -1,23 +1,18 @@
-import { set } from 'd3';
+import { time, set } from 'd3';
 import defineData from './functions/defineData';
 
 export default function onInit() {
     const context = this;
 
     //Data manipulation
-    this.raw_data.forEach(d => {
-        d[this.config.stdy_col] = /^ *\d+ *$/.test(d[this.config.stdy_col])
-            ? +d[this.config.stdy_col]
-            : NaN;
-        d[this.config.endy_col] = /^ *\d+ *$/.test(d[this.config.endy_col])
-            ? +d[this.config.endy_col]
-            : d[this.config.stdy_col];
-        d[this.config.stdt_col] = /^\d{4}-\d\d-\d\d *$/.test(d[this.config.stdt_col])
-            ? d[this.config.stdt_col]
-            : '';
-        d[this.config.endt_col] = /^\d{4}-\d\d-\d\d *$/.test(d[this.config.endt_col])
-            ? d[this.config.endt_col]
-            : d[this.config.stdt_col];
+    this.raw_data.forEach((d, i) => {
+        if (!/^ *\d+ *$/.test(d[this.config.stdy_col])) d[this.config.stdy_col] = '';
+        if (!/^ *\d+ *$/.test(d[this.config.endy_col]))
+            d[this.config.endy_col] = d[this.config.stdy_col];
+        if (!time.format(this.config.date_format).parse(d[this.config.stdt_col]))
+            d[this.config.stdt_col] = '';
+        if (!time.format(this.config.date_format).parse(d[this.config.endt_col]))
+            d[this.config.endt_col] = d[this.config.stdt_col];
     });
 
     //Calculate number of total IDs and number of IDs with any event.
@@ -30,13 +25,22 @@ export default function onInit() {
     //Remove records with insufficient data.
     this.wide_data = this.raw_data.filter(
         d =>
-            d[this.config.stdy_col] !== NaN &&
-            d[this.config.endy_col] !== NaN &&
-            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] == '') &&
-            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] == '') &&
+            !(d.hasOwnProperty(this.config.stdy_col) && d[this.config.stdy_col] === '') &&
+            !(d.hasOwnProperty(this.config.endy_col) && d[this.config.endy_col] === '') &&
+            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] === '') &&
+            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] === '') &&
             !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
             !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
     );
+
+    if (this.wide_data.length < this.raw_data.length) {
+        console.warn(
+            `${''}${this.raw_data.length -
+                this.wide_data
+                    .length} records have been removed due to invalid data.\n${''}Possible issues include\n${''}  - missing or invalid study day variable values\n${''}  - missing or invalid date variable values\n${''}  - date variable values that do not match settings.date_format (${this
+                .config.date_format})\n${''}  - missing identifiers or event types`
+        );
+    }
 
     //Define a record for each start day and stop day.
     defineData.call(this);

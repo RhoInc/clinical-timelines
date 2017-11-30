@@ -21,7 +21,7 @@ export default function onResize() {
     drawOngoingMarks.call(this);
 
     //Draw reference lines.
-    if (this.config.referenceLines) drawReferenceLines.call(this);
+    if (this.config.reference_lines) drawReferenceLines.call(this);
 
     //Highlight marks.
     this.svg.selectAll('.highlight-overlay').remove();

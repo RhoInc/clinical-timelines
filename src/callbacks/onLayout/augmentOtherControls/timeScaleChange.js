@@ -17,17 +17,21 @@ export default function timeScaleChange(dropdown, d) {
     syncTimeScaleSettings(this.IDtimeline.config);
 
     //Update listing time scale settings
-    this.listing.config.cols.forEach(col => {
+    this.listing.config.cols = this.listing.config.cols.map(col => {
         if (col === this.config.stdy_col) col = this.config.stdt_col;
+        else if (col === this.config.stdt_col) col = this.config.stdy_col;
         if (col === this.config.endy_col) col = this.config.endt_col;
-        if (col === this.config.stdt_col) col = this.config.stdy_col;
-        if (col === this.config.endt_col) col = this.config.endy_col;
+        else if (col === this.config.endt_col) col = this.config.endy_col;
+
+        return col;
     });
-    this.listing.config.headers.forEach(header => {
+    this.listing.config.headers = this.listing.config.headers.map(header => {
         if (header === 'Start Day') header = 'Start Date';
+        else if (header === 'Start Date') header = 'Start Day';
         if (header === 'Stop Day') header = 'Stop Date';
-        if (header === 'Start Date') header = 'Start Day';
-        if (header === 'Stop Date') header = 'Stop Day';
+        else if (header === 'Stop Date') header = 'Stop Day';
+
+        return header;
     });
 
     //Redefine data.

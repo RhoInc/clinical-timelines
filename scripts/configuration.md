@@ -135,7 +135,7 @@ grouping annotation placement, 'horizontal' or 'vertical'
 
 the time scale on which to plot events
 
-**default:** `"study day"`
+**default:** `"Study Day"`
 
 
 

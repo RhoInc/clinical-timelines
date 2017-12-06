@@ -83,15 +83,6 @@ Variable label
 
 
 
-## settings.site_col
-`string`
-
-site variable name
-
-**default:** `"SITE"`
-
-
-
 ## settings.groupings
 `array`
 

@@ -44,9 +44,6 @@ export default function onLayout() {
         .insert('div', ':first-child')
         .classed('annotation ID-details hidden', true);
     this.IDdetails.wrap
-        .append('div')
-        .html(`${this.config.id_unitPropCased}: <span id = 'ID'></span>`);
-    this.IDdetails.wrap
         .selectAll('div.characteristic')
         .data(this.config.id_characteristics)
         .enter()

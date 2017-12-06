@@ -1,4 +1,4 @@
-import { set, min, max, time } from 'd3';
+import { time, set, min, max } from 'd3';
 import defineData from './functions/defineData';
 import handleEventTypes from './onInit/handleEventTypes';
 import removeFilters from './onInit/removeFilters';
@@ -9,19 +9,14 @@ export default function onInit() {
     const context = this;
 
     //Data manipulation
-    this.raw_data.forEach(d => {
-        d[this.config.stdy_col] = /^ *\d+ *$/.test(d[this.config.stdy_col])
-            ? +d[this.config.stdy_col]
-            : NaN;
-        d[this.config.endy_col] = /^ *\d+ *$/.test(d[this.config.endy_col])
-            ? +d[this.config.endy_col]
-            : d[this.config.stdy_col];
-        d[this.config.stdt_col] = /^\d{4}-\d\d-\d\d *$/.test(d[this.config.stdt_col])
-            ? d[this.config.stdt_col]
-            : '';
-        d[this.config.endt_col] = /^\d{4}-\d\d-\d\d *$/.test(d[this.config.endt_col])
-            ? d[this.config.endt_col]
-            : d[this.config.stdt_col];
+    this.raw_data.forEach((d, i) => {
+        if (!/^ *\d+ *$/.test(d[this.config.stdy_col])) d[this.config.stdy_col] = '';
+        if (!/^ *\d+ *$/.test(d[this.config.endy_col]))
+            d[this.config.endy_col] = d[this.config.stdy_col];
+        if (!time.format(this.config.date_format).parse(d[this.config.stdt_col]))
+            d[this.config.stdt_col] = '';
+        if (!time.format(this.config.date_format).parse(d[this.config.endt_col]))
+            d[this.config.endt_col] = d[this.config.stdt_col];
     });
 
     //Calculate number of total IDs and number of IDs with any event.
@@ -31,16 +26,8 @@ export default function onInit() {
     this.populationDetails.N = this.populationDetails.population.length;
     this.IDdetails = {};
 
-    //Remove records with insufficient data.
-    this.wide_data = this.raw_data.filter(
-        d =>
-            d[this.config.stdy_col] !== NaN &&
-            d[this.config.endy_col] !== NaN &&
-            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] == '') &&
-            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] == '') &&
-            !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
-            !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
-    );
+    //Define a record for each start day and stop day.
+    defineData.call(this);
 
     //Define x-domain.
     this.config.study_day_range = this.config.study_day_range || [
@@ -61,9 +48,6 @@ export default function onInit() {
                       time.format(this.config.date_format).parse(d[this.config.endt_col])
                   )
               ];
-
-    //Define a record for each start day and stop day.
-    defineData.call(this);
 
     //Default event types to 'All'.
     handleEventTypes.call(this);

@@ -1,12 +1,8 @@
 import arrayOfVariablesCheck from './arrayOfVariablesCheck';
+import '../../util/number-isinteger';
 
 export default function syncRendererSpecificSettings(settings) {
     //ID
-    const defaultID_characteristics = [{ value_col: settings.site_col, label: 'Site' }];
-    settings.id_characteristics = arrayOfVariablesCheck(
-        defaultID_characteristics,
-        settings.id_characteristics
-    );
     settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
     settings.id_unitPropCased =
         settings.id_unit.substring(0, 1).toUpperCase() +
@@ -14,6 +10,13 @@ export default function syncRendererSpecificSettings(settings) {
     settings.id_unitPlural = /y$/.test(settings.id_unit)
         ? settings.id_unit.substring(0, settings.id_unit.length - 1) + 'ies'
         : settings.id_unit + 's';
+    const defaultID_characteristics = [
+        { value_col: settings.id_col, label: settings.id_unitPropCased }
+    ];
+    settings.id_characteristics = arrayOfVariablesCheck(
+        defaultID_characteristics,
+        settings.id_characteristics
+    );
 
     //Events
     if (!(settings.event_types instanceof Array && settings.event_types.length))
@@ -22,7 +25,6 @@ export default function syncRendererSpecificSettings(settings) {
     //Filters
     const defaultFilters = [
         { value_col: settings.id_col, label: settings.id_unitPropCased },
-        { value_col: settings.site_col, label: 'Site' },
         { value_col: settings.event_col, label: 'Event Type' }
     ];
     if (settings.ongo_col)
@@ -30,7 +32,7 @@ export default function syncRendererSpecificSettings(settings) {
     settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
     //Groupings
-    const defaultGroupings = [{ value_col: settings.site_col, label: 'Site' }];
+    const defaultGroupings = [];
     settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
     if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
         settings.grouping_direction = 'horizontal';
@@ -41,15 +43,16 @@ export default function syncRendererSpecificSettings(settings) {
             settings.reference_lines = [settings.reference_lines];
 
         settings.reference_lines = settings.reference_lines
-            .map(referenceLine => {
+            .map(reference_line => {
                 const referenceLineObject = {};
-                referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
+                referenceLineObject.timepoint = reference_line.timepoint || reference_line;
                 referenceLineObject.label =
-                    referenceLine.label || `Study Day ${referenceLineObject.studyDay}`;
+                    reference_line.label ||
+                    `${settings.config.time_scale}: ${referenceLineObject.timepoint}`;
 
                 return referenceLineObject;
             })
-            .filter(referenceLine => Number.isInteger(referenceLine.studyDay));
+            .filter(reference_line => Number.isInteger(reference_line.timepoint));
 
         if (!settings.reference_lines.length) delete settings.reference_lines;
     }

@@ -58,25 +58,39 @@ export default function onResize() {
 
     //Offset bottom x-axis to prevent overlap with final ID.
     const bottomXaxis = this.svg.select('.x.axis'),
-        bottomXaxisTitle = bottomXaxis.select('.axis-title');
-    bottomXaxis.attr(
-        'transform',
-        `translate(0,${+bottomXaxis
-            .attr('transform')
-            .split(',')[1]
-            .split(')')[0] + this.y.rangeBand()})`
-    );
+        bottomXaxisTransform = bottomXaxis.attr('transform'),
+        bottomXaxisTransformX =
+            bottomXaxisTransform.indexOf(',') > -1
+                ? +bottomXaxisTransform.split(',')[0].split('(')[1]
+                : +bottomXaxisTransform.split(' ')[0].split('(')[1],
+        bottomXaxisTransformY =
+            bottomXaxisTransform.indexOf(',') > -1
+                ? +bottomXaxisTransform.split(',')[1].split(')')[0]
+                : +bottomXaxisTransform.split(' ')[1].split(')')[0],
+        bottomXaxisTitle = bottomXaxis.select('.axis-title'),
+        bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
+        bottomXaxisTitleTransformX =
+            bottomXaxisTitleTransform.indexOf(',') > -1
+                ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
+                : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
+        bottomXaxisTitleTransformY =
+            bottomXaxisTitleTransform.indexOf(',') > -1
+                ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
+                : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
+    bottomXaxis.attr('transform', `translate(0,${bottomXaxisTransformY + this.y.rangeBand()})`);
     bottomXaxisTitle.attr(
         'transform',
-        `translate(
-            ${+bottomXaxisTitle
-                .attr('transform')
-                .split(',')[0]
-                .split('(')[1]},
-            ${+bottomXaxisTitle
-                .attr('transform')
-                .split(',')[1]
-                .split(')')[0] -
-                7 * this.margin.bottom / 16})`
+        `translate(${bottomXaxisTitleTransformX},${bottomXaxisTitleTransformY -
+            7 * this.margin.bottom / 16})`
     );
+
+    //Replace newline characters with html line break entities to cater to Internet Explorer.
+    if (!!document.documentMode)
+        this.svg.selectAll('.line,.point').each(function(d) {
+            console.log(d);
+            const mark = select(this),
+                tooltip = mark.select('title'),
+                text = tooltip.text().split('\n');
+            tooltip.text(text.join('--|--'));
+        });
 }

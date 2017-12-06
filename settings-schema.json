@@ -76,12 +76,6 @@
                 }
             }
         }
-        ,"site_col":
-            {"title": "Site"
-            ,"description": "site variable name"
-            ,"default": "SITE"
-            ,"type": "string"
-            }
 
 
 
@@ -123,6 +117,9 @@
         ,"description": "the time scale on which to plot events"
         ,"type": "string"
         ,"default": "Study Day"
+        ,"enum":
+            ["Study Day"
+            ,"Date"]
         }
         ,"stdy_col":
             {"title": "Start Day"

@@ -2412,6 +2412,11 @@
                                 currentLine.offset * +mark.attributes['stroke-width'] * 1.5 +
                                 ')'
                         );
+                    } else {
+                        //Capture line via its class name and offset vertically.
+                        var _className = currentLine.key + ' line',
+                            _g = d3.select(document.getElementsByClassName(_className)[0]);
+                        _g.attr('transform', 'translate(0,0)');
                     }
                 });
             }

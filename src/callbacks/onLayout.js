@@ -13,7 +13,7 @@ export default function onLayout() {
             description = controlGroup.select('.span-description'),
             container = controlGroup.append('div').classed('label-description', true);
 
-        controlGroup.attr('class', `${controlGroup.attr('class')} {d.type}`);
+        controlGroup.attr('class', `${controlGroup.attr('class')} ${d.type}`);
 
         container.node().appendChild(label.node());
         container.node().appendChild(description.node());
@@ -42,9 +42,6 @@ export default function onLayout() {
     this.IDdetails.wrap = this.leftSide
         .insert('div', ':first-child')
         .classed('annotation ID-details hidden', true);
-    this.IDdetails.wrap
-        .append('div')
-        .html(`${this.config.id_unitPropCased}: <span id = 'ID'></span>`);
     this.IDdetails.wrap
         .selectAll('div.characteristic')
         .data(this.config.id_characteristics)

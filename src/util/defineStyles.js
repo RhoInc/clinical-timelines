@@ -5,7 +5,13 @@ export default function defineStyles() {
           Global styles
         \--------------------------------------------------------------------------------------***/
 
-            '#clinical-timelines .hidden {' + '    display: none !important;' + '}',
+            '#clinical-timelines {' +
+                '    display: inline-block;' +
+                '    width: 100%;' +
+                '}',
+            '#clinical-timelines .hidden {' +
+                '    display: none !important;' +
+                '}',
             '#clinical-timelines .ct-button {' +
                 '    cursor: pointer !important;' +
                 '    border-radius: 4px !important;' +
@@ -14,18 +20,29 @@ export default function defineStyles() {
             '#clinical-timelines .ct-button.highlighted {' +
                 '    border: 2px solid black !important;' +
                 '}',
-            '#clinical-timelines .ct-button.selected {' + '    background: lightgray;' + '}',
+            '#clinical-timelines .ct-button.selected {' +
+                '    background: lightgray;' +
+                '}',
 
         /***--------------------------------------------------------------------------------------\
           Left and right side containers
         \--------------------------------------------------------------------------------------***/
 
-            '#clinical-timelines > * {' + '    display: inline-block;' + '    padding: .5%;' + '}',
-            '#clinical-timelines > #left-side {' + '    width: 22%;' + '    float: left;' + '}',
-            '#clinical-timelines > #right-side {' + '    width: 75%;' + '    float: right;' + '}',
+            '#clinical-timelines > * {' +
+                '    display: inline-block;' +
+                '    padding: 10px;' +
+                '}',
+            '#clinical-timelines > #left-side {' +
+                '    width: 22%;' +
+                '    float: left;' +
+                '}',
+            '#clinical-timelines > #right-side {' +
+                '    width: 75%;' +
+                '    float: right;' +
+                '}',
             '#clinical-timelines > * > * {' +
                 '    width: 100%;' +
-                '    padding: 1%;' +
+                '    padding: 10px;' +
                 '    vertical-align: top;' +
                 '    border: 1px solid #eee;' +
                 '    display: inline-block;' +
@@ -36,7 +53,8 @@ export default function defineStyles() {
           Left side container elements
         \--------------------------------------------------------------------------------------***/
 
-            '#clinical-timelines > #left-side > * {' + '}',
+            '#clinical-timelines > #left-side > * {' +
+                '}',
 
           //Annotations
             '#clinical-timelines > #left-side > .annotation {' +
@@ -44,8 +62,8 @@ export default function defineStyles() {
                 '    text-align: right;' +
                 '}',
             '#clinical-timelines > #left-side > .annotation .ct-stats,' +
-                '#clinical-timelines > #left-side > .annotation #ID,' +
-                '#clinical-timelines > #left-side > .annotation .characteristic span {' +
+            '#clinical-timelines > #left-side > .annotation #ID,' +
+            '#clinical-timelines > #left-side > .annotation .characteristic span {' +
                 '    font-weight: bold;' +
                 '}',
             '#clinical-timelines > #left-side > .annotation .ct-stats.sample {' +
@@ -111,7 +129,8 @@ export default function defineStyles() {
           Right side container elements
         \--------------------------------------------------------------------------------------***/
 
-            '#clinical-timelines > #right-side > * {' + '}',
+            '#clinical-timelines > #right-side > * {' +
+                '}',
 
           //Legend
             '#clinical-timelines > #right-side > .wc-chart .legend {' +
@@ -158,6 +177,22 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:nth-child(even) rect.ct-stripe {' +
                 '    fill: #eee;' +
+                '}',
+
+          //Mark highlighting
+            '#clinical-timelines path.highlighted {' +
+                '    stroke: black;' +
+                '}',
+            '#clinical-timelines line.highlight-overlay {' +
+                '    stroke-width: 2px;' +
+                '}',
+            '#clinical-timelines circle.highlighted {' +
+                '    stroke: black;' +
+                '    stroke-width: 2px;' +
+                '}',
+            '#clinical-timelines polygon.highlighted {' +
+                '    stroke: black;' +
+                '    stroke-width: 2px;' +
                 '}',
 
           //Grouping
@@ -209,20 +244,23 @@ export default function defineStyles() {
                 '}',
 
           //Reference lines
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line {' +
+            '#clinical-timelines .wc-chart .wc-svg title {' +
+                '    white-space: pre;' +
+                '}',
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 2px;' +
                 '    stroke-dasharray: 2,2;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line.hover {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
                 '    stroke-dasharray: none;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .invisible-reference-line {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .invisible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 20px;' +
                 '    stroke-opacity: 0;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .reference-line-label-box {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
                 '    fill: white;' +
                 '    stroke: black;' +
                 '    stroke-width: black;' +

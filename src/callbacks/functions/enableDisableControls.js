@@ -9,6 +9,5 @@ export default function enableDisableControls() {
                 control.option !== 'time_scale' &&
                 control.value_col !== this.config.event_col
         )
-        .selectAll('select,input')
-        .property('disabled', !!this.selected_id);
+        .classed('hidden', !!this.selected_id);
 }

@@ -2,17 +2,6 @@ import lengthenRaw from './lengthenRaw';
 import { merge } from 'd3';
 
 export default function defineData() {
-    //Remove records with insufficient data.
-    this.wide_data = this.raw_data.filter(
-        d =>
-            !(d.hasOwnProperty(this.config.stdy_col) && d[this.config.stdy_col] === '') &&
-            !(d.hasOwnProperty(this.config.endy_col) && d[this.config.endy_col] === '') &&
-            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] === '') &&
-            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] === '') &&
-            !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
-            !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
-    );
-
     //Warn user of removed records.
     if (this.wide_data.length < this.raw_data.length) {
         console.warn(

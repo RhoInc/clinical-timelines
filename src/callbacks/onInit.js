@@ -25,6 +25,17 @@ export default function onInit() {
     this.populationDetails.N = this.populationDetails.population.length;
     this.IDdetails = {};
 
+    //Remove records with insufficient data.
+    this.wide_data = this.raw_data.filter(
+        d =>
+            !(d.hasOwnProperty(this.config.stdy_col) && d[this.config.stdy_col] === '') &&
+            !(d.hasOwnProperty(this.config.endy_col) && d[this.config.endy_col] === '') &&
+            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] === '') &&
+            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] === '') &&
+            !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
+            !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
+    );
+
     //Define a record for each start day and stop day.
     defineData.call(this);
 

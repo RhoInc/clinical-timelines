@@ -14,4 +14,7 @@ export default function onDraw() {
         if (this.config.y.grouping) this.config.margin.right = 40;
         else delete this.config.margin.right;
     }
+
+    //Update top x-axis.
+    this.svg.select('g.x-top.axis text.axis-title.top').text(this.config.time_scale);
 }

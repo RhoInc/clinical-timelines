@@ -1,5 +1,6 @@
 import drawOngoingMarks from '../../callbacks/onResize/drawOngoingMarks';
 import drawReferenceLines from '../../callbacks/onResize/drawReferenceLines';
+import highlightMarks from '../../callbacks/onResize/highlightMarks';
 
 export default function onResize() {
     const context = this;
@@ -10,6 +11,7 @@ export default function onResize() {
     //Draw ongoing marks.
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
+
         //Identify marks which represent ongoing events.
         if (mark.type === 'line') {
             markData.forEach(d => {
@@ -20,10 +22,8 @@ export default function onResize() {
     drawOngoingMarks.call(this);
 
     //Draw reference lines.
-    if (this.config.reference_lines) drawReferenceLines.call(this);
+    drawReferenceLines.call(this);
 
-    //Highlight events
-    this.svg
-        .selectAll('.wc-data-mark')
-        .classed('highlighted', d => d.key.indexOf(this.config.event_highlighted) > -1);
+    //Highlight events.
+    highlightMarks.call(this);
 }

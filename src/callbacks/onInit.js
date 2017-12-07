@@ -1,94 +1,70 @@
-import { set, merge } from 'd3';
-import lengthenRaw from './onInit/lengthenRaw';
+import { time, set, min, max } from 'd3';
+import defineData from './functions/defineData';
+import handleEventTypes from './onInit/handleEventTypes';
+import removeFilters from './onInit/removeFilters';
+import addDataDrivenTooltips from './onInit/addDataDrivenTooltips';
 
 export default function onInit() {
     const context = this;
 
     //Data manipulation
-    this.raw_data.forEach(d => {
-        d[this.config.stdy_col] = /^ *\d+ *$/.test(d[this.config.stdy_col])
-            ? +d[this.config.stdy_col]
-            : NaN;
-        d[this.config.endy_col] = /^ *\d+ *$/.test(d[this.config.endy_col])
-            ? +d[this.config.endy_col]
-            : d[this.config.stdy_col];
+    this.raw_data.forEach((d, i) => {
+        if (!/^ *\d+ *$/.test(d[this.config.stdy_col])) d[this.config.stdy_col] = '';
+        if (!/^ *\d+ *$/.test(d[this.config.endy_col]))
+            d[this.config.endy_col] = d[this.config.stdy_col];
+        if (!time.format(this.config.date_format).parse(d[this.config.stdt_col]))
+            d[this.config.stdt_col] = '';
+        if (!time.format(this.config.date_format).parse(d[this.config.endt_col]))
+            d[this.config.endt_col] = d[this.config.stdt_col];
     });
 
-    //Calculate number of total participants and number of participants with any event.
+    //Calculate number of total IDs and number of IDs with any event.
     this.populationDetails = {
         population: set(this.raw_data.map(d => d[this.config.id_col])).values()
     };
     this.populationDetails.N = this.populationDetails.population.length;
-    this.participantDetails = {};
+    this.IDdetails = {};
 
     //Remove records with insufficient data.
     this.wide_data = this.raw_data.filter(
         d =>
-            d[this.config.stdy_col] !== NaN &&
-            d[this.config.endy_col] !== NaN &&
+            !(d.hasOwnProperty(this.config.stdy_col) && d[this.config.stdy_col] === '') &&
+            !(d.hasOwnProperty(this.config.endy_col) && d[this.config.endy_col] === '') &&
+            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] === '') &&
+            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] === '') &&
             !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
             !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
     );
 
     //Define a record for each start day and stop day.
-    const singleDayEvents = this.raw_data
-            .filter(d => d[this.config.stdy_col] === d[this.config.endy_col])
-            .map(d => {
-                d.wc_category = 'DY';
-                d.wc_value = d[this.config.stdy_col];
-                return d;
-            }),
-        multiDayEvents = lengthenRaw(
-            this.raw_data.filter(d => d[this.config.stdy_col] !== d[this.config.endy_col]),
-            [this.config.stdy_col, this.config.endy_col]
-        );
-    this.raw_data = merge([singleDayEvents, multiDayEvents]);
+    defineData.call(this);
+
+    //Define x-domain.
+    this.config.study_day_range = this.config.study_day_range || [
+        min(this.raw_data, d => +d[this.config.stdy_col]),
+        max(this.raw_data, d => +d[this.config.endy_col])
+    ];
+    this.config.date_range =
+        this.config.date_range instanceof Array && this.config.date_range.length === 2
+            ? this.config.date_range.map(
+                  date =>
+                      date instanceof Date ? date : time.format(this.config.date_format).parse(date)
+              )
+            : [
+                  min(this.raw_data, d =>
+                      time.format(this.config.date_format).parse(d[this.config.stdt_col])
+                  ),
+                  max(this.raw_data, d =>
+                      time.format(this.config.date_format).parse(d[this.config.endt_col])
+                  )
+              ];
 
     //Default event types to 'All'.
-    this.allEventTypes = set(this.raw_data.map(d => d[this.config.event_col]))
-        .values()
-        .sort();
-    this.currentEventTypes = this.config.event_types || this.allEventTypes;
-    this.config.color_dom =
-        this.currentEventTypes !== 'All'
-            ? this.currentEventTypes.concat(
-                  this.allEventTypes
-                      .filter(eventType => this.currentEventTypes.indexOf(eventType) === -1)
-                      .sort()
-              )
-            : this.allEventTypes;
-    this.config.legend.order = this.config.color_dom;
+    handleEventTypes.call(this);
 
     //Remove filters for variables fewer than two levels.
-    this.controls.config.inputs = this.controls.config.inputs.filter(input => {
-        if (input.type !== 'subsetter') {
-            //Set values of Event Type highlighting control to event types present in the data.
-            if (input.label === 'Event Type' && input.description === 'highlighting')
-                input.values = this.config.color_dom;
-            else if (input.label === 'Y-axis' && input.description === 'grouping')
-                input.values = this.config.groupings.map(grouping => grouping.value_col);
-
-            return true;
-        } else {
-            const levels = set(this.raw_data.map(d => d[input.value_col])).values();
-
-            if (levels.length < 2) {
-                console.warn(
-                    input.value_col + ' filter removed because the variable has only one level.'
-                );
-            }
-
-            return levels.length > 1;
-        }
-    });
+    removeFilters.call(this);
 
     //Add data-driven tooltips.
-    if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
-        this.config.marks.forEach(mark => {
-            mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
-        });
-        this.config.participantSettings.marks.forEach(mark => {
-            mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
-        });
-    }
+    addDataDrivenTooltips.call(this);
 }

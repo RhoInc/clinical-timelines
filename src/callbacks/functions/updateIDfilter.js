@@ -1,5 +1,5 @@
 export default function updateIDfilter() {
-    //Update participant filter.
+    //Update ID filter.
     this.controls.wrap
         .selectAll('.control-group')
         .filter(control => control.value_col === this.config.id_col)

@@ -16,7 +16,7 @@ export default function offsetCircles(mark, markData) {
     //For each study day with more than one event...
     overlapping.forEach(d => {
         const x = d.key.split('|')[0], // study day
-            y = d.key.split('|')[1]; // participant
+            y = d.key.split('|')[1]; // ID
 
         //For each overlapping point...
         d.values.keys.forEach((di, i) => {

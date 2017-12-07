@@ -55,15 +55,15 @@
         ,"default": null
         ,"type": "string"
         }
-
-
-
-    ,"site_col":
-        {"title": "Site"
-        ,"description": "site variable name"
-        ,"default": "SITE"
+    ,"event_highlight_color":
+        {"title": "Highlighted Event Color"
+        ,"description": "fill color of highlighted events"
+        ,"default": null
         ,"type": "string"
         }
+
+
+
     ,"filters":
         {"title": "Filters"
         ,"description": "an array of filter variables and associated metadata"
@@ -118,6 +118,15 @@
 
 
 
+    ,"time_scale":
+        {"title": "Time Scale"
+        ,"description": "the time scale on which to plot events"
+        ,"type": "string"
+        ,"default": "Study Day"
+        ,"enum":
+            ["Study Day"
+            ,"Date"]
+        }
     ,"stdy_col":
         {"title": "Start Day"
         ,"description": "start day variable name"
@@ -130,6 +139,47 @@
         ,"default": "ENDY"
         ,"type": "string"
         }
+    ,"study_day_range":
+        {"title": "Study Day Range"
+        ,"description": "start and stop days with which to define the x-axis domain"
+        ,"type": "array"
+        ,"items":
+            {"type": "number"}
+        }
+    ,"stdt_col":
+        {"title": "Start Date"
+        ,"description": "start date variable name"
+        ,"default": "STDT"
+        ,"type": "string"
+        }
+    ,"endt_col":
+        {"title": "End Date"
+        ,"description": "end date variable name"
+        ,"default": "ENDT"
+        ,"type": "string"
+        }
+    ,"date_range":
+        {"title": "Date Range"
+        ,"description": "start and stop dates with which to define the x-axis domain and which match settings.date_format"
+        ,"type": "array"
+        ,"items":
+            {"type": "string"}
+        }
+    ,"date_format":
+        {"title": "Input Date Format"
+        ,"description": "date format of input variables"
+        ,"default": "%Y-%m-%d"
+        ,"type": "string"
+        }
+    ,"date_display_format":
+        {"title": "Displayed Date Format"
+        ,"description": "date format of x-axis"
+        ,"default": "%Y-%m-%d"
+        ,"type": "string"
+        }
+
+
+
     ,"seq_col":
         {"title": "Sequence Number"
         ,"description": "event type sequence variable name"
@@ -142,9 +192,6 @@
         ,"default": "TOOLTIP"
         ,"type": "string"
         }
-
-
-
     ,"ongo_col":
         {"title": "Ongoing?"
         ,"description": "ongoing event indicator variable name"
@@ -157,9 +204,6 @@
         ,"default": "Y"
         ,"type": "string"
         }
-
-
-
     ,"reference_lines":
         {"title": "Reference Timepoints"
         ,"description": "an array of reference timepoints and associated descriptions"

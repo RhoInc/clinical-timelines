@@ -179,22 +179,6 @@ export default function defineStyles() {
                 '    fill: #eee;' +
                 '}',
 
-          //Mark highlighting
-            '#clinical-timelines path.highlighted {' +
-                '    stroke: black;' +
-                '}',
-            '#clinical-timelines line.highlight-overlay {' +
-                '    stroke-width: 2px;' +
-                '}',
-            '#clinical-timelines circle.highlighted {' +
-                '    stroke: black;' +
-                '    stroke-width: 2px;' +
-                '}',
-            '#clinical-timelines polygon.highlighted {' +
-                '    stroke: black;' +
-                '    stroke-width: 2px;' +
-                '}',
-
           //Grouping
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +
                 '    stroke: black;' +

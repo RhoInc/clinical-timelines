@@ -175,18 +175,6 @@
                     '    fill: #eee;' +
                     '}',
 
-                //Mark highlighting
-                '#clinical-timelines path.highlighted {' + '    stroke: black;' + '}',
-                '#clinical-timelines line.highlight-overlay {' + '    stroke-width: 2px;' + '}',
-                '#clinical-timelines circle.highlighted {' +
-                    '    stroke: black;' +
-                    '    stroke-width: 2px;' +
-                    '}',
-                '#clinical-timelines polygon.highlighted {' +
-                    '    stroke: black;' +
-                    '    stroke-width: 2px;' +
-                    '}',
-
                 //Grouping
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +
                     '    stroke: black;' +
@@ -2705,6 +2693,16 @@
         );
     }
 
+    function IEsucks() {
+        if (!!document.documentMode)
+            this.svg.selectAll('.line,.point').each(function(d) {
+                var mark = select(this),
+                    tooltip = mark.select('title'),
+                    text = tooltip.text().split('\n');
+                tooltip.text(text.join('--|--'));
+            });
+    }
+
     function onResize() {
         legendFilter.call(this);
 
@@ -2726,7 +2724,7 @@
         //Draw ongoing marks.
         drawOngoingMarks.call(this);
 
-        //Highlight events.
+        //Highlight marks.
         highlightMarks.call(this);
 
         //Draw reference lines.
@@ -2736,14 +2734,7 @@
         offsetBottomXaxis.call(this);
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
-        if (!!document.documentMode)
-            this.svg.selectAll('.line,.point').each(function(d) {
-                console.log(d);
-                var mark = select(this),
-                    tooltip = mark.select('title'),
-                    text = tooltip.text().split('\n');
-                tooltip.text(text.join('--|--'));
-            });
+        IEsucks.call(this);
     }
 
     function onDestroy() {}

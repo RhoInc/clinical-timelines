@@ -8,6 +8,7 @@ import drawOngoingMarks from './onResize/drawOngoingMarks';
 import highlightMarks from './onResize/highlightMarks';
 import drawReferenceLines from './onResize/drawReferenceLines';
 import offsetBottomXaxis from './onResize/offsetBottomXaxis';
+import IEsucks from './onResize/IEsucks';
 
 export default function onResize() {
     const context = this;
@@ -33,7 +34,7 @@ export default function onResize() {
     //Draw ongoing marks.
     drawOngoingMarks.call(this);
 
-    //Highlight events.
+    //Highlight marks.
     highlightMarks.call(this);
 
     //Draw reference lines.
@@ -43,12 +44,5 @@ export default function onResize() {
     offsetBottomXaxis.call(this);
 
     //Replace newline characters with html line break entities to cater to Internet Explorer.
-    if (!!document.documentMode)
-        this.svg.selectAll('.line,.point').each(function(d) {
-            console.log(d);
-            const mark = select(this),
-                tooltip = mark.select('title'),
-                text = tooltip.text().split('\n');
-            tooltip.text(text.join('--|--'));
-        });
+    IEsucks.call(this);
 }

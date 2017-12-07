@@ -13,6 +13,7 @@
       Global styles
     \--------------------------------------------------------------------------------------***/
 
+                '#clinical-timelines {' + '    display: inline-block;' + '    width: 100%;' + '}',
                 '#clinical-timelines .hidden {' + '    display: none !important;' + '}',
                 '#clinical-timelines .ct-button {' +
                     '    cursor: pointer !important;' +
@@ -30,7 +31,7 @@
 
                 '#clinical-timelines > * {' +
                     '    display: inline-block;' +
-                    '    padding: .5%;' +
+                    '    padding: 10px;' +
                     '}',
                 '#clinical-timelines > #left-side {' + '    width: 22%;' + '    float: left;' + '}',
                 '#clinical-timelines > #right-side {' +
@@ -39,7 +40,7 @@
                     '}',
                 '#clinical-timelines > * > * {' +
                     '    width: 100%;' +
-                    '    padding: 1%;' +
+                    '    padding: 10px;' +
                     '    vertical-align: top;' +
                     '    border: 1px solid #eee;' +
                     '    display: inline-block;' +
@@ -642,10 +643,12 @@
             settings.reference_lines = settings.reference_lines
                 .map(function(reference_line) {
                     var referenceLineObject = {};
+                    referenceLineObject.time_scale =
+                        reference_line.time_scale || settings.time_scale;
                     referenceLineObject.timepoint = reference_line.timepoint || reference_line;
                     referenceLineObject.label =
                         reference_line.label ||
-                        settings.config.time_scale + ': ' + referenceLineObject.timepoint;
+                        settings.time_scale + ': ' + referenceLineObject.timepoint;
 
                     return referenceLineObject;
                 })
@@ -1083,10 +1086,10 @@
         //Define x-domain.
         this.config.study_day_range = this.config.study_day_range || [
             d3.min(this.raw_data, function(d) {
-                return d[_this.config.stdy_col];
+                return +d[_this.config.stdy_col];
             }),
             d3.max(this.raw_data, function(d) {
-                return d[_this.config.endy_col];
+                return +d[_this.config.endy_col];
             })
         ];
         this.config.date_range =

@@ -31,8 +31,8 @@ export default function onInit() {
 
     //Define x-domain.
     this.config.study_day_range = this.config.study_day_range || [
-        min(this.raw_data, d => d[this.config.stdy_col]),
-        max(this.raw_data, d => d[this.config.endy_col])
+        min(this.raw_data, d => +d[this.config.stdy_col]),
+        max(this.raw_data, d => +d[this.config.endy_col])
     ];
     this.config.date_range =
         this.config.date_range instanceof Array && this.config.date_range.length === 2

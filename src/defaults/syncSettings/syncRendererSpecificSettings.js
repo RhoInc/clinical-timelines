@@ -45,10 +45,11 @@ export default function syncRendererSpecificSettings(settings) {
         settings.reference_lines = settings.reference_lines
             .map(reference_line => {
                 const referenceLineObject = {};
+                referenceLineObject.time_scale = reference_line.time_scale || settings.time_scale;
                 referenceLineObject.timepoint = reference_line.timepoint || reference_line;
                 referenceLineObject.label =
                     reference_line.label ||
-                    `${settings.config.time_scale}: ${referenceLineObject.timepoint}`;
+                    `${settings.time_scale}: ${referenceLineObject.timepoint}`;
 
                 return referenceLineObject;
             })

@@ -2,7 +2,6 @@ import { time, set, min, max } from 'd3';
 import defineData from './functions/defineData';
 import handleEventTypes from './onInit/handleEventTypes';
 import removeFilters from './onInit/removeFilters';
-import removeSiteReferences from './onInit/removeSiteReferences';
 import addDataDrivenTooltips from './onInit/addDataDrivenTooltips';
 
 export default function onInit() {
@@ -54,9 +53,6 @@ export default function onInit() {
 
     //Remove filters for variables fewer than two levels.
     removeFilters.call(this);
-
-    //Remove references to site_col if column does not exist.
-    removeSiteReferences.call(this);
 
     //Add data-driven tooltips.
     addDataDrivenTooltips.call(this);

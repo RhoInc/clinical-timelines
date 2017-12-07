@@ -643,17 +643,36 @@
             settings.reference_lines = settings.reference_lines
                 .map(function(reference_line) {
                     var referenceLineObject = {};
-                    referenceLineObject.time_scale =
-                        reference_line.time_scale || settings.time_scale;
-                    referenceLineObject.timepoint = reference_line.timepoint || reference_line;
-                    referenceLineObject.label =
-                        reference_line.label ||
-                        settings.time_scale + ': ' + referenceLineObject.timepoint;
+
+                    //either an object or not
+                    referenceLineObject.timepoint =
+                        reference_line instanceof Object
+                            ? reference_line.timepoint
+                            : reference_line;
+
+                    //either an integer or not
+                    referenceLineObject.time_scale = Number.isInteger(
+                        +referenceLineObject.timepoint
+                    )
+                        ? 'Study Day'
+                        : 'Date';
+
+                    //label predefined or not
+                    referenceLineObject.label = reference_line.label
+                        ? reference_line.label
+                        : referenceLineObject.time_scale + ': ' + referenceLineObject.timepoint;
 
                     return referenceLineObject;
                 })
                 .filter(function(reference_line) {
-                    return Number.isInteger(reference_line.timepoint);
+                    return (
+                        (reference_line.time_scale === 'Study Day' &&
+                            Number.isInteger(reference_line.timepoint)) ||
+                        (reference_line.time_scale === 'Date' &&
+                            d3.time
+                                .format(settings.date_format)
+                                .parse(reference_line.timepoint) instanceof Date)
+                    );
                 });
 
             if (!settings.reference_lines.length) delete settings.reference_lines;
@@ -1009,38 +1028,6 @@
         });
     }
 
-    function removeSiteReferences() {
-        var _this = this;
-
-        if (!this.raw_data[0].hasOwnProperty(this.config.site_col)) {
-            this.config.groupings = this.config.groupings.filter(function(grouping) {
-                return grouping.value_col !== _this.config.site_col;
-            });
-            var yAxisGrouping = this.controls.config.inputs
-                .filter(function(input) {
-                    return input.option === 'y.grouping';
-                })
-                .pop();
-            yAxisGrouping.values = yAxisGrouping.values.filter(function(value) {
-                return value !== _this.config.site_col;
-            });
-            this.config.filters = this.config.filters.filter(function(filter) {
-                return filter.value_col !== _this.config.site_col;
-            });
-            this.config.id_characteristics = this.config.id_characteristics.filter(function(
-                id_characteristic
-            ) {
-                return id_characteristic.value_col !== _this.config.site_col;
-            });
-            this.listing.config.cols = this.listing.config.cols.filter(function(col) {
-                return col !== _this.config.site_col;
-            });
-            this.listing.config.headers = this.listing.config.headers.filter(function(header) {
-                return header !== 'Site';
-            });
-        }
-    }
-
     function addDataDrivenTooltips() {
         var _this = this;
 
@@ -1117,9 +1104,6 @@
 
         //Remove filters for variables fewer than two levels.
         removeFilters.call(this);
-
-        //Remove references to site_col if column does not exist.
-        removeSiteReferences.call(this);
 
         //Add data-driven tooltips.
         addDataDrivenTooltips.call(this);
@@ -2486,77 +2470,85 @@
             .classed('reference-lines', true);
 
         //Append reference line for each item in config.reference_lines.
-        this.config.reference_lines.forEach(function(reference_line, i) {
-            var referenceLineGroup = referenceLinesGroup
-                    .append('g')
-                    .classed('reference-line', true)
-                    .attr('id', 'reference-line-' + i),
-                visibleReferenceLine = referenceLineGroup
-                    .append('line')
-                    .classed('visible-reference-line', true)
-                    .attr({
-                        x1: _this.x(reference_line.timepoint),
-                        x2: _this.x(reference_line.timepoint),
-                        y1: 0,
-                        y2: _this.plot_height
-                    }),
-                invisibleReferenceLine = referenceLineGroup
-                    .append('line')
-                    .classed('invisible-reference-line', true)
-                    .attr({
-                        x1: _this.x(reference_line.timepoint),
-                        x2: _this.x(reference_line.timepoint),
-                        y1: 0,
-                        y2: _this.plot_height
-                    }),
-                // invisible reference line has no dasharray and is much thicker to make hovering easier
-                direction =
-                    reference_line.timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2
-                        ? 'right'
-                        : 'left',
-                referenceLineLabel = referenceLineGroup
-                    .append('text')
-                    .classed('reference-line-label', true)
-                    .attr({
-                        x: _this.x(reference_line.timepoint),
-                        y: 0,
-                        'text-anchor': direction === 'right' ? 'beginning' : 'end',
-                        dx: direction === 'right' ? 15 : -15,
-                        dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+        this.config.reference_lines
+            .filter(function(reference_line) {
+                return reference_line.time_scale === _this.config.time_scale;
+            })
+            .forEach(function(reference_line, i) {
+                var referenceLineGroup = referenceLinesGroup
+                        .append('g')
+                        .classed('reference-line', true)
+                        .attr('id', 'reference-line-' + i),
+                    timepoint =
+                        _this.config.time_scale === 'Study Day'
+                            ? +reference_line.timepoint
+                            : d3.time
+                                  .format(_this.config.date_format)
+                                  .parse(reference_line.timepoint),
+                    visibleReferenceLine = referenceLineGroup
+                        .append('line')
+                        .classed('visible-reference-line', true)
+                        .attr({
+                            x1: _this.x(timepoint),
+                            x2: _this.x(timepoint),
+                            y1: 0,
+                            y2: _this.plot_height
+                        }),
+                    invisibleReferenceLine = referenceLineGroup
+                        .append('line')
+                        .classed('invisible-reference-line', true)
+                        .attr({
+                            x1: _this.x(timepoint),
+                            x2: _this.x(timepoint),
+                            y1: 0,
+                            y2: _this.plot_height
+                        }),
+                    // invisible reference line has no dasharray and is much thicker to make hovering easier
+                    direction =
+                        timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2 ? 'right' : 'left',
+                    referenceLineLabel = referenceLineGroup
+                        .append('text')
+                        .classed('reference-line-label', true)
+                        .attr({
+                            x: _this.x(timepoint),
+                            y: 0,
+                            'text-anchor': direction === 'right' ? 'beginning' : 'end',
+                            dx: direction === 'right' ? 15 : -15,
+                            dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                        })
+                        .text(reference_line.label),
+                    dimensions = referenceLineLabel.node().getBBox(),
+                    referenceLineLabelBox = referenceLineGroup
+                        .insert('rect', '.reference-line-label')
+                        .classed('reference-line-label-box', true)
+                        .attr({
+                            x: dimensions.x - 10,
+                            y: dimensions.y - 5,
+                            width: dimensions.width + 20,
+                            height: dimensions.height + 10
+                        });
+
+                //Display reference line label on hover.
+                invisibleReferenceLine
+                    .on('mouseover', function() {
+                        visibleReferenceLine.classed('hover', true);
+                        referenceLineLabel.classed('hidden', false);
+                        referenceLineLabelBox.classed('hidden', false);
+                        _this.svg.node().appendChild(referenceLineLabelBox.node());
+                        _this.svg.node().appendChild(referenceLineLabel.node());
                     })
-                    .text(reference_line.label),
-                dimensions = referenceLineLabel.node().getBBox(),
-                referenceLineLabelBox = referenceLineGroup
-                    .insert('rect', '.reference-line-label')
-                    .classed('reference-line-label-box', true)
-                    .attr({
-                        x: dimensions.x - 10,
-                        y: dimensions.y - 5,
-                        width: dimensions.width + 20,
-                        height: dimensions.height + 10
+                    .on('mouseout', function() {
+                        visibleReferenceLine.classed('hover', false);
+                        referenceLineLabel.classed('hidden', true);
+                        referenceLineLabelBox.classed('hidden', true);
+                        referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
+                        referenceLineGroup.node().appendChild(referenceLineLabel.node());
                     });
 
-            //Display reference line label on hover.
-            invisibleReferenceLine
-                .on('mouseover', function() {
-                    visibleReferenceLine.classed('hover', true);
-                    referenceLineLabel.classed('hidden', false);
-                    referenceLineLabelBox.classed('hidden', false);
-                    _this.svg.node().appendChild(referenceLineLabelBox.node());
-                    _this.svg.node().appendChild(referenceLineLabel.node());
-                })
-                .on('mouseout', function() {
-                    visibleReferenceLine.classed('hover', false);
-                    referenceLineLabel.classed('hidden', true);
-                    referenceLineLabelBox.classed('hidden', true);
-                    referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
-                    referenceLineGroup.node().appendChild(referenceLineLabel.node());
-                });
-
-            //Hide reference labels initially.
-            referenceLineLabel.classed('hidden', true);
-            referenceLineLabelBox.classed('hidden', true);
-        });
+                //Hide reference labels initially.
+                referenceLineLabel.classed('hidden', true);
+                referenceLineLabelBox.classed('hidden', true);
+            });
     }
 
     function onResize() {

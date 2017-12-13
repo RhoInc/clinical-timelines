@@ -76,12 +76,6 @@
                 }
             }
         }
-        ,"site_col":
-            {"title": "Site"
-            ,"description": "site variable name"
-            ,"default": "SITE"
-            ,"type": "string"
-            }
 
 
 

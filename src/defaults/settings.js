@@ -9,7 +9,6 @@ export default {
     event_highlighted: null,
 
     filters: null,
-    site_col: 'SITE',
 
     groupings: null,
     grouping_initial: null,

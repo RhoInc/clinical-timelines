@@ -436,7 +436,6 @@
         event_highlighted: null,
 
         filters: null,
-        site_col: 'SITE',
 
         groupings: null,
         grouping_initial: null,
@@ -564,14 +563,16 @@
 
     function syncRendererSpecificSettings(settings) {
         //ID
-        var defaultID_characteristics = [{ value_col: settings.site_col, label: 'Site' }];
+        settings.id_unitPropCased =
+            settings.id_unit.substring(0, 1).toUpperCase() +
+            settings.id_unit.substring(1).toLowerCase();
+        var defaultID_characteristics = [
+            { value_col: settings.id_col, label: settings.id_unitPropCased }
+        ];
         settings.id_characteristics = arrayOfVariablesCheck(
             defaultID_characteristics,
             settings.id_characteristics
         );
-        settings.id_unitPropCased =
-            settings.id_unit.substring(0, 1).toUpperCase() +
-            settings.id_unit.substring(1).toLowerCase();
 
         //Events
         if (!(settings.event_types instanceof Array && settings.event_types.length))
@@ -580,7 +581,6 @@
         //Filters
         var defaultFilters = [
             { value_col: settings.id_col, label: settings.id_unitPropCased },
-            { value_col: settings.site_col, label: 'Site' },
             { value_col: settings.event_col, label: 'Event Type' }
         ];
         if (settings.ongo_col)
@@ -588,7 +588,7 @@
         settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
         //Groupings
-        var defaultGroupings = [{ value_col: settings.site_col, label: 'Site' }];
+        var defaultGroupings = [];
         settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
         if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
             settings.grouping_direction = 'horizontal';
@@ -599,16 +599,17 @@
                 settings.reference_lines = [settings.reference_lines];
 
             settings.reference_lines = settings.reference_lines
-                .map(function(referenceLine) {
+                .map(function(reference_line) {
                     var referenceLineObject = {};
-                    referenceLineObject.studyDay = referenceLine.studyDay || referenceLine;
+                    referenceLineObject.timepoint = reference_line.timepoint || reference_line;
                     referenceLineObject.label =
-                        referenceLine.label || 'Study Day ' + referenceLineObject.studyDay;
+                        reference_line.label ||
+                        settings.config.time_scale + ': ' + referenceLineObject.timepoint;
 
                     return referenceLineObject;
                 })
-                .filter(function(referenceLine) {
-                    return Number.isInteger(referenceLine.studyDay);
+                .filter(function(reference_line) {
+                    return Number.isInteger(reference_line.timepoint);
                 });
 
             if (!settings.reference_lines.length) delete settings.reference_lines;
@@ -1357,9 +1358,6 @@
         this.IDdetails.wrap = this.leftSide
             .insert('div', ':first-child')
             .classed('annotation ID-details hidden', true);
-        this.IDdetails.wrap
-            .append('div')
-            .html(this.config.id_unitPropCased + ": <span id = 'ID'></span>");
         this.IDdetails.wrap
             .selectAll('div.characteristic')
             .data(this.config.id_characteristics)
@@ -2249,7 +2247,7 @@
             .classed('reference-lines', true);
 
         //Append reference line for each item in config.reference_lines.
-        this.config.reference_lines.forEach(function(studyDay, i) {
+        this.config.reference_lines.forEach(function(reference_line, i) {
             var referenceLineGroup = referenceLinesGroup
                     .append('g')
                     .classed('reference-line', true)
@@ -2258,8 +2256,8 @@
                     .append('line')
                     .classed('visible-reference-line', true)
                     .attr({
-                        x1: _this.x(referenceLine.timepoint),
-                        x2: _this.x(referenceLine.timepoint),
+                        x1: _this.x(reference_line.timepoint),
+                        x2: _this.x(reference_line.timepoint),
                         y1: 0,
                         y2: _this.plot_height
                     }),
@@ -2267,27 +2265,27 @@
                     .append('line')
                     .classed('invisible-reference-line', true)
                     .attr({
-                        x1: _this.x(referenceLine.timepoint),
-                        x2: _this.x(referenceLine.timepoint),
+                        x1: _this.x(reference_line.timepoint),
+                        x2: _this.x(reference_line.timepoint),
                         y1: 0,
                         y2: _this.plot_height
                     }),
                 // invisible reference line has no dasharray and is much thicker to make hovering easier
                 direction =
-                    referenceLine.timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2
+                    reference_line.timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2
                         ? 'right'
                         : 'left',
                 referenceLineLabel = referenceLineGroup
                     .append('text')
                     .classed('reference-line-label', true)
                     .attr({
-                        x: _this.x(referenceLine.timepoint),
+                        x: _this.x(reference_line.timepoint),
                         y: 0,
                         'text-anchor': direction === 'right' ? 'beginning' : 'end',
                         dx: direction === 'right' ? 15 : -15,
                         dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
                     })
-                    .text(referenceLine.label),
+                    .text(reference_line.label),
                 dimensions = referenceLineLabel.node().getBBox(),
                 referenceLineLabelBox = referenceLineGroup
                     .insert('rect', '.reference-line-label')

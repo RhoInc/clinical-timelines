@@ -1,4 +1,5 @@
 import drawOngoingMarks from '../../callbacks/onResize/drawOngoingMarks';
+import drawTimeRange from './onResize/drawTimeRange';
 import drawReferenceLines from '../../callbacks/onResize/drawReferenceLines';
 import { select } from 'd3';
 
@@ -19,6 +20,9 @@ export default function onResize() {
         }
     });
     drawOngoingMarks.call(this);
+
+    //Annotate time range.
+    drawTimeRange.call(this);
 
     //Draw reference lines.
     if (this.config.reference_lines) drawReferenceLines.call(this);

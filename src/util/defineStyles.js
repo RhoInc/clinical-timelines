@@ -236,6 +236,9 @@ export default function defineStyles() {
                 '    padding-left: 10px;' +
                 '    width: 24%;' +
                 '}',
+            '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-svg .time-range {' +
+                '    opacity: .1;' +
+                '}',
 
           //Listing
             '#clinical-timelines > #right-side > .wc-chart.wc-table table {' +

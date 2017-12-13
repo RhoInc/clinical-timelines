@@ -4,7 +4,7 @@ export default function drawReferenceLines() {
     //Add group for reference lines.
     this.svg.select('.reference-lines').remove();
     const referenceLinesGroup = this.svg
-        .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+        .insert('g', '.line-supergroup')
         .classed('reference-lines', true);
 
     //Append reference line for each item in config.reference_lines.

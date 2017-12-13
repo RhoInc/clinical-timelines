@@ -28,10 +28,7 @@
       Left and right side containers
     \--------------------------------------------------------------------------------------***/
 
-                '#clinical-timelines > * {' +
-                    '    display: inline-block;' +
-                    '    padding: .5%;' +
-                    '}',
+                '#clinical-timelines > * {' + '    display: inline-block;' + '}',
                 '#clinical-timelines > #left-side {' + '    width: 22%;' + '    float: left;' + '}',
                 '#clinical-timelines > #right-side {' +
                     '    width: 75%;' +
@@ -39,9 +36,7 @@
                     '}',
                 '#clinical-timelines > * > * {' +
                     '    width: 100%;' +
-                    '    padding: 1%;' +
                     '    vertical-align: top;' +
-                    '    border: 1px solid #eee;' +
                     '    display: inline-block;' +
                     '    margin-bottom: 10px;' +
                     '}',
@@ -50,7 +45,10 @@
       Left side container elements
     \--------------------------------------------------------------------------------------***/
 
-                '#clinical-timelines > #left-side > * {' + '}',
+                '#clinical-timelines > #left-side > * {' +
+                    '    border: 1px solid #eee;' +
+                    '    padding: 10px;' +
+                    '}',
 
                 //Annotations
                 '#clinical-timelines > #left-side > .annotation {' +
@@ -190,20 +188,20 @@
 
                 //Reference lines
                 '#clinical-timelines .wc-chart .wc-svg title {' + '    white-space: pre;' + '}',
-                '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line {' +
+                '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                     '    stroke: black;' +
                     '    stroke-width: 2px;' +
                     '    stroke-dasharray: 2,2;' +
                     '}',
-                '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line.hover {' +
+                '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
                     '    stroke-dasharray: none;' +
                     '}',
-                '#clinical-timelines > #right-side > .wc-chart .wc-svg .invisible-reference-line {' +
+                '#clinical-timelines > #right-side .wc-chart .wc-svg .invisible-reference-line {' +
                     '    stroke: black;' +
                     '    stroke-width: 20px;' +
                     '    stroke-opacity: 0;' +
                     '}',
-                '#clinical-timelines > #right-side > .wc-chart .wc-svg .reference-line-label-box {' +
+                '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
                     '    fill: white;' +
                     '    stroke: black;' +
                     '    stroke-width: black;' +
@@ -2496,7 +2494,7 @@
 
         this.svg.select('.reference-lines').remove();
         var referenceLinesGroup = this.svg
-            .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+            .insert('g', '.line-supergroup')
             .classed('reference-lines', true);
 
         //Append reference line for each item in config.reference_lines.

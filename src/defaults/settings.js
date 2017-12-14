@@ -23,12 +23,12 @@ export default {
         grouping_direction: 'horizontal',
 
       //Timing settings
-        time_scale: 'Study Day',
+        time_scale: 'day',
 
-          //Study day settings
+          //Day settings
             stdy_col: 'STDY',
             endy_col: 'ENDY',
-            study_day_range: null,
+            day_range: null,
 
           //Date settings
             stdt_col: 'STDT',

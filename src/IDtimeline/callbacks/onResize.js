@@ -40,12 +40,12 @@ export default function onResize() {
                     .classed('highlight-overlay', true)
                     .attr({
                         x1: context.x(
-                            context.config.time_scale === 'Study Day'
+                            context.config.time_scale === 'day'
                                 ? +d.values[0].key
                                 : new Date(d.values[0].key)
                         ),
                         x2: context.x(
-                            context.config.time_scale === 'Study Day'
+                            context.config.time_scale === 'day'
                                 ? +d.values[1].key
                                 : new Date(d.values[1].key)
                         ),

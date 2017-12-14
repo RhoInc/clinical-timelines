@@ -12,6 +12,9 @@ export default function syncWebchartsSettings(settings) {
     //Color stratification
     settings.color_by = settings.event_col;
 
+    //Define right margin for vertical groupings and to prevent date tick label cutoff.
+    settings.margin.right = settings.grouping_direction === 'vertical' ? 40 : 0;
+
     //Add space at bottom of timeline to create space for the last ID's offset marks.
     settings.margin.bottom = settings.margin.top + settings.range_band;
 }

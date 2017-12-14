@@ -1,13 +1,13 @@
 import { nest, select, time, min, max } from 'd3';
 
 export default function offsetLines(mark, markData) {
-    //Nest data by study day and filter on any nested object with more than one datum.
+    //Nest data by time interval and filter on any nested object with more than one datum.
     const IDdata = nest()
         .key(d => d.values[0].values.raw[0][this.config.id_col])
         .key(d => d.key)
         .rollup(d => {
             //Expose start and end point of line.
-            return this.config.time_scale === 'Study Day'
+            return this.config.time_scale === 'day'
                 ? {
                       x1: +d[0].values[0].key,
                       x2: +d[0].values[1].key

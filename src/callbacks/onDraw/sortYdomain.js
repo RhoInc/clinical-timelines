@@ -7,20 +7,10 @@ export default function sortYdomain() {
 
     if (this.config.y.sort === 'earliest') {
         if (this.config.y.grouping) {
-            //Sort IDs by grouping then earliest event start date if y-axis is grouped.
+            //Sort IDs by grouping then earliest event if y-axis is grouped.
             const nestedData = nest()
                 .key(d => d[this.config.y.grouping] + '|' + d[this.config.id_col])
-                .rollup(d =>
-                    min(
-                        d,
-                        di =>
-                            this.config.time_scale === 'Study Day'
-                                ? +di[this.config.stdy_col]
-                                : time
-                                      .format(this.config.date_format)
-                                      .parse(di[this.config.stdt_col])
-                    )
-                )
+                .rollup(d => min(d, di => this.config.time_function(di[this.config.st_col])))
                 .entries(this.longDataInsideTimeRange)
                 .sort((a, b) => {
                     const aGrouping = a.key.split('|')[0],
@@ -48,20 +38,10 @@ export default function sortYdomain() {
             //Set y-domain.
             this.y_dom = nestedData.map(d => d.key.split('|')[1]);
         } else {
-            //Otherwise sort IDs by earliest event start date.
+            //Otherwise sort IDs by earliest event.
             this.y_dom = nest()
                 .key(d => d[this.config.id_col])
-                .rollup(d =>
-                    min(
-                        d,
-                        di =>
-                            this.config.time_scale === 'Study Day'
-                                ? +di[this.config.stdy_col]
-                                : time
-                                      .format(this.config.date_format)
-                                      .parse(di[this.config.stdt_col])
-                    )
-                )
+                .rollup(d => min(d, di => this.config.time_function(di[this.config.st_col])))
                 .entries(this.longDataInsideTimeRange)
                 .sort((a, b) => {
                     const earliestEventSort =

@@ -67,13 +67,4 @@ export default function defineGroupingData() {
 
             return groupingObject;
         });
-
-    //range_band hack
-    if (this.config.grouping_direction === 'horizontal')
-        this.config.range_band =
-            this.initialSettings.range_band +
-            this.groupings.length *
-                2 /
-                set(this.wideDataInsideTimeRange.map(d => d[this.config.id_col])).values().length *
-                this.initialSettings.range_band;
 }

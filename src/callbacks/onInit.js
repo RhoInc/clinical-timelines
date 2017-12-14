@@ -1,62 +1,56 @@
 import { time, set, min, max } from 'd3';
+import manipulateData from './onInit/manipulateData';
+import cleanData from './functions/cleanData';
 import defineData from './functions/defineData';
+import setDefaultTimeRanges from './onInit/setDefaultTimeRanges';
 import handleEventTypes from './onInit/handleEventTypes';
 import removeFilters from './onInit/removeFilters';
-import removeSiteReferences from './onInit/removeSiteReferences';
 import addDataDrivenTooltips from './onInit/addDataDrivenTooltips';
 
 export default function onInit() {
     const context = this;
 
-    //Data manipulation
-    this.raw_data.forEach((d, i) => {
-        if (!/^ *\d+ *$/.test(d[this.config.stdy_col])) d[this.config.stdy_col] = '';
-        if (!/^ *\d+ *$/.test(d[this.config.endy_col]))
-            d[this.config.endy_col] = d[this.config.stdy_col];
-        if (!time.format(this.config.date_format).parse(d[this.config.stdt_col]))
-            d[this.config.stdt_col] = '';
-        if (!time.format(this.config.date_format).parse(d[this.config.endt_col]))
-            d[this.config.endt_col] = d[this.config.stdt_col];
-    });
-
-    //Calculate number of total IDs and number of IDs with any event.
+    //Capture and count all IDs in data.
     this.populationDetails = {
         population: set(this.raw_data.map(d => d[this.config.id_col])).values()
     };
     this.populationDetails.N = this.populationDetails.population.length;
+
+    //Instantiate ID details.
     this.IDdetails = {};
+
+    //Retain initial data array, removing records with missing key variables.
+    this.initial_data = this.raw_data.filter(
+        d => !/^\s*$/.test(d[this.config.id_col]) && !/^\s*$/.test(d[this.config.event_col])
+    );
+
+    //Warn user of removed records.
+    if (this.initial_data.length < this.raw_data.length)
+        console.warn(
+            `${this.raw_data.length -
+                this.initial_data
+                    .length} records have been removed due to missing identifiers or event types.`
+        );
+
+    //Standardize invalid day and date values.
+    manipulateData.call(this);
+
+    //Remove unusable data.
+    cleanData.call(this);
 
     //Define a record for each start day and stop day.
     defineData.call(this);
 
-    //Define x-domain.
-    this.config.study_day_range = this.config.study_day_range || [
-        min(this.raw_data, d => d[this.config.stdy_col]),
-        max(this.raw_data, d => d[this.config.endy_col])
-    ];
-    this.config.date_range =
-        this.config.date_range instanceof Array && this.config.date_range.length === 2
-            ? this.config.date_range.map(
-                  date =>
-                      date instanceof Date ? date : time.format(this.config.date_format).parse(date)
-              )
-            : [
-                  min(this.raw_data, d =>
-                      time.format(this.config.date_format).parse(d[this.config.stdt_col])
-                  ),
-                  max(this.raw_data, d =>
-                      time.format(this.config.date_format).parse(d[this.config.endt_col])
-                  )
-              ];
+    //Set default time ranges.
+    setDefaultTimeRanges.call(this);
+    this.config.time_range =
+        this.config.time_scale === 'day' ? this.config.day_range : this.config.date_range;
 
     //Default event types to 'All'.
     handleEventTypes.call(this);
 
     //Remove filters for variables fewer than two levels.
     removeFilters.call(this);
-
-    //Remove references to site_col if column does not exist.
-    removeSiteReferences.call(this);
 
     //Add data-driven tooltips.
     addDataDrivenTooltips.call(this);

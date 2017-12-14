@@ -29,16 +29,8 @@ export default function highlightMarks() {
                         .classed('highlight-overlay', true)
                         .attr({
                             'clip-path': 'url(#1)',
-                            x1: context.x(
-                                context.config.time_scale === 'Study Day'
-                                    ? +d.values[0].key
-                                    : new Date(d.values[0].key)
-                            ),
-                            x2: context.x(
-                                context.config.time_scale === 'Study Day'
-                                    ? +d.values[1].key
-                                    : new Date(d.values[1].key)
-                            ),
+                            x1: context.x(context.config.time_function(d.values[0].key)),
+                            x2: context.x(context.config.time_function(d.values[1].key)),
                             y1:
                                 context.y(d.values[0].values.raw[0][context.config.id_col]) +
                                 context.y.rangeBand() / 2,

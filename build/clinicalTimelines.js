@@ -552,7 +552,10 @@
         },
         gridlines: 'y',
         range_band: 24,
-        margin: { top: 50 }, // for second x-axis
+        margin: {
+            top: 60,
+            right: 40
+        }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
     };
 
@@ -689,9 +692,6 @@
 
         //Color stratification
         settings.color_by = settings.event_col;
-
-        //Define right margin for vertical groupings and to prevent date tick label cutoff.
-        settings.margin.right = settings.grouping_direction === 'vertical' ? 40 : 0;
 
         //Add space at bottom of timeline to create space for the last ID's offset marks.
         settings.margin.bottom = settings.margin.top + settings.range_band;
@@ -1284,16 +1284,19 @@
         );
     }
 
-    function IDchange(select, d) {
-        var filter = this.filters.filter(function(filter) {
-            return filter.col === d.value_col;
-        })[0];
+    function IDchange(select) {
+        var _this = this;
 
-        //Update currently selected ID and toggle view.
-        this.selected_id = filter.val !== 'All' ? filter.val : null;
+        this.selected_id = d3
+            .select(select)
+            .select('option:checked')
+            .text();
+        this.filters.filter(function(filter) {
+            return filter.col === _this.config.id_col;
+        })[0].val = this.selected_id;
 
         //Redraw.
-        if (this.selected_id && this.selected_id !== 'All') {
+        if (this.selected_id !== 'All') {
             drawIDtimeline.call(this);
         } else {
             delete this.selected_id;
@@ -1325,14 +1328,25 @@
         enableDisableControls.call(this);
     }
 
-    function eventTypeChange(select, d) {
-        var filter = this.filters.filter(function(filter) {
-            return filter.col === d.value_col;
-        })[0];
+    function eventTypeChange(select) {
+        var _this = this;
 
-        //Re-draw ID timeline if in ID timeline view.
-        this.currentEventTypes = filter.val;
+        this.currentEventTypes = d3
+            .select(select)
+            .selectAll('select option:checked')
+            .pop()
+            .map(function(d) {
+                return d.textContent;
+            });
+        this.filters.filter(function(filter) {
+            return filter.col === _this.config.event_col;
+        })[0].val = this.currentEventTypes;
+        this.wrap.selectAll('.legend-item').classed('selected', function(d) {
+            return _this.currentEventTypes.indexOf(d.label) > -1;
+        });
+
         if (this.selected_id) drawIDtimeline.call(this);
+        else this.draw();
     }
 
     function augmentFilters() {
@@ -1350,27 +1364,26 @@
                 })
                 .classed('ID', function(d) {
                     return d.value_col === _this.config.id_col;
-                });
-
-        //Set to selected event types specified in settings.event_types and handle clinical timelines and ID timeline toggle.
-        filters
-            //Highlight selected event types in select.
-            .each(function(d) {
-                if (d.value_col === context.config.event_col)
-                    d3
-                        .select(this)
-                        .selectAll('option')
-                        .property('selected', function(di) {
-                            return context.currentEventTypes instanceof Array
-                                ? context.currentEventTypes.indexOf(di) > -1
-                                : true;
-                        });
-            })
-            .on('change', function(d) {
-                if (d.value_col === context.config.id_col) IDchange.call(context, this, d);
-                else if (d.value_col === context.config.event_col)
-                    eventTypeChange.call(context, this, d);
+                }),
+            IDfilter = filters.filter(function(filter) {
+                return filter.value_col === _this.config.id_col;
+            }),
+            eventTypeFilter = filters.filter(function(filter) {
+                return filter.value_col === _this.config.event_col;
             });
+
+        IDfilter.select('select').on('change', function(d) {
+            IDchange.call(context, this);
+        });
+
+        eventTypeFilter.selectAll('select.changer option').property('selected', function(di) {
+            return context.currentEventTypes instanceof Array
+                ? context.currentEventTypes.indexOf(di) > -1
+                : true;
+        });
+        eventTypeFilter.select('select').on('change', function(d) {
+            eventTypeChange.call(context, this);
+        });
     }
 
     function eventHighlightingChange(select, d) {
@@ -1557,7 +1570,7 @@
 
         //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
         //addition to the current filter selections.
-        this.filtered_long_data = this.raw_data.filter(function(d) {
+        this.filtered_long_data = this.long_data.filter(function(d) {
             var filtered = false;
 
             _this.filters.forEach(function(di) {
@@ -1883,8 +1896,8 @@
             }
         } else {
             /**-------------------------------------------------------------------------------------------\
-      Sort y-domain alphanumerically.
-    \-------------------------------------------------------------------------------------------**/
+        Sort y-domain alphanumerically.
+        \-------------------------------------------------------------------------------------------**/
 
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then alphanumerically if y-axis is grouped.

@@ -110,6 +110,9 @@ export default {
         },
         gridlines: 'y',
         range_band: 24,
-        margin: { top: 50 }, // for second x-axis
+        margin: {
+            top: 60,
+            right: 40
+        }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
 };

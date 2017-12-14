@@ -1,14 +1,15 @@
+import { select as d3select } from 'd3';
 import drawIDtimeline from '../../functions/drawIDtimeline';
 import enableDisableControls from '../../functions/enableDisableControls';
 
-export default function IDchange(select, d) {
-    const filter = this.filters.filter(filter => filter.col === d.value_col)[0];
-
-    //Update currently selected ID and toggle view.
-    this.selected_id = filter.val !== 'All' ? filter.val : null;
+export default function IDchange(select) {
+    this.selected_id = d3select(select)
+        .select('option:checked')
+        .text();
+    this.filters.filter(filter => filter.col === this.config.id_col)[0].val = this.selected_id;
 
     //Redraw.
-    if (this.selected_id && this.selected_id !== 'All') {
+    if (this.selected_id !== 'All') {
         drawIDtimeline.call(this);
     } else {
         delete this.selected_id;

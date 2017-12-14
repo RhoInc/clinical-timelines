@@ -18,7 +18,7 @@ export default function setDefaultTimeRanges() {
         this.config.date_range.length === 2 &&
         this.config.date_range[0].toString() !== this.config.day_range[1].toString() &&
         this.config.date_range.every(
-            date => time.format(this.config.date_format).parse(date) || date instanceof Date
+            date => date instanceof Date || time.format(this.config.date_format).parse(date)
         )
             ? this.config.date_range.map(
                   date =>

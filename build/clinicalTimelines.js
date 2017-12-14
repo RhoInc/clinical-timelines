@@ -999,7 +999,7 @@
             this.config.date_range.length === 2 &&
             this.config.date_range[0].toString() !== this.config.day_range[1].toString() &&
             this.config.date_range.every(function(date) {
-                return d3.time.format(_this.config.date_format).parse(date) || date instanceof Date;
+                return date instanceof Date || d3.time.format(_this.config.date_format).parse(date);
             })
                 ? this.config.date_range.map(function(date) {
                       return date instanceof Date
@@ -1042,11 +1042,56 @@
         this.config.legend.order = this.config.color_dom;
     }
 
-    function removeFilters() {
+    function checkTimeScales() {
         var _this = this;
 
         this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
-            if (input.type !== 'subsetter') {
+            if (input.description !== 'X-axis scale') return true;
+            else {
+                var anyDates = _this.initial_data.some(function(d) {
+                        return d.hasOwnProperty(_this.config.stdt_col);
+                    }),
+                    anyDays = _this.initial_data.some(function(d) {
+                        return d.hasOwnProperty(_this.config.stdy_col);
+                    });
+
+                if (!anyDates && !anyDays) {
+                    var errorText =
+                        'The data contain neither ' +
+                        _this.config.stdt_col +
+                        ' nor ' +
+                        _this.config.stdy_col +
+                        '.  Please update the settings object to match the variables in the data.';
+                    _this.wrap
+                        .append('div')
+                        .style('color', 'red')
+                        .html(errorText);
+                    throw new Error(errorText);
+                } else if (!anyDates && _this.config.time_scale === 'date') {
+                    _this.config.time_scale = 'day';
+                    syncTimeScaleSettings(_this.config);
+                    _this.IDtimeline.config.time_scale = 'day';
+                    syncTimeScaleSettings(_this.IDtimeline.config);
+                } else if (!anyDays && _this.config.time_scale === 'day') {
+                    _this.config.time_scale = 'date';
+                    syncTimeScaleSettings(_this.config);
+                    _this.IDtimeline.config.time_scale = 'date';
+                    syncTimeScaleSettings(_this.IDtimeline.config);
+                }
+
+                return anyDates && anyDays;
+            }
+        });
+    }
+
+    function checkOtherControls() {
+        var _this = this;
+
+        this.controls.config.inputs
+            .filter(function(input) {
+                return input.type !== 'subsetter';
+            })
+            .forEach(function(input) {
                 //Set values of Event Type highlighting control to event types present in the data.
                 if (input.description === 'Event highlighting')
                     input.values = _this.config.color_dom;
@@ -1056,7 +1101,17 @@
                     });
 
                 return true;
-            } else if (!_this.raw_data[0].hasOwnProperty(input.value_col)) {
+            });
+
+        checkTimeScales.call(this);
+    }
+
+    function checkFilters() {
+        var _this = this;
+
+        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
+            if (input.type !== 'subsetter') return true;
+            else if (!_this.raw_data[0].hasOwnProperty(input.value_col)) {
                 console.warn(
                     input.value_col + ' filter removed because the variable does not exist.'
                 );
@@ -1130,25 +1185,28 @@
         //Standardize invalid day and date values.
         manipulateData.call(this);
 
-        //Remove unusable data.
-        cleanData.call(this);
+        //Default event types to 'All'.
+        handleEventTypes.call(this);
 
-        //Define a record for each start day and stop day.
-        defineData.call(this);
+        //Check other control inputs.
+        checkOtherControls.call(this);
+
+        //Check filters for non-existent or single-value variables.
+        checkFilters.call(this);
 
         //Set default time ranges.
         setDefaultTimeRanges.call(this);
         this.config.time_range =
             this.config.time_scale === 'day' ? this.config.day_range : this.config.date_range;
 
-        //Default event types to 'All'.
-        handleEventTypes.call(this);
-
-        //Remove filters for variables fewer than two levels.
-        removeFilters.call(this);
-
         //Add data-driven tooltips.
         addDataDrivenTooltips.call(this);
+
+        //Remove unusable data.
+        cleanData.call(this);
+
+        //Define a record for each start day and stop day.
+        defineData.call(this);
     }
 
     function enableDisableControls() {
@@ -1736,7 +1794,7 @@
                 })
             )
             .values()
-            .map(function(d) {
+            .map(function(d, i) {
                 var groupingObject = {
                     key: d,
                     IDs: []
@@ -1778,20 +1836,20 @@
                         groupingEnd2 = clone(groupingEnd);
 
                     //First placeholder row
-                    groupingStart1[_this.config.id_col] = '--' + d;
+                    groupingStart1[_this.config.id_col] = '--' + i;
                     _this.raw_data.push(groupingStart1);
                     _this.longDataInsideTimeRange.push(groupingStart1);
 
-                    groupingEnd1[_this.config.id_col] = '--' + d;
+                    groupingEnd1[_this.config.id_col] = '--' + i;
                     _this.raw_data.push(groupingEnd1);
                     _this.longDataInsideTimeRange.push(groupingEnd1);
 
                     //Second placeholder row
-                    groupingStart2[_this.config.id_col] = '-' + d;
+                    groupingStart2[_this.config.id_col] = '-' + i;
                     _this.raw_data.push(groupingStart2);
                     _this.longDataInsideTimeRange.push(groupingStart2);
 
-                    groupingEnd2[_this.config.id_col] = '-' + d;
+                    groupingEnd2[_this.config.id_col] = '-' + i;
                     _this.raw_data.push(groupingEnd2);
                     _this.longDataInsideTimeRange.push(groupingEnd2);
                 }
@@ -1799,25 +1857,6 @@
                 return groupingObject;
             });
     }
-
-    function onPreprocess() {
-        this.config.x.domain = this.config.time_range;
-
-        //Define filtered data irrespective of individual mark filtering.
-        defineFilteredData.call(this);
-
-        //Define population details data.
-        definePopulationDetails.call(this);
-
-        //Define data inside time range.
-        defineDataInsideTimeRange.call(this);
-
-        //Insert groupings into data to draw empty rows in which to draw groupings.
-        if (this.config.y.grouping) defineGroupingData.call(this);
-        else delete this.groupings;
-    }
-
-    function onDatatransform() {}
 
     function sortYdomain() {
         var _this = this;
@@ -1866,12 +1905,12 @@
                 });
 
                 //Set y-domain.
-                this.y_dom = nestedData.map(function(d) {
+                this.config.y.domain = nestedData.map(function(d) {
                     return d.key.split('|')[1];
                 });
             } else {
                 //Otherwise sort IDs by earliest event.
-                this.y_dom = d3
+                this.config.y.domain = d3
                     .nest()
                     .key(function(d) {
                         return d[_this.config.id_col];
@@ -1901,7 +1940,7 @@
 
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then alphanumerically if y-axis is grouped.
-                this.y_dom = d3
+                this.config.y.domain = d3
                     .set(
                         this.longDataInsideTimeRange.map(function(d) {
                             return d[_this.config.id_col];
@@ -1922,7 +1961,7 @@
                             : aGrouping < bGrouping ? 1 : alphanumericSort;
                     });
 
-                this.y_dom.forEach(function(d) {
+                this.config.y.domain.forEach(function(d) {
                     _this.groupings
                         .filter(function(grouping) {
                             return (
@@ -1937,7 +1976,10 @@
                 });
             } else {
                 //Otherwise sort IDs alphanumerically.
-                this.y_dom = this.populationDetails.sampleInsideTimeRange.sort(function(a, b) {
+                this.config.y.domain = this.populationDetails.sampleInsideTimeRange.sort(function(
+                    a,
+                    b
+                ) {
                     var alphanumericSort = a > b ? -1 : 1;
 
                     return alphanumericSort;
@@ -1946,12 +1988,29 @@
         }
     }
 
-    function onDraw() {
-        sortYdomain.call(this);
+    function onPreprocess() {
+        this.config.x.domain = this.config.time_range;
 
-        //Clear grouping elements.
-        this.svg.selectAll('.grouping').remove();
+        //Define filtered data irrespective of individual mark filtering.
+        defineFilteredData.call(this);
+
+        //Define population details data.
+        definePopulationDetails.call(this);
+
+        //Define data inside time range.
+        defineDataInsideTimeRange.call(this);
+
+        //Insert groupings into data to draw empty rows in which to draw groupings.
+        if (this.config.y.grouping) defineGroupingData.call(this);
+        else delete this.groupings;
+
+        //Sort y-axis based on `Sort IDs` control selection.
+        sortYdomain.call(this);
     }
+
+    function onDatatransform() {}
+
+    function onDraw() {}
 
     function legendFilter() {
         var _this = this;
@@ -2155,6 +2214,9 @@
     }
 
     function annotateGrouping() {
+        //Clear grouping elements.
+        this.svg.selectAll('.grouping').remove();
+
         if (this.config.y.grouping) {
             this.svg.selectAll('.grouping').remove();
 

@@ -1,15 +1,9 @@
 import { set } from 'd3';
 
-export default function removeFilters() {
+export default function checkFilters() {
     this.controls.config.inputs = this.controls.config.inputs.filter(input => {
-        if (input.type !== 'subsetter') {
-            //Set values of Event Type highlighting control to event types present in the data.
-            if (input.description === 'Event highlighting') input.values = this.config.color_dom;
-            else if (input.description === 'Y-axis grouping')
-                input.values = this.config.groupings.map(grouping => grouping.value_col);
-
-            return true;
-        } else if (!this.raw_data[0].hasOwnProperty(input.value_col)) {
+        if (input.type !== 'subsetter') return true;
+        else if (!this.raw_data[0].hasOwnProperty(input.value_col)) {
             console.warn(input.value_col + ' filter removed because the variable does not exist.');
 
             return false;

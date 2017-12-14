@@ -4,7 +4,8 @@ import cleanData from './functions/cleanData';
 import defineData from './functions/defineData';
 import setDefaultTimeRanges from './onInit/setDefaultTimeRanges';
 import handleEventTypes from './onInit/handleEventTypes';
-import removeFilters from './onInit/removeFilters';
+import checkOtherControls from './onInit/checkOtherControls';
+import checkFilters from './onInit/checkFilters';
 import addDataDrivenTooltips from './onInit/addDataDrivenTooltips';
 
 export default function onInit() {
@@ -35,23 +36,26 @@ export default function onInit() {
     //Standardize invalid day and date values.
     manipulateData.call(this);
 
-    //Remove unusable data.
-    cleanData.call(this);
+    //Default event types to 'All'.
+    handleEventTypes.call(this);
 
-    //Define a record for each start day and stop day.
-    defineData.call(this);
+    //Check other control inputs.
+    checkOtherControls.call(this);
+
+    //Check filters for non-existent or single-value variables.
+    checkFilters.call(this);
 
     //Set default time ranges.
     setDefaultTimeRanges.call(this);
     this.config.time_range =
         this.config.time_scale === 'day' ? this.config.day_range : this.config.date_range;
 
-    //Default event types to 'All'.
-    handleEventTypes.call(this);
-
-    //Remove filters for variables fewer than two levels.
-    removeFilters.call(this);
-
     //Add data-driven tooltips.
     addDataDrivenTooltips.call(this);
+
+    //Remove unusable data.
+    cleanData.call(this);
+
+    //Define a record for each start day and stop day.
+    defineData.call(this);
 }

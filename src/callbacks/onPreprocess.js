@@ -2,6 +2,7 @@ import defineFilteredData from './onPreprocess/defineFilteredData';
 import definePopulationDetails from './onPreprocess/definePopulationDetails';
 import defineDataInsideTimeRange from './onPreprocess/defineDataInsideTimeRange';
 import defineGroupingData from './onPreprocess/defineGroupingData';
+import sortYdomain from './onPreprocess/sortYdomain';
 
 export default function onPreprocess() {
     const context = this;
@@ -21,4 +22,7 @@ export default function onPreprocess() {
     //Insert groupings into data to draw empty rows in which to draw groupings.
     if (this.config.y.grouping) defineGroupingData.call(this);
     else delete this.groupings;
+
+    //Sort y-axis based on `Sort IDs` control selection.
+    sortYdomain.call(this);
 }

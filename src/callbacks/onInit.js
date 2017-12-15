@@ -2,7 +2,6 @@ import { time, set, min, max } from 'd3';
 import defineData from './functions/defineData';
 import handleEventTypes from './onInit/handleEventTypes';
 import removeFilters from './onInit/removeFilters';
-import removeSiteReferences from './onInit/removeSiteReferences';
 import addDataDrivenTooltips from './onInit/addDataDrivenTooltips';
 
 export default function onInit() {
@@ -26,13 +25,24 @@ export default function onInit() {
     this.populationDetails.N = this.populationDetails.population.length;
     this.IDdetails = {};
 
+    //Remove records with insufficient data.
+    this.wide_data = this.raw_data.filter(
+        d =>
+            !(d.hasOwnProperty(this.config.stdy_col) && d[this.config.stdy_col] === '') &&
+            !(d.hasOwnProperty(this.config.endy_col) && d[this.config.endy_col] === '') &&
+            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] === '') &&
+            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] === '') &&
+            !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
+            !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
+    );
+
     //Define a record for each start day and stop day.
     defineData.call(this);
 
     //Define x-domain.
     this.config.study_day_range = this.config.study_day_range || [
-        min(this.raw_data, d => d[this.config.stdy_col]),
-        max(this.raw_data, d => d[this.config.endy_col])
+        min(this.raw_data, d => +d[this.config.stdy_col]),
+        max(this.raw_data, d => +d[this.config.endy_col])
     ];
     this.config.date_range =
         this.config.date_range instanceof Array && this.config.date_range.length === 2
@@ -54,9 +64,6 @@ export default function onInit() {
 
     //Remove filters for variables fewer than two levels.
     removeFilters.call(this);
-
-    //Remove references to site_col if column does not exist.
-    removeSiteReferences.call(this);
 
     //Add data-driven tooltips.
     addDataDrivenTooltips.call(this);

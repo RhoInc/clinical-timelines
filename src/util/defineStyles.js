@@ -5,6 +5,10 @@ export default function defineStyles() {
           Global styles
         \--------------------------------------------------------------------------------------***/
 
+            '#clinical-timelines {' +
+                '    display: inline-block;' +
+                '    width: 100%;' +
+                '}',
             '#clinical-timelines .hidden {' +
                 '    display: none !important;' +
                 '}',
@@ -26,6 +30,7 @@ export default function defineStyles() {
 
             '#clinical-timelines > * {' +
                 '    display: inline-block;' +
+                '    padding: 10px;' +
                 '}',
             '#clinical-timelines > #left-side {' +
                 '    width: 22%;' +
@@ -37,6 +42,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > * > * {' +
                 '    width: 100%;' +
+                '    padding: 10px;' +
                 '    vertical-align: top;' +
                 '    display: inline-block;' +
                 '    margin-bottom: 10px;' +
@@ -53,7 +59,7 @@ export default function defineStyles() {
 
           //Annotations
             '#clinical-timelines > #left-side > .annotation {' +
-                '    font-size: small;' +
+                '    font-size: 90%;' +
                 '    text-align: right;' +
                 '}',
             '#clinical-timelines > #left-side > .annotation .ct-stats,' +
@@ -117,7 +123,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                 '    padding: 0 5px;' +
-                '    font-size: 14px;' +
+                '    font-size: 110%;' +
                 '}',
 
         /***--------------------------------------------------------------------------------------\
@@ -155,20 +161,23 @@ export default function defineStyles() {
                 '    border: 2px solid black;' +
                 '}',
 
-          //Mark highlighting
-            '#clinical-timelines path.highlighted {' +
-                '    stroke: black;' +
+          //Y-axis
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick {' +
+                '    cursor: pointer;' +
+                '    fill: blue;' +
+                '    text-decoration: none;' +
+                '    font-weight: bolder;' +
                 '}',
-            '#clinical-timelines line.highlight-overlay {' +
-                '    stroke-width: 2px;' +
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:hover {' +
+                '    text-decoration: underline;' +
                 '}',
-            '#clinical-timelines circle.highlighted {' +
-                '    stroke: black;' +
-                '    stroke-width: 2px;' +
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
+                '    stroke: #aaa;' +
+                '    stroke-width: 1;' +
+                '    fill: none;' +
                 '}',
-            '#clinical-timelines polygon.highlighted {' +
-                '    stroke: black;' +
-                '    stroke-width: 2px;' +
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:nth-child(even) rect.ct-stripe {' +
+                '    fill: #eee;' +
                 '}',
 
           //Grouping
@@ -177,19 +186,46 @@ export default function defineStyles() {
                 '    stroke-width: 2px;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .annotation {' +
-                '    font-size: 24px;' +
-                '    font-weight: bold;' +
-                '    text-anchor: beginning;' +
+                '    font-size: 150%;' +
+                '    font-weight: normal;' +
+                '    text-anchor: start;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping.vertical .annotation {' +
                 '    writing-mode: tb-rl;' +
                 '}',
 
-          //Y-axis
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick {' +
-                '    cursor: pointer;' +
-                '    fill: blue;' +
-                '    text-decoration: underline;' +
+          //Lines
+            '#clinical-timelines path.wc-data-mark {' +
+                '    stroke-width: 4;' +
+                '    clip-path: url(#1);' +
+                '    stroke-opacity: 1;' +
+                '}',
+            '#clinical-timelines path.wc-data-mark.highlighted {' +
+                '    stroke-width: 7;' +
+                '}',
+            '#clinical-timelines line.highlight-overlay {' +
+                '    clip-path: url(#1);' +
+                '    stroke-width: 3;' +
+                '    stroke-linecap: round;' +
+                '}',
+
+          //Circles
+            '#clinical-timelines circle.wc-data-mark {' +
+                '    stroke-width: 0;' +
+                '    clip-path: url(#1);' +
+                '    fill-opacity: 1;' +
+                '}',
+            '#clinical-timelines circle.wc-data-mark.highlighted {' +
+                '    stroke-opacity: 1;' +
+                '    stroke-width: 2;' +
+                '}',
+
+          //Arrows
+            '#clinical-timelines polygon.ongoing-event {' +
+                '    clip-path: url(#1);' +
+                '}',
+            '#clinical-timelines polygon.ongoing-event.highlighted {' +
+                '    stroke-width: 2;' +
                 '}',
 
           //Reference lines
@@ -231,7 +267,8 @@ export default function defineStyles() {
             '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-chart-title {' +
                 '    float: right;' +
                 '    text-align: left;' +
-                '    font-size: 21px;' +
+                '    font-size: 150%;' +
+                '    font-weight: normal;' +
                 '    padding-left: 10px;' +
                 '    width: 24%;' +
                 '}',

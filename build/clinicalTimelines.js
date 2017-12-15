@@ -13,6 +13,7 @@
       Global styles
     \--------------------------------------------------------------------------------------***/
 
+                '#clinical-timelines {' + '    display: inline-block;' + '    width: 100%;' + '}',
                 '#clinical-timelines .hidden {' + '    display: none !important;' + '}',
                 '#clinical-timelines .ct-button {' +
                     '    cursor: pointer !important;' +
@@ -28,7 +29,10 @@
       Left and right side containers
     \--------------------------------------------------------------------------------------***/
 
-                '#clinical-timelines > * {' + '    display: inline-block;' + '}',
+                '#clinical-timelines > * {' +
+                    '    display: inline-block;' +
+                    '    padding: 10px;' +
+                    '}',
                 '#clinical-timelines > #left-side {' + '    width: 22%;' + '    float: left;' + '}',
                 '#clinical-timelines > #right-side {' +
                     '    width: 75%;' +
@@ -36,6 +40,7 @@
                     '}',
                 '#clinical-timelines > * > * {' +
                     '    width: 100%;' +
+                    '    padding: 10px;' +
                     '    vertical-align: top;' +
                     '    display: inline-block;' +
                     '    margin-bottom: 10px;' +
@@ -52,7 +57,7 @@
 
                 //Annotations
                 '#clinical-timelines > #left-side > .annotation {' +
-                    '    font-size: small;' +
+                    '    font-size: 90%;' +
                     '    text-align: right;' +
                     '}',
                 '#clinical-timelines > #left-side > .annotation .ct-stats,' +
@@ -116,7 +121,7 @@
                     '}',
                 '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                     '    padding: 0 5px;' +
-                    '    font-size: 14px;' +
+                    '    font-size: 110%;' +
                     '}',
 
                 /***--------------------------------------------------------------------------------------\
@@ -153,16 +158,23 @@
                     '    border: 2px solid black;' +
                     '}',
 
-                //Mark highlighting
-                '#clinical-timelines path.highlighted {' + '    stroke: black;' + '}',
-                '#clinical-timelines line.highlight-overlay {' + '    stroke-width: 2px;' + '}',
-                '#clinical-timelines circle.highlighted {' +
-                    '    stroke: black;' +
-                    '    stroke-width: 2px;' +
+                //Y-axis
+                '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick {' +
+                    '    cursor: pointer;' +
+                    '    fill: blue;' +
+                    '    text-decoration: none;' +
+                    '    font-weight: bolder;' +
                     '}',
-                '#clinical-timelines polygon.highlighted {' +
-                    '    stroke: black;' +
-                    '    stroke-width: 2px;' +
+                '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:hover {' +
+                    '    text-decoration: underline;' +
+                    '}',
+                '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
+                    '    stroke: #aaa;' +
+                    '    stroke-width: 1;' +
+                    '    fill: none;' +
+                    '}',
+                '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:nth-child(even) rect.ct-stripe {' +
+                    '    fill: #eee;' +
                     '}',
 
                 //Grouping
@@ -171,19 +183,44 @@
                     '    stroke-width: 2px;' +
                     '}',
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .annotation {' +
-                    '    font-size: 24px;' +
-                    '    font-weight: bold;' +
-                    '    text-anchor: beginning;' +
+                    '    font-size: 150%;' +
+                    '    font-weight: normal;' +
+                    '    text-anchor: start;' +
                     '}',
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping.vertical .annotation {' +
                     '    writing-mode: tb-rl;' +
                     '}',
 
-                //Y-axis
-                '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick {' +
-                    '    cursor: pointer;' +
-                    '    fill: blue;' +
-                    '    text-decoration: underline;' +
+                //Lines
+                '#clinical-timelines path.wc-data-mark {' +
+                    '    stroke-width: 4;' +
+                    '    clip-path: url(#1);' +
+                    '    stroke-opacity: 1;' +
+                    '}',
+                '#clinical-timelines path.wc-data-mark.highlighted {' +
+                    '    stroke-width: 7;' +
+                    '}',
+                '#clinical-timelines line.highlight-overlay {' +
+                    '    clip-path: url(#1);' +
+                    '    stroke-width: 3;' +
+                    '    stroke-linecap: round;' +
+                    '}',
+
+                //Circles
+                '#clinical-timelines circle.wc-data-mark {' +
+                    '    stroke-width: 0;' +
+                    '    clip-path: url(#1);' +
+                    '    fill-opacity: 1;' +
+                    '}',
+                '#clinical-timelines circle.wc-data-mark.highlighted {' +
+                    '    stroke-opacity: 1;' +
+                    '    stroke-width: 2;' +
+                    '}',
+
+                //Arrows
+                '#clinical-timelines polygon.ongoing-event {' + '    clip-path: url(#1);' + '}',
+                '#clinical-timelines polygon.ongoing-event.highlighted {' +
+                    '    stroke-width: 2;' +
                     '}',
 
                 //Reference lines
@@ -223,7 +260,8 @@
                 '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-chart-title {' +
                     '    float: right;' +
                     '    text-align: left;' +
-                    '    font-size: 21px;' +
+                    '    font-size: 150%;' +
+                    '    font-weight: normal;' +
                     '    padding-left: 10px;' +
                     '    width: 24%;' +
                     '}',
@@ -456,6 +494,7 @@
         event_col: 'DOMAIN',
         event_types: null,
         event_highlighted: null,
+        event_highlight_color: 'black',
 
         //Filter settings
         filters: null,
@@ -478,6 +517,7 @@
         endt_col: 'ENDT',
         date_range: null,
         date_format: '%Y-%m-%d',
+        date_display_format: '%b %y', // sync in syncSettings()
 
         //Miscellaneous settings
         seq_col: 'SEQ',
@@ -514,21 +554,15 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
-                    'clip-path': 'url(#1)',
-                    'stroke-width': 4,
-                    'stroke-opacity': 1
+                    'stroke-width': 4
                 }
             },
             {
                 type: 'circle',
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
-                radius: '3',
+                radius: 4,
                 attributes: {
-                    'clip-path': 'url(#1)',
-                    fill: 'white',
-                    'fill-opacity': 1,
-                    'stroke-opacity': 1,
                     'stroke-width': 2
                 }
             }
@@ -552,7 +586,7 @@
             mark: 'circle'
         },
         gridlines: 'y',
-        range_band: 24,
+        range_band: 30,
         margin: { top: 50 }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
     };
@@ -600,7 +634,7 @@
         };
 
     function syncRendererSpecificSettings(settings) {
-        //ID
+        //ID settings
         settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
         settings.id_unitPropCased =
             settings.id_unit.substring(0, 1).toUpperCase() +
@@ -616,11 +650,11 @@
             settings.id_characteristics
         );
 
-        //Events
+        //Event settings
         if (!(settings.event_types instanceof Array && settings.event_types.length))
             delete settings.event_types;
 
-        //Filters
+        //Filter settings
         var defaultFilters = [
             { value_col: settings.id_col, label: settings.id_unitPropCased },
             { value_col: settings.event_col, label: 'Event Type' }
@@ -629,13 +663,16 @@
             defaultFilters.splice(2, 0, { value_col: settings.ongo_col, label: 'Ongoing?' });
         settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
-        //Groupings
+        //Grouping settings
         var defaultGroupings = [];
         settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
         if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
             settings.grouping_direction = 'horizontal';
 
-        //Reference lines
+        //Time settings
+        settings.date_display_format = settings.date_display_format || settings.date_format;
+
+        //Reference line settings
         if (settings.reference_lines) {
             if (!(settings.reference_lines instanceof Array))
                 settings.reference_lines = [settings.reference_lines];
@@ -643,21 +680,42 @@
             settings.reference_lines = settings.reference_lines
                 .map(function(reference_line) {
                     var referenceLineObject = {};
-                    referenceLineObject.timepoint = reference_line.timepoint || reference_line;
-                    referenceLineObject.label =
-                        reference_line.label ||
-                        settings.config.time_scale + ': ' + referenceLineObject.timepoint;
+
+                    //either an object or not
+                    referenceLineObject.timepoint =
+                        reference_line instanceof Object
+                            ? reference_line.timepoint
+                            : reference_line;
+
+                    //either an integer or not
+                    referenceLineObject.time_scale = Number.isInteger(
+                        +referenceLineObject.timepoint
+                    )
+                        ? 'Study Day'
+                        : 'Date';
+
+                    //label predefined or not
+                    referenceLineObject.label = reference_line.label
+                        ? reference_line.label
+                        : referenceLineObject.time_scale + ': ' + referenceLineObject.timepoint;
 
                     return referenceLineObject;
                 })
                 .filter(function(reference_line) {
-                    return Number.isInteger(reference_line.timepoint);
+                    return (
+                        (reference_line.time_scale === 'Study Day' &&
+                            Number.isInteger(reference_line.timepoint)) ||
+                        (reference_line.time_scale === 'Date' &&
+                            d3.time
+                                .format(settings.date_format)
+                                .parse(reference_line.timepoint) instanceof Date)
+                    );
                 });
 
             if (!settings.reference_lines.length) delete settings.reference_lines;
         }
 
-        //Details
+        //Detail settings
         var defaultDetails =
             settings.time_scale === 'Study Day'
                 ? [
@@ -707,7 +765,8 @@
         //X-axis
         settings.x.type = settings.time_scale === 'Study Day' ? 'linear' : 'time';
         settings.x.label = settings.time_scale;
-        settings.x.format = settings.time_scale === 'Study Day' ? '1d' : settings.date_format;
+        settings.x.format =
+            settings.time_scale === 'Study Day' ? '1d' : settings.date_display_format;
 
         //Lines (events with duration)
         settings.marks[0].tooltip =
@@ -751,6 +810,7 @@
         settings.y.sort = 'alphabetical-descending';
         settings.marks[0].per = [settings.event_col, settings.seq_col];
         settings.marks[1].per = [settings.event_col, settings.seq_col, 'wc_value'];
+        settings.gridlines = 'y';
         settings.range_band = settings.range_band / 2;
         settings.margin = { left: 25 };
     }
@@ -1021,38 +1081,6 @@
         });
     }
 
-    function removeSiteReferences() {
-        var _this = this;
-
-        if (!this.raw_data[0].hasOwnProperty(this.config.site_col)) {
-            this.config.groupings = this.config.groupings.filter(function(grouping) {
-                return grouping.value_col !== _this.config.site_col;
-            });
-            var yAxisGrouping = this.controls.config.inputs
-                .filter(function(input) {
-                    return input.option === 'y.grouping';
-                })
-                .pop();
-            yAxisGrouping.values = yAxisGrouping.values.filter(function(value) {
-                return value !== _this.config.site_col;
-            });
-            this.config.filters = this.config.filters.filter(function(filter) {
-                return filter.value_col !== _this.config.site_col;
-            });
-            this.config.id_characteristics = this.config.id_characteristics.filter(function(
-                id_characteristic
-            ) {
-                return id_characteristic.value_col !== _this.config.site_col;
-            });
-            this.listing.config.cols = this.listing.config.cols.filter(function(col) {
-                return col !== _this.config.site_col;
-            });
-            this.listing.config.headers = this.listing.config.headers.filter(function(header) {
-                return header !== 'Site';
-            });
-        }
-    }
-
     function addDataDrivenTooltips() {
         var _this = this;
 
@@ -1092,16 +1120,30 @@
         this.populationDetails.N = this.populationDetails.population.length;
         this.IDdetails = {};
 
+        //Remove records with insufficient data.
+        this.wide_data = this.raw_data.filter(
+            function(d) {
+                return (
+                    !(d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] === '') &&
+                    !(d.hasOwnProperty(_this.config.endy_col) && d[_this.config.endy_col] === '') &&
+                    !(d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] === '') &&
+                    !(d.hasOwnProperty(_this.config.endt_col) && d[_this.config.endt_col] === '') &&
+                    !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
+                    !/^\s*$/.test(d[_this.config.event_col])
+                );
+            } // remove records with missing [event_col]
+        );
+
         //Define a record for each start day and stop day.
         defineData.call(this);
 
         //Define x-domain.
         this.config.study_day_range = this.config.study_day_range || [
             d3.min(this.raw_data, function(d) {
-                return d[_this.config.stdy_col];
+                return +d[_this.config.stdy_col];
             }),
             d3.max(this.raw_data, function(d) {
-                return d[_this.config.endy_col];
+                return +d[_this.config.endy_col];
             })
         ];
         this.config.date_range =
@@ -1129,9 +1171,6 @@
 
         //Remove filters for variables fewer than two levels.
         removeFilters.call(this);
-
-        //Remove references to site_col if column does not exist.
-        removeSiteReferences.call(this);
 
         //Add data-driven tooltips.
         addDataDrivenTooltips.call(this);
@@ -1270,7 +1309,7 @@
         );
     }
 
-    function IDchange(select$$1, d) {
+    function IDchange(select, d) {
         var filter = this.filters.filter(function(filter) {
             return filter.col === d.value_col;
         })[0];
@@ -1311,7 +1350,7 @@
         enableDisableControls.call(this);
     }
 
-    function eventTypeChange(select$$1, d) {
+    function eventTypeChange(select, d) {
         var filter = this.filters.filter(function(filter) {
             return filter.col === d.value_col;
         })[0];
@@ -1359,10 +1398,10 @@
             });
     }
 
-    function eventHighlightingChange(select$$1, d) {
+    function eventHighlightingChange(select, d) {
         //Update event highlighting settings.
         this.config.event_highlighted = d3
-            .select(select$$1)
+            .select(select)
             .select('option:checked')
             .text();
         this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
@@ -1734,7 +1773,7 @@
                 })
             )
             .values()
-            .map(function(d) {
+            .map(function(d, i) {
                 var groupingObject = {
                     key: d,
                     IDs: []
@@ -1775,42 +1814,18 @@
                         groupingEnd1 = clone(groupingEnd),
                         groupingEnd2 = clone(groupingEnd);
 
-                    //First placeholder row
-                    groupingStart1[_this.config.id_col] = '--' + d;
+                    //Placeholder row in which to print grouping.
+                    groupingStart1[_this.config.id_col] = '-g' + i + 'a';
                     _this.raw_data.push(groupingStart1);
                     _this.longDataInsideTimeRange.push(groupingStart1);
 
-                    groupingEnd1[_this.config.id_col] = '--' + d;
+                    groupingEnd1[_this.config.id_col] = '-g' + i + 'a';
                     _this.raw_data.push(groupingEnd1);
                     _this.longDataInsideTimeRange.push(groupingEnd1);
-
-                    //Second placeholder row
-                    groupingStart2[_this.config.id_col] = '-' + d;
-                    _this.raw_data.push(groupingStart2);
-                    _this.longDataInsideTimeRange.push(groupingStart2);
-
-                    groupingEnd2[_this.config.id_col] = '-' + d;
-                    _this.raw_data.push(groupingEnd2);
-                    _this.longDataInsideTimeRange.push(groupingEnd2);
                 }
 
                 return groupingObject;
             });
-
-        //range_band hack
-        if (this.config.grouping_direction === 'horizontal')
-            this.config.range_band =
-                this.initialSettings.range_band +
-                this.groupings.length *
-                    2 /
-                    d3
-                        .set(
-                            this.wideDataInsideTimeRange.map(function(d) {
-                                return d[_this.config.id_col];
-                            })
-                        )
-                        .values().length *
-                    this.initialSettings.range_band;
     }
 
     function onPreprocess() {
@@ -1833,10 +1848,7 @@
 
         //Insert groupings into data to draw empty rows in which to draw groupings.
         if (this.config.y.grouping) defineGroupingData.call(this);
-        else {
-            delete this.groupings;
-            this.config.range_band = this.initialSettings.range_band;
-        }
+        else delete this.groupings;
     }
 
     function onDatatransform() {}
@@ -1992,74 +2004,6 @@
         this.svg.select('g.x-top.axis text.axis-title.top').text(this.config.time_scale);
     }
 
-    function highlightMarks() {
-        var _this = this;
-
-        var context = this;
-
-        this.svg.selectAll('.highlight-overlay').remove();
-
-        //Highlight legend.
-        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
-            return d.label === _this.config.event_highlighted;
-        });
-
-        //Highlight marks.
-        var highlightedMarks = this.svg
-                .selectAll('.wc-data-mark, .ongoing-event')
-                .classed('highlighted', function(d) {
-                    return d.key.indexOf(_this.config.event_highlighted) > -1;
-                })
-                .filter(function(d) {
-                    return d.key.indexOf(_this.config.event_highlighted) > -1;
-                }),
-            paths = highlightedMarks
-                .filter(function() {
-                    return (
-                        this.tagName === 'path' &&
-                        this.getAttribute('class').indexOf('highlighted') > -1
-                    );
-                })
-                .each(function(d) {
-                    var g = d3.select(this.parentNode),
-                        line = g
-                            .append('line')
-                            .classed('highlight-overlay', true)
-                            .attr({
-                                'clip-path': 'url(#1)',
-                                x1: context.x(
-                                    context.config.time_scale === 'Study Day'
-                                        ? +d.values[0].key
-                                        : new Date(d.values[0].key)
-                                ),
-                                x2: context.x(
-                                    context.config.time_scale === 'Study Day'
-                                        ? +d.values[1].key
-                                        : new Date(d.values[1].key)
-                                ),
-                                y1:
-                                    context.y(d.values[0].values.raw[0][context.config.id_col]) +
-                                    context.y.rangeBand() / 2,
-                                y2:
-                                    context.y(d.values[0].values.raw[0][context.config.id_col]) +
-                                    context.y.rangeBand() / 2,
-                                stroke: context.colorScale(
-                                    d.values[0].values.raw[0][context.config.event_col]
-                                )
-                            });
-                }),
-            circles = highlightedMarks
-                .filter(function() {
-                    return (
-                        this.tagName === 'circle' &&
-                        this.getAttribute('class').indexOf('highlighted') > -1
-                    );
-                })
-                .attr('fill', function(d) {
-                    return _this.colorScale(d.values.raw[0][_this.config.event_col]);
-                });
-    }
-
     function legendFilter() {
         var _this = this;
 
@@ -2128,7 +2072,7 @@
                 .orient('top')
                 .tickFormat(
                     this.config.time_scale === 'Date'
-                        ? d3.time.format(this.config.date_format)
+                        ? d3.time.format(this.config.date_display_format)
                         : d3.format('1d')
                 )
                 .innerTickSize(this.xAxis.innerTickSize())
@@ -2148,30 +2092,215 @@
             );
     }
 
+    function addStriping() {
+        var context = this;
+        this.svg.selectAll('.ct-stripe').remove();
+        var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
+            d3
+                .select(this)
+                .select('text')
+                .attr('dy', context.y.rangeBand() / 2);
+            d3
+                .select(this)
+                .insert('rect', ':first-child')
+                .attr({
+                    id: d,
+                    x: -context.margin.left,
+                    y: -context.config.marks[0].attributes['stroke-width'],
+                    width: context.plot_width + context.margin.left,
+                    height:
+                        context.y.rangeBand() + context.config.marks[0].attributes['stroke-width']
+                })
+                .classed('ct-stripe', true);
+        });
+    }
+
     function tickClick() {
         var _this = this;
 
-        drawIDtimeline.call(this);
-        enableDisableControls.call(this);
-        updateIDfilter.call(this);
+        this.svg
+            .selectAll('.y.axis .tick')
+            .each(function(d) {
+                if (/^-g\d/.test(d)) d3.select(this).remove();
+            })
+            .on('click', function(d) {
+                _this.selected_id = d;
 
-        //Highlight ID dropdown.
-        this.controls.wrap
-            .selectAll('.control-group')
-            .filter(function(control) {
-                return control.value_col === _this.config.id_col;
+                drawIDtimeline.call(_this);
+                enableDisableControls.call(_this);
+                updateIDfilter.call(_this);
+
+                //Highlight ID dropdown.
+                _this.controls.wrap
+                    .selectAll('.control-group')
+                    .filter(function(control) {
+                        return control.value_col === _this.config.id_col;
+                    })
+                    .style({
+                        'font-weight': 'bold'
+                    })
+                    .transition()
+                    .delay(500)
+                    .style({
+                        'font-weight': 'normal'
+                    })
+                    .select('select')
+                    .node()
+                    .focus();
+            });
+    }
+
+    function horizontally() {
+        var _this = this;
+
+        this.groupings
+            .sort(function(a, b) {
+                return a.key < b.key ? -1 : 1;
             })
-            .style({
-                'font-weight': 'bold'
+            .forEach(function(d, i) {
+                if (d.IDs.length) {
+                    var nIDs = d.IDs.length,
+                        firstID = d.IDs[nIDs - 1],
+                        y1 = _this.y(firstID),
+                        y2 = _this.y(d.IDs[0]),
+                        g = _this.svg
+                            .append('g')
+                            .classed('grouping horizontal', true)
+                            .attr('id', d.key.replace(/ /g, '-')),
+                        annotation = g
+                            .append('text')
+                            .classed('annotation', true)
+                            .attr({
+                                x: 0,
+                                y: y1,
+                                dy: _this.y.rangeBand() * 1.25
+                            })
+                            .text(
+                                _this.config.groupings.filter(function(grouping) {
+                                    return grouping.value_col === _this.config.y.grouping;
+                                })[0].label +
+                                    ': ' +
+                                    d.key
+                            ),
+                        rule = g
+                            .append('line')
+                            .classed('boundary horizontal', true)
+                            .attr({
+                                x1: 0,
+                                y1: y1 + _this.y.rangeBand() / 4,
+                                x2: _this.plot_width,
+                                y2: y1 + _this.y.rangeBand() / 4
+                            });
+                }
+            });
+    }
+
+    function vertically() {
+        var _this = this;
+
+        this.groupings.forEach(function(d) {
+            if (d.IDs.length) {
+                var nIDs = d.IDs.length,
+                    firstID = d.IDs[nIDs - 1],
+                    y1 = _this.y(firstID),
+                    y2 = _this.y(d.IDs[0]),
+                    g = _this.svg
+                        .append('g')
+                        .classed('grouping vertical', true)
+                        .attr('id', d.key.replace(/ /g, '-')),
+                    topBoundary = g
+                        .append('line')
+                        .classed('boundary horizontal', true)
+                        .attr({
+                            x1: _this.plot_width,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y1 + 3 * _this.y.rangeBand() / 4,
+                            y2: y1 + 3 * _this.y.rangeBand() / 4
+                        }),
+                    span = g
+                        .append('line')
+                        .classed('boundary vertical', true)
+                        .attr({
+                            x1: _this.plot_width + _this.margin.right / 8,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y1 + 3 * _this.y.rangeBand() / 4,
+                            y2: y2 + _this.y.rangeBand()
+                        }),
+                    bottomBoundary = g
+                        .append('line')
+                        .classed('boundary horizontal', true)
+                        .attr({
+                            x1: _this.plot_width,
+                            x2: _this.plot_width + _this.margin.right / 8,
+                            y1: y2 + _this.y.rangeBand(),
+                            y2: y2 + _this.y.rangeBand()
+                        }),
+                    annotation = g
+                        .append('text')
+                        .classed('annotation', true)
+                        .attr({
+                            x: _this.plot_width,
+                            dx: 4 * _this.margin.right / 8,
+                            y: y1,
+                            dy: _this.y.rangeBand()
+                        })
+                        .text(
+                            _this.config.groupings.filter(function(grouping) {
+                                return grouping.value_col === _this.config.y.grouping;
+                            })[0].label +
+                                ': ' +
+                                d.key
+                        );
+            }
+        });
+    }
+
+    function annotateGrouping() {
+        if (this.config.y.grouping) {
+            this.svg.selectAll('.grouping').remove();
+
+            if (this.config.grouping_direction === 'horizontal') horizontally.call(this);
+            else if (this.config.grouping_direction === 'vertical') vertically.call(this);
+        }
+    }
+
+    function offsetCircles(mark, markData) {
+        var _this = this;
+
+        //Nest data by study day and filter on any nested object with more than one datum.
+        var overlapping = d3
+            .nest()
+            .key(function(d) {
+                return d.total + '|' + d.values.raw[0][_this.config.id_col];
             })
-            .transition()
-            .delay(500)
-            .style({
-                'font-weight': 'normal'
+            .rollup(function(d) {
+                return {
+                    n: d.length,
+                    keys: d.map(function(di) {
+                        return di.key;
+                    })
+                };
             })
-            .select('select')
-            .node()
-            .focus();
+            .entries(markData)
+            .filter(function(d) {
+                return d.values.n > 1;
+            });
+
+        //For each study day with more than one event...
+        overlapping.forEach(function(d) {
+            var x = d.key.split('|')[0],
+                // study day
+                y = d.key.split('|')[1]; // ID
+
+            //For each overlapping point...
+            d.values.keys.forEach(function(di, i) {
+                //Capture point via its class name and offset vertically.
+                var className = di + ' point',
+                    g = d3.select(document.getElementsByClassName(className)[0]),
+                    point = g.select('circle');
+                g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
+            });
+        });
     }
 
     function offsetLines(mark, markData) {
@@ -2322,171 +2451,157 @@
         });
     }
 
-    function offsetCircles(mark, markData) {
+    function offsetOverlappingMarks() {
         var _this = this;
 
-        //Nest data by study day and filter on any nested object with more than one datum.
-        var overlapping = d3
-            .nest()
-            .key(function(d) {
-                return d.total + '|' + d.values.raw[0][_this.config.id_col];
-            })
-            .rollup(function(d) {
-                return {
-                    n: d.length,
-                    keys: d.map(function(di) {
-                        return di.key;
-                    })
-                };
-            })
-            .entries(markData)
-            .filter(function(d) {
-                return d.values.n > 1;
-            });
-
-        //For each study day with more than one event...
-        overlapping.forEach(function(d) {
-            var x = d.key.split('|')[0],
-                // study day
-                y = d.key.split('|')[1]; // ID
-
-            //For each overlapping point...
-            d.values.keys.forEach(function(di, i) {
-                //Capture point via its class name and offset vertically.
-                var className = di + ' point',
-                    g = d3.select(document.getElementsByClassName(className)[0]),
-                    point = g.select('circle');
-                g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
-            });
-        });
-    }
-
-    function horizontally() {
-        var _this = this;
-
-        this.groupings.forEach(function(d) {
-            if (d.IDs.length) {
-                var nIDs = d.IDs.length,
-                    firstID = d.IDs[nIDs - 1],
-                    y1 = _this.y(firstID),
-                    y2 = _this.y(d.IDs[0]),
-                    g = _this.svg
-                        .append('g')
-                        .classed('grouping horizontal', true)
-                        .attr('id', d.key.replace(/ /g, '-')),
-                    annotation = g
-                        .append('text')
-                        .classed('annotation', true)
-                        .attr({
-                            x: 0,
-                            dx: -_this.margin.left,
-                            y: y1,
-                            dy: _this.y.rangeBand() * 1.75
-                        })
-                        .text(d.key);
+        this.config.marks.forEach(function(mark, i) {
+            var markData = _this.marks[i].data;
+            if (mark.type === 'line') {
+                //Identify marks which represent ongoing events.
+                if (_this.config.ongo_col)
+                    markData.forEach(function(d) {
+                        d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
+                    });
+                offsetLines.call(_this, mark, markData);
+            } else if (mark.type === 'circle') {
+                offsetCircles.call(_this, mark, markData);
             }
         });
-    }
-
-    function vertically() {
-        var _this = this;
-
-        this.groupings.forEach(function(d) {
-            if (d.IDs.length) {
-                var nIDs = d.IDs.length,
-                    firstID = d.IDs[nIDs - 1],
-                    y1 = _this.y(firstID),
-                    y2 = _this.y(d.IDs[0]),
-                    g = _this.svg
-                        .append('g')
-                        .classed('grouping vertical', true)
-                        .attr('id', d.key.replace(/ /g, '-')),
-                    topBoundary = g
-                        .append('line')
-                        .classed('boundary horizontal', true)
-                        .attr({
-                            x1: _this.plot_width,
-                            x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y1 + _this.y.rangeBand() / 4,
-                            y2: y1 + _this.y.rangeBand() / 4
-                        }),
-                    span = g
-                        .append('line')
-                        .classed('boundary vertical', true)
-                        .attr({
-                            x1: _this.plot_width + _this.margin.right / 8,
-                            x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y1 + _this.y.rangeBand() / 4,
-                            y2: y2 + 3 * _this.y.rangeBand() / 4
-                        }),
-                    bottomBoundary = g
-                        .append('line')
-                        .classed('boundary horizontal', true)
-                        .attr({
-                            x1: _this.plot_width,
-                            x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y2 + 3 * _this.y.rangeBand() / 4,
-                            y2: y2 + 3 * _this.y.rangeBand() / 4
-                        }),
-                    annotation = g
-                        .append('text')
-                        .classed('annotation', true)
-                        .attr({
-                            x: _this.plot_width,
-                            dx: 5 * _this.margin.right / 8,
-                            y: y1,
-                            dy: _this.y.rangeBand() / 2
-                        })
-                        .text(d.key);
-            }
-        });
-    }
-
-    function annotateGrouping() {
-        this.svg.selectAll('.grouping').remove();
-
-        if (this.config.grouping_direction === 'horizontal') horizontally.call(this);
-        else if (this.config.grouping_direction === 'vertical') vertically.call(this);
     }
 
     function drawOngoingMarks() {
         var _this = this;
 
+        if (this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
+            var context = this;
+
+            this.svg.selectAll('.ongoing-event').remove();
+            this.svg
+                .selectAll('.line-supergroup .line')
+                .filter(function(d) {
+                    return d.ongoing === _this.config.ongo_val;
+                })
+                .each(function(d) {
+                    var g = d3.select(this),
+                        endpoint = d.values[1],
+                        x = context.x(
+                            context.config.time_scale === 'Study Day'
+                                ? +endpoint.key
+                                : new Date(endpoint.key)
+                        ),
+                        y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
+                        color = context.colorScale(
+                            endpoint.values.raw[0][context.config.event_col]
+                        ),
+                        arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
+
+                    g
+                        .append('polygon')
+                        .datum(d)
+                        .classed('ongoing-event', true)
+                        .attr({
+                            points: arrow
+                                .map(function(coordinate) {
+                                    return coordinate.join(',');
+                                })
+                                .join(' '),
+                            fill: color,
+                            stroke: color
+                        });
+                });
+        }
+    }
+
+    function highlightMarks() {
+        var _this = this;
+
         var context = this;
 
-        this.svg.selectAll('.ongoing-event').remove();
-        this.svg
-            .selectAll('.line-supergroup .line')
-            .filter(function(d) {
-                return d.ongoing === _this.config.ongo_val;
-            })
-            .each(function(d) {
-                var g = d3.select(this),
-                    endpoint = d.values[1],
-                    x = context.x(
-                        context.config.time_scale === 'Study Day'
-                            ? +endpoint.key
-                            : new Date(endpoint.key)
-                    ),
-                    y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
-                    color = context.colorScale(endpoint.values.raw[0][context.config.event_col]),
-                    arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
+        this.svg.selectAll('.highlight-overlay').remove();
 
-                g
-                    .append('polygon')
-                    .datum(d)
-                    .classed('ongoing-event', true)
-                    .attr({
-                        'clip-path': 'url(#1)',
-                        points: arrow
-                            .map(function(coordinate) {
-                                return coordinate.join(',');
-                            })
-                            .join(' '),
-                        fill: color,
-                        stroke: color
-                    });
-            });
+        //Highlight legend.
+        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
+            return d.label === _this.config.event_highlighted;
+        });
+
+        //Highlight marks.
+        var highlightedMarks = this.svg
+                .selectAll('.wc-data-mark, .ongoing-event')
+                .classed('highlighted', function(d) {
+                    return d.key.indexOf(_this.config.event_highlighted) > -1;
+                })
+                .filter(function(d) {
+                    return d.key.indexOf(_this.config.event_highlighted) > -1;
+                }),
+            paths = highlightedMarks
+                .filter(function() {
+                    return (
+                        this.tagName === 'path' &&
+                        this.getAttribute('class').indexOf('highlighted') > -1
+                    );
+                })
+                .each(function(d, i) {
+                    var g = d3.select(this.parentNode),
+                        x1 = context.x(
+                            context.config.time_scale === 'Study Day'
+                                ? +d.values[0].key
+                                : new Date(d.values[0].key)
+                        ),
+                        x2 = context.x(
+                            context.config.time_scale === 'Study Day'
+                                ? +d.values[1].key
+                                : new Date(d.values[1].key)
+                        ),
+                        y =
+                            context.y(
+                                d.values[0].values.raw[0][
+                                    context.parent ? context.config.seq_col : context.config.id_col
+                                ]
+                            ) +
+                            context.y.rangeBand() / 2,
+                        color = context.config.event_highlight_color,
+                        line = g
+                            .append('line')
+                            .classed('highlight-overlay', true)
+                            .attr({
+                                x1: x1,
+                                x2: x2,
+                                y1: y,
+                                y2: y,
+                                stroke: color
+                            });
+
+                    if (d.ongoing === context.config.ongo_val) {
+                        var arrow = [[x2 + 7, y], [x2, y - 2.5], [x2, y + 2.5]],
+                            polygon = g
+                                .append('polygon')
+                                .datum(d)
+                                .classed('highlighted ongoing-event', true)
+                                .attr({
+                                    points: arrow
+                                        .map(function(coordinate) {
+                                            return coordinate.join(',');
+                                        })
+                                        .join(' '),
+                                    fill: color
+                                });
+                    }
+                }),
+            circles = highlightedMarks
+                .filter(function() {
+                    return (
+                        this.tagName === 'circle' &&
+                        this.getAttribute('class').indexOf('highlighted') > -1
+                    );
+                })
+                .attr({
+                    stroke: function stroke(d) {
+                        return _this.colorScale(d.values.raw[0][_this.config.event_col]);
+                    },
+                    fill: function fill(d) {
+                        return _this.config.event_highlight_color;
+                    }
+                });
     }
 
     function drawReferenceLines() {
@@ -2548,118 +2663,161 @@
                         height: dimensions.height + 10
                     });
 
-            //Display reference line label on hover.
-            invisibleReferenceLine
-                .on('mouseover', function() {
-                    visibleReferenceLine.classed('hover', true);
-                    referenceLineLabel.classed('hidden', false);
-                    referenceLineLabelBox.classed('hidden', false);
-                    _this.svg.node().appendChild(referenceLineLabelBox.node());
-                    _this.svg.node().appendChild(referenceLineLabel.node());
+            //Append reference line for each item in config.reference_lines.
+            this.config.reference_lines
+                .filter(function(reference_line) {
+                    return reference_line.time_scale === _this.config.time_scale;
                 })
-                .on('mouseout', function() {
-                    visibleReferenceLine.classed('hover', false);
+                .forEach(function(reference_line, i) {
+                    var referenceLineGroup = referenceLinesGroup
+                            .append('g')
+                            .classed('reference-line', true)
+                            .attr('id', 'reference-line-' + i),
+                        timepoint =
+                            _this.config.time_scale === 'Study Day'
+                                ? +reference_line.timepoint
+                                : d3.time
+                                      .format(_this.config.date_format)
+                                      .parse(reference_line.timepoint),
+                        visibleReferenceLine = referenceLineGroup
+                            .append('line')
+                            .classed('visible-reference-line', true)
+                            .attr({
+                                x1: _this.x(timepoint),
+                                x2: _this.x(timepoint),
+                                y1: 0,
+                                y2: _this.plot_height
+                            }),
+                        invisibleReferenceLine = referenceLineGroup
+                            .append('line')
+                            .classed('invisible-reference-line', true)
+                            .attr({
+                                x1: _this.x(timepoint),
+                                x2: _this.x(timepoint),
+                                y1: 0,
+                                y2: _this.plot_height
+                            }),
+                        // invisible reference line has no dasharray and is much thicker to make hovering easier
+                        direction =
+                            timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2 ? 'right' : 'left',
+                        referenceLineLabel = referenceLineGroup
+                            .append('text')
+                            .classed('reference-line-label', true)
+                            .attr({
+                                x: _this.x(timepoint),
+                                y: 0,
+                                'text-anchor': direction === 'right' ? 'beginning' : 'end',
+                                dx: direction === 'right' ? 15 : -15,
+                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                            })
+                            .text(reference_line.label),
+                        dimensions = referenceLineLabel.node().getBBox(),
+                        referenceLineLabelBox = referenceLineGroup
+                            .insert('rect', '.reference-line-label')
+                            .classed('reference-line-label-box', true)
+                            .attr({
+                                x: dimensions.x - 10,
+                                y: dimensions.y - 5,
+                                width: dimensions.width + 20,
+                                height: dimensions.height + 10
+                            });
+
+                    //Display reference line label on hover.
+                    invisibleReferenceLine
+                        .on('mouseover', function() {
+                            visibleReferenceLine.classed('hover', true);
+                            referenceLineLabel.classed('hidden', false);
+                            referenceLineLabelBox.classed('hidden', false);
+                            _this.svg.node().appendChild(referenceLineLabelBox.node());
+                            _this.svg.node().appendChild(referenceLineLabel.node());
+                        })
+                        .on('mouseout', function() {
+                            visibleReferenceLine.classed('hover', false);
+                            referenceLineLabel.classed('hidden', true);
+                            referenceLineLabelBox.classed('hidden', true);
+                            referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
+                            referenceLineGroup.node().appendChild(referenceLineLabel.node());
+                        });
+
+                    //Hide reference labels initially.
                     referenceLineLabel.classed('hidden', true);
                     referenceLineLabelBox.classed('hidden', true);
-                    referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
-                    referenceLineGroup.node().appendChild(referenceLineLabel.node());
                 });
+        }
+    }
 
-            //Hide reference labels initially.
-            referenceLineLabel.classed('hidden', true);
-            referenceLineLabelBox.classed('hidden', true);
-        });
+    function offsetBottomXaxis() {
+        var bottomXaxis = this.svg.select('.x.axis'),
+            bottomXaxisTitle = bottomXaxis.select('.axis-title');
+        bottomXaxis.attr(
+            'transform',
+            'translate(0,' +
+                (+bottomXaxis
+                    .attr('transform')
+                    .split(',')[1]
+                    .split(')')[0] +
+                    this.y.rangeBand()) +
+                ')'
+        );
+        bottomXaxisTitle.attr(
+            'transform',
+            'translate(\n            ' +
+                +bottomXaxisTitle
+                    .attr('transform')
+                    .split(',')[0]
+                    .split('(')[1] +
+                ',\n            ' +
+                (+bottomXaxisTitle
+                    .attr('transform')
+                    .split(',')[1]
+                    .split(')')[0] -
+                    7 * this.margin.bottom / 16) +
+                ')'
+        );
+    }
+
+    function IEsucks() {
+        if (!!document.documentMode)
+            this.svg.selectAll('.line,.point').each(function(d) {
+                var mark = select(this),
+                    tooltip = mark.select('title'),
+                    text = tooltip.text().split('\n');
+                tooltip.text(text.join('--|--'));
+            });
     }
 
     function onResize() {
-        var _this = this;
-
         legendFilter.call(this);
 
         //Draw second x-axis at top of chart.
         drawTopXaxis.call(this);
 
-        //Offset overlapping marks.
-        this.config.marks.forEach(function(mark, i) {
-            var markData = _this.marks[i].data;
-            if (mark.type === 'line') {
-                //Identify marks which represent ongoing events.
-                if (_this.config.ongo_col)
-                    markData.forEach(function(d) {
-                        d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
-                    });
-                offsetLines.call(_this, mark, markData);
-            } else if (mark.type === 'circle') {
-                offsetCircles.call(_this, mark, markData);
-            }
-        });
-
-        //Draw ongoing marks.
-        if (this.config.ongo_col) drawOngoingMarks.call(this);
-
-        //Highlight events.
-        highlightMarks.call(this);
+        //Distinguish each timeline with striping.
+        addStriping.call(this);
 
         //Draw second chart when y-axis tick label is clicked.
-        this.svg
-            .selectAll('.y.axis .tick')
-            .each(function(d) {
-                if (/^-/.test(d)) d3.select(this).remove();
-            })
-            .on('click', function(d) {
-                _this.selected_id = d;
-                tickClick.call(_this);
-            });
+        tickClick.call(this);
 
         //Annotate grouping.
-        if (this.config.y.grouping) annotateGrouping.call(this);
+        annotateGrouping.call(this);
+
+        //Offset overlapping marks.
+        offsetOverlappingMarks.call(this);
+
+        //Draw ongoing marks.
+        drawOngoingMarks.call(this);
+
+        //Highlight marks.
+        highlightMarks.call(this);
 
         //Draw reference lines.
-        if (this.config.reference_lines) drawReferenceLines.call(this);
+        drawReferenceLines.call(this);
 
         //Offset bottom x-axis to prevent overlap with final ID.
-        var bottomXaxis = this.svg.select('.x.axis'),
-            bottomXaxisTransform = bottomXaxis.attr('transform'),
-            bottomXaxisTransformX =
-                bottomXaxisTransform.indexOf(',') > -1
-                    ? +bottomXaxisTransform.split(',')[0].split('(')[1]
-                    : +bottomXaxisTransform.split(' ')[0].split('(')[1],
-            bottomXaxisTransformY =
-                bottomXaxisTransform.indexOf(',') > -1
-                    ? +bottomXaxisTransform.split(',')[1].split(')')[0]
-                    : +bottomXaxisTransform.split(' ')[1].split(')')[0],
-            bottomXaxisTitle = bottomXaxis.select('.axis-title'),
-            bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
-            bottomXaxisTitleTransformX =
-                bottomXaxisTitleTransform.indexOf(',') > -1
-                    ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
-                    : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
-            bottomXaxisTitleTransformY =
-                bottomXaxisTitleTransform.indexOf(',') > -1
-                    ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
-                    : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
-        bottomXaxis.attr(
-            'transform',
-            'translate(0,' + (bottomXaxisTransformY + this.y.rangeBand()) + ')'
-        );
-        bottomXaxisTitle.attr(
-            'transform',
-            'translate(' +
-                bottomXaxisTitleTransformX +
-                ',' +
-                (bottomXaxisTitleTransformY - 7 * this.margin.bottom / 16) +
-                ')'
-        );
+        offsetBottomXaxis.call(this);
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
-        if (!!document.documentMode)
-            this.svg.selectAll('.line,.point').each(function(d) {
-                console.log(d);
-                var mark = d3.select(this),
-                    tooltip = mark.select('title'),
-                    text = tooltip.text().split('\n');
-                tooltip.text(text.join('--|--'));
-            });
+        IEsucks.call(this);
     }
 
     function onDestroy() {}
@@ -2748,14 +2906,12 @@
     function onResize$1() {
         var _this = this;
 
-        var context = this;
-
-        //Hide legend.
         this.wrap.select('.legend').classed('hidden', true);
 
         //Draw ongoing marks.
         this.config.marks.forEach(function(mark, i) {
             var markData = _this.marks[i].data;
+
             //Identify marks which represent ongoing events.
             if (mark.type === 'line') {
                 markData.forEach(function(d) {
@@ -2769,48 +2925,10 @@
         drawTimeRange.call(this);
 
         //Draw reference lines.
-        if (this.config.reference_lines) drawReferenceLines.call(this);
+        drawReferenceLines.call(this);
 
-        //Highlight marks.
-        this.svg.selectAll('.highlight-overlay').remove();
-        this.svg
-            .selectAll('.wc-data-mark, .ongoing-event')
-            .classed('highlighted', function(d) {
-                return d.key.indexOf(_this.parent.config.event_highlighted) > -1;
-            })
-            .filter(function() {
-                return (
-                    this.tagName === 'path' &&
-                    this.getAttribute('class').indexOf('highlighted') > -1
-                );
-            })
-            .each(function(d) {
-                var g = d3.select(this.parentNode),
-                    line = g
-                        .append('line')
-                        .classed('highlight-overlay', true)
-                        .attr({
-                            x1: context.x(
-                                context.config.time_scale === 'Study Day'
-                                    ? +d.values[0].key
-                                    : new Date(d.values[0].key)
-                            ),
-                            x2: context.x(
-                                context.config.time_scale === 'Study Day'
-                                    ? +d.values[1].key
-                                    : new Date(d.values[1].key)
-                            ),
-                            y1:
-                                context.y(d.values[0].values.raw[0][context.config.seq_col]) +
-                                context.y.rangeBand() / 2,
-                            y2:
-                                context.y(d.values[0].values.raw[0][context.config.seq_col]) +
-                                context.y.rangeBand() / 2,
-                            stroke: context.colorScale(
-                                d.values[0].values.raw[0][context.config.event_col]
-                            )
-                        });
-            });
+        //Highlight events.
+        highlightMarks.call(this);
     }
 
     function onDestroy$1() {}

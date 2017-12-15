@@ -5,7 +5,7 @@ export default function defineGroupingData() {
     //Capture each grouping and corresponding array of IDs.
     this.groupings = set(this.longDataInsideTimeRange.map(d => d[this.config.y.grouping]))
         .values()
-        .map(d => {
+        .map((d, i) => {
             const groupingObject = {
                 key: d,
                 IDs: []
@@ -46,34 +46,16 @@ export default function defineGroupingData() {
                     groupingEnd1 = clone(groupingEnd),
                     groupingEnd2 = clone(groupingEnd);
 
-                //First placeholder row
-                groupingStart1[this.config.id_col] = '--' + d;
+                //Placeholder row in which to print grouping.
+                groupingStart1[this.config.id_col] = '-g' + i + 'a';
                 this.raw_data.push(groupingStart1);
                 this.longDataInsideTimeRange.push(groupingStart1);
 
-                groupingEnd1[this.config.id_col] = '--' + d;
+                groupingEnd1[this.config.id_col] = '-g' + i + 'a';
                 this.raw_data.push(groupingEnd1);
                 this.longDataInsideTimeRange.push(groupingEnd1);
-
-                //Second placeholder row
-                groupingStart2[this.config.id_col] = '-' + d;
-                this.raw_data.push(groupingStart2);
-                this.longDataInsideTimeRange.push(groupingStart2);
-
-                groupingEnd2[this.config.id_col] = '-' + d;
-                this.raw_data.push(groupingEnd2);
-                this.longDataInsideTimeRange.push(groupingEnd2);
             }
 
             return groupingObject;
         });
-
-    //range_band hack
-    if (this.config.grouping_direction === 'horizontal')
-        this.config.range_band =
-            this.initialSettings.range_band +
-            this.groupings.length *
-                2 /
-                set(this.wideDataInsideTimeRange.map(d => d[this.config.id_col])).values().length *
-                this.initialSettings.range_band;
 }

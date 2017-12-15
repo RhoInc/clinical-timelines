@@ -51,10 +51,10 @@ export default function onResize() {
         });
 
     //Annotate grouping.
-    if (this.config.y.grouping) annotateGrouping.call(this);
+    annotateGrouping.call(this);
 
     //Draw reference lines.
-    if (this.config.reference_lines) drawReferenceLines.call(this);
+    drawReferenceLines.call(this);
 
     //Offset bottom x-axis to prevent overlap with final ID.
     const bottomXaxis = this.svg.select('.x.axis'),

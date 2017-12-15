@@ -5,6 +5,10 @@ export default function defineStyles() {
           Global styles
         \--------------------------------------------------------------------------------------***/
 
+            '#clinical-timelines {' +
+                '    display: inline-block;' +
+                '    width: 100%;' +
+                '}',
             '#clinical-timelines .hidden {' +
                 '    display: none !important;' +
                 '}',
@@ -26,7 +30,7 @@ export default function defineStyles() {
 
             '#clinical-timelines > * {' +
                 '    display: inline-block;' +
-                '    padding: .5%;' +
+                '    padding: 10px;' +
                 '}',
             '#clinical-timelines > #left-side {' +
                 '    width: 22%;' +
@@ -38,7 +42,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > * > * {' +
                 '    width: 100%;' +
-                '    padding: 1%;' +
+                '    padding: 10px;' +
                 '    vertical-align: top;' +
                 '    border: 1px solid #eee;' +
                 '    display: inline-block;' +
@@ -197,20 +201,20 @@ export default function defineStyles() {
             '#clinical-timelines .wc-chart .wc-svg title {' +
                 '    white-space: pre;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 2px;' +
                 '    stroke-dasharray: 2,2;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line.hover {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
                 '    stroke-dasharray: none;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .invisible-reference-line {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .invisible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 20px;' +
                 '    stroke-opacity: 0;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .reference-line-label-box {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
                 '    fill: white;' +
                 '    stroke: black;' +
                 '    stroke-width: black;' +

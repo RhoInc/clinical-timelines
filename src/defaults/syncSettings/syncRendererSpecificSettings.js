@@ -56,8 +56,8 @@ export default function syncRendererSpecificSettings(settings) {
 
                 //either an integer or not
                 referenceLineObject.time_scale = Number.isInteger(+referenceLineObject.timepoint)
-                    ? 'Study Day'
-                    : 'Date';
+                    ? 'day'
+                    : 'date';
 
                 //label predefined or not
                 referenceLineObject.label = reference_line.label
@@ -68,9 +68,9 @@ export default function syncRendererSpecificSettings(settings) {
             })
             .filter(
                 reference_line =>
-                    (reference_line.time_scale === 'Study Day' &&
+                    (reference_line.time_scale === 'day' &&
                         Number.isInteger(reference_line.timepoint)) ||
-                    (reference_line.time_scale === 'Date' &&
+                    (reference_line.time_scale === 'date' &&
                         time.format(settings.date_format).parse(reference_line.timepoint) instanceof
                             Date)
             );

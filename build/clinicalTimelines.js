@@ -2403,7 +2403,6 @@
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         if (!!document.documentMode)
             this.svg.selectAll('.line,.point').each(function(d) {
-                console.log(d);
                 var mark = d3.select(this),
                     tooltip = mark.select('title'),
                     text = tooltip.text().split('\n');

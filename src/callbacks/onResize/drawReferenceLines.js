@@ -1,9 +1,9 @@
 import { time } from 'd3';
 
 export default function drawReferenceLines() {
-    const context = this;
-
     if (this.config.reference_lines) {
+        const context = this;
+
         //Add group for reference lines.
         this.svg.select('.reference-lines').remove();
         const referenceLinesGroup = this.svg

@@ -3,7 +3,7 @@ import '../../util/number-isinteger';
 import { time } from 'd3';
 
 export default function syncRendererSpecificSettings(settings) {
-    //ID
+    //ID settings
     settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
     settings.id_unitPropCased =
         settings.id_unit.substring(0, 1).toUpperCase() +
@@ -19,11 +19,11 @@ export default function syncRendererSpecificSettings(settings) {
         settings.id_characteristics
     );
 
-    //Events
+    //Event settings
     if (!(settings.event_types instanceof Array && settings.event_types.length))
         delete settings.event_types;
 
-    //Filters
+    //Filter settings
     const defaultFilters = [
         { value_col: settings.id_col, label: settings.id_unitPropCased },
         { value_col: settings.event_col, label: 'Event Type' }
@@ -32,13 +32,16 @@ export default function syncRendererSpecificSettings(settings) {
         defaultFilters.splice(2, 0, { value_col: settings.ongo_col, label: 'Ongoing?' });
     settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
-    //Groupings
+    //Grouping settings
     const defaultGroupings = [];
     settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
     if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
         settings.grouping_direction = 'horizontal';
 
-    //Reference lines
+    //Time settings
+    settings.date_display_format = settings.date_display_format || settings.date_format;
+
+    //Reference line settings
     if (settings.reference_lines) {
         if (!(settings.reference_lines instanceof Array))
             settings.reference_lines = [settings.reference_lines];
@@ -75,7 +78,7 @@ export default function syncRendererSpecificSettings(settings) {
         if (!settings.reference_lines.length) delete settings.reference_lines;
     }
 
-    //Details
+    //Detail settings
     const defaultDetails =
         settings.time_scale === 'Study Day'
             ? [

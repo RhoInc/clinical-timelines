@@ -13,6 +13,7 @@ export default {
         event_col: 'DOMAIN',
         event_types: null,
         event_highlighted: null,
+        event_highlight_color: 'black',
 
       //Filter settings
         filters: null,
@@ -35,6 +36,7 @@ export default {
             endt_col: 'ENDT',
             date_range: null,
             date_format: '%Y-%m-%d',
+            date_display_format: '%b %y', // sync in syncSettings()
 
       //Miscellaneous settings
         seq_col: 'SEQ',
@@ -71,21 +73,15 @@ export default {
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
-                    'clip-path': 'url(#1)',
                     'stroke-width': 4,
-                    'stroke-opacity': 1
                 }
             },
             {
                 type: 'circle',
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
-                radius: '3',
+                radius: 4,
                 attributes: {
-                    'clip-path': 'url(#1)',
-                    fill: 'white',
-                    'fill-opacity': 1,
-                    'stroke-opacity': 1,
                     'stroke-width': 2
                 }
             }
@@ -109,7 +105,7 @@ export default {
             mark: 'circle'
         },
         gridlines: 'y',
-        range_band: 24,
+        range_band: 30,
         margin: { top: 50 }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
 };

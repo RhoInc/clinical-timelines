@@ -940,6 +940,33 @@
     function defineData() {
         var _this = this;
 
+        //Remove records with insufficient data (this.wide_data should only be defined on initialization).
+        if (!this.hasOwnProperty('wide_data'))
+            this.wide_data = this.raw_data.filter(
+                function(d) {
+                    return (
+                        !(
+                            d.hasOwnProperty(_this.config.stdy_col) &&
+                            d[_this.config.stdy_col] === ''
+                        ) &&
+                        !(
+                            d.hasOwnProperty(_this.config.endy_col) &&
+                            d[_this.config.endy_col] === ''
+                        ) &&
+                        !(
+                            d.hasOwnProperty(_this.config.stdt_col) &&
+                            d[_this.config.stdt_col] === ''
+                        ) &&
+                        !(
+                            d.hasOwnProperty(_this.config.endt_col) &&
+                            d[_this.config.endt_col] === ''
+                        ) &&
+                        !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
+                        !/^\s*$/.test(d[_this.config.event_col])
+                    );
+                } // remove records with missing [event_col]
+            );
+
         //Warn user of removed records.
         if (this.wide_data.length < this.raw_data.length) {
             console.warn(

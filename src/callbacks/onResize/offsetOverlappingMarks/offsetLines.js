@@ -117,6 +117,11 @@ export default function offsetLines(mark, markData) {
                             +mark.attributes['stroke-width'] *
                             1.5})`
                     );
+                } else {
+                    //Capture line via its class name and offset vertically.
+                    const className = `${currentLine.key} line`,
+                        g = select(document.getElementsByClassName(className)[0]);
+                    g.attr('transform', 'translate(0,0)');
                 }
             });
         }

@@ -2607,61 +2607,11 @@
     function drawReferenceLines() {
         var _this = this;
 
-        this.svg.select('.reference-lines').remove();
-        var referenceLinesGroup = this.svg
-            .insert('g', '.line-supergroup')
-            .classed('reference-lines', true);
-
-        //Append reference line for each item in config.reference_lines.
-        this.config.reference_lines.forEach(function(reference_line, i) {
-            var referenceLineGroup = referenceLinesGroup
-                    .append('g')
-                    .classed('reference-line', true)
-                    .attr('id', 'reference-line-' + i),
-                visibleReferenceLine = referenceLineGroup
-                    .append('line')
-                    .classed('visible-reference-line', true)
-                    .attr({
-                        x1: _this.x(reference_line.timepoint),
-                        x2: _this.x(reference_line.timepoint),
-                        y1: 0,
-                        y2: _this.plot_height
-                    }),
-                invisibleReferenceLine = referenceLineGroup
-                    .append('line')
-                    .classed('invisible-reference-line', true)
-                    .attr({
-                        x1: _this.x(reference_line.timepoint),
-                        x2: _this.x(reference_line.timepoint),
-                        y1: 0,
-                        y2: _this.plot_height
-                    }),
-                // invisible reference line has no dasharray and is much thicker to make hovering easier
-                direction =
-                    reference_line.timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2
-                        ? 'right'
-                        : 'left',
-                referenceLineLabel = referenceLineGroup
-                    .append('text')
-                    .classed('reference-line-label', true)
-                    .attr({
-                        x: _this.x(reference_line.timepoint),
-                        y: 0,
-                        'text-anchor': direction === 'right' ? 'beginning' : 'end',
-                        dx: direction === 'right' ? 15 : -15,
-                        dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
-                    })
-                    .text(reference_line.label),
-                dimensions = referenceLineLabel.node().getBBox(),
-                referenceLineLabelBox = referenceLineGroup
-                    .insert('rect', '.reference-line-label')
-                    .classed('reference-line-label-box', true)
-                    .attr({
-                        x: dimensions.x - 10,
-                        y: dimensions.y - 5,
-                        width: dimensions.width + 20,
-                        height: dimensions.height + 10
-                    });
+        if (this.config.reference_lines) {
+            this.svg.select('.reference-lines').remove();
+            var referenceLinesGroup = this.svg
+                .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+                .classed('reference-lines', true);
 
             //Append reference line for each item in config.reference_lines.
             this.config.reference_lines

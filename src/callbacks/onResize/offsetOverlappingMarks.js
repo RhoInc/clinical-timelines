@@ -1,7 +1,7 @@
-import offsetLines from './offsetMarks/offsetLines';
-import offsetCircles from './offsetMarks/offsetCircles';
+import offsetCircles from './offsetOverlappingMarks/offsetCircles';
+import offsetLines from './offsetOverlappingMarks/offsetLines';
 
-export default function offsetMarks() {
+export default function offsetOverlappingMarks() {
     this.config.marks.forEach((mark, i) => {
         const markData = this.marks[i].data;
         if (mark.type === 'line') {

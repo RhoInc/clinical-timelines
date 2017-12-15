@@ -1,7 +1,7 @@
 import { nest, select } from 'd3';
 
 export default function offsetCircles(mark, markData) {
-    //Nest data by timepoint and filter on any nested object with more than one datum.
+    //Nest data by study day and filter on any nested object with more than one datum.
     const overlapping = nest()
         .key(d => d.total + '|' + d.values.raw[0][this.config.id_col])
         .rollup(d => {
@@ -13,9 +13,9 @@ export default function offsetCircles(mark, markData) {
         .entries(markData)
         .filter(d => d.values.n > 1);
 
-    //For each timepoint with more than one event...
+    //For each study day with more than one event...
     overlapping.forEach(d => {
-        const x = d.key.split('|')[0], // timepoint
+        const x = d.key.split('|')[0], // study day
             y = d.key.split('|')[1]; // ID
 
         //For each overlapping point...

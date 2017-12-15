@@ -7,7 +7,7 @@ export default function tickClick() {
     this.svg
         .selectAll('.y.axis .tick')
         .each(function(d) {
-            if (/^-/.test(d)) select(this).remove();
+            if (/^-g\d+-/.test(d)) select(this).remove();
         })
         .on('click', d => {
             this.selected_id = d;

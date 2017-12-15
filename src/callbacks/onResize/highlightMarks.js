@@ -22,25 +22,34 @@ export default function highlightMarks() {
                     this.getAttribute('class').indexOf('highlighted') > -1
                 );
             })
-            .each(function(d) {
+            .each(function(d, i) {
                 const g = select(this.parentNode),
+                    x1 = context.x(context.config.time_function(d.values[0].key)),
+                    x2 = context.x(context.config.time_function(d.values[1].key)),
+                    y = context.y(d.values[0].values.raw[0][context.config.id_col]) + context.y.rangeBand() / 2,
+                    color = context.config.event_highlight_color,
                     line = g
                         .append('line')
                         .classed('highlight-overlay', true)
                         .attr({
-                            'clip-path': 'url(#1)',
-                            x1: context.x(context.config.time_function(d.values[0].key)),
-                            x2: context.x(context.config.time_function(d.values[1].key)),
-                            y1:
-                                context.y(d.values[0].values.raw[0][context.config.id_col]) +
-                                context.y.rangeBand() / 2,
-                            y2:
-                                context.y(d.values[0].values.raw[0][context.config.id_col]) +
-                                context.y.rangeBand() / 2,
-                            stroke: context.colorScale(
-                                d.values[0].values.raw[0][context.config.event_col]
-                            )
+                            x1: x1,
+                            x2: x2,
+                            y1: y,
+                            y2: y,
+                            stroke: color
                         });
+
+                if (d.ongoing === context.config.ongo_val) {
+                    const arrow = [[x2 + 7, y], [x2, y - 2.5], [x2, y + 2.5]],
+                        polygon = g
+                            .append('polygon')
+                            .datum(d)
+                            .classed('highlighted ongoing-event', true)
+                            .attr({
+                                points: arrow.map(coordinate => coordinate.join(',')).join(' '),
+                                fill: color
+                            });
+                }
             }),
         circles = highlightedMarks
             .filter(function() {
@@ -49,5 +58,8 @@ export default function highlightMarks() {
                     this.getAttribute('class').indexOf('highlighted') > -1
                 );
             })
-            .attr('fill', d => this.colorScale(d.values.raw[0][this.config.event_col]));
+            .attr({
+                stroke: d => this.colorScale(d.values.raw[0][this.config.event_col]),
+                fill: d => this.config.event_highlight_color
+            });
 }

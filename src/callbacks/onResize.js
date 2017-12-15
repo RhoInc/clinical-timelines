@@ -2,7 +2,8 @@ import legendFilter from './onResize/legendFilter';
 import drawTopXaxis from './onResize/drawTopXaxis';
 import tickClick from './onResize/tickClick';
 import annotateGrouping from './onResize/annotateGrouping';
-import offsetMarks from './onResize/offsetMarks';
+import addStriping from './onResize/addStriping';
+import offsetOverlappingMarks from './onResize/offsetOverlappingMarks';
 import highlightMarks from './onResize/highlightMarks';
 import drawOngoingMarks from './onResize/drawOngoingMarks';
 import offsetBottomXaxis from './onResize/offsetBottomXaxis';
@@ -24,10 +25,16 @@ export default function onResize() {
     //Annotate grouping.
     annotateGrouping.call(this);
 
-    //Offset overlapping marks.
-    offsetMarks.call(this);
+    //Distinguish each timeline with striping.
+    addStriping.call(this);
 
-    //Highlight events.
+    //Offset overlapping marks.
+    offsetOverlappingMarks.call(this);
+
+    //Draw ongoing marks.
+    drawOngoingMarks.call(this);
+
+    //Highlight marks.
     highlightMarks.call(this);
 
     //Draw ongoing marks.

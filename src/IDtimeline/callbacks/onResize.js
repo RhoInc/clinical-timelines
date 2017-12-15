@@ -1,4 +1,5 @@
 import drawOngoingMarks from '../../callbacks/onResize/drawOngoingMarks';
+import drawTimeRange from './onResize/drawTimeRange';
 import drawReferenceLines from '../../callbacks/onResize/drawReferenceLines';
 import highlightMarks from '../../callbacks/onResize/highlightMarks';
 
@@ -20,6 +21,9 @@ export default function onResize() {
         }
     });
     drawOngoingMarks.call(this);
+
+    //Annotate time range.
+    drawTimeRange.call(this);
 
     //Draw reference lines.
     drawReferenceLines.call(this);

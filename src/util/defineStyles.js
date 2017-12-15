@@ -44,7 +44,6 @@ export default function defineStyles() {
                 '    width: 100%;' +
                 '    padding: 10px;' +
                 '    vertical-align: top;' +
-                '    border: 1px solid #eee;' +
                 '    display: inline-block;' +
                 '    margin-bottom: 10px;' +
                 '}',
@@ -54,6 +53,8 @@ export default function defineStyles() {
         \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines > #left-side > * {' +
+                '    border: 1px solid #eee;' +
+                '    padding: 10px;' +
                 '}',
 
           //Annotations
@@ -270,6 +271,9 @@ export default function defineStyles() {
                 '    font-weight: normal;' +
                 '    padding-left: 10px;' +
                 '    width: 24%;' +
+                '}',
+            '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-svg .time-range {' +
+                '    opacity: .1;' +
                 '}',
 
           //Listing

@@ -42,7 +42,6 @@
                     '    width: 100%;' +
                     '    padding: 10px;' +
                     '    vertical-align: top;' +
-                    '    border: 1px solid #eee;' +
                     '    display: inline-block;' +
                     '    margin-bottom: 10px;' +
                     '}',
@@ -51,7 +50,10 @@
       Left side container elements
     \--------------------------------------------------------------------------------------***/
 
-                '#clinical-timelines > #left-side > * {' + '}',
+                '#clinical-timelines > #left-side > * {' +
+                    '    border: 1px solid #eee;' +
+                    '    padding: 10px;' +
+                    '}',
 
                 //Annotations
                 '#clinical-timelines > #left-side > .annotation {' +
@@ -262,6 +264,9 @@
                     '    font-weight: normal;' +
                     '    padding-left: 10px;' +
                     '    width: 24%;' +
+                    '}',
+                '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-svg .time-range {' +
+                    '    opacity: .1;' +
                     '}',
 
                 //Listing
@@ -941,7 +946,7 @@
         var _this = this;
 
         //Remove records with insufficient data (this.wide_data should only be defined on initialization).
-        if (!this.hasOwnProperty('wide_data'))
+        if (!this.hasOwnProperty('wide_data')) {
             this.wide_data = this.raw_data.filter(
                 function(d) {
                     return (
@@ -967,15 +972,16 @@
                 } // remove records with missing [event_col]
             );
 
-        //Warn user of removed records.
-        if (this.wide_data.length < this.raw_data.length) {
-            console.warn(
-                this.raw_data.length -
-                    this.wide_data.length +
-                    ' records have been removed due to invalid data.\nPossible issues include\n  - missing or invalid study day variable values\n  - missing or invalid date variable values\n  - date variable values that do not match settings.date_format (' +
-                    this.config.date_format +
-                    ')\n$  - missing identifiers or event types'
-            );
+            //Warn user of removed records.
+            if (this.wide_data.length < this.raw_data.length) {
+                console.warn(
+                    this.raw_data.length -
+                        this.wide_data.length +
+                        ' records have been removed due to invalid data.\nPossible issues include\n  - missing or invalid study day variable values\n  - missing or invalid date variable values\n  - date variable values that do not match settings.date_format (' +
+                        this.config.date_format +
+                        ')\n$  - missing identifiers or event types'
+                );
+            }
         }
 
         //Separate out timepoints and time intervals.
@@ -2798,6 +2804,60 @@
         this.raw_width = newWidth;
     }
 
+    function drawTimeRange() {
+        var _this = this;
+
+        this.svg.select('.time-range').remove();
+        var x_dom = this.x_dom.map(function(x) {
+                return x instanceof Date ? x.getTime() : x;
+            }),
+            timeRange =
+                this.parent.clinicalTimelines.config.time_scale === 'Study Day'
+                    ? this.parent.clinicalTimelines.config.study_day_range
+                    : this.parent.clinicalTimelines.config.date_range.map(function(dt) {
+                          return dt.getTime();
+                      }),
+            timeRangeText =
+                this.config.time_scale === 'Study Day'
+                    ? this.parent.clinicalTimelines.config.study_day_range.map(function(dy) {
+                          return dy.toString();
+                      })
+                    : this.parent.clinicalTimelines.config.date_range.map(function(dt) {
+                          return d3.time.format(
+                              _this.parent.clinicalTimelines.config.date_format
+                          )(dt);
+                      }); // update to date_display_format at some point
+
+        if (
+            (x_dom[0] !== timeRange[0] || x_dom[1] !== timeRange[1]) &&
+            ((timeRange[0] >= x_dom[0] && timeRange[0] <= x_dom[1]) || // left side of time range overlaps x-domain
+            (timeRange[1] >= x_dom[0] && timeRange[1] <= x_dom[1]) || // right side of time range overlaps x-domain
+                (timeRange[0] <= x_dom[0] && timeRange[1] >= x_dom[1])) // time range fully encompassed x-domain
+        ) {
+            var timeRangeGroup = this.svg
+                    .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+                    .classed('time-range', true),
+                x = this.x(Math.max(timeRange[0], x_dom[0])),
+                width = Math.min(this.x(timeRange[1]) - x, this.plot_width - x),
+                timeRangeRect = timeRangeGroup
+                    .append('rect')
+                    .classed('time-range-rect', true)
+                    .attr({
+                        x: x,
+                        y: 0,
+                        width: width,
+                        height: this.plot_height
+                    }),
+                timeRangeTooltip = timeRangeGroup
+                    .append('title')
+                    .text(
+                        this.parent.clinicalTimelines.config.time_scale +
+                            ' Range: ' +
+                            timeRangeText.join(' - ')
+                    );
+        }
+    }
+
     function onResize$1() {
         var _this = this;
 
@@ -2815,6 +2875,9 @@
             }
         });
         drawOngoingMarks.call(this);
+
+        //Annotate time range.
+        drawTimeRange.call(this);
 
         //Draw reference lines.
         drawReferenceLines.call(this);

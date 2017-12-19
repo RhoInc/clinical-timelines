@@ -24,12 +24,7 @@ export default {
         grouping_direction: 'horizontal',
 
       //Timing settings
-        time_scale: 'day',
-
-          //Day settings
-            stdy_col: 'STDY',
-            endy_col: 'ENDY',
-            day_range: null,
+        time_scale: 'date',
 
           //Date settings
             stdt_col: 'STDT',
@@ -37,6 +32,11 @@ export default {
             date_range: null,
             date_format: '%Y-%m-%d',
             date_display_format: '%b %y', // sync in syncSettings()
+
+          //Day settings
+            stdy_col: 'STDY',
+            endy_col: 'ENDY',
+            day_range: null,
 
       //Miscellaneous settings
         seq_col: 'SEQ',
@@ -104,7 +104,6 @@ export default {
             order: null, // set in syncSettings()
             mark: 'circle'
         },
-        gridlines: 'y',
         range_band: 30,
         margin: {
             top: 60,

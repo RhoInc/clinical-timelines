@@ -3,6 +3,7 @@ export default function syncListingSettings(settings) {
         cols: settings.details.map(detail => detail.value_col),
         headers: settings.details.map(detail => detail.label)
     };
+
     //Define listing columns and headers if not already defined.
     if (!settings.details_config.hasOwnProperty('cols')) {
         settings.details_config.cols = settings.details.map(detail => detail.value_col);

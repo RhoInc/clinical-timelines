@@ -1,9 +1,18 @@
+import { select as d3select } from 'd3';
 import drawIDtimeline from '../../functions/drawIDtimeline';
 
-export default function eventTypeChange(select, d) {
-    const filter = this.filters.filter(filter => filter.col === d.value_col)[0];
+export default function eventTypeChange(select) {
+    this.currentEventTypes = d3select(select)
+        .selectAll('select option:checked')
+        .pop()
+        .map(d => d.textContent);
+    this.filters.filter(
+        filter => filter.col === this.config.event_col
+    )[0].val = this.currentEventTypes;
+    this.wrap
+        .selectAll('.legend-item')
+        .classed('selected', d => this.currentEventTypes.indexOf(d.label) > -1);
 
-    //Re-draw ID timeline if in ID timeline view.
-    this.currentEventTypes = filter.val;
     if (this.selected_id) drawIDtimeline.call(this);
+    else this.draw();
 }

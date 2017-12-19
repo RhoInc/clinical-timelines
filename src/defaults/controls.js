@@ -9,7 +9,8 @@ export default [
     {
         type: 'dropdown',
         option: 'time_scale',
-        values: ['Study Day', 'Date'],
+        values: ['day', 'date'],
+        relabels: ['Day', 'Date'],
         label: '',
         description: 'X-axis scale',
         require: true

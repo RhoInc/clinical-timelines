@@ -7,20 +7,10 @@ export default function sortYdomain() {
 
     if (this.config.y.sort === 'earliest') {
         if (this.config.y.grouping) {
-            //Sort IDs by grouping then earliest event start date if y-axis is grouped.
+            //Sort IDs by grouping then earliest event if y-axis is grouped.
             const nestedData = nest()
                 .key(d => d[this.config.y.grouping] + '|' + d[this.config.id_col])
-                .rollup(d =>
-                    min(
-                        d,
-                        di =>
-                            this.config.time_scale === 'Study Day'
-                                ? +di[this.config.stdy_col]
-                                : time
-                                      .format(this.config.date_format)
-                                      .parse(di[this.config.stdt_col])
-                    )
-                )
+                .rollup(d => min(d, di => this.config.time_function(di[this.config.st_col])))
                 .entries(this.longDataInsideTimeRange)
                 .sort((a, b) => {
                     const aGrouping = a.key.split('|')[0],
@@ -46,22 +36,12 @@ export default function sortYdomain() {
             });
 
             //Set y-domain.
-            this.y_dom = nestedData.map(d => d.key.split('|')[1]);
+            this.config.y.domain = nestedData.map(d => d.key.split('|')[1]);
         } else {
-            //Otherwise sort IDs by earliest event start date.
-            this.y_dom = nest()
+            //Otherwise sort IDs by earliest event.
+            this.config.y.domain = nest()
                 .key(d => d[this.config.id_col])
-                .rollup(d =>
-                    min(
-                        d,
-                        di =>
-                            this.config.time_scale === 'Study Day'
-                                ? +di[this.config.stdy_col]
-                                : time
-                                      .format(this.config.date_format)
-                                      .parse(di[this.config.stdt_col])
-                    )
-                )
+                .rollup(d => min(d, di => this.config.time_function(di[this.config.st_col])))
                 .entries(this.longDataInsideTimeRange)
                 .sort((a, b) => {
                     const earliestEventSort =
@@ -78,7 +58,7 @@ export default function sortYdomain() {
 
         if (this.config.y.grouping) {
             //Sort IDs by grouping then alphanumerically if y-axis is grouped.
-            this.y_dom = set(this.longDataInsideTimeRange.map(d => d[this.config.id_col]))
+            this.config.y.domain = set(this.longDataInsideTimeRange.map(d => d[this.config.id_col]))
                 .values()
                 .sort((a, b) => {
                     const aGrouping = this.raw_data.filter(d => d[this.config.id_col] === a)[0][
@@ -94,7 +74,7 @@ export default function sortYdomain() {
                         : aGrouping < bGrouping ? 1 : alphanumericSort;
                 });
 
-            this.y_dom.forEach(d => {
+            this.config.y.domain.forEach(d => {
                 this.groupings
                     .filter(
                         grouping =>
@@ -108,7 +88,7 @@ export default function sortYdomain() {
             });
         } else {
             //Otherwise sort IDs alphanumerically.
-            this.y_dom = this.populationDetails.sampleInsideTimeRange.sort((a, b) => {
+            this.config.y.domain = this.populationDetails.sampleInsideTimeRange.sort((a, b) => {
                 const alphanumericSort = a > b ? -1 : 1;
 
                 return alphanumericSort;

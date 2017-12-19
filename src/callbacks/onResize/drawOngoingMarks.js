@@ -1,7 +1,7 @@
 import { select } from 'd3';
 
 export default function drawOngoingMarks() {
-    if (this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
+    if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
         const context = this;
 
         this.svg.selectAll('.ongoing-event').remove();

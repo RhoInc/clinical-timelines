@@ -20,8 +20,7 @@ export default function onPreprocess() {
     defineDataInsideTimeRange.call(this);
 
     //Insert groupings into data to draw empty rows in which to draw groupings.
-    if (this.config.y.grouping) defineGroupingData.call(this);
-    else delete this.groupings;
+    defineGroupingData.call(this);
 
     //Sort y-axis based on `Sort IDs` control selection.
     sortYdomain.call(this);

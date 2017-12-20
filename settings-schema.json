@@ -185,12 +185,15 @@
         ,"items":
             {"type": "object"
             ,"properties":
-                {"studyDay":
-                    {"title": "Study day"
-                    ,"type": "number"
+                {"timepoint":
+                    {"title": "Timepoint"
+                    ,"type":
+                        ["number"
+                        ,"string"
+                        ]
                     }
                 ,"label":
-                    {"title": "Reference day description"
+                    {"title": "Reference timepoint description"
                     ,"type": "string"
                     }
                 }

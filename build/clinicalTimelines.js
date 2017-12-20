@@ -609,7 +609,7 @@
                     return referenceLineObject;
                 })
                 .filter(function(reference_line) {
-                    return Number.isInteger(reference_line.timepoint);
+                    return Number.isInteger(+reference_line.timepoint);
                 });
 
             if (!settings.reference_lines.length) delete settings.reference_lines;

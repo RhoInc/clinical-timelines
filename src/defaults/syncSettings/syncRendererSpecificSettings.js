@@ -48,7 +48,7 @@ export default function syncRendererSpecificSettings(settings) {
 
                 return referenceLineObject;
             })
-            .filter(reference_line => Number.isInteger(reference_line.timepoint));
+            .filter(reference_line => Number.isInteger(+reference_line.timepoint));
 
         if (!settings.reference_lines.length) delete settings.reference_lines;
     }

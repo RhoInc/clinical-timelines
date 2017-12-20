@@ -187,10 +187,7 @@
             ,"properties":
                 {"timepoint":
                     {"title": "Timepoint"
-                    ,"type":
-                        ["number"
-                        ,"string"
-                        ]
+                    ,"type": "string"
                     }
                 ,"label":
                     {"title": "Reference timepoint description"

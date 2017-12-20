@@ -218,7 +218,7 @@ an array of reference timepoints and associated descriptions
 
 **default:** none
 ### settings.reference_lines.timepoint
-`number,string`
+`string`
 
 Timepoint
 

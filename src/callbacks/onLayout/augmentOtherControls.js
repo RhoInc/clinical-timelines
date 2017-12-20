@@ -7,7 +7,8 @@ export default function augmentOtherControls() {
         otherControls = this.controls.wrap
             .selectAll('.control-group')
             .filter(d => d.type !== 'subsetter')
-            .classed('ct-control', true);
+            .classed('ct-control', true)
+            .attr('id', d => `control-${d.option.replace('.', '-')}`);
 
     //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
     otherControls

@@ -237,18 +237,22 @@
                 ,"searchable":
                     {"title": "Searchable?"
                     ,"type": "boolean"
+                    ,"default": true
                     }
                 ,"sortable":
                     {"title": "sortable?"
                     ,"type": "boolean"
+                    ,"default": true
                     }
                 ,"pagination":
                     {"title": "Paginated?"
                     ,"type": "boolean"
+                    ,"default": true
                     }
                 ,"exportable":
                     {"title": "Exportable?"
                     ,"type": "boolean"
+                    ,"default": true
                     }
                 }
             }

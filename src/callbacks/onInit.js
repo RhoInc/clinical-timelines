@@ -37,8 +37,9 @@ export default function onInit() {
         console.warn(
             `${''}${this.raw_data.length -
                 this.wide_data
-                    .length} records have been removed due to invalid data.\n${''}Possible issues include\n${''}  - missing or invalid study day variable values\n${''}  - missing or invalid date variable values\n${''}  - date variable values that do not match settings.date_format (${this
-                .config.date_format})\n${''}  - missing identifiers or event types`
+                    .length} records have been removed due to invalid data.\n${''}Possible issues include\n${''}  - missing or invalid study day variable values\n${''}  - missing or invalid date variable values\n${''}  - date variable values that do not match settings.date_format (${
+                this.config.date_format
+            })\n${''}  - missing identifiers or event types`
         );
     }
 

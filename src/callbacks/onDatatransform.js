@@ -10,9 +10,10 @@ export default function onDatatransform() {
     this.populationDetails.n = this.populationDetails.sample.length;
     this.populationDetails.rate = this.populationDetails.n / this.populationDetails.N;
     this.populationDetails.wrap.html(
-        `<span class = 'stats'>${this.populationDetails.n}</span> of <span class = 'stats'>${this
-            .populationDetails.N}</span> ${this.config.id_unit}(s) (<span class = 'stats'>${format(
-            '%'
-        )(this.populationDetails.rate)}</span>)`
+        `<span class = 'stats'>${this.populationDetails.n}</span> of <span class = 'stats'>${
+            this.populationDetails.N
+        }</span> ${this.config.id_unit}(s) (<span class = 'stats'>${format('%')(
+            this.populationDetails.rate
+        )}</span>)`
     );
 }

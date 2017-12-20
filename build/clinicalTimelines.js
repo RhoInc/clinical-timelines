@@ -604,7 +604,7 @@
                     referenceLineObject.timepoint = reference_line.timepoint || reference_line;
                     referenceLineObject.label =
                         reference_line.label ||
-                        settings.config.time_scale + ': ' + referenceLineObject.timepoint;
+                        settings.time_scale + ': ' + referenceLineObject.timepoint;
 
                     return referenceLineObject;
                 })

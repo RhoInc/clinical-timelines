@@ -217,15 +217,15 @@ ongoing event indicator value
 an array of reference timepoints and associated descriptions
 
 **default:** none
-### settings.reference_lines.studyDay
-`number`
+### settings.reference_lines.timepoint
+`number,string`
 
-Study day
+Timepoint
 
 ### settings.reference_lines.label
 `string`
 
-Reference day description
+Reference timepoint description
 
 
 

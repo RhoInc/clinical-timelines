@@ -1599,11 +1599,25 @@
 
         //Add event listener to input node.
         timeRangeInput.on('change', function(d) {
-            var time_range = context.config.time_scale + '_range';
-            context[time_range][d.index] =
+            var time_range = context.config.time_scale + '_range',
+                increment = context.config.time_scale === 'date' ? 24 * 60 * 60 * 1000 : 1;
+            var input =
                 context.config.time_scale === 'date'
                     ? d3.time.format('%Y-%m-%d').parse(this.value)
                     : +this.value;
+
+            if (d.index === 0 && input >= context[time_range][1])
+                input =
+                    context.config.time_scale === 'date'
+                        ? new Date(context[time_range][1].getTime() - increment)
+                        : context[time_range][1] - increment;
+            else if (d.index === 1 && input <= context[time_range][0])
+                input =
+                    context.config.time_scale === 'date'
+                        ? new Date(context[time_range][0].getTime() + increment)
+                        : (input = context[time_range][0] + increment);
+
+            context[time_range][d.index] = input;
             context.time_range = context[time_range];
             context.draw();
         });

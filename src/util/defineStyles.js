@@ -114,6 +114,7 @@ export default function defineStyles() {
                 '    margin-left: 5px;' +
                 '    width: 50%;' +
                 '    clear: right;' +
+                '    box-sizing: border-box;' +
                 '}',
             '#clinical-timelines > #left-side > .ID-details .back-button {' +
                 '    display: inline-block;' +

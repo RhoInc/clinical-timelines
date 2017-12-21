@@ -802,7 +802,7 @@
             'Event: [' +
             settings.event_col +
             ']' +
-            ('\n' + settings.time_scale + ': [' + settings.st_col + ']');
+            ('\n' + settings.x.label + ': [' + settings.st_col + ']');
         settings.marks[1].values = { wc_category: settings.time_unit };
     }
 

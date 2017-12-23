@@ -11,7 +11,7 @@ export default function listing(clinicalTimelines) {
         listing.on(callback.substring(2).toLowerCase(), callbacks[callback]);
 
     listing.clinicalTimelines = clinicalTimelines;
-    listing.init([]);
+    listing.init([], clinicalTimelines.test);
     listing.wrap.classed('hidden', true);
 
     return listing;

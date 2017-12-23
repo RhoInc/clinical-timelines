@@ -1455,7 +1455,9 @@
                     ? _this.currentEventTypes.indexOf(d[_this.config.event_col]) > -1
                     : true;
             }),
-            this.config.event_col
+            this.config.event_col,
+            null,
+            clinicalTimelines.test
         );
 
         //Draw ID detail listing.
@@ -3064,8 +3066,24 @@
 
     function IDtimeline(clinicalTimelines) {
         var IDtimeline = webcharts.createChart(
-            clinicalTimelines.rightSide.node(),
-            clinicalTimelines.config.IDtimelineSettings
+                clinicalTimelines.rightSide.node(),
+                clinicalTimelines.config.IDtimelineSettings
+            ),
+            dummyDatum = {
+                wc_category: null,
+                wc_value: null
+            };
+
+        dummyDatum[clinicalTimelines.config.id_col] = null;
+        dummyDatum[clinicalTimelines.config.event_col] = null;
+        dummyDatum[clinicalTimelines.config.seq_col] = null;
+
+        webcharts.multiply(
+            IDtimeline,
+            [dummyDatum],
+            clinicalTimelines.config.event_col,
+            null,
+            clinicalTimelines.test
         );
 
         for (var callback in callbacks$1) {
@@ -3102,15 +3120,16 @@
             listing.on(callback.substring(2).toLowerCase(), callbacks$2[callback]);
         }
         listing.clinicalTimelines = clinicalTimelines;
-        listing.init([]);
+        listing.init([], clinicalTimelines.test);
         listing.wrap.classed('hidden', true);
 
         return listing;
     }
 
-    function clinicalTimelines() {
+    function clinicalTimelines$1() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments[1];
+        var test = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
         //Define unique div within passed element argument.
         var container = d3
@@ -3121,7 +3140,7 @@
             rightSide = container.append('div').attr('id', 'right-side');
 
         //Define .css styles to avoid requiring a separate .css file.
-        defineStyles();
+        if (!test) defineStyles();
 
         var mergedSettings = Object.assign({}, defaults$1.settings, settings),
             syncedSettings = defaults$1.syncSettings(mergedSettings),
@@ -3131,6 +3150,7 @@
                 inputs: syncedControls
             }),
             clinicalTimelines = webcharts.createChart(rightSide.node(), syncedSettings, controls);
+        clinicalTimelines.test = test; // pass test argument along down the line
 
         for (var callback in callbacks) {
             clinicalTimelines.on(callback.substring(2).toLowerCase(), callbacks[callback]);
@@ -3144,5 +3164,5 @@
         return clinicalTimelines;
     }
 
-    return clinicalTimelines;
+    return clinicalTimelines$1;
 });

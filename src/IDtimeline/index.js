@@ -1,10 +1,26 @@
-import { createChart } from 'webcharts';
+import { createChart, multiply } from 'webcharts';
 import callbacks from './callbacks/index';
 
 export default function IDtimeline(clinicalTimelines) {
     const IDtimeline = createChart(
-        clinicalTimelines.rightSide.node(),
-        clinicalTimelines.config.IDtimelineSettings
+            clinicalTimelines.rightSide.node(),
+            clinicalTimelines.config.IDtimelineSettings
+        ),
+        dummyDatum = {
+            wc_category: null,
+            wc_value: null
+        };
+
+    dummyDatum[clinicalTimelines.config.id_col] = null;
+    dummyDatum[clinicalTimelines.config.event_col] = null;
+    dummyDatum[clinicalTimelines.config.seq_col] = null;
+
+    multiply(
+        IDtimeline,
+        [dummyDatum],
+        clinicalTimelines.config.event_col,
+        null,
+        clinicalTimelines.test
     );
 
     for (const callback in callbacks)

@@ -38,7 +38,9 @@ export default function drawIDtimeline() {
                     ? this.currentEventTypes.indexOf(d[this.config.event_col]) > -1
                     : true
         ),
-        this.config.event_col
+        this.config.event_col,
+        null,
+        clinicalTimelines.test
     );
 
     //Draw ID detail listing.

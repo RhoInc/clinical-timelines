@@ -1039,6 +1039,29 @@
     function setDefaultTimeRanges() {
         var _this = this;
 
+        //Date range
+        this.full_date_range = [
+            d3.min(this.initial_data, function(d) {
+                return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
+            }),
+            d3.max(this.initial_data, function(d) {
+                return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
+            })
+        ];
+        this.date_range =
+            this.config.date_range instanceof Array &&
+            this.config.date_range.length === 2 &&
+            this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
+            this.config.date_range.every(function(date) {
+                return date instanceof Date || d3.time.format(_this.config.date_format).parse(date);
+            })
+                ? this.config.date_range.map(function(date) {
+                      return date instanceof Date
+                          ? date
+                          : d3.time.format(_this.config.date_format).parse(date);
+                  })
+                : this.full_date_range;
+
         //Day range
         this.full_day_range = [
             d3.min(this.initial_data, function(d) {
@@ -1059,29 +1082,6 @@
                       return +day;
                   })
                 : this.full_day_range;
-
-        //Date range
-        this.full_date_range = [
-            d3.min(this.initial_data, function(d) {
-                return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
-            }),
-            d3.max(this.initial_data, function(d) {
-                return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
-            })
-        ];
-        this.date_range =
-            this.config.date_range instanceof Array &&
-            this.config.date_range.length === 2 &&
-            this.config.date_range[0].toString() !== this.config.day_range[1].toString() &&
-            this.config.date_range.every(function(date) {
-                return date instanceof Date || d3.time.format(_this.config.date_format).parse(date);
-            })
-                ? this.config.date_range.map(function(date) {
-                      return date instanceof Date
-                          ? date
-                          : d3.time.format(_this.config.date_format).parse(date);
-                  })
-                : this.full_date_range;
     }
 
     function handleEventTypes() {

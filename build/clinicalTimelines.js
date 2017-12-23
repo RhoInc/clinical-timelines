@@ -1060,7 +1060,7 @@
         this.config.date_range =
             this.config.date_range instanceof Array &&
             this.config.date_range.length === 2 &&
-            this.config.date_range[0].toString() !== this.config.day_range[1].toString() &&
+            this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
             this.config.date_range.every(function(date) {
                 return date instanceof Date || d3.time.format(_this.config.date_format).parse(date);
             })

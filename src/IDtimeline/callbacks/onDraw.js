@@ -1,5 +1,3 @@
-import clone from '../../util/clone';
-
 export default function onDraw() {
     const context = this;
 

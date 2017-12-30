@@ -7,14 +7,14 @@ export default function drawTimeRange() {
     this.svg.select('.time-range').remove();
     const x_dom = this.x_dom.map(x => (x instanceof Date ? x.getTime() : x)),
         timeRange =
-            this.parent.clinicalTimelines.config.time_scale === 'day'
-                ? this.parent.clinicalTimelines.day_range
-                : this.parent.clinicalTimelines.date_range.map(dt => dt.getTime()),
+            this.parent.timelines.config.time_scale === 'day'
+                ? this.parent.timelines.day_range
+                : this.parent.timelines.date_range.map(dt => dt.getTime()),
         timeRangeText =
             this.config.time_scale === 'day'
-                ? this.parent.clinicalTimelines.day_range.map(dy => dy.toString())
-                : this.parent.clinicalTimelines.date_range.map(dt =>
-                      time.format(this.parent.clinicalTimelines.config.date_format)(dt)
+                ? this.parent.timelines.day_range.map(dy => dy.toString())
+                : this.parent.timelines.date_range.map(dt =>
+                      time.format(this.parent.timelines.config.date_format)(dt)
                   ); // update to date_display_format at some point
 
     if (
@@ -25,12 +25,12 @@ export default function drawTimeRange() {
     ) {
         const timeRangeGroup = this.svg
                 .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
-                .classed('time-range', true),
+                .classed('ct-time-range', true),
             x = this.x(Math.max(timeRange[0], x_dom[0])),
             width = Math.min(this.x(timeRange[1]) - x, this.plot_width - x),
             timeRangeRect = timeRangeGroup
                 .append('rect')
-                .classed('time-range-rect', true)
+                .classed('ct-time-range-rect', true)
                 .attr({
                     x: x,
                     y: 0,
@@ -40,7 +40,7 @@ export default function drawTimeRange() {
             timeRangeTooltip = timeRangeGroup
                 .append('title')
                 .text(
-                    `${this.parent.clinicalTimelines.config.x.label} Range: ${timeRangeText.join(
+                    `${this.parent.timelines.config.x.label} Range: ${timeRangeText.join(
                         ' - '
                     )}`
                 );

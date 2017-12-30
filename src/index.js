@@ -1,39 +1,49 @@
-import { select } from 'd3';
-import defineStyles from './util/defineStyles';
-import clone from './util/clone';
-import './util/object-assign';
-import defaults from './defaults/index';
-import { createControls, createChart } from 'webcharts';
-import callbacks from './callbacks/index';
+import defineSettings from './defineSettings';
+import defineStyles from './defineStyles';
+import defineLayout from './defineLayout';
+import controls from './controls';
+import timelines from './timelines/index';
 import IDtimeline from './IDtimeline/index';
 import listing from './listing/index';
+import recurse from './recurse';
+import init from './init';
 
-export default function clinicalTimelines(element = 'body', settings, test = false) {
-    //Define unique div within passed element argument.
-    const container = select(element)
-            .append('div')
-            .attr('id', 'clinical-timelines'),
-        leftSide = container.append('div').attr('id', 'left-side'),
-        rightSide = container.append('div').attr('id', 'right-side');
+export default function clinicalTimelines(element = 'body', settings = {}, test = false) {
+    const
+        clinicalTimelines = {
+            element: element,
+            settings: {
+                user: settings
+            },
+            containers: {},
+            init: init,
+            test: test
+        };
+
+    //Merge and sync settings.
+    defineSettings.call(clinicalTimelines);
 
     //Define .css styles to avoid requiring a separate .css file.
-    if (!test) defineStyles();
+    if (!test)
+        defineStyles.call(clinicalTimelines);
 
-    const mergedSettings = Object.assign({}, defaults.settings, settings),
-        syncedSettings = defaults.syncSettings(mergedSettings),
-        syncedControls = defaults.syncControls(defaults.controls, syncedSettings),
-        controls = createControls(leftSide.node(), { location: 'top', inputs: syncedControls }),
-        clinicalTimelines = createChart(rightSide.node(), syncedSettings, controls);
-    clinicalTimelines.test = test; // pass test argument along down the line
+    //Define layout of HTML.
+    defineLayout.call(clinicalTimelines);
 
-    for (const callback in callbacks)
-        clinicalTimelines.on(callback.substring(2).toLowerCase(), callbacks[callback]);
+    //Create controls.
+    controls.call(clinicalTimelines);
 
-    clinicalTimelines.leftSide = leftSide;
-    clinicalTimelines.rightSide = rightSide;
-    clinicalTimelines.initialSettings = clone(syncedSettings);
-    clinicalTimelines.IDtimeline = IDtimeline(clinicalTimelines);
-    clinicalTimelines.listing = listing(clinicalTimelines);
+    //Create timelines.
+    timelines.call(clinicalTimelines);
+
+    //Create ID timeline.
+    IDtimeline.call(clinicalTimelines);
+
+    //Create listing.
+    listing.call(clinicalTimelines);
+
+    //Recurse clinical timelines, ID timeline, and listing.
+    recurse.call(clinicalTimelines);
 
     return clinicalTimelines;
 }

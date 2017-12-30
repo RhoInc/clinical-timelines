@@ -1,13 +1,13 @@
-import drawOngoingMarks from '../../callbacks/onResize/drawOngoingMarks';
+import drawOngoingMarks from '../../timelines/callbacks/onResize/drawOngoingMarks';
 import drawTimeRange from './onResize/drawTimeRange';
-import drawReferenceLines from '../../callbacks/onResize/drawReferenceLines';
-import highlightMarks from '../../callbacks/onResize/highlightMarks';
+import drawReferenceLines from '../../timelines/callbacks/onResize/drawReferenceLines';
+import highlightMarks from '../../timelines/callbacks/onResize/highlightMarks';
 
 export default function onResize() {
     const context = this;
 
     //Hide legend.
-    this.wrap.select('.legend').classed('hidden', true);
+    this.wrap.select('.legend').classed('ct-hidden', true);
 
     //Draw ongoing marks.
     this.config.marks.forEach((mark, i) => {

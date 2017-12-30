@@ -15,26 +15,29 @@ export default function IDchange(select) {
         delete this.selected_id;
 
         //Display population details.
-        this.populationDetails.wrap.classed('ct-hidden', false);
+        this.clinicalTimelines.containers.populationDetails.classed('ct-hidden', false);
 
         //Hide ID information.
-        this.IDdetails.wrap.classed('ct-hidden', true);
-        this.IDdetails.wrap.select('#ID').text('');
-
-        //Display back button.
-        this.backButton.classed('ct-hidden', true);
+        this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', true);
+        this.clinicalTimelines.containers.IDdetails.select('#ID').text('');
 
         //Hide clinical timelines.
         this.wrap.select('svg.wc-svg').classed('ct-hidden', false);
         this.draw();
 
         //Hide ID timeline.
-        this.IDtimeline.wrap.selectAll('*').remove();
-        this.IDtimeline.wrap.classed('ct-hidden', true);
+        this.clinicalTimelines.containers.IDtimeline
+            .select('div')
+            .selectAll('*')
+            .remove();
+        this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', true);
 
         //Draw ID detail listing.
-        this.listing.wrap.selectAll('*').remove();
-        this.listing.wrap.classed('ct-hidden', true);
+        this.clinicalTimelines.containers.listing
+            .select('div')
+            .selectAll('*')
+            .remove();
+        this.clinicalTimelines.containers.listing.classed('ct-hidden', true);
     }
 
     //Update controls given the current view.

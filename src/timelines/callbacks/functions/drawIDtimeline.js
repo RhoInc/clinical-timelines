@@ -3,14 +3,11 @@ import { multiply } from 'webcharts';
 
 export default function drawIDtimeline() {
     //Hide population details.
-    this.populationDetails.wrap.classed('ct-hidden', true);
+    this.clinicalTimelines.containers.populationDetails.classed('ct-hidden', true);
 
     //Display ID information.
-    this.IDdetails.wrap.classed('ct-hidden', false);
-    this.IDdetails.wrap.select('#ID').text(this.selected_id);
-
-    //Display back button.
-    this.backButton.classed('ct-hidden', false);
+    this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', false);
+    this.clinicalTimelines.containers.IDdetails.select('#ID').text(this.selected_id);
 
     //Hide clinical timelines.
     this.wrap.select('svg.wc-svg').classed('ct-hidden', true);
@@ -21,15 +18,20 @@ export default function drawIDtimeline() {
 
     //Draw row identifier characteristics.
     if (this.config.id_characteristics)
-        this.IDdetails.wrap.selectAll('div.characteristic').each(function(d) {
-            select(this)
-                .select('span')
-                .text(wideIDdata[0][d.value_col]);
-        });
+        this.clinicalTimelines.containers.IDdetails
+            .selectAll('div.ct-characteristic')
+            .each(function(d) {
+                select(this)
+                    .select('span')
+                    .text(wideIDdata[0][d.value_col]);
+            });
 
     //Draw ID timeline.
-    this.IDtimeline.wrap.classed('ct-hidden', false);
-    this.IDtimeline.wrap.selectAll('*').remove();
+    this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
+    this.clinicalTimelines.containers.IDtimeline
+        .select('div')
+        .selectAll('*')
+        .remove();
     multiply(
         this.IDtimeline,
         longIDdata.filter(
@@ -44,8 +46,11 @@ export default function drawIDtimeline() {
     );
 
     //Draw ID detail listing.
-    this.listing.wrap.classed('ct-hidden', false);
-    this.listing.wrap.selectAll('*').remove();
+    this.clinicalTimelines.containers.listing.classed('ct-hidden', false);
+    this.clinicalTimelines.containers.listing
+        .select('div')
+        .selectAll('*')
+        .remove();
     this.listing.init(
         wideIDdata.filter(
             d =>

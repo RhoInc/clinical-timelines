@@ -1,4 +1,4 @@
-import detailsLayout from './onLayout/detailsLayout';
+import IDdetails from './onLayout/IDdetails';
 import controlGroupLayout from './onLayout/controlGroupLayout';
 import augmentOtherControls from './onLayout/augmentOtherControls';
 import addTimeRangeControls from './onlayout/addTimeRangeControls';
@@ -9,7 +9,7 @@ export default function onLayout() {
     const context = this;
 
     //Lay out details container.
-    detailsLayout.call(this);
+    IDdetails.call(this);
 
     //Move control labels and descriptions inside a div to display them vertically, label on top of description.
     controlGroupLayout.call(this);

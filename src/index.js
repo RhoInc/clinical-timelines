@@ -9,23 +9,21 @@ import recurse from './recurse';
 import init from './init';
 
 export default function clinicalTimelines(element = 'body', settings = {}, test = false) {
-    const
-        clinicalTimelines = {
-            element: element,
-            settings: {
-                user: settings
-            },
-            containers: {},
-            init: init,
-            test: test
-        };
+    const clinicalTimelines = {
+        element: element,
+        settings: {
+            user: settings
+        },
+        containers: {},
+        init: init,
+        test: test
+    };
 
     //Merge and sync settings.
     defineSettings.call(clinicalTimelines);
 
     //Define .css styles to avoid requiring a separate .css file.
-    if (!test)
-        defineStyles.call(clinicalTimelines);
+    if (!test) defineStyles.call(clinicalTimelines);
 
     //Define layout of HTML.
     defineLayout.call(clinicalTimelines);

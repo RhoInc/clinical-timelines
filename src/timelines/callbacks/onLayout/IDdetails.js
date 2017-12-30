@@ -1,6 +1,6 @@
 import backButton from './backButton';
 
-export default function detailsLayout() {
+export default function IDdetails() {
     //Add ID characteristics.
     this.clinicalTimelines.containers.IDdetails
         .selectAll('div.characteristic')
@@ -11,10 +11,7 @@ export default function detailsLayout() {
         .html(d => `${d.label}: <span id = '${d.value_col}'></span>`);
 
     //Add back button to return from ID timeline to clinical timelines.
-    this.clinicalTimelines.containers.backButton
-        .append('button')
-        .html('&#8592; Back')
-        .on('click', () => {
-            backButton.call(this);
-        });
+    this.clinicalTimelines.containers.IDdetails.select('#ct-back-button button').on('click', () => {
+        backButton.call(this);
+    });
 }

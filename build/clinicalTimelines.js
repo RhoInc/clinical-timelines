@@ -3191,7 +3191,10 @@
     }
 
     function init(data) {
-        this.timelines.init(data);
+        this.data = {
+            raw: data
+        };
+        this.timelines.init(data, this.test);
     }
 
     function clinicalTimelines$1() {

@@ -940,11 +940,14 @@
                     '    width: 100%;' +
                     '}'
             ],
-            style = document.createElement('style');
+            style = this.test
+                ? this.dom.window.document.createElement('style')
+                : document.createElement('style');
         style.type = 'text/css';
         style.innerHTML = styles.join('\n');
 
-        document.getElementsByTagName('head')[0].appendChild(style);
+        if (this.test) this.dom.window.document.getElementsByTagName('head')[0].appendChild(style);
+        else document.getElementsByTagName('head')[0].appendChild(style);
     }
 
     function defineLayout() {
@@ -961,7 +964,6 @@
             .append('div')
             .classed('ct-column', true)
             .attr('id', 'ct-left-column')),
-            //Details container
             (this.containers.details = this.containers.leftColumn
                 .append('div')
                 .attr('id', 'ct-details'));
@@ -979,8 +981,7 @@
             .attr('id', 'ct-ID-details');
 
         //Add back button to return from ID timeline to clinical timelines.
-        this.containers.IDdetails
-            .append('div')
+        this.containers.IDdetails.append('div')
             .attr('id', 'ct-back-button')
             .append('button')
             .html('&#8592; Back');
@@ -1441,8 +1442,7 @@
         var _this = this;
 
         //Add ID characteristics.
-        this.clinicalTimelines.containers.IDdetails
-            .selectAll('div.characteristic')
+        this.clinicalTimelines.containers.IDdetails.selectAll('div.characteristic')
             .data(this.config.id_characteristics)
             .enter()
             .append('div')
@@ -1452,11 +1452,12 @@
             });
 
         //Add back button to return from ID timeline to clinical timelines.
-        this.clinicalTimelines.containers.IDdetails
-            .select('#ct-back-button button')
-            .on('click', function() {
+        this.clinicalTimelines.containers.IDdetails.select('#ct-back-button button').on(
+            'click',
+            function() {
                 backButton.call(_this);
-            });
+            }
+        );
     }
 
     function controlGroupLayout() {
@@ -1512,19 +1513,18 @@
 
         //Draw row identifier characteristics.
         if (this.config.id_characteristics)
-            this.clinicalTimelines.containers.IDdetails
-                .selectAll('div.ct-characteristic')
-                .each(function(d) {
+            this.clinicalTimelines.containers.IDdetails.selectAll('div.ct-characteristic').each(
+                function(d) {
                     d3
                         .select(this)
                         .select('span')
                         .text(wideIDdata[0][d.value_col]);
-                });
+                }
+            );
 
         //Draw ID timeline.
         this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-        this.clinicalTimelines.containers.IDtimeline
-            .select('div')
+        this.clinicalTimelines.containers.IDtimeline.select('div')
             .selectAll('*')
             .remove();
         webcharts.multiply(
@@ -1550,7 +1550,8 @@
                 return _this.currentEventTypes !== 'All'
                     ? _this.currentEventTypes.indexOf(d[_this.config.event_col]) > -1
                     : true;
-            })
+            }),
+            clinicalTimelines.test
         );
     }
 
@@ -1752,8 +1753,7 @@
             this.draw();
 
             //Hide ID timeline.
-            this.clinicalTimelines.containers.IDtimeline
-                .select('div')
+            this.clinicalTimelines.containers.IDtimeline.select('div')
                 .selectAll('*')
                 .remove();
             this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', true);
@@ -2527,7 +2527,13 @@
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
                 var className = di + ' point',
-                    g = d3.select(document.getElementsByClassName(className)[0]),
+                    g = _this.clinicalTimelines.test
+                        ? d3.select(
+                              _this.clinicalTimelines.dom.window.document.getElementsByClassName(
+                                  className
+                              )[0]
+                          )
+                        : d3.select(document.getElementsByClassName(className)[0]),
                     point = g.select('circle');
                 g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
             });
@@ -2669,7 +2675,13 @@
                     if (currentLine.offset > 0) {
                         //Capture line via its class name and offset vertically.
                         var className = currentLine.key + ' line',
-                            g = d3.select(document.getElementsByClassName(className)[0]);
+                            g = _this.clinicalTimelines.test
+                                ? d3.select(
+                                      _this.clinicalTimelines.dom.window.document.getElementsByClassName(
+                                          className
+                                      )[0]
+                                  )
+                                : d3.select(document.getElementsByClassName(className)[0]);
                         g.attr(
                             'transform',
                             'translate(0,' +
@@ -2679,7 +2691,13 @@
                     } else {
                         //Capture line via its class name and offset vertically.
                         var _className = currentLine.key + ' line',
-                            _g = d3.select(document.getElementsByClassName(_className)[0]);
+                            _g = _this.clinicalTimelines.test
+                                ? d3.select(
+                                      _this.clinicalTimelines.dom.window.document.getElementsByClassName(
+                                          _className
+                                      )[0]
+                                  )
+                                : d3.select(document.getElementsByClassName(_className)[0]);
                         _g.attr('transform', 'translate(0,0)');
                     }
                 });
@@ -2833,38 +2851,40 @@
     }
 
     function offsetBottomXaxis() {
-        var bottomXaxis = this.svg.select('.x.axis'),
-            bottomXaxisTransform = bottomXaxis.attr('transform'),
-            bottomXaxisTransformX =
-                bottomXaxisTransform.indexOf(',') > -1
-                    ? +bottomXaxisTransform.split(',')[0].split('(')[1]
-                    : +bottomXaxisTransform.split(' ')[0].split('(')[1],
-            bottomXaxisTransformY =
-                bottomXaxisTransform.indexOf(',') > -1
-                    ? +bottomXaxisTransform.split(',')[1].split(')')[0]
-                    : +bottomXaxisTransform.split(' ')[1].split(')')[0],
-            bottomXaxisTitle = bottomXaxis.select('.axis-title'),
-            bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
-            bottomXaxisTitleTransformX =
-                bottomXaxisTitleTransform.indexOf(',') > -1
-                    ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
-                    : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
-            bottomXaxisTitleTransformY =
-                bottomXaxisTitleTransform.indexOf(',') > -1
-                    ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
-                    : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
-        bottomXaxis.attr(
-            'transform',
-            'translate(0,' + (bottomXaxisTransformY + this.y.rangeBand()) + ')'
-        );
-        bottomXaxisTitle.attr(
-            'transform',
-            'translate(' +
-                bottomXaxisTitleTransformX +
-                ',' +
-                (bottomXaxisTitleTransformY - 7 * this.margin.bottom / 16) +
-                ')'
-        );
+        if (!this.clinicalTimelines.test) {
+            var bottomXaxis = this.svg.select('.x.axis'),
+                bottomXaxisTransform = bottomXaxis.attr('transform'),
+                bottomXaxisTransformX =
+                    bottomXaxisTransform.indexOf(',') > -1
+                        ? +bottomXaxisTransform.split(',')[0].split('(')[1]
+                        : +bottomXaxisTransform.split(' ')[0].split('(')[1],
+                bottomXaxisTransformY =
+                    bottomXaxisTransform.indexOf(',') > -1
+                        ? +bottomXaxisTransform.split(',')[1].split(')')[0]
+                        : +bottomXaxisTransform.split(' ')[1].split(')')[0],
+                bottomXaxisTitle = bottomXaxis.select('.axis-title'),
+                bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
+                bottomXaxisTitleTransformX =
+                    bottomXaxisTitleTransform.indexOf(',') > -1
+                        ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
+                        : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
+                bottomXaxisTitleTransformY =
+                    bottomXaxisTitleTransform.indexOf(',') > -1
+                        ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
+                        : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
+            bottomXaxis.attr(
+                'transform',
+                'translate(0,' + (bottomXaxisTransformY + this.y.rangeBand()) + ')'
+            );
+            bottomXaxisTitle.attr(
+                'transform',
+                'translate(' +
+                    bottomXaxisTitleTransformX +
+                    ',' +
+                    (bottomXaxisTitleTransformY - 7 * this.margin.bottom / 16) +
+                    ')'
+            );
+        }
     }
 
     function drawReferenceLines() {
@@ -2963,7 +2983,8 @@
     }
 
     function IEsucks() {
-        if (!!document.documentMode)
+        var inIE = this.clinicalTimelines.test ? false : !!document.documentMode;
+        if (inIE)
             this.svg.selectAll('.line,.point').each(function(d) {
                 var mark = select(this),
                     tooltip = mark.select('title'),
@@ -3200,7 +3221,7 @@
     function clinicalTimelines$1() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var test = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+        var dom = arguments[2];
 
         var clinicalTimelines = {
             element: element,
@@ -3209,14 +3230,15 @@
             },
             containers: {},
             init: init,
-            test: test
+            test: !!dom,
+            dom: dom
         };
 
         //Merge and sync settings.
         defineSettings.call(clinicalTimelines);
 
         //Define .css styles to avoid requiring a separate .css file.
-        if (!test) defineStyles.call(clinicalTimelines);
+        defineStyles.call(clinicalTimelines);
 
         //Define layout of HTML.
         defineLayout.call(clinicalTimelines);

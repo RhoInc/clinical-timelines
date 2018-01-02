@@ -284,9 +284,14 @@ export default function defineStyles() {
                 '    width: 100%;' +
                 '}'
         ],
-        style = document.createElement('style');
+        style = this.test
+            ? this.dom.window.document.createElement('style')
+            : document.createElement('style');
         style.type = 'text/css';
         style.innerHTML = styles.join('\n');
 
-    document.getElementsByTagName('head')[0].appendChild(style);
+    if (this.test)
+        this.dom.window.document.getElementsByTagName('head')[0].appendChild(style);
+    else
+        document.getElementsByTagName('head')[0].appendChild(style);
 }

@@ -8,11 +8,11 @@ Clinical Timelines is a JavaScript library that visualizes events over time via 
 While initially designed for use in clinical trial research, the library works with any longitudinal data of one record per event.
 
 Clinical Timelines presents all timepoints and time intervals for each facet, e.g. for each participant in a clinical trial.
-Users can drill down to individual timelines which pulls up a set of small multiples, each representing a signle event type, and a detailed listing of that individual's data.
-
-[Click here](https://rhoinc.github.io/viz-library/examples/0022-clinical-timelines/example.html) to see a demo with clinical trial data as the input.
+Users can drill down to individual timelines which pulls up a set of small multiples, each representing a single event type, and a detailed listing of that individual's data.
 
 ![alt tag](https://user-images.githubusercontent.com/31038805/32617032-e90cc4aa-c541-11e7-8ec8-c8867de51c94.PNG)
+
+[Click here](https://rhoinc.github.io/viz-library/examples/0022-clinical-timelines/example.html) to see a demo with clinical trial data as the input.
 
 ## Usage
 

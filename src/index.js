@@ -8,7 +8,7 @@ import listing from './listing/index';
 import recurse from './recurse';
 import init from './init';
 
-export default function clinicalTimelines(element = 'body', settings = {}, test = false) {
+export default function clinicalTimelines(element = 'body', settings = {}, dom) {
     const clinicalTimelines = {
         element: element,
         settings: {
@@ -16,14 +16,15 @@ export default function clinicalTimelines(element = 'body', settings = {}, test 
         },
         containers: {},
         init: init,
-        test: test
+        test: !!dom,
+        dom: dom
     };
 
     //Merge and sync settings.
     defineSettings.call(clinicalTimelines);
 
     //Define .css styles to avoid requiring a separate .css file.
-    if (!test) defineStyles.call(clinicalTimelines);
+    defineStyles.call(clinicalTimelines);
 
     //Define layout of HTML.
     defineLayout.call(clinicalTimelines);

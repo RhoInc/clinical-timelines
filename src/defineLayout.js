@@ -31,8 +31,7 @@ export default function defineLayout() {
         .attr('id', 'ct-ID-details');
 
     //Add back button to return from ID timeline to clinical timelines.
-    this.containers.IDdetails
-        .append('div')
+    this.containers.IDdetails.append('div')
         .attr('id', 'ct-back-button')
         .append('button')
         .html('&#8592; Back');

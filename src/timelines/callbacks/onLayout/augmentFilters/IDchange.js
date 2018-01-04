@@ -26,8 +26,7 @@ export default function IDchange(select) {
         this.draw();
 
         //Hide ID timeline.
-        this.clinicalTimelines.containers.IDtimeline
-            .select('div')
+        this.clinicalTimelines.containers.IDtimeline.select('div')
             .selectAll('*')
             .remove();
         this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', true);

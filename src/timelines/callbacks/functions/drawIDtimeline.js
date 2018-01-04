@@ -18,18 +18,17 @@ export default function drawIDtimeline() {
 
     //Draw row identifier characteristics.
     if (this.config.id_characteristics)
-        this.clinicalTimelines.containers.IDdetails
-            .selectAll('div.ct-characteristic')
-            .each(function(d) {
+        this.clinicalTimelines.containers.IDdetails.selectAll('div.ct-characteristic').each(
+            function(d) {
                 select(this)
                     .select('span')
                     .text(wideIDdata[0][d.value_col]);
-            });
+            }
+        );
 
     //Draw ID timeline.
     this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-    this.clinicalTimelines.containers.IDtimeline
-        .select('div')
+    this.clinicalTimelines.containers.IDtimeline.select('div')
         .selectAll('*')
         .remove();
     multiply(
@@ -57,6 +56,7 @@ export default function drawIDtimeline() {
                 this.currentEventTypes !== 'All'
                     ? this.currentEventTypes.indexOf(d[this.config.event_col]) > -1
                     : true
-        )
+        ),
+        clinicalTimelines.test
     );
 }

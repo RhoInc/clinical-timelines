@@ -110,7 +110,13 @@ export default function offsetLines(mark, markData) {
                 if (currentLine.offset > 0) {
                     //Capture line via its class name and offset vertically.
                     const className = `${currentLine.key} line`,
-                        g = select(document.getElementsByClassName(className)[0]);
+                        g = this.clinicalTimelines.test
+                            ? select(
+                                  this.clinicalTimelines.dom.window.document.getElementsByClassName(
+                                      className
+                                  )[0]
+                              )
+                            : select(document.getElementsByClassName(className)[0]);
                     g.attr(
                         'transform',
                         `translate(0,${currentLine.offset *
@@ -120,7 +126,13 @@ export default function offsetLines(mark, markData) {
                 } else {
                     //Capture line via its class name and offset vertically.
                     const className = `${currentLine.key} line`,
-                        g = select(document.getElementsByClassName(className)[0]);
+                        g = this.clinicalTimelines.test
+                            ? select(
+                                  this.clinicalTimelines.dom.window.document.getElementsByClassName(
+                                      className
+                                  )[0]
+                              )
+                            : select(document.getElementsByClassName(className)[0]);
                     g.attr('transform', 'translate(0,0)');
                 }
             });

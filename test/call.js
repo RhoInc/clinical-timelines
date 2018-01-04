@@ -14,7 +14,7 @@ describe('clinical-timelines object creation', () => {
     });
 
     beforeEach(() => {
-        CT = clinicalTimelines(container, settings, true);
+        CT = clinicalTimelines(container, settings, dom);
     });
 
     afterEach(() => {

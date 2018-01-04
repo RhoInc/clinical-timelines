@@ -711,6 +711,7 @@
                     '    margin-bottom: 10px;' +
                     '    border: 1px solid #eee;' +
                     '}',
+                '#clinical-timelines .ct-column > * > * {' + '    margin: 10px;' + '}',
 
                 /***--------------------------------------------------------------------------------------\
       Left column elements

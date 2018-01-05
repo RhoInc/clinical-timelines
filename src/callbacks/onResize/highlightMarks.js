@@ -50,7 +50,8 @@ export default function highlightMarks() {
                             x2: x2,
                             y1: y,
                             y2: y,
-                            stroke: color
+                            stroke: color,
+                            'clip-path': `url(#${context.id})`
                         });
 
                 if (d.ongoing === context.config.ongo_val) {
@@ -61,7 +62,8 @@ export default function highlightMarks() {
                             .classed('highlighted ongoing-event', true)
                             .attr({
                                 points: arrow.map(coordinate => coordinate.join(',')).join(' '),
-                                fill: color
+                                fill: color,
+                                'clip-path': `url(#${context.id})`
                             });
                 }
             }),

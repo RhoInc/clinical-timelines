@@ -73,7 +73,8 @@ export default {
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
-                    'stroke-width': 4,
+                    'clip-path': 'url(#1)',
+                    'stroke-width': 4
                 }
             },
             {
@@ -82,6 +83,7 @@ export default {
                 tooltip: null, // set in syncSettings()
                 radius: 4,
                 attributes: {
+                    'clip-path': 'url(#1)',
                     'stroke-width': 2
                 }
             }

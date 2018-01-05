@@ -2,6 +2,7 @@ import drawOngoingMarks from '../../callbacks/onResize/drawOngoingMarks';
 import drawTimeRange from './onResize/drawTimeRange';
 import drawReferenceLines from '../../callbacks/onResize/drawReferenceLines';
 import highlightMarks from '../../callbacks/onResize/highlightMarks';
+import IEsucks from '../../callbacks/onResize/IEsucks';
 
 export default function onResize() {
     const context = this;
@@ -30,4 +31,7 @@ export default function onResize() {
 
     //Highlight events.
     highlightMarks.call(this);
+
+    //Replace newline characters with html line break entities to cater to Internet Explorer.
+    IEsucks.call(this);
 }

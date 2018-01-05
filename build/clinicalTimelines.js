@@ -194,14 +194,12 @@
                 //Lines
                 '#clinical-timelines path.wc-data-mark {' +
                     '    stroke-width: 4;' +
-                    '    clip-path: url(#1);' +
                     '    stroke-opacity: 1;' +
                     '}',
                 '#clinical-timelines path.wc-data-mark.highlighted {' +
                     '    stroke-width: 7;' +
                     '}',
                 '#clinical-timelines line.highlight-overlay {' +
-                    '    clip-path: url(#1);' +
                     '    stroke-width: 3;' +
                     '    stroke-linecap: round;' +
                     '}',
@@ -209,7 +207,6 @@
                 //Circles
                 '#clinical-timelines circle.wc-data-mark {' +
                     '    stroke-width: 0;' +
-                    '    clip-path: url(#1);' +
                     '    fill-opacity: 1;' +
                     '}',
                 '#clinical-timelines circle.wc-data-mark.highlighted {' +
@@ -218,7 +215,7 @@
                     '}',
 
                 //Arrows
-                '#clinical-timelines polygon.ongoing-event {' + '    clip-path: url(#1);' + '}',
+                '#clinical-timelines polygon.ongoing-event {' + '}',
                 '#clinical-timelines polygon.ongoing-event.highlighted {' +
                     '    stroke-width: 2;' +
                     '}',
@@ -554,6 +551,7 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
+                    'clip-path': 'url(#1)',
                     'stroke-width': 4
                 }
             },
@@ -563,6 +561,7 @@
                 tooltip: null, // set in syncSettings()
                 radius: 4,
                 attributes: {
+                    'clip-path': 'url(#1)',
                     'stroke-width': 2
                 }
             }
@@ -764,7 +763,7 @@
     function syncTimeScaleSettings(settings) {
         //X-axis
         settings.x.type = settings.time_scale === 'Study Day' ? 'linear' : 'time';
-        settings.x.label = settings.time_scale;
+        if (settings.x.label !== '') settings.x.label = settings.time_scale;
         settings.x.format =
             settings.time_scale === 'Study Day' ? '1d' : settings.date_display_format;
 
@@ -1309,7 +1308,7 @@
         );
     }
 
-    function IDchange(select, d) {
+    function IDchange(select$$1, d) {
         var filter = this.filters.filter(function(filter) {
             return filter.col === d.value_col;
         })[0];
@@ -1350,7 +1349,7 @@
         enableDisableControls.call(this);
     }
 
-    function eventTypeChange(select, d) {
+    function eventTypeChange(select$$1, d) {
         var filter = this.filters.filter(function(filter) {
             return filter.col === d.value_col;
         })[0];
@@ -1398,10 +1397,10 @@
             });
     }
 
-    function eventHighlightingChange(select, d) {
+    function eventHighlightingChange(select$$1, d) {
         //Update event highlighting settings.
         this.config.event_highlighted = d3
-            .select(select)
+            .select(select$$1)
             .select('option:checked')
             .text();
         this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
@@ -2511,7 +2510,8 @@
                                 })
                                 .join(' '),
                             fill: color,
-                            stroke: color
+                            stroke: color,
+                            'clip-path': 'url(#' + context.id + ')'
                         });
                 });
         }
@@ -2573,7 +2573,8 @@
                                 x2: x2,
                                 y1: y,
                                 y2: y,
-                                stroke: color
+                                stroke: color,
+                                'clip-path': 'url(#' + context.id + ')'
                             });
 
                     if (d.ongoing === context.config.ongo_val) {
@@ -2588,7 +2589,8 @@
                                             return coordinate.join(',');
                                         })
                                         .join(' '),
-                                    fill: color
+                                    fill: color,
+                                    'clip-path': 'url(#' + context.id + ')'
                                 });
                     }
                 }),
@@ -2641,7 +2643,8 @@
                                 x1: _this.x(timepoint),
                                 x2: _this.x(timepoint),
                                 y1: 0,
-                                y2: _this.plot_height
+                                y2: _this.plot_height,
+                                'clip-path': 'url(#' + _this.id + ')'
                             }),
                         invisibleReferenceLine = referenceLineGroup
                             .append('line')
@@ -2650,7 +2653,8 @@
                                 x1: _this.x(timepoint),
                                 x2: _this.x(timepoint),
                                 y1: 0,
-                                y2: _this.plot_height
+                                y2: _this.plot_height,
+                                'clip-path': 'url(#' + _this.id + ')'
                             }),
                         // invisible reference line has no dasharray and is much thicker to make hovering easier
                         direction =
@@ -2663,7 +2667,8 @@
                                 y: 0,
                                 'text-anchor': direction === 'right' ? 'beginning' : 'end',
                                 dx: direction === 'right' ? 15 : -15,
-                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1),
+                                'clip-path': 'url(#' + _this.id + ')'
                             })
                             .text(reference_line.label),
                         dimensions = referenceLineLabel.node().getBBox(),
@@ -2674,7 +2679,8 @@
                                 x: dimensions.x - 10,
                                 y: dimensions.y - 5,
                                 width: dimensions.width + 20,
-                                height: dimensions.height + 10
+                                height: dimensions.height + 10,
+                                'clip-path': 'url(#' + _this.id + ')'
                             });
 
                     //Display reference line label on hover.
@@ -2702,31 +2708,42 @@
     }
 
     function offsetBottomXaxis() {
-        var bottomXaxis = this.svg.select('.x.axis'),
-            bottomXaxisTitle = bottomXaxis.select('.axis-title');
+        var //capture x-axis and its translation coordinates
+            bottomXaxis = this.svg.select('.x.axis'),
+            bottomXaxisTransform = bottomXaxis
+                .attr('transform')
+                .replace(/^translate\((.*)\)$/, '$1'),
+            bottomXaxisTransformCoordinates =
+                bottomXaxisTransform.indexOf(',') > -1
+                    ? bottomXaxisTransform.split(',')
+                    : bottomXaxisTransform.split(' '),
+            //capture x-axis title and its translation coordinates
+            bottomXaxisTitle = bottomXaxis.select('.axis-title'),
+            bottomXaxisTitleTransform = bottomXaxisTitle
+                .attr('transform')
+                .replace(/^translate\((.*)\)$/, '$1'),
+            bottomXaxisTitleTransformCoordinates =
+                bottomXaxisTitleTransform.indexOf(',') > -1
+                    ? bottomXaxisTitleTransform.split(',')
+                    : bottomXaxisTitleTransform.split(' ');
+
+        //offset x-axis
         bottomXaxis.attr(
             'transform',
-            'translate(0,' +
-                (+bottomXaxis
-                    .attr('transform')
-                    .split(',')[1]
-                    .split(')')[0] +
-                    this.y.rangeBand()) +
+            'translate(' +
+                +bottomXaxisTransformCoordinates[0] +
+                ',' +
+                (+bottomXaxisTransformCoordinates[1] + this.y.rangeBand()) +
                 ')'
         );
+
+        //offset x-axis title
         bottomXaxisTitle.attr(
             'transform',
-            'translate(\n            ' +
-                +bottomXaxisTitle
-                    .attr('transform')
-                    .split(',')[0]
-                    .split('(')[1] +
-                ',\n            ' +
-                (+bottomXaxisTitle
-                    .attr('transform')
-                    .split(',')[1]
-                    .split(')')[0] -
-                    7 * this.margin.bottom / 16) +
+            'translate(' +
+                +bottomXaxisTitleTransformCoordinates[0] +
+                ',' +
+                (+bottomXaxisTitleTransformCoordinates[1] - 7 * this.margin.bottom / 16) +
                 ')'
         );
     }
@@ -2734,7 +2751,7 @@
     function IEsucks() {
         if (!!document.documentMode)
             this.svg.selectAll('.line,.point').each(function(d) {
-                var mark = select(this),
+                var mark = d3.select(this),
                     tooltip = mark.select('title'),
                     text = tooltip.text().split('\n');
                 tooltip.text(text.join('--|--'));
@@ -2788,8 +2805,13 @@
     };
 
     function onInit$1() {
+        var _this = this;
+
         this.config.color_dom = this.parent.clinicalTimelines.config.color_dom;
         this.config.legend.order = this.parent.clinicalTimelines.config.legend.order;
+        this.config.marks.forEach(function(mark) {
+            mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
+        });
     }
 
     function onLayout$1() {}
@@ -2884,6 +2906,9 @@
 
         //Highlight events.
         highlightMarks.call(this);
+
+        //Replace newline characters with html line break entities to cater to Internet Explorer.
+        IEsucks.call(this);
     }
 
     function onDestroy$1() {}

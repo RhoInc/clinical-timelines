@@ -24,12 +24,7 @@ export default {
         grouping_direction: 'horizontal',
 
       //Timing settings
-        time_scale: 'Study Day',
-
-          //Study day settings
-            stdy_col: 'STDY',
-            endy_col: 'ENDY',
-            study_day_range: null,
+        time_scale: 'date',
 
           //Date settings
             stdt_col: 'STDT',
@@ -37,6 +32,11 @@ export default {
             date_range: null,
             date_format: '%Y-%m-%d',
             date_display_format: '%b %y', // sync in syncSettings()
+
+          //Day settings
+            stdy_col: 'STDY',
+            endy_col: 'ENDY',
+            day_range: null,
 
       //Miscellaneous settings
         seq_col: 'SEQ',
@@ -106,8 +106,10 @@ export default {
             order: null, // set in syncSettings()
             mark: 'circle'
         },
-        gridlines: 'y',
         range_band: 30,
-        margin: { top: 50 }, // for second x-axis
+        margin: {
+            top: 60,
+            right: 40
+        }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
 };

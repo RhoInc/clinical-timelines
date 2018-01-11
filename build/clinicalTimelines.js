@@ -29,10 +29,7 @@
       Left and right side containers
     \--------------------------------------------------------------------------------------***/
 
-                '#clinical-timelines > * {' +
-                    '    display: inline-block;' +
-                    '    padding: 10px;' +
-                    '}',
+                '#clinical-timelines > * {' + '    display: inline-block;' + '}',
                 '#clinical-timelines > #left-side {' + '    width: 22%;' + '    float: left;' + '}',
                 '#clinical-timelines > #right-side {' +
                     '    width: 75%;' +
@@ -40,7 +37,6 @@
                     '}',
                 '#clinical-timelines > * > * {' +
                     '    width: 100%;' +
-                    '    padding: 10px;' +
                     '    vertical-align: top;' +
                     '    display: inline-block;' +
                     '    margin-bottom: 10px;' +
@@ -409,6 +405,21 @@
         };
     })();
 
+    var defineProperty = function(obj, key, value) {
+        if (key in obj) {
+            Object.defineProperty(obj, key, {
+                value: value,
+                enumerable: true,
+                configurable: true,
+                writable: true
+            });
+        } else {
+            obj[key] = value;
+        }
+
+        return obj;
+    };
+
     /*------------------------------------------------------------------------------------------------\
   Clone a variable (http://stackoverflow.com/a/728694).
 \------------------------------------------------------------------------------------------------*/
@@ -502,12 +513,7 @@
         grouping_direction: 'horizontal',
 
         //Timing settings
-        time_scale: 'Study Day',
-
-        //Study day settings
-        stdy_col: 'STDY',
-        endy_col: 'ENDY',
-        study_day_range: null,
+        time_scale: 'date',
 
         //Date settings
         stdt_col: 'STDT',
@@ -515,6 +521,11 @@
         date_range: null,
         date_format: '%Y-%m-%d',
         date_display_format: '%b %y', // sync in syncSettings()
+
+        //Day settings
+        stdy_col: 'STDY',
+        endy_col: 'ENDY',
+        day_range: null,
 
         //Miscellaneous settings
         seq_col: 'SEQ',
@@ -584,9 +595,11 @@
             order: null, // set in syncSettings()
             mark: 'circle'
         },
-        gridlines: 'y',
         range_band: 30,
-        margin: { top: 50 }, // for second x-axis
+        margin: {
+            top: 60,
+            right: 40
+        }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
     };
 
@@ -690,8 +703,8 @@
                     referenceLineObject.time_scale = Number.isInteger(
                         +referenceLineObject.timepoint
                     )
-                        ? 'Study Day'
-                        : 'Date';
+                        ? 'day'
+                        : 'date';
 
                     //label predefined or not
                     referenceLineObject.label = reference_line.label
@@ -702,9 +715,9 @@
                 })
                 .filter(function(reference_line) {
                     return (
-                        (reference_line.time_scale === 'Study Day' &&
+                        (reference_line.time_scale === 'day' &&
                             Number.isInteger(reference_line.timepoint)) ||
-                        (reference_line.time_scale === 'Date' &&
+                        (reference_line.time_scale === 'date' &&
                             d3.time
                                 .format(settings.date_format)
                                 .parse(reference_line.timepoint) instanceof Date)
@@ -714,21 +727,13 @@
             if (!settings.reference_lines.length) delete settings.reference_lines;
         }
 
-        //Detail settings
-        var defaultDetails =
-            settings.time_scale === 'Study Day'
-                ? [
-                      { value_col: settings.event_col, label: 'Event Type' },
-                      { value_col: settings.stdy_col, label: 'Start Day' },
-                      { value_col: settings.endy_col, label: 'Stop Day' },
-                      { value_col: settings.seq_col, label: 'Sequence Number' }
-                  ]
-                : [
-                      { value_col: settings.event_col, label: 'Event Type' },
-                      { value_col: settings.stdt_col, label: 'Start Date' },
-                      { value_col: settings.endt_col, label: 'Stop Date' },
-                      { value_col: settings.seq_col, label: 'Sequence Number' }
-                  ];
+        //Details
+        var defaultDetails = [
+            { value_col: settings.event_col, label: 'Event Type' },
+            { value_col: 'stdtdy', label: 'Start Date (Day)' },
+            { value_col: 'endtdy', label: 'Stop Date (Day)' },
+            { value_col: settings.seq_col, label: 'Sequence Number' }
+        ];
         settings.details = arrayOfVariablesCheck(defaultDetails, settings.details);
         settings.filters.forEach(function(filter) {
             if (
@@ -761,46 +766,57 @@
     }
 
     function syncTimeScaleSettings(settings) {
-        //X-axis
-        settings.x.type = settings.time_scale === 'Study Day' ? 'linear' : 'time';
-        if (settings.x.label !== '') settings.x.label = settings.time_scale;
-        settings.x.format =
-            settings.time_scale === 'Study Day' ? '1d' : settings.date_display_format;
+        //Coerce invalid time scale arguments.
+        settings.time_scale =
+            ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
+                ? settings.time_scale.toLowerCase()
+                : 'date';
 
-        //Lines (events with duration)
+        //Define settings variables to handle both date and day time scales.
+        if (settings.time_scale === 'date') {
+            settings.st_col = settings.stdt_col;
+            settings.en_col = settings.endt_col;
+            settings.x_type = 'time';
+            settings.time_unit = 'DT';
+            settings.x_format = settings.date_format;
+            settings.x_d3format = d3.time.format(settings.x_format);
+            settings.time_function = function(dt) {
+                return settings.x_d3format.parse(dt) ? settings.x_d3format.parse(dt) : new Date(dt);
+            };
+        } else if (settings.time_scale === 'day') {
+            settings.st_col = settings.stdy_col;
+            settings.en_col = settings.endy_col;
+            settings.x_type = 'linear';
+            settings.time_unit = 'DY';
+            settings.x_format = '1d';
+            settings.x_d3format = d3.format(settings.x_format);
+            settings.time_function = function(dy) {
+                return +dy;
+            };
+        }
+
+        //Sync x-axis settings with time scale settings.
+        settings.x.type = settings.x_type;
+        settings.x.label =
+            settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
+        settings.x.format = settings.x_format;
+
+        //Time intervals (lines)
         settings.marks[0].tooltip =
-            settings.time_scale === 'Study Day'
-                ? 'Event: [' +
-                  settings.event_col +
-                  ']' +
-                  ('\nStart Day: [' + settings.stdy_col + ']') +
-                  ('\nStop Day: [' + settings.endy_col + ']')
-                : 'Event: [' +
-                  settings.event_col +
-                  ']' +
-                  ('\nStart Date: [' + settings.stdt_col + ']') +
-                  ('\nStop Date: [' + settings.endt_col + ']');
-        settings.marks[0].values =
-            settings.time_scale === 'Study Day'
-                ? { wc_category: [settings.stdy_col, settings.endy_col] }
-                : { wc_category: [settings.stdt_col, settings.endt_col] };
+            'Event: [' +
+            settings.event_col +
+            ']' +
+            ('\nStart ' + settings.time_scale + ': [' + settings.st_col + ']') +
+            ('\nStop ' + settings.time_scale + ': [' + settings.en_col + ']');
+        settings.marks[0].values = { wc_category: [settings.st_col, settings.en_col] };
 
-        //Circles (events without duration)
+        //Timepoints (circles)
         settings.marks[1].tooltip =
-            settings.time_scale === 'Study Day'
-                ? 'Event: [' +
-                  settings.event_col +
-                  ']' +
-                  ('\nStudy Day: [' + settings.stdy_col + ']')
-                : 'Event: [' +
-                  settings.event_col +
-                  ']' +
-                  ('\nStudy Date: [' + settings.stdt_col + ']');
-        settings.marks[1].values =
-            settings.time_scale === 'Study Day' ? { wc_category: ['DY'] } : { wc_category: ['DT'] };
-
-        //Define right margin for vertical groupings and to prevent date tick label cutoff.
-        settings.margin.right = settings.y.grouping || settings.time_scale === 'Date' ? 40 : 0;
+            'Event: [' +
+            settings.event_col +
+            ']' +
+            ('\n' + settings.time_scale + ': [' + settings.st_col + ']');
+        settings.marks[1].values = { wc_category: settings.time_unit };
     }
 
     function syncIDtimelineSettings(settings) {
@@ -823,6 +839,7 @@
                 return detail.label;
             })
         };
+
         //Define listing columns and headers if not already defined.
         if (!settings.details_config.hasOwnProperty('cols')) {
             settings.details_config.cols = settings.details.map(function(detail) {
@@ -838,9 +855,9 @@
         var syncedSettings = clone(settings);
 
         //Clinical timelines
+        syncTimeScaleSettings(syncedSettings);
         syncRendererSpecificSettings(syncedSettings);
         syncWebchartsSettings(syncedSettings);
-        syncTimeScaleSettings(syncedSettings);
 
         //ID timeline
         syncedSettings.IDtimelineSettings = clone(syncedSettings);
@@ -863,7 +880,8 @@
         {
             type: 'dropdown',
             option: 'time_scale',
-            values: ['Study Day', 'Date'],
+            values: ['day', 'date'],
+            relabels: ['Day', 'Date'],
             label: '',
             description: 'X-axis scale',
             require: true
@@ -922,6 +940,71 @@
         syncControls: syncControls
     };
 
+    function manipulateData() {
+        var _this = this;
+
+        this.initial_data.forEach(function(d, i) {
+            var has_stdt = d.hasOwnProperty(_this.config.stdt_col),
+                has_endt = d.hasOwnProperty(_this.config.endt_col),
+                has_stdy = d.hasOwnProperty(_this.config.stdy_col),
+                has_endy = d.hasOwnProperty(_this.config.endy_col);
+
+            //Set to an empty string invalid date and day values.
+            if (has_stdt) {
+                if (!d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]))
+                    d[_this.config.stdt_col] = '';
+            }
+            if (has_endt) {
+                if (!d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]))
+                    d[_this.config.endt_col] = d[_this.config.stdt_col];
+            }
+            if (has_stdy) {
+                if (!/^ *\d+ *$/.test(d[_this.config.stdy_col])) d[_this.config.stdy_col] = '';
+            }
+            if (has_endy) {
+                if (!/^ *\d+ *$/.test(d[_this.config.endy_col]))
+                    d[_this.config.endy_col] = d[_this.config.stdy_col];
+            }
+
+            //Concatenate date and day values for listing.
+            d.stdtdy =
+                has_stdt && has_stdy
+                    ? d[_this.config.stdt_col] + ' (' + d[_this.config.stdy_col] + ')'
+                    : d[_this.config.stdt_col] || d[_this.config.stdy_col];
+            d.endtdy =
+                has_endt && has_endy
+                    ? d[_this.config.endt_col] + ' (' + d[_this.config.endy_col] + ')'
+                    : d[_this.config.endt_col] || d[_this.config.endy_col];
+        });
+    }
+
+    function cleanData() {
+        var _this = this;
+
+        //Remove records with insufficient data (this.wide_data should only be defined on initialization).
+        this.wide_data = this.initial_data.filter(function(d) {
+            return d[_this.config.st_col] !== '';
+        });
+
+        //Warn user of removed records.
+        if (this.wide_data.length < this.initial_data.length) {
+            if (this.config.time_scale === 'day')
+                console.warn(
+                    this.initial_data.length -
+                        this.wide_data.length +
+                        ' records have been removed due to missing or invalid day variable values.'
+                );
+            else if (this.config.time_scale === 'date')
+                console.warn(
+                    this.initial_data.length -
+                        this.wide_data.length +
+                        ' records have been removed due to missing or invalid date variable values that do not match settings.date_format (' +
+                        this.config.date_format +
+                        ')'
+                );
+        }
+    }
+
     /*------------------------------------------------------------------------------------------------\
   Expand a data array to one item per original item per specified column.
 \------------------------------------------------------------------------------------------------*/
@@ -944,75 +1027,74 @@
     function defineData() {
         var _this = this;
 
-        //Remove records with insufficient data (this.wide_data should only be defined on initialization).
-        if (!this.hasOwnProperty('wide_data')) {
-            this.wide_data = this.raw_data.filter(
-                function(d) {
-                    return (
-                        !(
-                            d.hasOwnProperty(_this.config.stdy_col) &&
-                            d[_this.config.stdy_col] === ''
-                        ) &&
-                        !(
-                            d.hasOwnProperty(_this.config.endy_col) &&
-                            d[_this.config.endy_col] === ''
-                        ) &&
-                        !(
-                            d.hasOwnProperty(_this.config.stdt_col) &&
-                            d[_this.config.stdt_col] === ''
-                        ) &&
-                        !(
-                            d.hasOwnProperty(_this.config.endt_col) &&
-                            d[_this.config.endt_col] === ''
-                        ) &&
-                        !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
-                        !/^\s*$/.test(d[_this.config.event_col])
-                    );
-                } // remove records with missing [event_col]
-            );
-
-            //Warn user of removed records.
-            if (this.wide_data.length < this.raw_data.length) {
-                console.warn(
-                    this.raw_data.length -
-                        this.wide_data.length +
-                        ' records have been removed due to invalid data.\nPossible issues include\n  - missing or invalid study day variable values\n  - missing or invalid date variable values\n  - date variable values that do not match settings.date_format (' +
-                        this.config.date_format +
-                        ')\n$  - missing identifiers or event types'
-                );
-            }
-        }
-
         //Separate out timepoints and time intervals.
         var timepoints = this.wide_data
                 .filter(function(d) {
-                    return (
-                        d[_this.config.stdy_col] === d[_this.config.endy_col] ||
-                        d[_this.config.stdt_col] === d[_this.config.endt_col]
-                    );
+                    return d[_this.config.st_col] === d[_this.config.en_col];
                 })
                 .map(function(d) {
-                    d.wc_category = _this.config.time_scale === 'Study Day' ? 'DY' : 'DT';
-                    d.wc_value =
-                        _this.config.time_scale === 'Study Day'
-                            ? d[_this.config.stdy_col]
-                            : d[_this.config.stdt_col];
+                    d.wc_category = _this.config.time_unit;
+                    d.wc_value = d[_this.config.st_col];
+
                     return d;
                 }),
             timeIntervals = lengthenRaw(
                 this.wide_data.filter(function(d) {
-                    return (
-                        d[_this.config.stdy_col] !== d[_this.config.endy_col] ||
-                        d[_this.config.stdt_col] !== d[_this.config.endt_col]
-                    );
+                    return d[_this.config.st_col] !== d[_this.config.en_col];
                 }),
-                this.config.time_scale === 'Study Day'
-                    ? [this.config.stdy_col, this.config.endy_col]
-                    : [this.config.stdt_col, this.config.endt_col]
+                [this.config.st_col, this.config.en_col]
             );
 
         this.long_data = d3.merge([timepoints, timeIntervals]);
         this.raw_data = this.long_data;
+    }
+
+    function setDefaultTimeRanges() {
+        var _this = this;
+
+        this.config.day_range =
+            this.config.day_range instanceof Array &&
+            this.config.day_range.length === 2 &&
+            this.config.day_range[0].toString() !== this.config.day_range[1].toString() &&
+            this.config.day_range.every(function(day) {
+                return Number.isInteger(+day);
+            })
+                ? this.config.day_range.map(function(day) {
+                      return +day;
+                  })
+                : [
+                      d3.min(this.initial_data, function(d) {
+                          return +d[_this.config.stdy_col];
+                      }),
+                      d3.max(this.raw_data, function(d) {
+                          return +d[_this.config.endy_col];
+                      })
+                  ];
+
+        this.config.date_range =
+            this.config.date_range instanceof Array &&
+            this.config.date_range.length === 2 &&
+            this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
+            this.config.date_range.every(function(date) {
+                return date instanceof Date || d3.time.format(_this.config.date_format).parse(date);
+            })
+                ? this.config.date_range.map(function(date) {
+                      return date instanceof Date
+                          ? date
+                          : d3.time.format(_this.config.date_format).parse(date);
+                  })
+                : [
+                      d3.min(this.raw_data, function(d) {
+                          return d3.time
+                              .format(_this.config.date_format)
+                              .parse(d[_this.config.stdt_col]);
+                      }),
+                      d3.max(this.raw_data, function(d) {
+                          return d3.time
+                              .format(_this.config.date_format)
+                              .parse(d[_this.config.endt_col]);
+                      })
+                  ];
     }
 
     function handleEventTypes() {
@@ -1020,31 +1102,73 @@
 
         this.allEventTypes = d3
             .set(
-                this.raw_data.map(function(d) {
+                this.initial_data.map(function(d) {
                     return d[_this.config.event_col];
                 })
             )
             .values()
             .sort();
         this.currentEventTypes = this.config.event_types || this.allEventTypes;
-        this.config.color_dom =
-            this.currentEventTypes !== 'All'
-                ? this.currentEventTypes.concat(
-                      this.allEventTypes
-                          .filter(function(eventType) {
-                              return _this.currentEventTypes.indexOf(eventType) === -1;
-                          })
-                          .sort()
-                  )
-                : this.allEventTypes;
+        this.config.color_dom = this.currentEventTypes.concat(
+            this.allEventTypes
+                .filter(function(eventType) {
+                    return _this.currentEventTypes.indexOf(eventType) === -1;
+                })
+                .sort()
+        );
         this.config.legend.order = this.config.color_dom;
     }
 
-    function removeFilters() {
+    function checkTimeScales() {
         var _this = this;
 
         this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
-            if (input.type !== 'subsetter') {
+            if (input.description !== 'X-axis scale') return true;
+            else {
+                var anyDates = _this.initial_data.some(function(d) {
+                        return d.hasOwnProperty(_this.config.stdt_col);
+                    }),
+                    anyDays = _this.initial_data.some(function(d) {
+                        return d.hasOwnProperty(_this.config.stdy_col);
+                    });
+
+                if (!anyDates && !anyDays) {
+                    var errorText =
+                        'The data contain neither ' +
+                        _this.config.stdt_col +
+                        ' nor ' +
+                        _this.config.stdy_col +
+                        '.  Please update the settings object to match the variables in the data.';
+                    _this.wrap
+                        .append('div')
+                        .style('color', 'red')
+                        .html(errorText);
+                    throw new Error(errorText);
+                } else if (!anyDates && _this.config.time_scale === 'date') {
+                    _this.config.time_scale = 'day';
+                    syncTimeScaleSettings(_this.config);
+                    _this.IDtimeline.config.time_scale = 'day';
+                    syncTimeScaleSettings(_this.IDtimeline.config);
+                } else if (!anyDays && _this.config.time_scale === 'day') {
+                    _this.config.time_scale = 'date';
+                    syncTimeScaleSettings(_this.config);
+                    _this.IDtimeline.config.time_scale = 'date';
+                    syncTimeScaleSettings(_this.IDtimeline.config);
+                }
+
+                return anyDates && anyDays;
+            }
+        });
+    }
+
+    function checkOtherControls() {
+        var _this = this;
+
+        this.controls.config.inputs
+            .filter(function(input) {
+                return input.type !== 'subsetter';
+            })
+            .forEach(function(input) {
                 //Set values of Event Type highlighting control to event types present in the data.
                 if (input.description === 'Event highlighting')
                     input.values = _this.config.color_dom;
@@ -1054,7 +1178,17 @@
                     });
 
                 return true;
-            } else if (!_this.raw_data[0].hasOwnProperty(input.value_col)) {
+            });
+
+        checkTimeScales.call(this);
+    }
+
+    function checkFilters() {
+        var _this = this;
+
+        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
+            if (input.type !== 'subsetter') return true;
+            else if (!_this.raw_data[0].hasOwnProperty(input.value_col)) {
                 console.warn(
                     input.value_col + ' filter removed because the variable does not exist.'
                 );
@@ -1096,17 +1230,6 @@
     function onInit() {
         var _this = this;
 
-        this.raw_data.forEach(function(d, i) {
-            if (!/^ *\d+ *$/.test(d[_this.config.stdy_col])) d[_this.config.stdy_col] = '';
-            if (!/^ *\d+ *$/.test(d[_this.config.endy_col]))
-                d[_this.config.endy_col] = d[_this.config.stdy_col];
-            if (!d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]))
-                d[_this.config.stdt_col] = '';
-            if (!d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]))
-                d[_this.config.endt_col] = d[_this.config.stdt_col];
-        });
-
-        //Calculate number of total IDs and number of IDs with any event.
         this.populationDetails = {
             population: d3
                 .set(
@@ -1117,62 +1240,50 @@
                 .values()
         };
         this.populationDetails.N = this.populationDetails.population.length;
+
+        //Instantiate ID details.
         this.IDdetails = {};
 
-        //Remove records with insufficient data.
-        this.wide_data = this.raw_data.filter(
-            function(d) {
-                return (
-                    !(d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] === '') &&
-                    !(d.hasOwnProperty(_this.config.endy_col) && d[_this.config.endy_col] === '') &&
-                    !(d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] === '') &&
-                    !(d.hasOwnProperty(_this.config.endt_col) && d[_this.config.endt_col] === '') &&
-                    !/^\s*$/.test(d[_this.config.id_col]) && // remove records with missing [id_col]
-                    !/^\s*$/.test(d[_this.config.event_col])
-                );
-            } // remove records with missing [event_col]
-        );
+        //Retain initial data array, removing records with missing key variables.
+        this.initial_data = this.raw_data.filter(function(d) {
+            return (
+                !/^\s*$/.test(d[_this.config.id_col]) && !/^\s*$/.test(d[_this.config.event_col])
+            );
+        });
 
-        //Define a record for each start day and stop day.
-        defineData.call(this);
+        //Warn user of removed records.
+        if (this.initial_data.length < this.raw_data.length)
+            console.warn(
+                this.raw_data.length -
+                    this.initial_data.length +
+                    ' records have been removed due to missing identifiers or event types.'
+            );
 
-        //Define x-domain.
-        this.config.study_day_range = this.config.study_day_range || [
-            d3.min(this.raw_data, function(d) {
-                return +d[_this.config.stdy_col];
-            }),
-            d3.max(this.raw_data, function(d) {
-                return +d[_this.config.endy_col];
-            })
-        ];
-        this.config.date_range =
-            this.config.date_range instanceof Array && this.config.date_range.length === 2
-                ? this.config.date_range.map(function(date) {
-                      return date instanceof Date
-                          ? date
-                          : d3.time.format(_this.config.date_format).parse(date);
-                  })
-                : [
-                      d3.min(this.raw_data, function(d) {
-                          return d3.time
-                              .format(_this.config.date_format)
-                              .parse(d[_this.config.stdt_col]);
-                      }),
-                      d3.max(this.raw_data, function(d) {
-                          return d3.time
-                              .format(_this.config.date_format)
-                              .parse(d[_this.config.endt_col]);
-                      })
-                  ];
+        //Standardize invalid day and date values.
+        manipulateData.call(this);
 
         //Default event types to 'All'.
         handleEventTypes.call(this);
 
-        //Remove filters for variables fewer than two levels.
-        removeFilters.call(this);
+        //Check other control inputs.
+        checkOtherControls.call(this);
+
+        //Check filters for non-existent or single-value variables.
+        checkFilters.call(this);
+
+        //Set default time ranges.
+        setDefaultTimeRanges.call(this);
+        this.config.time_range =
+            this.config.time_scale === 'day' ? this.config.day_range : this.config.date_range;
 
         //Add data-driven tooltips.
         addDataDrivenTooltips.call(this);
+
+        //Remove unusable data.
+        cleanData.call(this);
+
+        //Define a record for each start day and stop day.
+        defineData.call(this);
     }
 
     function enableDisableControls() {
@@ -1251,6 +1362,70 @@
             .focus();
     }
 
+    function detailsLayout() {
+        var _this = this;
+
+        //Add container for population details.
+        this.populationDetails.wrap = this.leftSide
+            .insert('div', ':first-child')
+            .classed('annotation population-details', true);
+
+        //Add container for ID characteristics.
+        this.IDdetails.wrap = this.leftSide
+            .insert('div', ':first-child')
+            .classed('annotation ID-details hidden', true);
+        this.IDdetails.wrap
+            .selectAll('div.characteristic')
+            .data(this.config.id_characteristics)
+            .enter()
+            .append('div')
+            .classed('characteristic', true)
+            .html(function(d) {
+                return d.label + ": <span id = '" + d.value_col + "'></span>";
+            });
+
+        //Add back button to return from ID timeline to clinical timelines.
+        this.backButton = this.IDdetails.wrap
+            .insert('div', ':first-child')
+            .classed('back-button hidden', true);
+        this.backButton
+            .append('button')
+            .html('&#8592; Back')
+            .on('click', function() {
+                backButton.call(_this);
+            });
+    }
+
+    function controlGroupLayout() {
+        var context = this;
+
+        this.controls.wrap.selectAll('.control-group').each(function(d) {
+            var controlGroup = d3.select(this),
+                label = controlGroup.select('.control-label'),
+                description = controlGroup.select('.span-description'),
+                container = controlGroup.append('div').classed('label-description', true);
+
+            controlGroup.attr('class', controlGroup.attr('class') + ' ' + d.type);
+
+            container.node().appendChild(label.node());
+            container.node().appendChild(description.node());
+
+            //Add horizontal rule to group controls and filters.
+            if (d.value_col === context.config.id_col)
+                context.controls.wrap
+                    .insert('div', ':first-child')
+                    .classed('controls horizontal-rule', true)
+                    .text('Controls');
+            else if (d.option === 'y.grouping') {
+                var filterRule = context.controls.wrap
+                    .append('div')
+                    .classed('filters horizontal-rule', true)
+                    .text('Filters');
+                context.controls.wrap.node().insertBefore(filterRule.node(), this.nextSibling);
+            }
+        });
+    }
+
     function drawIDtimeline() {
         var _this = this;
 
@@ -1308,16 +1483,19 @@
         );
     }
 
-    function IDchange(select$$1, d) {
-        var filter = this.filters.filter(function(filter) {
-            return filter.col === d.value_col;
-        })[0];
+    function IDchange(select$$1) {
+        var _this = this;
 
-        //Update currently selected ID and toggle view.
-        this.selected_id = filter.val !== 'All' ? filter.val : null;
+        this.selected_id = d3
+            .select(select$$1)
+            .select('option:checked')
+            .text();
+        this.filters.filter(function(filter) {
+            return filter.col === _this.config.id_col;
+        })[0].val = this.selected_id;
 
         //Redraw.
-        if (this.selected_id && this.selected_id !== 'All') {
+        if (this.selected_id !== 'All') {
             drawIDtimeline.call(this);
         } else {
             delete this.selected_id;
@@ -1349,14 +1527,25 @@
         enableDisableControls.call(this);
     }
 
-    function eventTypeChange(select$$1, d) {
-        var filter = this.filters.filter(function(filter) {
-            return filter.col === d.value_col;
-        })[0];
+    function eventTypeChange(select$$1) {
+        var _this = this;
 
-        //Re-draw ID timeline if in ID timeline view.
-        this.currentEventTypes = filter.val;
+        this.currentEventTypes = d3
+            .select(select$$1)
+            .selectAll('select option:checked')
+            .pop()
+            .map(function(d) {
+                return d.textContent;
+            });
+        this.filters.filter(function(filter) {
+            return filter.col === _this.config.event_col;
+        })[0].val = this.currentEventTypes;
+        this.wrap.selectAll('.legend-item').classed('selected', function(d) {
+            return _this.currentEventTypes.indexOf(d.label) > -1;
+        });
+
         if (this.selected_id) drawIDtimeline.call(this);
+        else this.draw();
     }
 
     function augmentFilters() {
@@ -1374,27 +1563,26 @@
                 })
                 .classed('ID', function(d) {
                     return d.value_col === _this.config.id_col;
-                });
-
-        //Set to selected event types specified in settings.event_types and handle clinical timelines and ID timeline toggle.
-        filters
-            //Highlight selected event types in select.
-            .each(function(d) {
-                if (d.value_col === context.config.event_col)
-                    d3
-                        .select(this)
-                        .selectAll('option')
-                        .property('selected', function(di) {
-                            return context.currentEventTypes instanceof Array
-                                ? context.currentEventTypes.indexOf(di) > -1
-                                : true;
-                        });
-            })
-            .on('change', function(d) {
-                if (d.value_col === context.config.id_col) IDchange.call(context, this, d);
-                else if (d.value_col === context.config.event_col)
-                    eventTypeChange.call(context, this, d);
+                }),
+            IDfilter = filters.filter(function(filter) {
+                return filter.value_col === _this.config.id_col;
+            }),
+            eventTypeFilter = filters.filter(function(filter) {
+                return filter.value_col === _this.config.event_col;
             });
+
+        IDfilter.select('select').on('change', function(d) {
+            IDchange.call(context, this);
+        });
+
+        eventTypeFilter.selectAll('select.changer option').property('selected', function(di) {
+            return context.currentEventTypes instanceof Array
+                ? context.currentEventTypes.indexOf(di) > -1
+                : true;
+        });
+        eventTypeFilter.select('select').on('change', function(d) {
+            eventTypeChange.call(context, this);
+        });
     }
 
     function eventHighlightingChange(select$$1, d) {
@@ -1411,36 +1599,21 @@
     }
 
     function timeScaleChange(dropdown, d) {
-        var _this = this;
-
         //Update clinical timelines time scale settings
         this.config.time_scale = d3
             .select(dropdown)
             .select('option:checked')
             .text();
         syncTimeScaleSettings(this.config);
+        this.config.time_range =
+            this.config.time_scale === 'day' ? this.config.day_range : this.config.date_range;
 
         //Update ID timeline time scale settings
         this.IDtimeline.config.time_scale = this.config.time_scale;
         syncTimeScaleSettings(this.IDtimeline.config);
 
-        //Update listing time scale settings
-        this.listing.config.cols = this.listing.config.cols.map(function(col) {
-            if (col === _this.config.stdy_col) col = _this.config.stdt_col;
-            else if (col === _this.config.stdt_col) col = _this.config.stdy_col;
-            if (col === _this.config.endy_col) col = _this.config.endt_col;
-            else if (col === _this.config.endt_col) col = _this.config.endy_col;
-
-            return col;
-        });
-        this.listing.config.headers = this.listing.config.headers.map(function(header) {
-            if (header === 'Start Day') header = 'Start Date';
-            else if (header === 'Start Date') header = 'Start Day';
-            if (header === 'Stop Day') header = 'Stop Date';
-            else if (header === 'Stop Date') header = 'Stop Day';
-
-            return header;
-        });
+        //Remove records without time data.
+        cleanData.call(this);
 
         //Redefine data.
         defineData.call(this);
@@ -1515,67 +1688,19 @@
             });
     }
 
-    function onLayout() {
-        var _this = this;
+    function topXaxis() {
+        this.svg
+            .append('g')
+            .classed('x-top axis linear', true)
+            .append('text')
+            .classed('axis-title top', true);
+    }
 
-        var context = this;
+    function onLayout() {
+        detailsLayout.call(this);
 
         //Move control labels and descriptions inside a div to display them vertically, label on top of description.
-        this.controls.wrap.selectAll('.control-group').each(function(d) {
-            var controlGroup = d3.select(this),
-                label = controlGroup.select('.control-label'),
-                description = controlGroup.select('.span-description'),
-                container = controlGroup.append('div').classed('label-description', true);
-
-            controlGroup.attr('class', controlGroup.attr('class') + ' ' + d.type);
-
-            container.node().appendChild(label.node());
-            container.node().appendChild(description.node());
-
-            //Add horizontal rule to group controls and filters.
-            if (d.value_col === context.config.id_col)
-                context.controls.wrap
-                    .insert('div', ':first-child')
-                    .classed('controls horizontal-rule', true)
-                    .text('Controls');
-            else if (d.option === 'y.grouping') {
-                var filterRule = context.controls.wrap
-                    .append('div')
-                    .classed('filters horizontal-rule', true)
-                    .text('Filters');
-                context.controls.wrap.node().insertBefore(filterRule.node(), this.nextSibling);
-            }
-        });
-
-        //Add container for population details.
-        this.populationDetails.wrap = this.leftSide
-            .insert('div', ':first-child')
-            .classed('annotation population-details', true);
-
-        //Add container for ID characteristics.
-        this.IDdetails.wrap = this.leftSide
-            .insert('div', ':first-child')
-            .classed('annotation ID-details hidden', true);
-        this.IDdetails.wrap
-            .selectAll('div.characteristic')
-            .data(this.config.id_characteristics)
-            .enter()
-            .append('div')
-            .classed('characteristic', true)
-            .html(function(d) {
-                return d.label + ": <span id = '" + d.value_col + "'></span>";
-            });
-
-        //Add back button to return from ID timeline to clinical timelines.
-        this.backButton = this.IDdetails.wrap
-            .insert('div', ':first-child')
-            .classed('back-button hidden', true);
-        this.backButton
-            .append('button')
-            .html('&#8592; Back')
-            .on('click', function() {
-                backButton.call(_this);
-            });
+        controlGroupLayout.call(this);
 
         //Add additional functionality to filter event listeners.
         augmentFilters.call(this);
@@ -1584,11 +1709,7 @@
         augmentOtherControls.call(this);
 
         //Add top x-axis.
-        this.svg
-            .append('g')
-            .classed('x-top axis linear', true)
-            .append('text')
-            .classed('axis-title top', true);
+        topXaxis.call(this);
     }
 
     function defineFilteredData() {
@@ -1596,7 +1717,7 @@
 
         //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
         //addition to the current filter selections.
-        this.filtered_long_data = this.raw_data.filter(function(d) {
+        this.filtered_long_data = this.long_data.filter(function(d) {
             var filtered = false;
 
             _this.filters.forEach(function(di) {
@@ -1691,18 +1812,8 @@
                 };
 
                 IDobject.dataInsideTimeRange = IDobject.data.filter(function(d) {
-                    var st =
-                            _this.config.time_scale === 'Study Day'
-                                ? +d[_this.config.stdy_col]
-                                : d3.time
-                                      .format(_this.config.date_format)
-                                      .parse(d[_this.config.stdt_col]),
-                        en =
-                            _this.config.time_scale === 'Study Day'
-                                ? +d[_this.config.endy_col]
-                                : d3.time
-                                      .format(_this.config.date_format)
-                                      .parse(d[_this.config.endt_col]),
+                    var st = _this.config.time_function(d[_this.config.st_col]),
+                        en = _this.config.time_function(d[_this.config.en_col]),
                         stInsideTimeRange =
                             _this.config.x.domain[0] <= st && st <= _this.config.x.domain[1],
                         // start is within the time range
@@ -1764,93 +1875,70 @@
     function defineGroupingData() {
         var _this = this;
 
-        //Capture each grouping and corresponding array of IDs.
-        this.groupings = d3
-            .set(
-                this.longDataInsideTimeRange.map(function(d) {
-                    return d[_this.config.y.grouping];
-                })
-            )
-            .values()
-            .map(function(d, i) {
-                var groupingObject = {
-                    key: d,
-                    IDs: []
-                };
+        if (this.config.y.grouping) {
+            //Capture each grouping and corresponding array of IDs.
+            this.groupings = d3
+                .set(
+                    this.longDataInsideTimeRange.map(function(d) {
+                        return d[_this.config.y.grouping];
+                    })
+                )
+                .values()
+                .map(function(d, i) {
+                    var groupingObject = {
+                        key: d,
+                        IDs: []
+                    };
 
-                if (_this.config.grouping_direction === 'horizontal') {
-                    //Define datum for each grouping that looks like actual data.
-                    for (var variable in _this.raw_data[0]) {
-                        if (
-                            [
-                                _this.config.id_col,
-                                _this.config.event_col,
-                                _this.config.seq_col,
-                                _this.config.y.grouping
-                            ].indexOf(variable) === -1
-                        )
-                            groupingObject[variable] = '';
-                        else if (variable === _this.config.id_col)
-                            groupingObject[_this.config.id_col] = d;
-                        else if (variable === _this.config.event_col)
-                            groupingObject[_this.config.event_col] = 'Grouping';
-                        else if (variable === _this.config.seq_col)
-                            groupingObject[_this.config.seq_col] = '1';
-                        else if (variable === _this.config.y.grouping)
-                            groupingObject[_this.config.y.grouping] = d;
+                    if (_this.config.grouping_direction === 'horizontal') {
+                        //Define datum for each grouping that looks like actual data.
+                        for (var variable in _this.raw_data[0]) {
+                            if (
+                                [
+                                    _this.config.id_col,
+                                    _this.config.event_col,
+                                    _this.config.seq_col,
+                                    _this.config.y.grouping
+                                ].indexOf(variable) === -1
+                            )
+                                groupingObject[variable] = '';
+                            else if (variable === _this.config.id_col)
+                                groupingObject[_this.config.id_col] = d;
+                            else if (variable === _this.config.event_col)
+                                groupingObject[_this.config.event_col] = 'Grouping';
+                            else if (variable === _this.config.seq_col)
+                                groupingObject[_this.config.seq_col] = '1';
+                            else if (variable === _this.config.y.grouping)
+                                groupingObject[_this.config.y.grouping] = d;
+                        }
+
+                        //Define both a start and end datum.
+                        var groupingStart = clone(groupingObject),
+                            groupingEnd = clone(groupingObject);
+
+                        groupingStart.wc_value = _this.config.x.domain[0];
+                        groupingEnd.wc_value = _this.config.x.domain[0];
+
+                        //Push two start and two end data to raw_data to create space to annotate grouping.
+                        var groupingStart1 = clone(groupingStart),
+                            groupingStart2 = clone(groupingStart),
+                            groupingEnd1 = clone(groupingEnd),
+                            groupingEnd2 = clone(groupingEnd);
+
+                        //Placeholder row in which to print grouping.
+                        groupingStart1[_this.config.id_col] = '-g' + i + '-';
+                        _this.raw_data.push(groupingStart1);
+                        _this.longDataInsideTimeRange.push(groupingStart1);
+
+                        groupingEnd1[_this.config.id_col] = '-g' + i + '-';
+                        _this.raw_data.push(groupingEnd1);
+                        _this.longDataInsideTimeRange.push(groupingEnd1);
                     }
 
-                    //Define both a start and end datum.
-                    var groupingStart = clone(groupingObject),
-                        groupingEnd = clone(groupingObject);
-
-                    groupingStart.wc_value = _this.config.x.domain[0];
-                    groupingEnd.wc_value = _this.config.x.domain[0];
-
-                    //Push two start and two end data to raw_data to create space to annotate grouping.
-                    var groupingStart1 = clone(groupingStart),
-                        groupingStart2 = clone(groupingStart),
-                        groupingEnd1 = clone(groupingEnd),
-                        groupingEnd2 = clone(groupingEnd);
-
-                    //Placeholder row in which to print grouping.
-                    groupingStart1[_this.config.id_col] = '-g' + i + 'a';
-                    _this.raw_data.push(groupingStart1);
-                    _this.longDataInsideTimeRange.push(groupingStart1);
-
-                    groupingEnd1[_this.config.id_col] = '-g' + i + 'a';
-                    _this.raw_data.push(groupingEnd1);
-                    _this.longDataInsideTimeRange.push(groupingEnd1);
-                }
-
-                return groupingObject;
-            });
+                    return groupingObject;
+                });
+        } else delete this.groupings;
     }
-
-    function onPreprocess() {
-        this.config.x.domain =
-            this.config.time_scale === 'Study Day'
-                ? this.config.study_day_range
-                : this.config.date_range;
-
-        //Reset raw data array.
-        this.raw_data = this.long_data;
-
-        //Define filtered data irrespective of individual mark filtering.
-        defineFilteredData.call(this);
-
-        //Define population details data.
-        definePopulationDetails.call(this);
-
-        //Define data inside time range.
-        defineDataInsideTimeRange.call(this);
-
-        //Insert groupings into data to draw empty rows in which to draw groupings.
-        if (this.config.y.grouping) defineGroupingData.call(this);
-        else delete this.groupings;
-    }
-
-    function onDatatransform() {}
 
     function sortYdomain() {
         var _this = this;
@@ -1861,7 +1949,7 @@
 
         if (this.config.y.sort === 'earliest') {
             if (this.config.y.grouping) {
-                //Sort IDs by grouping then earliest event start date if y-axis is grouped.
+                //Sort IDs by grouping then earliest event if y-axis is grouped.
                 var nestedData = d3
                     .nest()
                     .key(function(d) {
@@ -1869,11 +1957,7 @@
                     })
                     .rollup(function(d) {
                         return d3.min(d, function(di) {
-                            return _this.config.time_scale === 'Study Day'
-                                ? +di[_this.config.stdy_col]
-                                : d3.time
-                                      .format(_this.config.date_format)
-                                      .parse(di[_this.config.stdt_col]);
+                            return _this.config.time_function(di[_this.config.st_col]);
                         });
                     })
                     .entries(this.longDataInsideTimeRange)
@@ -1903,23 +1987,19 @@
                 });
 
                 //Set y-domain.
-                this.y_dom = nestedData.map(function(d) {
+                this.config.y.domain = nestedData.map(function(d) {
                     return d.key.split('|')[1];
                 });
             } else {
-                //Otherwise sort IDs by earliest event start date.
-                this.y_dom = d3
+                //Otherwise sort IDs by earliest event.
+                this.config.y.domain = d3
                     .nest()
                     .key(function(d) {
                         return d[_this.config.id_col];
                     })
                     .rollup(function(d) {
                         return d3.min(d, function(di) {
-                            return _this.config.time_scale === 'Study Day'
-                                ? +di[_this.config.stdy_col]
-                                : d3.time
-                                      .format(_this.config.date_format)
-                                      .parse(di[_this.config.stdt_col]);
+                            return _this.config.time_function(di[_this.config.st_col]);
                         });
                     })
                     .entries(this.longDataInsideTimeRange)
@@ -1942,7 +2022,7 @@
 
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then alphanumerically if y-axis is grouped.
-                this.y_dom = d3
+                this.config.y.domain = d3
                     .set(
                         this.longDataInsideTimeRange.map(function(d) {
                             return d[_this.config.id_col];
@@ -1963,7 +2043,7 @@
                             : aGrouping < bGrouping ? 1 : alphanumericSort;
                     });
 
-                this.y_dom.forEach(function(d) {
+                this.config.y.domain.forEach(function(d) {
                     _this.groupings
                         .filter(function(grouping) {
                             return (
@@ -1978,7 +2058,10 @@
                 });
             } else {
                 //Otherwise sort IDs alphanumerically.
-                this.y_dom = this.populationDetails.sampleInsideTimeRange.sort(function(a, b) {
+                this.config.y.domain = this.populationDetails.sampleInsideTimeRange.sort(function(
+                    a,
+                    b
+                ) {
                     var alphanumericSort = a > b ? -1 : 1;
 
                     return alphanumericSort;
@@ -1987,21 +2070,28 @@
         }
     }
 
-    function onDraw() {
+    function onPreprocess() {
+        this.config.x.domain = this.config.time_range;
+
+        //Define filtered data irrespective of individual mark filtering.
+        defineFilteredData.call(this);
+
+        //Define population details data.
+        definePopulationDetails.call(this);
+
+        //Define data inside time range.
+        defineDataInsideTimeRange.call(this);
+
+        //Insert groupings into data to draw empty rows in which to draw groupings.
+        defineGroupingData.call(this);
+
+        //Sort y-axis based on `Sort IDs` control selection.
         sortYdomain.call(this);
-
-        //Clear grouping elements.
-        this.svg.selectAll('.grouping').remove();
-
-        //Add right margin for vertical y-axis grouping.
-        if (this.config.grouping_direction === 'vertical') {
-            if (this.config.y.grouping) this.config.margin.right = 40;
-            else delete this.config.margin.right;
-        }
-
-        //Update top x-axis.
-        this.svg.select('g.x-top.axis text.axis-title.top').text(this.config.time_scale);
     }
+
+    function onDatatransform() {}
+
+    function onDraw() {}
 
     function legendFilter() {
         var _this = this;
@@ -2069,11 +2159,7 @@
                 .axis()
                 .scale(this.x)
                 .orient('top')
-                .tickFormat(
-                    this.config.time_scale === 'Date'
-                        ? d3.time.format(this.config.date_display_format)
-                        : d3.format('1d')
-                )
+                .tickFormat(this.config.x_d3format)
                 .innerTickSize(this.xAxis.innerTickSize())
                 .outerTickSize(this.xAxis.outerTickSize())
                 .ticks(this.xAxis.ticks()[0]),
@@ -2088,30 +2174,8 @@
                     ',-' +
                     9 * this.config.margin.top / 16 +
                     ')'
-            );
-    }
-
-    function addStriping() {
-        var context = this;
-        this.svg.selectAll('.ct-stripe').remove();
-        var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
-            d3
-                .select(this)
-                .select('text')
-                .attr('dy', context.y.rangeBand() / 2);
-            d3
-                .select(this)
-                .insert('rect', ':first-child')
-                .attr({
-                    id: d,
-                    x: -context.margin.left,
-                    y: -context.config.marks[0].attributes['stroke-width'],
-                    width: context.plot_width + context.margin.left,
-                    height:
-                        context.y.rangeBand() + context.config.marks[0].attributes['stroke-width']
-                })
-                .classed('ct-stripe', true);
-        });
+            )
+            .text(this.config.x.label);
     }
 
     function tickClick() {
@@ -2120,7 +2184,7 @@
         this.svg
             .selectAll('.y.axis .tick')
             .each(function(d) {
-                if (/^-g\d/.test(d)) d3.select(this).remove();
+                if (/^-g\d+-/.test(d)) d3.select(this).remove();
             })
             .on('click', function(d) {
                 _this.selected_id = d;
@@ -2255,6 +2319,9 @@
     }
 
     function annotateGrouping() {
+        //Clear grouping elements.
+        this.svg.selectAll('.grouping').remove();
+
         if (this.config.y.grouping) {
             this.svg.selectAll('.grouping').remove();
 
@@ -2263,10 +2330,33 @@
         }
     }
 
+    function addStriping() {
+        var context = this;
+        this.svg.selectAll('.ct-stripe').remove();
+        var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
+            d3
+                .select(this)
+                .select('text')
+                .attr('dy', context.y.rangeBand() / 2);
+            d3
+                .select(this)
+                .insert('rect', ':first-child')
+                .attr({
+                    id: d,
+                    x: -context.margin.left,
+                    y: -context.config.marks[0].attributes['stroke-width'],
+                    width: context.plot_width + context.margin.left,
+                    height:
+                        context.y.rangeBand() + context.config.marks[0].attributes['stroke-width']
+                })
+                .classed('ct-stripe', true);
+        });
+    }
+
     function offsetCircles(mark, markData) {
         var _this = this;
 
-        //Nest data by study day and filter on any nested object with more than one datum.
+        //Nest data by timepoint and filter on any nested object with more than one datum.
         var overlapping = d3
             .nest()
             .key(function(d) {
@@ -2285,10 +2375,10 @@
                 return d.values.n > 1;
             });
 
-        //For each study day with more than one event...
+        //For each timepoint with more than one event...
         overlapping.forEach(function(d) {
             var x = d.key.split('|')[0],
-                // study day
+                // timepoint
                 y = d.key.split('|')[1]; // ID
 
             //For each overlapping point...
@@ -2305,7 +2395,7 @@
     function offsetLines(mark, markData) {
         var _this = this;
 
-        //Nest data by study day and filter on any nested object with more than one datum.
+        //Nest data by time interval and filter on any nested object with more than one datum.
         var IDdata = d3
             .nest()
             .key(function(d) {
@@ -2316,7 +2406,7 @@
             })
             .rollup(function(d) {
                 //Expose start and end point of line.
-                return _this.config.time_scale === 'Study Day'
+                return _this.config.time_scale === 'day'
                     ? {
                           x1: +d[0].values[0].key,
                           x2: +d[0].values[1].key
@@ -2473,10 +2563,97 @@
         });
     }
 
+    function highlightMarks() {
+        var _this = this;
+
+        var context = this;
+
+        //Clear line overlays.
+        this.svg.selectAll('.highlight-overlay').remove();
+
+        //Highlight legend.
+        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
+            return d.label === _this.config.event_highlighted;
+        });
+
+        //Select marks.
+        var highlightedMarks = this.svg
+            .selectAll('.wc-data-mark, .ongoing-event')
+            .classed('highlighted', function(d) {
+                return d.key.indexOf(_this.config.event_highlighted) > -1;
+            })
+            .filter(function(d) {
+                return d.key.indexOf(_this.config.event_highlighted) > -1;
+            });
+
+        //Highlight Lines.
+        var paths = highlightedMarks.filter(function() {
+            return (
+                this.tagName === 'path' && this.getAttribute('class').indexOf('highlighted') > -1
+            );
+        });
+        paths.each(function(d, i) {
+            var g = d3.select(this.parentNode),
+                x1 = context.x(context.config.time_function(d.values[0].key)),
+                x2 = context.x(context.config.time_function(d.values[1].key)),
+                y =
+                    context.y(
+                        d.values[0].values.raw[0][
+                            context.config.y.column === context.config.id_col
+                                ? context.config.id_col
+                                : context.config.seq_col
+                        ]
+                    ) +
+                    context.y.rangeBand() / 2,
+                color = context.config.event_highlight_color,
+                line = g
+                    .append('line')
+                    .classed('highlight-overlay', true)
+                    .attr({
+                        x1: x1,
+                        x2: x2,
+                        y1: y,
+                        y2: y,
+                        stroke: color
+                    });
+
+            if (d.ongoing === context.config.ongo_val) {
+                var arrow = [[x2 + 7, y], [x2, y - 2.5], [x2, y + 2.5]],
+                    polygon = g
+                        .append('polygon')
+                        .datum(d)
+                        .classed('highlighted ongoing-event', true)
+                        .attr({
+                            points: arrow
+                                .map(function(coordinate) {
+                                    return coordinate.join(',');
+                                })
+                                .join(' '),
+                            fill: color
+                        });
+            }
+        });
+
+        //Highlight circles.
+        var circles = highlightedMarks.filter(function() {
+            return (
+                this.tagName === 'circle' && this.getAttribute('class').indexOf('highlighted') > -1
+            );
+        });
+        circles.attr({
+            stroke: function stroke(d) {
+                return _this.colorScale(d.values.raw[0][_this.config.event_col]);
+            },
+            fill: function fill(d) {
+                return _this.config.event_highlight_color;
+            }
+        });
+    }
+
     function drawOngoingMarks() {
         var _this = this;
 
-        if (this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
+        if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
             var context = this;
 
             this.svg.selectAll('.ongoing-event').remove();
@@ -2488,11 +2665,7 @@
                 .each(function(d) {
                     var g = d3.select(this),
                         endpoint = d.values[1],
-                        x = context.x(
-                            context.config.time_scale === 'Study Day'
-                                ? +endpoint.key
-                                : new Date(endpoint.key)
-                        ),
+                        x = context.x(context.config.time_function(endpoint.key)),
                         y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
                         color = context.colorScale(
                             endpoint.values.raw[0][context.config.event_col]
@@ -2503,206 +2676,22 @@
                         .append('polygon')
                         .datum(d)
                         .classed('ongoing-event', true)
-                        .attr({
-                            points: arrow
-                                .map(function(coordinate) {
-                                    return coordinate.join(',');
-                                })
-                                .join(' '),
-                            fill: color,
-                            stroke: color,
-                            'clip-path': 'url(#' + context.id + ')'
-                        });
-                });
-        }
-    }
-
-    function highlightMarks() {
-        var _this = this;
-
-        var context = this;
-
-        this.svg.selectAll('.highlight-overlay').remove();
-
-        //Highlight legend.
-        this.wrap.selectAll('.legend-item').classed('highlighted', function(d) {
-            return d.label === _this.config.event_highlighted;
-        });
-
-        //Highlight marks.
-        var highlightedMarks = this.svg
-                .selectAll('.wc-data-mark, .ongoing-event')
-                .classed('highlighted', function(d) {
-                    return d.key.indexOf(_this.config.event_highlighted) > -1;
-                })
-                .filter(function(d) {
-                    return d.key.indexOf(_this.config.event_highlighted) > -1;
-                }),
-            paths = highlightedMarks
-                .filter(function() {
-                    return (
-                        this.tagName === 'path' &&
-                        this.getAttribute('class').indexOf('highlighted') > -1
-                    );
-                })
-                .each(function(d, i) {
-                    var g = d3.select(this.parentNode),
-                        x1 = context.x(
-                            context.config.time_scale === 'Study Day'
-                                ? +d.values[0].key
-                                : new Date(d.values[0].key)
-                        ),
-                        x2 = context.x(
-                            context.config.time_scale === 'Study Day'
-                                ? +d.values[1].key
-                                : new Date(d.values[1].key)
-                        ),
-                        y =
-                            context.y(
-                                d.values[0].values.raw[0][
-                                    context.parent ? context.config.seq_col : context.config.id_col
-                                ]
-                            ) +
-                            context.y.rangeBand() / 2,
-                        color = context.config.event_highlight_color,
-                        line = g
-                            .append('line')
-                            .classed('highlight-overlay', true)
-                            .attr({
-                                x1: x1,
-                                x2: x2,
-                                y1: y,
-                                y2: y,
-                                stroke: color,
-                                'clip-path': 'url(#' + context.id + ')'
-                            });
-
-                    if (d.ongoing === context.config.ongo_val) {
-                        var arrow = [[x2 + 7, y], [x2, y - 2.5], [x2, y + 2.5]],
-                            polygon = g
-                                .append('polygon')
-                                .datum(d)
-                                .classed('highlighted ongoing-event', true)
-                                .attr({
+                        .attr(
+                            defineProperty(
+                                {
+                                    'clip-path': 'url(#1)',
                                     points: arrow
                                         .map(function(coordinate) {
                                             return coordinate.join(',');
                                         })
                                         .join(' '),
                                     fill: color,
-                                    'clip-path': 'url(#' + context.id + ')'
-                                });
-                    }
-                }),
-            circles = highlightedMarks
-                .filter(function() {
-                    return (
-                        this.tagName === 'circle' &&
-                        this.getAttribute('class').indexOf('highlighted') > -1
-                    );
-                })
-                .attr({
-                    stroke: function stroke(d) {
-                        return _this.colorScale(d.values.raw[0][_this.config.event_col]);
-                    },
-                    fill: function fill(d) {
-                        return _this.config.event_highlight_color;
-                    }
-                });
-    }
-
-    function drawReferenceLines() {
-        var _this = this;
-
-        if (this.config.reference_lines) {
-            this.svg.select('.reference-lines').remove();
-            var referenceLinesGroup = this.svg
-                .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
-                .classed('reference-lines', true);
-
-            //Append reference line for each item in config.reference_lines.
-            this.config.reference_lines
-                .filter(function(reference_line) {
-                    return reference_line.time_scale === _this.config.time_scale;
-                })
-                .forEach(function(reference_line, i) {
-                    var referenceLineGroup = referenceLinesGroup
-                            .append('g')
-                            .classed('reference-line', true)
-                            .attr('id', 'reference-line-' + i),
-                        timepoint =
-                            _this.config.time_scale === 'Study Day'
-                                ? +reference_line.timepoint
-                                : d3.time
-                                      .format(_this.config.date_format)
-                                      .parse(reference_line.timepoint),
-                        visibleReferenceLine = referenceLineGroup
-                            .append('line')
-                            .classed('visible-reference-line', true)
-                            .attr({
-                                x1: _this.x(timepoint),
-                                x2: _this.x(timepoint),
-                                y1: 0,
-                                y2: _this.plot_height,
-                                'clip-path': 'url(#' + _this.id + ')'
-                            }),
-                        invisibleReferenceLine = referenceLineGroup
-                            .append('line')
-                            .classed('invisible-reference-line', true)
-                            .attr({
-                                x1: _this.x(timepoint),
-                                x2: _this.x(timepoint),
-                                y1: 0,
-                                y2: _this.plot_height,
-                                'clip-path': 'url(#' + _this.id + ')'
-                            }),
-                        // invisible reference line has no dasharray and is much thicker to make hovering easier
-                        direction =
-                            timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2 ? 'right' : 'left',
-                        referenceLineLabel = referenceLineGroup
-                            .append('text')
-                            .classed('reference-line-label', true)
-                            .attr({
-                                x: _this.x(timepoint),
-                                y: 0,
-                                'text-anchor': direction === 'right' ? 'beginning' : 'end',
-                                dx: direction === 'right' ? 15 : -15,
-                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1),
-                                'clip-path': 'url(#' + _this.id + ')'
-                            })
-                            .text(reference_line.label),
-                        dimensions = referenceLineLabel.node().getBBox(),
-                        referenceLineLabelBox = referenceLineGroup
-                            .insert('rect', '.reference-line-label')
-                            .classed('reference-line-label-box', true)
-                            .attr({
-                                x: dimensions.x - 10,
-                                y: dimensions.y - 5,
-                                width: dimensions.width + 20,
-                                height: dimensions.height + 10,
-                                'clip-path': 'url(#' + _this.id + ')'
-                            });
-
-                    //Display reference line label on hover.
-                    invisibleReferenceLine
-                        .on('mouseover', function() {
-                            visibleReferenceLine.classed('hover', true);
-                            referenceLineLabel.classed('hidden', false);
-                            referenceLineLabelBox.classed('hidden', false);
-                            _this.svg.node().appendChild(referenceLineLabelBox.node());
-                            _this.svg.node().appendChild(referenceLineLabel.node());
-                        })
-                        .on('mouseout', function() {
-                            visibleReferenceLine.classed('hover', false);
-                            referenceLineLabel.classed('hidden', true);
-                            referenceLineLabelBox.classed('hidden', true);
-                            referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
-                            referenceLineGroup.node().appendChild(referenceLineLabel.node());
-                        });
-
-                    //Hide reference labels initially.
-                    referenceLineLabel.classed('hidden', true);
-                    referenceLineLabelBox.classed('hidden', true);
+                                    stroke: color
+                                },
+                                'clip-path',
+                                'url(#' + context.id + ')'
+                            )
+                        );
                 });
         }
     }
@@ -2748,6 +2737,105 @@
         );
     }
 
+    function drawReferenceLines() {
+        var _this = this;
+
+        if (this.config.reference_lines) {
+            this.svg.select('.reference-lines').remove();
+            var referenceLinesGroup = this.svg
+                .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
+                .classed('reference-lines', true);
+
+            //Append reference line for each item in config.reference_lines.
+            this.config.reference_lines
+                .filter(function(reference_line) {
+                    return reference_line.time_scale === _this.config.time_scale;
+                })
+                .forEach(function(reference_line, i) {
+                    var referenceLineGroup = referenceLinesGroup
+                            .append('g')
+                            .classed('reference-line', true)
+                            .attr('id', 'reference-line-' + i),
+                        timepoint = _this.config.time_function(reference_line.timepoint),
+                        x = _this.x(timepoint),
+                        y2 =
+                            _this.plot_height +
+                            (_this.config.y.column === _this.config.id_col
+                                ? _this.y.rangeBand()
+                                : 0),
+                        visibleReferenceLine = referenceLineGroup
+                            .append('line')
+                            .classed('visible-reference-line', true)
+                            .attr({
+                                x1: x,
+                                x2: x,
+                                y1: 0,
+                                y2: y2,
+                                'clip-path': 'url(#' + _this.id + ')'
+                            }),
+                        invisibleReferenceLine = referenceLineGroup
+                            .append('line')
+                            .classed('invisible-reference-line', true)
+                            .attr({
+                                x1: x,
+                                x2: x,
+                                y1: 0,
+                                y2: y2,
+                                'clip-path': 'url(#' + _this.id + ')'
+                            }),
+                        // invisible reference line has no dasharray and is much thicker to make hovering easier
+                        direction =
+                            reference_line.timepoint <= (_this.x_dom[1] - _this.x_dom[0]) / 2
+                                ? 'right'
+                                : 'left',
+                        referenceLineLabel = referenceLineGroup
+                            .append('text')
+                            .classed('reference-line-label', true)
+                            .attr({
+                                x: x,
+                                y: 0,
+                                'text-anchor': direction === 'right' ? 'beginning' : 'end',
+                                dx: direction === 'right' ? 15 : -15,
+                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1),
+                                'clip-path': 'url(#' + _this.id + ')'
+                            })
+                            .text(reference_line.label),
+                        dimensions = referenceLineLabel.node().getBBox(),
+                        referenceLineLabelBox = referenceLineGroup
+                            .insert('rect', '.reference-line-label')
+                            .classed('reference-line-label-box', true)
+                            .attr({
+                                x: dimensions.x - 10,
+                                y: dimensions.y - 5,
+                                width: dimensions.width + 20,
+                                height: dimensions.height + 10,
+                                'clip-path': 'url(#' + _this.id + ')'
+                            });
+
+                    //Display reference line label on hover.
+                    invisibleReferenceLine
+                        .on('mouseover', function() {
+                            visibleReferenceLine.classed('hover', true);
+                            referenceLineLabel.classed('hidden', false);
+                            referenceLineLabelBox.classed('hidden', false);
+                            _this.svg.node().appendChild(referenceLineLabelBox.node());
+                            _this.svg.node().appendChild(referenceLineLabel.node());
+                        })
+                        .on('mouseout', function() {
+                            visibleReferenceLine.classed('hover', false);
+                            referenceLineLabel.classed('hidden', true);
+                            referenceLineLabelBox.classed('hidden', true);
+                            referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
+                            referenceLineGroup.node().appendChild(referenceLineLabel.node());
+                        });
+
+                    //Hide reference labels initially.
+                    referenceLineLabel.classed('hidden', true);
+                    referenceLineLabelBox.classed('hidden', true);
+                });
+        }
+    }
+
     function IEsucks() {
         if (!!document.documentMode)
             this.svg.selectAll('.line,.point').each(function(d) {
@@ -2764,14 +2852,14 @@
         //Draw second x-axis at top of chart.
         drawTopXaxis.call(this);
 
-        //Distinguish each timeline with striping.
-        addStriping.call(this);
-
         //Draw second chart when y-axis tick label is clicked.
         tickClick.call(this);
 
         //Annotate grouping.
         annotateGrouping.call(this);
+
+        //Distinguish each timeline with striping.
+        addStriping.call(this);
 
         //Offset overlapping marks.
         offsetOverlappingMarks.call(this);
@@ -2782,11 +2870,14 @@
         //Highlight marks.
         highlightMarks.call(this);
 
-        //Draw reference lines.
-        drawReferenceLines.call(this);
+        //Draw ongoing marks.
+        drawOngoingMarks.call(this);
 
         //Offset bottom x-axis to prevent overlap with final ID.
         offsetBottomXaxis.call(this);
+
+        //Draw reference lines.
+        drawReferenceLines.call(this);
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
@@ -2809,6 +2900,7 @@
 
         this.config.color_dom = this.parent.clinicalTimelines.config.color_dom;
         this.config.legend.order = this.parent.clinicalTimelines.config.legend.order;
+        this.config.x.domain = null;
         this.config.marks.forEach(function(mark) {
             mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
         });
@@ -2834,14 +2926,14 @@
                 return x instanceof Date ? x.getTime() : x;
             }),
             timeRange =
-                this.parent.clinicalTimelines.config.time_scale === 'Study Day'
-                    ? this.parent.clinicalTimelines.config.study_day_range
+                this.parent.clinicalTimelines.config.time_scale === 'day'
+                    ? this.parent.clinicalTimelines.config.day_range
                     : this.parent.clinicalTimelines.config.date_range.map(function(dt) {
                           return dt.getTime();
                       }),
             timeRangeText =
-                this.config.time_scale === 'Study Day'
-                    ? this.parent.clinicalTimelines.config.study_day_range.map(function(dy) {
+                this.config.time_scale === 'day'
+                    ? this.parent.clinicalTimelines.config.day_range.map(function(dy) {
                           return dy.toString();
                       })
                     : this.parent.clinicalTimelines.config.date_range.map(function(dt) {

@@ -51,7 +51,7 @@
         }
     ,"event_highlighted":
         {"title": "Highlighted Event"
-        ,"description": "highlighted event type"
+        ,"description": "initial highlighted event type"
         ,"default": null
         ,"type": "string"
         }
@@ -86,7 +86,7 @@
 
 
     ,"groupings":
-        {"title": "ID grouping"
+        {"title": "ID Grouping"
         ,"description": "an array of categorical ID characteristic variables with which to group IDs"
         ,"type": "array"
         ,"items":
@@ -104,16 +104,20 @@
             }
         }
     ,"grouping_initial":
-        {"title": "Initial ID grouping"
+        {"title": "Initial ID Grouping"
         ,"description": "initial ID grouping variable"
         ,"default": null
         ,"type": "string"
         }
     ,"grouping_direction":
-        {"title": "Grouping annotation placement"
-        ,"description": "grouping annotation placement, 'horizontal' or 'vertical'"
+        {"title": "Grouping Annotation Placement"
+        ,"description": "grouping annotation placement"
         ,"default": "horizontal"
         ,"type": "string"
+        ,"enum":
+            ["horizontal"
+            ,"vertical"
+            ]
         }
 
 
@@ -122,29 +126,10 @@
         {"title": "Time Scale"
         ,"description": "the time scale on which to plot events"
         ,"type": "string"
-        ,"default": "Study Day"
+        ,"default": "date"
         ,"enum":
-            ["Study Day"
-            ,"Date"]
-        }
-    ,"stdy_col":
-        {"title": "Start Day"
-        ,"description": "start day variable name"
-        ,"default": "STDY"
-        ,"type": "string"
-        }
-    ,"endy_col":
-        {"title": "End Day"
-        ,"description": "end day variable name"
-        ,"default": "ENDY"
-        ,"type": "string"
-        }
-    ,"study_day_range":
-        {"title": "Study Day Range"
-        ,"description": "start and stop days with which to define the x-axis domain"
-        ,"type": "array"
-        ,"items":
-            {"type": "number"}
+            ["date"
+            ,"day"]
         }
     ,"stdt_col":
         {"title": "Start Date"
@@ -162,12 +147,14 @@
         {"title": "Date Range"
         ,"description": "start and stop dates with which to define the x-axis domain and which match settings.date_format"
         ,"type": "array"
+        ,"minItems": 2
+        ,"maxItems": 2
         ,"items":
             {"type": "string"}
         }
     ,"date_format":
         {"title": "Input Date Format"
-        ,"description": "date format of input variables"
+        ,"description": "date format of start and stop date variables"
         ,"default": "%Y-%m-%d"
         ,"type": "string"
         }
@@ -176,6 +163,27 @@
         ,"description": "date format of x-axis"
         ,"default": "%Y-%m-%d"
         ,"type": "string"
+        }
+    ,"stdy_col":
+        {"title": "Start Day"
+        ,"description": "start day variable name"
+        ,"default": "STDY"
+        ,"type": "string"
+        }
+    ,"endy_col":
+        {"title": "End Day"
+        ,"description": "end day variable name"
+        ,"default": "ENDY"
+        ,"type": "string"
+        }
+    ,"day_range":
+        {"title": "Day Range"
+        ,"description": "start and stop days with which to define the x-axis domain"
+        ,"type": "array"
+        ,"minItems": 2
+        ,"maxItems": 2
+        ,"items":
+            {"type": "number"}
         }
 
 
@@ -211,12 +219,11 @@
         ,"items":
             {"type": "object"
             ,"properties":
-                {"studyDay":
-                    {"title": "Study day"
-                    ,"type": "number"
-                    }
+                {"timepoint":
+                    {"title": "Timepoint"
+                    ,"type":"string"}
                 ,"label":
-                    {"title": "Reference day description"
+                    {"title": "Reference timepoint description"
                     ,"type": "string"
                     }
                 }
@@ -263,18 +270,22 @@
             ,"searchable":
                 {"title": "Searchable?"
                 ,"type": "boolean"
+                ,"default": true
                 }
             ,"sortable":
                 {"title": "sortable?"
                 ,"type": "boolean"
+                ,"default": true
                 }
             ,"pagination":
                 {"title": "Paginated?"
                 ,"type": "boolean"
+                ,"default": true
                 }
             ,"exportable":
                 {"title": "Exportable?"
                 ,"type": "boolean"
+                ,"default": true
                 }
             }
         }

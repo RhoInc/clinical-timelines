@@ -10,9 +10,9 @@ export default function syncSettings(settings) {
     const syncedSettings = clone(settings);
 
     //Clinical timelines
+    syncTimeScaleSettings(syncedSettings);
     syncRendererSpecificSettings(syncedSettings);
     syncWebchartsSettings(syncedSettings);
-    syncTimeScaleSettings(syncedSettings);
 
     //ID timeline
     syncedSettings.IDtimelineSettings = clone(syncedSettings);

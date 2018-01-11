@@ -18,36 +18,40 @@ export default function drawReferenceLines() {
                         .append('g')
                         .classed('reference-line', true)
                         .attr('id', 'reference-line-' + i),
-                    timepoint =
-                        this.config.time_scale === 'Study Day'
-                            ? +reference_line.timepoint
-                            : time.format(this.config.date_format).parse(reference_line.timepoint),
+                    timepoint = this.config.time_function(reference_line.timepoint),
+                    x = this.x(timepoint),
+                    y2 =
+                        this.plot_height +
+                        (this.config.y.column === this.config.id_col ? this.y.rangeBand() : 0),
                     visibleReferenceLine = referenceLineGroup
                         .append('line')
                         .classed('visible-reference-line', true)
                         .attr({
-                            x1: this.x(timepoint),
-                            x2: this.x(timepoint),
+                            x1: x,
+                            x2: x,
                             y1: 0,
-                            y2: this.plot_height,
+                            y2: y2,
                             'clip-path': `url(#${this.id})`
                         }),
                     invisibleReferenceLine = referenceLineGroup
                         .append('line')
                         .classed('invisible-reference-line', true)
                         .attr({
-                            x1: this.x(timepoint),
-                            x2: this.x(timepoint),
+                            x1: x,
+                            x2: x,
                             y1: 0,
-                            y2: this.plot_height,
+                            y2: y2,
                             'clip-path': `url(#${this.id})`
                         }), // invisible reference line has no dasharray and is much thicker to make hovering easier
-                    direction = timepoint <= (this.x_dom[1] - this.x_dom[0]) / 2 ? 'right' : 'left',
+                    direction =
+                        reference_line.timepoint <= (this.x_dom[1] - this.x_dom[0]) / 2
+                            ? 'right'
+                            : 'left',
                     referenceLineLabel = referenceLineGroup
                         .append('text')
                         .classed('reference-line-label', true)
                         .attr({
-                            x: this.x(timepoint),
+                            x: x,
                             y: 0,
                             'text-anchor': direction === 'right' ? 'beginning' : 'end',
                             dx: direction === 'right' ? 15 : -15,

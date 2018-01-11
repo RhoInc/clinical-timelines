@@ -5,11 +5,7 @@ export default function drawTopXaxis() {
             .axis()
             .scale(this.x)
             .orient('top')
-            .tickFormat(
-                this.config.time_scale === 'Date'
-                    ? time.format(this.config.date_display_format)
-                    : format('1d')
-            )
+            .tickFormat(this.config.x_d3format)
             .innerTickSize(this.xAxis.innerTickSize())
             .outerTickSize(this.xAxis.outerTickSize())
             .ticks(this.xAxis.ticks()[0]),
@@ -24,5 +20,6 @@ export default function drawTopXaxis() {
                 ',-' +
                 9 * this.config.margin.top / 16 +
                 ')'
-        );
+        )
+        .text(this.config.x.label);
 }

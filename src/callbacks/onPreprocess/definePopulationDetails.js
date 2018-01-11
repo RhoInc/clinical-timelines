@@ -12,14 +12,8 @@ export default function definePopulationDetails() {
             };
 
             IDobject.dataInsideTimeRange = IDobject.data.filter(d => {
-                const st =
-                        this.config.time_scale === 'Study Day'
-                            ? +d[this.config.stdy_col]
-                            : time.format(this.config.date_format).parse(d[this.config.stdt_col]),
-                    en =
-                        this.config.time_scale === 'Study Day'
-                            ? +d[this.config.endy_col]
-                            : time.format(this.config.date_format).parse(d[this.config.endt_col]),
+                const st = this.config.time_function(d[this.config.st_col]),
+                    en = this.config.time_function(d[this.config.en_col]),
                     stInsideTimeRange =
                         this.config.x.domain[0] <= st && st <= this.config.x.domain[1], // start is within the time range
                     enInsideTimeRange =

@@ -7,12 +7,12 @@ export default function drawTimeRange() {
     this.svg.select('.time-range').remove();
     const x_dom = this.x_dom.map(x => (x instanceof Date ? x.getTime() : x)),
         timeRange =
-            this.parent.clinicalTimelines.config.time_scale === 'Study Day'
-                ? this.parent.clinicalTimelines.config.study_day_range
+            this.parent.clinicalTimelines.config.time_scale === 'day'
+                ? this.parent.clinicalTimelines.config.day_range
                 : this.parent.clinicalTimelines.config.date_range.map(dt => dt.getTime()),
         timeRangeText =
-            this.config.time_scale === 'Study Day'
-                ? this.parent.clinicalTimelines.config.study_day_range.map(dy => dy.toString())
+            this.config.time_scale === 'day'
+                ? this.parent.clinicalTimelines.config.day_range.map(dy => dy.toString())
                 : this.parent.clinicalTimelines.config.date_range.map(dt =>
                       time.format(this.parent.clinicalTimelines.config.date_format)(dt)
                   ); // update to date_display_format at some point

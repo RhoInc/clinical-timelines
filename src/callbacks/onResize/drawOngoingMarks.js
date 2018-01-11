@@ -1,7 +1,7 @@
 import { select } from 'd3';
 
 export default function drawOngoingMarks() {
-    if (this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
+    if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
         const context = this;
 
         this.svg.selectAll('.ongoing-event').remove();
@@ -11,11 +11,7 @@ export default function drawOngoingMarks() {
             .each(function(d) {
                 const g = select(this),
                     endpoint = d.values[1],
-                    x = context.x(
-                        context.config.time_scale === 'Study Day'
-                            ? +endpoint.key
-                            : new Date(endpoint.key)
-                    ),
+                    x = context.x(context.config.time_function(endpoint.key)),
                     y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
                     color = context.colorScale(endpoint.values.raw[0][context.config.event_col]),
                     arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
@@ -25,6 +21,7 @@ export default function drawOngoingMarks() {
                     .datum(d)
                     .classed('ongoing-event', true)
                     .attr({
+                        'clip-path': 'url(#1)',
                         points: arrow.map(coordinate => coordinate.join(',')).join(' '),
                         fill: color,
                         stroke: color,

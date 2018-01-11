@@ -57,7 +57,7 @@ an array of event types displayed initially
 ## settings.event_highlighted
 `string`
 
-highlighted event type
+initial highlighted event type
 
 **default:** none
 
@@ -124,7 +124,7 @@ initial ID grouping variable
 ## settings.grouping_direction
 `string`
 
-grouping annotation placement, 'horizontal' or 'vertical'
+grouping annotation placement
 
 **default:** `"horizontal"`
 
@@ -135,34 +135,7 @@ grouping annotation placement, 'horizontal' or 'vertical'
 
 the time scale on which to plot events
 
-**default:** `"Study Day"`
-
-
-
-## settings.stdy_col
-`string`
-
-start day variable name
-
-**default:** `"STDY"`
-
-
-
-## settings.endy_col
-`string`
-
-end day variable name
-
-**default:** `"ENDY"`
-
-
-
-## settings.study_day_range
-`array`
-
-start and stop days with which to define the x-axis domain
-
-**default:** none
+**default:** `"date"`
 
 
 
@@ -196,7 +169,7 @@ start and stop dates with which to define the x-axis domain and which match sett
 ## settings.date_format
 `string`
 
-date format of input variables
+date format of start and stop date variables
 
 **default:** `"%Y-%m-%d"`
 
@@ -208,6 +181,33 @@ date format of input variables
 date format of x-axis
 
 **default:** `"%Y-%m-%d"`
+
+
+
+## settings.stdy_col
+`string`
+
+start day variable name
+
+**default:** `"STDY"`
+
+
+
+## settings.endy_col
+`string`
+
+end day variable name
+
+**default:** `"ENDY"`
+
+
+
+## settings.day_range
+`array`
+
+start and stop days with which to define the x-axis domain
+
+**default:** none
 
 
 
@@ -253,15 +253,15 @@ ongoing event indicator value
 an array of reference timepoints and associated descriptions
 
 **default:** none
-### settings.reference_lines.studyDay
-`number`
+### settings.reference_lines.timepoint
+`string`
 
-Study day
+Timepoint
 
 ### settings.reference_lines.label
 `string`
 
-Reference day description
+Reference timepoint description
 
 
 

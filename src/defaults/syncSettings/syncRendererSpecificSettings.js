@@ -56,8 +56,8 @@ export default function syncRendererSpecificSettings(settings) {
 
                 //either an integer or not
                 referenceLineObject.time_scale = Number.isInteger(+referenceLineObject.timepoint)
-                    ? 'Study Day'
-                    : 'Date';
+                    ? 'day'
+                    : 'date';
 
                 //label predefined or not
                 referenceLineObject.label = reference_line.label
@@ -68,9 +68,9 @@ export default function syncRendererSpecificSettings(settings) {
             })
             .filter(
                 reference_line =>
-                    (reference_line.time_scale === 'Study Day' &&
+                    (reference_line.time_scale === 'day' &&
                         Number.isInteger(reference_line.timepoint)) ||
-                    (reference_line.time_scale === 'Date' &&
+                    (reference_line.time_scale === 'date' &&
                         time.format(settings.date_format).parse(reference_line.timepoint) instanceof
                             Date)
             );
@@ -78,21 +78,13 @@ export default function syncRendererSpecificSettings(settings) {
         if (!settings.reference_lines.length) delete settings.reference_lines;
     }
 
-    //Detail settings
-    const defaultDetails =
-        settings.time_scale === 'Study Day'
-            ? [
-                  { value_col: settings.event_col, label: 'Event Type' },
-                  { value_col: settings.stdy_col, label: 'Start Day' },
-                  { value_col: settings.endy_col, label: 'Stop Day' },
-                  { value_col: settings.seq_col, label: 'Sequence Number' }
-              ]
-            : [
-                  { value_col: settings.event_col, label: 'Event Type' },
-                  { value_col: settings.stdt_col, label: 'Start Date' },
-                  { value_col: settings.endt_col, label: 'Stop Date' },
-                  { value_col: settings.seq_col, label: 'Sequence Number' }
-              ];
+    //Details
+    const defaultDetails = [
+        { value_col: settings.event_col, label: 'Event Type' },
+        { value_col: 'stdtdy', label: `Start Date (Day)` },
+        { value_col: 'endtdy', label: `Stop Date (Day)` },
+        { value_col: settings.seq_col, label: 'Sequence Number' }
+    ];
     settings.details = arrayOfVariablesCheck(defaultDetails, settings.details);
     settings.filters.forEach(filter => {
         if (settings.details.map(detail => detail.value_col).indexOf(filter.value_col) === -1)

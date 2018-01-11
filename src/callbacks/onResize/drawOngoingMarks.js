@@ -24,7 +24,8 @@ export default function drawOngoingMarks() {
                         'clip-path': 'url(#1)',
                         points: arrow.map(coordinate => coordinate.join(',')).join(' '),
                         fill: color,
-                        stroke: color
+                        stroke: color,
+                        'clip-path': `url(#${context.id})`
                     });
             });
     }

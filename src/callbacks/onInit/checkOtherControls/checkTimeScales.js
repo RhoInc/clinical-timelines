@@ -8,9 +8,9 @@ export default function checkTimeScales() {
                 anyDays = this.initial_data.some(d => d.hasOwnProperty(this.config.stdy_col));
 
             if (!anyDates && !anyDays) {
-                const errorText = `The data contain neither ${this.config.stdt_col} nor ${this
-                    .config
-                    .stdy_col}.  Please update the settings object to match the variables in the data.`;
+                const errorText = `The data contain neither ${this.config.stdt_col} nor ${
+                    this.config.stdy_col
+                }.  Please update the settings object to match the variables in the data.`;
                 this.wrap
                     .append('div')
                     .style('color', 'red')

@@ -1,3 +1,5 @@
+import { select } from 'd3';
+
 export default function IEsucks() {
     if (!!document.documentMode)
         this.svg.selectAll('.line,.point').each(function(d) {

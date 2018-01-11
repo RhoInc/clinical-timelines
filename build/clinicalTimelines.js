@@ -190,14 +190,12 @@
                 //Lines
                 '#clinical-timelines path.wc-data-mark {' +
                     '    stroke-width: 4;' +
-                    '    clip-path: url(#1);' +
                     '    stroke-opacity: 1;' +
                     '}',
                 '#clinical-timelines path.wc-data-mark.highlighted {' +
                     '    stroke-width: 7;' +
                     '}',
                 '#clinical-timelines line.highlight-overlay {' +
-                    '    clip-path: url(#1);' +
                     '    stroke-width: 3;' +
                     '    stroke-linecap: round;' +
                     '}',
@@ -205,7 +203,6 @@
                 //Circles
                 '#clinical-timelines circle.wc-data-mark {' +
                     '    stroke-width: 0;' +
-                    '    clip-path: url(#1);' +
                     '    fill-opacity: 1;' +
                     '}',
                 '#clinical-timelines circle.wc-data-mark.highlighted {' +
@@ -214,7 +211,7 @@
                     '}',
 
                 //Arrows
-                '#clinical-timelines polygon.ongoing-event {' + '    clip-path: url(#1);' + '}',
+                '#clinical-timelines polygon.ongoing-event {' + '}',
                 '#clinical-timelines polygon.ongoing-event.highlighted {' +
                     '    stroke-width: 2;' +
                     '}',
@@ -408,6 +405,21 @@
         };
     })();
 
+    var defineProperty = function(obj, key, value) {
+        if (key in obj) {
+            Object.defineProperty(obj, key, {
+                value: value,
+                enumerable: true,
+                configurable: true,
+                writable: true
+            });
+        } else {
+            obj[key] = value;
+        }
+
+        return obj;
+    };
+
     /*------------------------------------------------------------------------------------------------\
   Clone a variable (http://stackoverflow.com/a/728694).
 \------------------------------------------------------------------------------------------------*/
@@ -550,6 +562,7 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
+                    'clip-path': 'url(#1)',
                     'stroke-width': 4
                 }
             },
@@ -559,6 +572,7 @@
                 tooltip: null, // set in syncSettings()
                 radius: 4,
                 attributes: {
+                    'clip-path': 'url(#1)',
                     'stroke-width': 2
                 }
             }
@@ -1469,11 +1483,11 @@
         );
     }
 
-    function IDchange(select) {
+    function IDchange(select$$1) {
         var _this = this;
 
         this.selected_id = d3
-            .select(select)
+            .select(select$$1)
             .select('option:checked')
             .text();
         this.filters.filter(function(filter) {
@@ -1513,11 +1527,11 @@
         enableDisableControls.call(this);
     }
 
-    function eventTypeChange(select) {
+    function eventTypeChange(select$$1) {
         var _this = this;
 
         this.currentEventTypes = d3
-            .select(select)
+            .select(select$$1)
             .selectAll('select option:checked')
             .pop()
             .map(function(d) {
@@ -1571,10 +1585,10 @@
         });
     }
 
-    function eventHighlightingChange(select, d) {
+    function eventHighlightingChange(select$$1, d) {
         //Update event highlighting settings.
         this.config.event_highlighted = d3
-            .select(select)
+            .select(select$$1)
             .select('option:checked')
             .text();
         this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
@@ -2662,51 +2676,63 @@
                         .append('polygon')
                         .datum(d)
                         .classed('ongoing-event', true)
-                        .attr({
-                            'clip-path': 'url(#1)',
-                            points: arrow
-                                .map(function(coordinate) {
-                                    return coordinate.join(',');
-                                })
-                                .join(' '),
-                            fill: color,
-                            stroke: color
-                        });
+                        .attr(
+                            defineProperty(
+                                {
+                                    'clip-path': 'url(#1)',
+                                    points: arrow
+                                        .map(function(coordinate) {
+                                            return coordinate.join(',');
+                                        })
+                                        .join(' '),
+                                    fill: color,
+                                    stroke: color
+                                },
+                                'clip-path',
+                                'url(#' + context.id + ')'
+                            )
+                        );
                 });
         }
     }
 
     function offsetBottomXaxis() {
-        var bottomXaxis = this.svg.select('.x.axis'),
-            bottomXaxisTransform = bottomXaxis.attr('transform'),
-            bottomXaxisTransformX =
+        var //capture x-axis and its translation coordinates
+            bottomXaxis = this.svg.select('.x.axis'),
+            bottomXaxisTransform = bottomXaxis
+                .attr('transform')
+                .replace(/^translate\((.*)\)$/, '$1'),
+            bottomXaxisTransformCoordinates =
                 bottomXaxisTransform.indexOf(',') > -1
-                    ? +bottomXaxisTransform.split(',')[0].split('(')[1]
-                    : +bottomXaxisTransform.split(' ')[0].split('(')[1],
-            bottomXaxisTransformY =
-                bottomXaxisTransform.indexOf(',') > -1
-                    ? +bottomXaxisTransform.split(',')[1].split(')')[0]
-                    : +bottomXaxisTransform.split(' ')[1].split(')')[0],
+                    ? bottomXaxisTransform.split(',')
+                    : bottomXaxisTransform.split(' '),
+            //capture x-axis title and its translation coordinates
             bottomXaxisTitle = bottomXaxis.select('.axis-title'),
-            bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
-            bottomXaxisTitleTransformX =
+            bottomXaxisTitleTransform = bottomXaxisTitle
+                .attr('transform')
+                .replace(/^translate\((.*)\)$/, '$1'),
+            bottomXaxisTitleTransformCoordinates =
                 bottomXaxisTitleTransform.indexOf(',') > -1
-                    ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
-                    : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
-            bottomXaxisTitleTransformY =
-                bottomXaxisTitleTransform.indexOf(',') > -1
-                    ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
-                    : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
+                    ? bottomXaxisTitleTransform.split(',')
+                    : bottomXaxisTitleTransform.split(' ');
+
+        //offset x-axis
         bottomXaxis.attr(
             'transform',
-            'translate(0,' + (bottomXaxisTransformY + this.y.rangeBand()) + ')'
+            'translate(' +
+                +bottomXaxisTransformCoordinates[0] +
+                ',' +
+                (+bottomXaxisTransformCoordinates[1] + this.y.rangeBand()) +
+                ')'
         );
+
+        //offset x-axis title
         bottomXaxisTitle.attr(
             'transform',
             'translate(' +
-                bottomXaxisTitleTransformX +
+                +bottomXaxisTitleTransformCoordinates[0] +
                 ',' +
-                (bottomXaxisTitleTransformY - 7 * this.margin.bottom / 16) +
+                (+bottomXaxisTitleTransformCoordinates[1] - 7 * this.margin.bottom / 16) +
                 ')'
         );
     }
@@ -2744,7 +2770,8 @@
                                 x1: x,
                                 x2: x,
                                 y1: 0,
-                                y2: y2
+                                y2: y2,
+                                'clip-path': 'url(#' + _this.id + ')'
                             }),
                         invisibleReferenceLine = referenceLineGroup
                             .append('line')
@@ -2753,7 +2780,8 @@
                                 x1: x,
                                 x2: x,
                                 y1: 0,
-                                y2: y2
+                                y2: y2,
+                                'clip-path': 'url(#' + _this.id + ')'
                             }),
                         // invisible reference line has no dasharray and is much thicker to make hovering easier
                         direction =
@@ -2768,7 +2796,8 @@
                                 y: 0,
                                 'text-anchor': direction === 'right' ? 'beginning' : 'end',
                                 dx: direction === 'right' ? 15 : -15,
-                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1),
+                                'clip-path': 'url(#' + _this.id + ')'
                             })
                             .text(reference_line.label),
                         dimensions = referenceLineLabel.node().getBBox(),
@@ -2779,7 +2808,8 @@
                                 x: dimensions.x - 10,
                                 y: dimensions.y - 5,
                                 width: dimensions.width + 20,
-                                height: dimensions.height + 10
+                                height: dimensions.height + 10,
+                                'clip-path': 'url(#' + _this.id + ')'
                             });
 
                     //Display reference line label on hover.
@@ -2809,7 +2839,7 @@
     function IEsucks() {
         if (!!document.documentMode)
             this.svg.selectAll('.line,.point').each(function(d) {
-                var mark = select(this),
+                var mark = d3.select(this),
                     tooltip = mark.select('title'),
                     text = tooltip.text().split('\n');
                 tooltip.text(text.join('--|--'));
@@ -2866,9 +2896,14 @@
     };
 
     function onInit$1() {
+        var _this = this;
+
         this.config.color_dom = this.parent.clinicalTimelines.config.color_dom;
         this.config.legend.order = this.parent.clinicalTimelines.config.legend.order;
         this.config.x.domain = null;
+        this.config.marks.forEach(function(mark) {
+            mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
+        });
     }
 
     function onLayout$1() {}
@@ -2963,6 +2998,9 @@
 
         //Highlight events.
         highlightMarks.call(this);
+
+        //Replace newline characters with html line break entities to cater to Internet Explorer.
+        IEsucks.call(this);
     }
 
     function onDestroy$1() {}

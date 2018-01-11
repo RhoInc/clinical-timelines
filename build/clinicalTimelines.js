@@ -405,21 +405,6 @@
         };
     })();
 
-    var defineProperty = function(obj, key, value) {
-        if (key in obj) {
-            Object.defineProperty(obj, key, {
-                value: value,
-                enumerable: true,
-                configurable: true,
-                writable: true
-            });
-        } else {
-            obj[key] = value;
-        }
-
-        return obj;
-    };
-
     /*------------------------------------------------------------------------------------------------\
   Clone a variable (http://stackoverflow.com/a/728694).
 \------------------------------------------------------------------------------------------------*/
@@ -2614,7 +2599,8 @@
                         x2: x2,
                         y1: y,
                         y2: y,
-                        stroke: color
+                        stroke: color,
+                        'clip-path': 'url(#' + context.id + ')'
                     });
 
             if (d.ongoing === context.config.ongo_val) {
@@ -2676,22 +2662,16 @@
                         .append('polygon')
                         .datum(d)
                         .classed('ongoing-event', true)
-                        .attr(
-                            defineProperty(
-                                {
-                                    'clip-path': 'url(#1)',
-                                    points: arrow
-                                        .map(function(coordinate) {
-                                            return coordinate.join(',');
-                                        })
-                                        .join(' '),
-                                    fill: color,
-                                    stroke: color
-                                },
-                                'clip-path',
-                                'url(#' + context.id + ')'
-                            )
-                        );
+                        .attr({
+                            points: arrow
+                                .map(function(coordinate) {
+                                    return coordinate.join(',');
+                                })
+                                .join(' '),
+                            fill: color,
+                            stroke: color,
+                            'clip-path': 'url(#' + context.id + ')'
+                        });
                 });
         }
     }
@@ -2770,8 +2750,7 @@
                                 x1: x,
                                 x2: x,
                                 y1: 0,
-                                y2: y2,
-                                'clip-path': 'url(#' + _this.id + ')'
+                                y2: y2
                             }),
                         invisibleReferenceLine = referenceLineGroup
                             .append('line')
@@ -2780,8 +2759,7 @@
                                 x1: x,
                                 x2: x,
                                 y1: 0,
-                                y2: y2,
-                                'clip-path': 'url(#' + _this.id + ')'
+                                y2: y2
                             }),
                         // invisible reference line has no dasharray and is much thicker to make hovering easier
                         direction =
@@ -2796,8 +2774,7 @@
                                 y: 0,
                                 'text-anchor': direction === 'right' ? 'beginning' : 'end',
                                 dx: direction === 'right' ? 15 : -15,
-                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1),
-                                'clip-path': 'url(#' + _this.id + ')'
+                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
                             })
                             .text(reference_line.label),
                         dimensions = referenceLineLabel.node().getBBox(),
@@ -2808,8 +2785,7 @@
                                 x: dimensions.x - 10,
                                 y: dimensions.y - 5,
                                 width: dimensions.width + 20,
-                                height: dimensions.height + 10,
-                                'clip-path': 'url(#' + _this.id + ')'
+                                height: dimensions.height + 10
                             });
 
                     //Display reference line label on hover.

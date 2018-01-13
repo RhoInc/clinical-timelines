@@ -1,4 +1,4 @@
-import { time, set, min, max } from 'd3';
+import { set } from 'd3';
 import manipulateData from './onInit/manipulateData';
 import cleanData from './functions/cleanData';
 import defineData from './functions/defineData';

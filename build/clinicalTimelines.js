@@ -953,11 +953,11 @@
 
             //Concatenate date and day values for listing.
             d.stdtdy =
-                has_stdt && has_stdy
+                has_stdt && has_stdy && d[_this.config.stdy_col] !== ''
                     ? d[_this.config.stdt_col] + ' (' + d[_this.config.stdy_col] + ')'
                     : d[_this.config.stdt_col] || d[_this.config.stdy_col];
             d.endtdy =
-                has_endt && has_endy
+                has_endt && has_endy && d[_this.config.endy_col] !== ''
                     ? d[_this.config.endt_col] + ' (' + d[_this.config.endy_col] + ')'
                     : d[_this.config.endt_col] || d[_this.config.endy_col];
         });
@@ -1428,21 +1428,25 @@
         this.wrap.select('svg.wc-svg').classed('hidden', true);
 
         //Define ID data.
-        var longIDdata = this.long_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
+        var longIDdata = this.long_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
             }),
-            wideIDdata = this.wide_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
+            wideIDdata = this.wide_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
             });
 
-        //Draw row identifier characteristics.
-        if (this.config.id_characteristics)
-            this.IDdetails.wrap.selectAll('div.characteristic').each(function(d) {
+        //Draw ID characteristics.
+        if (this.config.id_characteristics) {
+            var id_characteristics = this.initial_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
+            })[0];
+            this.IDdetails.wrap.selectAll('.characteristic').each(function(d) {
                 d3
                     .select(this)
                     .select('span')
-                    .text(wideIDdata[0][d.value_col]);
+                    .text(id_characteristics[d.value_col]);
             });
+        }
 
         //Draw ID timeline.
         this.IDtimeline.wrap.classed('hidden', false);

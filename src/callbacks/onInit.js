@@ -25,6 +25,10 @@ export default function onInit() {
         d => !/^\s*$/.test(d[this.config.id_col]) && !/^\s*$/.test(d[this.config.event_col])
     );
 
+    //Manually set controls' data.
+    this.controls.data = this.initial_data;
+    this.controls.ready = true;
+
     //Warn user of removed records.
     if (this.initial_data.length < this.raw_data.length)
         console.warn(

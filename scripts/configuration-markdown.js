@@ -57,4 +57,7 @@ Object.keys(properties).forEach(property => {
     markdown.push(``);
 });
 
-fs.writeFile('./scripts/configuration.md', markdown.join('\n'), 'utf8');
+fs.writeFile('./scripts/configuration.md', markdown.join('\n'), (err) => {
+    if (err) throw err;
+    console.log('The configuration markdown file has been created!');
+});

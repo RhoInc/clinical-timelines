@@ -43,7 +43,8 @@ export default function highlightMarks() {
                     x2: x2,
                     y1: y,
                     y2: y,
-                    stroke: color
+                    stroke: color,
+                    'clip-path': `url(#${context.id})`
                 });
 
         if (d.ongoing === context.config.ongo_val) {

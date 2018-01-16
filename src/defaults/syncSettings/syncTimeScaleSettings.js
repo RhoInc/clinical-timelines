@@ -13,17 +13,19 @@ export default function syncTimeScaleSettings(settings) {
         settings.en_col = settings.endt_col;
         settings.x_type = 'time';
         settings.time_unit = 'DT';
-        settings.x_format = settings.date_format;
-        settings.x_d3format = time.format(settings.x_format);
+        settings.x_format = settings.date_display_format;
+        settings.x_parseFormat = time.format(settings.date_format);
+        settings.x_displayFormat = time.format(settings.date_display_format);
         settings.time_function = dt =>
-            settings.x_d3format.parse(dt) ? settings.x_d3format.parse(dt) : new Date(dt);
+            settings.x_parseFormat.parse(dt) ? settings.x_parseFormat.parse(dt) : new Date(dt);
     } else if (settings.time_scale === 'day') {
         settings.st_col = settings.stdy_col;
         settings.en_col = settings.endy_col;
         settings.x_type = 'linear';
         settings.time_unit = 'DY';
         settings.x_format = '1d';
-        settings.x_d3format = format(settings.x_format);
+        settings.x_parseFormat = format(settings.x_format);
+        settings.x_displayFormat = settings.x_parseFormat;
         settings.time_function = dy => +dy;
     }
 

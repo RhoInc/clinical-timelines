@@ -953,11 +953,11 @@
 
             //Concatenate date and day values for listing.
             d.stdtdy =
-                has_stdt && has_stdy
+                has_stdt && has_stdy && d[_this.config.stdy_col] !== ''
                     ? d[_this.config.stdt_col] + ' (' + d[_this.config.stdy_col] + ')'
                     : d[_this.config.stdt_col] || d[_this.config.stdy_col];
             d.endtdy =
-                has_endt && has_endy
+                has_endt && has_endy && d[_this.config.endy_col] !== ''
                     ? d[_this.config.endt_col] + ' (' + d[_this.config.endy_col] + ')'
                     : d[_this.config.endt_col] || d[_this.config.endy_col];
         });
@@ -1111,30 +1111,54 @@
             if (input.description !== 'X-axis scale') return true;
             else {
                 var anyDates = _this.initial_data.some(function(d) {
-                        return d.hasOwnProperty(_this.config.stdt_col);
+                        return (
+                            d.hasOwnProperty(_this.config.stdt_col) &&
+                            d[_this.config.stdt_col] !== ''
+                        );
                     }),
                     anyDays = _this.initial_data.some(function(d) {
-                        return d.hasOwnProperty(_this.config.stdy_col);
+                        return (
+                            d.hasOwnProperty(_this.config.stdy_col) &&
+                            d[_this.config.stdy_col] !== ''
+                        );
                     });
 
                 if (!anyDates && !anyDays) {
                     var errorText =
-                        'The data contain neither ' +
+                        'The data either contain neither ' +
                         _this.config.stdt_col +
                         ' nor ' +
                         _this.config.stdy_col +
-                        '.  Please update the settings object to match the variables in the data.';
+                        ' or both ' +
+                        _this.config.stdt_col +
+                        ' and ' +
+                        _this.config.stdy_col +
+                        ' contain no valid values.  Please update the settings object to match the variables in the data or clean the data.';
                     _this.wrap
                         .append('div')
                         .style('color', 'red')
                         .html(errorText);
                     throw new Error(errorText);
                 } else if (!anyDates && _this.config.time_scale === 'date') {
+                    console.warn(
+                        'The data either do not contain a variable named ' +
+                            _this.config.stdt_col +
+                            ' or ' +
+                            _this.config.stdt_col +
+                            ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
+                    );
                     _this.config.time_scale = 'day';
                     syncTimeScaleSettings(_this.config);
                     _this.IDtimeline.config.time_scale = 'day';
                     syncTimeScaleSettings(_this.IDtimeline.config);
                 } else if (!anyDays && _this.config.time_scale === 'day') {
+                    console.warn(
+                        'The data either do not contain a variable named ' +
+                            _this.config.stdy_col +
+                            ' or ' +
+                            _this.config.stdy_col +
+                            ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
+                    );
                     _this.config.time_scale = 'date';
                     syncTimeScaleSettings(_this.config);
                     _this.IDtimeline.config.time_scale = 'date';
@@ -1428,21 +1452,25 @@
         this.wrap.select('svg.wc-svg').classed('hidden', true);
 
         //Define ID data.
-        var longIDdata = this.long_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
+        var longIDdata = this.long_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
             }),
-            wideIDdata = this.wide_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
+            wideIDdata = this.wide_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
             });
 
-        //Draw row identifier characteristics.
-        if (this.config.id_characteristics)
-            this.IDdetails.wrap.selectAll('div.characteristic').each(function(d) {
+        //Draw ID characteristics.
+        if (this.config.id_characteristics) {
+            var id_characteristics = this.initial_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
+            })[0];
+            this.IDdetails.wrap.selectAll('.characteristic').each(function(d) {
                 d3
                     .select(this)
                     .select('span')
-                    .text(wideIDdata[0][d.value_col]);
+                    .text(id_characteristics[d.value_col]);
             });
+        }
 
         //Draw ID timeline.
         this.IDtimeline.wrap.classed('hidden', false);
@@ -2144,22 +2172,18 @@
                 .axis()
                 .scale(this.x)
                 .orient('top')
+                .ticks(this.xAxis.ticks()[0])
                 .tickFormat(this.config.x_d3format)
                 .innerTickSize(this.xAxis.innerTickSize())
-                .outerTickSize(this.xAxis.outerTickSize())
-                .ticks(this.xAxis.ticks()[0]),
+                .outerTickSize(this.xAxis.outerTickSize()),
             topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');
         topXaxisSelection.call(topXaxis);
         topXaxisSelection
             .select('text.axis-title.top')
-            .attr(
-                'transform',
-                'translate(' +
-                    (this.raw_width / 2 - this.margin.left) +
-                    ',-' +
-                    9 * this.config.margin.top / 16 +
-                    ')'
-            )
+            .attr({
+                transform: 'translate(' + this.plot_width / 2 + ',' + -this.margin.top / 2 + ')',
+                'text-anchor': 'middle'
+            })
             .text(this.config.x.label);
     }
 

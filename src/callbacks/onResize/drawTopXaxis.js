@@ -6,7 +6,7 @@ export default function drawTopXaxis() {
             .scale(this.x)
             .orient('top')
             .ticks(this.xAxis.ticks()[0])
-            .tickFormat(this.config.x_d3format)
+            .tickFormat(this.config.x_displayFormat)
             .innerTickSize(this.xAxis.innerTickSize())
             .outerTickSize(this.xAxis.outerTickSize()),
         topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');

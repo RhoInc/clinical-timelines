@@ -763,10 +763,13 @@
             settings.en_col = settings.endt_col;
             settings.x_type = 'time';
             settings.time_unit = 'DT';
-            settings.x_format = settings.date_format;
-            settings.x_d3format = d3.time.format(settings.x_format);
+            settings.x_format = settings.date_display_format;
+            settings.x_parseFormat = d3.time.format(settings.date_format);
+            settings.x_displayFormat = d3.time.format(settings.x_format);
             settings.time_function = function(dt) {
-                return settings.x_d3format.parse(dt) ? settings.x_d3format.parse(dt) : new Date(dt);
+                return settings.x_parseFormat.parse(dt)
+                    ? settings.x_parseFormat.parse(dt)
+                    : new Date(dt);
             };
         } else if (settings.time_scale === 'day') {
             settings.st_col = settings.stdy_col;
@@ -774,7 +777,8 @@
             settings.x_type = 'linear';
             settings.time_unit = 'DY';
             settings.x_format = '1d';
-            settings.x_d3format = d3.format(settings.x_format);
+            settings.x_parseFormat = d3.format(settings.x_format);
+            settings.x_displayFormat = settings.x_parseFormat;
             settings.time_function = function(dy) {
                 return +dy;
             };
@@ -2177,7 +2181,7 @@
                 .scale(this.x)
                 .orient('top')
                 .ticks(this.xAxis.ticks()[0])
-                .tickFormat(this.config.x_d3format)
+                .tickFormat(this.config.x_displayFormat)
                 .innerTickSize(this.xAxis.innerTickSize())
                 .outerTickSize(this.xAxis.outerTickSize()),
             topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');

@@ -1,7 +1,15 @@
 export default function syncWebchartsSettings(settings) {
     //Y-axis
     settings.y.column = settings.id_col;
-    settings.y.grouping = settings.grouping_initial;
+    if (settings.grouping_initial) {
+        settings.y.grouping = settings.grouping_initial;
+        settings.y.groupingLabel =
+            settings.groupings[
+                settings.groupings
+                    .map(grouping => grouping.value_col)
+                    .indexOf(settings.grouping_initial)
+            ].label;
+    }
 
     //Lines
     settings.marks[0].per = [settings.id_col, settings.event_col, settings.seq_col];

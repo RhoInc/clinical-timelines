@@ -1,6 +1,6 @@
 import { nest, select, sum } from 'd3';
 
-export default function drawReferenceTable(reference_line) {
+export default function drawReferenceTable(reference_line,i) {
     //Filter data on events that overlap reference line.
     reference_line.wide_data = this.filtered_wide_data.filter(
         d =>
@@ -36,7 +36,8 @@ export default function drawReferenceTable(reference_line) {
     if (reference_line.container) reference_line.container.remove();
     reference_line.container = this.leftSide
         .append('div')
-        .classed('poe-reference-line-container', true);
+        .classed('poe-reference-line-table-container', true)
+        .attr('id', 'poe-reference-line-table-container-' + i);
     reference_line.container
         .append('h3')
         .classed('poe-reference-line-header', true)

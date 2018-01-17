@@ -262,9 +262,12 @@ export default function defineStyles() {
                 '    stroke-dasharray: none;' +
                 '}',
             '#clinical-timelines > #right-side .wc-chart .wc-svg .invisible-reference-line {' +
+                '    cursor: pointer;' +
                 '    stroke: black;' +
                 '    stroke-width: 20;' +
                 '    stroke-opacity: 0;' +
+                '}',
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label {' +
                 '}',
             '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
                 '    fill: white;' +

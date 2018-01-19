@@ -1,67 +1,24 @@
-import { nest, select, sum } from 'd3';
+import updateTable from './drawReferenceTable/updateTable';
 
 export default function drawReferenceTable(reference_line, i) {
-    //Filter data on events that overlap reference line.
-    reference_line.wide_data = this.filtered_wide_data.filter(
-        d =>
-            this.config.x_parseFormat.parse(d[this.config.st_col]) <=
-                this.config.x_parseFormat.parse(reference_line.timepoint) &&
-            this.config.x_parseFormat.parse(d[this.config.en_col]) >=
-                this.config.x_parseFormat.parse(reference_line.timepoint)
-    );
-
-    //Nest data by grouping and event type.
-    reference_line.nested_data = nest()
-        .key(d => d[this.config.y.grouping] || 'All ' + this.config.id_unitPlural)
-        .key(d => d[this.config.event_col])
-        .rollup(d => d.length)
-        .entries(reference_line.wide_data);
-    reference_line.flattened_data = [];
-    reference_line.nested_data.forEach(d => {
-        reference_line.flattened_data.push({
-            class: 'poe-higher-level',
-            key: d.key,
-            n: sum(d.values, di => di.values)
-        });
-        d.values.forEach(di => {
-            reference_line.flattened_data.push({
-                class: 'poe-lower-level',
-                key: di.key,
-                n: di.values
-            });
-        });
-    });
-
-    //Add reference table container and header.
-    if (reference_line.container) reference_line.container.remove();
-    reference_line.container = this.leftSide
+    //Add reference line table container.
+    if (reference_line.tableContainer) reference_line.tableContainer.remove();
+    reference_line.tableContainer = this.leftSide
         .append('div')
         .classed('poe-reference-line-table-container', true)
         .attr('id', 'poe-reference-line-table-container-' + i);
-    reference_line.container
-        .append('h3')
-        .classed('poe-reference-line-header', true)
-        .text(reference_line.label);
 
-    //Add reference line table table.
-    reference_line.table = reference_line.container
+    //Add reference line table header.
+    reference_line.tableHeader = reference_line.tableContainer
+        .append('h3')
+        .classed('poe-reference-line-header', true);
+
+    //Add reference line table.
+    reference_line.table = reference_line.tableContainer
         .append('table')
-        .classed('poe-reference-line-table', true);
-    reference_line.table
-        .append('tbody')
-        .selectAll('tr')
-        .data(reference_line.flattened_data)
-        .enter()
-        .append('tr')
-        .each(function(d) {
-            const row = select(this);
-            row
-                .append('td')
-                .text(d.key)
-                .attr('class', d => d.class + (d.class === 'poe-lower-level' ? ' poe-indent' : ''));
-            row
-                .append('td')
-                .text(d.n)
-                .attr('class', d => d.class);
-        });
+        .classed('poe-reference-line-table', true)
+        .append('tbody');
+
+    //Add table data.
+    updateTable.call(this, reference_line);
 }

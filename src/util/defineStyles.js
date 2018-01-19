@@ -255,7 +255,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                 '    stroke: black;' +
-                '    stroke-width: 2;' +
+                '    stroke-width: 1;' +
                 '    stroke-dasharray: 2,2;' +
                 '}',
             '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
@@ -267,12 +267,9 @@ export default function defineStyles() {
                 '    stroke-width: 20;' +
                 '    stroke-opacity: 0;' +
                 '}',
-            '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label {' +
-                '}',
-            '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
-                '    fill: white;' +
-                '    stroke: black;' +
-                '    stroke-width: black;' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-text {' +
+                '    font-weight: bold;' +
+                '    font-size: 24px;' +
                 '}',
 
           //ID timeline

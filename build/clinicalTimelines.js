@@ -244,7 +244,7 @@
                 '#clinical-timelines .wc-chart .wc-svg title {' + '    white-space: pre;' + '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                     '    stroke: black;' +
-                    '    stroke-width: 2;' +
+                    '    stroke-width: 1;' +
                     '    stroke-dasharray: 2,2;' +
                     '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
@@ -256,11 +256,9 @@
                     '    stroke-width: 20;' +
                     '    stroke-opacity: 0;' +
                     '}',
-                '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label {' + '}',
-                '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
-                    '    fill: white;' +
-                    '    stroke: black;' +
-                    '    stroke-width: black;' +
+                '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-text {' +
+                    '    font-weight: bold;' +
+                    '    font-size: 24px;' +
                     '}',
 
                 //ID timeline
@@ -2945,96 +2943,28 @@
         );
     }
 
-    function addHover(reference_line) {
-        var context = this;
-
-        //Hide reference labels initially.
-        reference_line.textLabel.classed('hidden', true);
-        reference_line.textBox.classed('hidden', true);
-
-        //Add event listeners to invisible reference line.
-        reference_line.invisibleLine
-            .on('click', function() {
-                var mouse = d3.mouse(this);
-            })
-            .on('mouseover', function() {
-                var mouse = d3.mouse(this);
-                reference_line.visibleLine.classed('hover', true);
-                reference_line.textLabel.classed('hidden', false).attr('y', mouse[1]);
-                reference_line.textBox
-                    .classed('hidden', false)
-                    .attr('y', mouse[1] - reference_line.textDimensions.height);
-                context.svg.node().appendChild(reference_line.textBox.node());
-                context.svg.node().appendChild(reference_line.textLabel.node());
-            })
-            .on('mouseout', function() {
-                reference_line.visibleLine.classed('hover', false);
-                reference_line.textLabel.classed('hidden', true);
-                reference_line.textBox.classed('hidden', true);
+    function addVisibleLine(reference_line) {
+        reference_line.visibleLine = reference_line.g
+            .append('line')
+            .datum(reference_line.lineDatum)
+            .classed('visible-reference-line', true)
+            .attr({
+                x1: function x1(d) {
+                    return d.x1;
+                },
+                x2: function x2(d) {
+                    return d.x2;
+                },
+                y1: function y1(d) {
+                    return d.y1;
+                },
+                y2: function y2(d) {
+                    return d.y2;
+                }
             });
     }
 
-    function addDrag(reference_line) {
-        var drag = d3$1.behavior
-            .drag()
-            .origin(function(d) {
-                console.log(d);
-                return d;
-            })
-            .on('dragstart', function() {
-                d3$1.select(this).classed('poe-active', true);
-            })
-            .on('drag', function() {
-                console.log(d3$1.event);
-                var x = d3$1.event.dx,
-                    coordinates = {
-                        x1: parseInt(reference_line.invisibleLine.attr('x1')) + x,
-                        x2: parseInt(reference_line.invisibleLine.attr('x2')) + x
-                    };
-                reference_line.visibleLine.attr(coordinates);
-                reference_line.invisibleLine.attr(coordinates);
-                reference_line.textLabel.attr('x', coordinates.x1);
-                reference_line.textBox.attr('x', coordinates.x1 - 10);
-            })
-            .on('dragend', function() {
-                d3$1.select(this).classed('poe-active', false);
-            });
-
-        reference_line.invisibleLine.call(drag);
-    }
-
-    function drawReferenceLine(reference_line, i) {
-        reference_line.g = this.referenceLinesGroup
-            .append('g')
-            .classed('reference-line', true)
-            .attr('id', 'reference-line-' + i);
-        reference_line.timepointN = this.config.time_function(reference_line.timepoint);
-        (reference_line.lineDatum = {
-            x1: this.x(reference_line.timepointN),
-            x2: this.x(reference_line.timepointN),
-            y1: 0,
-            y2:
-                this.plot_height +
-                (this.config.y.column === this.config.id_col ? this.y.rangeBand() : 0)
-        }),
-            (reference_line.visibleLine = reference_line.g
-                .append('line')
-                .datum(reference_line.lineDatum)
-                .classed('visible-reference-line', true)
-                .attr({
-                    x1: function x1(d) {
-                        return d.x1;
-                    },
-                    x2: function x2(d) {
-                        return d.x2;
-                    },
-                    y1: function y1(d) {
-                        return d.y1;
-                    },
-                    y2: function y2(d) {
-                        return d.y2;
-                    }
-                }));
+    function addInvisibleLine(reference_line) {
         reference_line.invisibleLine = reference_line.g
             .append('line')
             .datum(reference_line.lineDatum)
@@ -3052,37 +2982,51 @@
                 y2: function y2(d) {
                     return d.y2;
                 }
-            }); // invisible reference line has no dasharray and is much thicker to make hovering easier
-        reference_line.textDirection =
-            reference_line.lineDatum.x1 <= this.plot_width / 2 ? 'right' : 'left';
-        reference_line.textLabel = reference_line.g
-            .append('text')
-            .classed('reference-line-label', true)
-            .attr({
-                x: reference_line.lineDatum.x1,
-                'text-anchor': reference_line.textDirection === 'right' ? 'beginning' : 'end',
-                dx: reference_line.textDirection === 'right' ? 15 : -15
-            })
-            .text(reference_line.label);
-        reference_line.textDimensions = reference_line.textLabel.node().getBBox();
-        reference_line.textBox = reference_line.g
-            .insert('rect', '.reference-line-label')
-            .classed('reference-line-label-box', true)
-            .attr({
-                x: reference_line.textDimensions.x - 10,
-                width: reference_line.textDimensions.width + 20,
-                height: reference_line.textDimensions.height + 8
             });
-
-        //Display reference line label on hover.
-        addHover.call(this, reference_line);
-
-        //Make line draggable.
-        addDrag.call(this, reference_line);
     }
 
-    function drawReferenceTable(reference_line, i) {
+    function updateText(reference_line) {
+        reference_line.textDirection =
+            reference_line.lineDatum.x1 <= this.plot_width / 2 ? 'right' : 'left';
+        reference_line.text
+            .attr({
+                x: reference_line.lineDatum.x1,
+                dx: reference_line.textDirection === 'right' ? 20 : -25,
+                'text-anchor': reference_line.textDirection === 'right' ? 'beginning' : 'end'
+            })
+            .text(reference_line.label);
+    }
+
+    function addText(reference_line) {
+        reference_line.text = reference_line.g.append('text').classed('reference-line-text', true);
+        updateText.call(this, reference_line);
+    }
+
+    function addHover(reference_line) {
+        var context = this;
+
+        //Hide reference labels initially.
+        reference_line.text.classed('hidden', true);
+
+        //Add event listeners to invisible reference line.
+        reference_line.invisibleLine
+            .on('mouseover', function() {
+                var mouse = d3.mouse(this);
+                reference_line.visibleLine.classed('hover', true);
+                reference_line.text.classed('hidden', false).attr('y', mouse[1]);
+                context.svg.node().appendChild(reference_line.text.node());
+            })
+            .on('mouseout', function() {
+                reference_line.visibleLine.classed('hover', false);
+                reference_line.text.classed('hidden', true);
+            });
+    }
+
+    function updateTable(reference_line) {
         var _this = this;
+
+        //Update reference table header.
+        reference_line.tableHeader.text(reference_line.label);
 
         //Filter data on events that overlap reference line.
         reference_line.wide_data = this.filtered_wide_data.filter(function(d) {
@@ -3125,23 +3069,9 @@
             });
         });
 
-        //Add reference table container and header.
-        if (reference_line.container) reference_line.container.remove();
-        reference_line.container = this.leftSide
-            .append('div')
-            .classed('poe-reference-line-table-container', true)
-            .attr('id', 'poe-reference-line-table-container-' + i);
-        reference_line.container
-            .append('h3')
-            .classed('poe-reference-line-header', true)
-            .text(reference_line.label);
-
-        //Add reference line table table.
-        reference_line.table = reference_line.container
-            .append('table')
-            .classed('poe-reference-line-table', true);
+        //Update table.
+        reference_line.table.selectAll('tr').remove();
         reference_line.table
-            .append('tbody')
             .selectAll('tr')
             .data(reference_line.flattened_data)
             .enter()
@@ -3161,6 +3091,97 @@
                         return d.class;
                     });
             });
+    }
+
+    function addDrag(reference_line) {
+        console.log(reference_line);
+        var context = this,
+            drag = d3$1.behavior
+                .drag()
+                .origin(function(d) {
+                    return d;
+                })
+                .on('dragstart', function() {
+                    d3$1.select(this).classed('poe-active', true);
+                })
+                .on('drag', function() {
+                    var x = d3$1.event.dx,
+                        coordinates = {
+                            x1: parseInt(reference_line.invisibleLine.attr('x1')) + x,
+                            x2: parseInt(reference_line.invisibleLine.attr('x2')) + x
+                        };
+                    reference_line.timepoint = context.config.x_parseFormat(
+                        context.x.invert(coordinates.x1)
+                    );
+                    reference_line.label = context.config.x_displayFormat(
+                        context.x.invert(coordinates.x1)
+                    );
+                    reference_line.lineDatum.x1 = coordinates.x1;
+                    reference_line.lineDatum.x2 = coordinates.x2;
+                    reference_line.visibleLine.attr(coordinates);
+                    reference_line.invisibleLine.attr(coordinates);
+                    updateText.call(context, reference_line);
+                    updateTable.call(context, reference_line);
+                })
+                .on('dragend', function() {
+                    d3$1.select(this).classed('poe-active', false);
+                });
+
+        reference_line.invisibleLine.call(drag);
+    }
+
+    function drawReferenceLine(reference_line, i) {
+        reference_line.g = this.referenceLinesGroup
+            .append('g')
+            .classed('reference-line', true)
+            .attr('id', 'reference-line-' + i);
+        reference_line.timepointN = this.config.time_function(reference_line.timepoint);
+        reference_line.lineDatum = {
+            x1: this.x(reference_line.timepointN),
+            x2: this.x(reference_line.timepointN),
+            y1: 0,
+            y2:
+                this.plot_height +
+                (this.config.y.column === this.config.id_col ? this.y.rangeBand() : 0)
+        };
+
+        //Visible reference line, drawn between the overlay and the marks
+        addVisibleLine.call(this, reference_line);
+
+        //Invisible reference line, without a dasharray and much thicker to make hovering easier
+        addInvisibleLine.call(this, reference_line);
+
+        //Reference line text label
+        addText.call(this, reference_line);
+
+        //Display reference line label on hover.
+        addHover.call(this, reference_line);
+
+        //Make line draggable.
+        if (!this.parent) addDrag.call(this, reference_line);
+    }
+
+    function drawReferenceTable(reference_line, i) {
+        //Add reference line table container.
+        if (reference_line.tableContainer) reference_line.tableContainer.remove();
+        reference_line.tableContainer = this.leftSide
+            .append('div')
+            .classed('poe-reference-line-table-container', true)
+            .attr('id', 'poe-reference-line-table-container-' + i);
+
+        //Add reference line table header.
+        reference_line.tableHeader = reference_line.tableContainer
+            .append('h3')
+            .classed('poe-reference-line-header', true);
+
+        //Add reference line table.
+        reference_line.table = reference_line.tableContainer
+            .append('table')
+            .classed('poe-reference-line-table', true)
+            .append('tbody');
+
+        //Add table data.
+        updateTable.call(this, reference_line);
     }
 
     function drawReferenceLines() {

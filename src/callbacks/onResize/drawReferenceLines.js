@@ -7,7 +7,7 @@ export default function drawReferenceLines() {
 
         //Add group for reference lines.
         this.svg.select('.reference-lines').remove();
-        this.leftSide.selectAll('.poe-reference-line-container').remove();
+        if (!this.parent) this.leftSide.selectAll('.poe-reference-line-container').remove();
         this.referenceLinesGroup = this.svg
             .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
             .classed('reference-lines', true);
@@ -20,7 +20,7 @@ export default function drawReferenceLines() {
                 drawReferenceLine.call(this, reference_line, i);
 
                 //Draw reference line frequency table.
-                drawReferenceTable.call(this, reference_line, i);
+                if (!this.parent) drawReferenceTable.call(this, reference_line, i);
             });
     }
 }

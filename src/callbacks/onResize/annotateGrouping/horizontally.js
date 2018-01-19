@@ -19,15 +19,13 @@ export default function horizontally() {
                     })
                     .text(`${this.config.y.groupingLabel}: ${d.key}`),
                 textArea = annotation.node().getBBox(),
-                background = g
-                    .insert('rect', ':first-child')
-                    .attr({
-                        x: textArea.x,
-                        y: textArea.y,
-                        width: textArea.width,
-                        height: textArea.height,
-                        fill: 'white'
-                    }),
+                background = g.insert('rect', ':first-child').attr({
+                    x: textArea.x,
+                    y: textArea.y,
+                    width: textArea.width,
+                    height: textArea.height,
+                    fill: 'white'
+                }),
                 rule = g
                     .append('line')
                     .classed('boundary horizontal', true)

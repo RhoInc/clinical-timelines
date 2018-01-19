@@ -1,6 +1,6 @@
 import { nest, select, sum } from 'd3';
 
-export default function drawReferenceTable(reference_line,i) {
+export default function drawReferenceTable(reference_line, i) {
     //Filter data on events that overlap reference line.
     reference_line.wide_data = this.filtered_wide_data.filter(
         d =>

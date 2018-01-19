@@ -1,7 +1,8 @@
-import { behavior,select,event } from 'd3';
+import { behavior, select, event } from 'd3';
 
 export default function addDrag(reference_line) {
-    const drag = behavior.drag()
+    const drag = behavior
+        .drag()
         .origin(function(d) {
             console.log(d);
             return d;
@@ -11,16 +12,13 @@ export default function addDrag(reference_line) {
         })
         .on('drag', function() {
             console.log(event);
-            const
-                x = event.dx,
+            const x = event.dx,
                 coordinates = {
                     x1: parseInt(reference_line.invisibleLine.attr('x1')) + x,
                     x2: parseInt(reference_line.invisibleLine.attr('x2')) + x
                 };
-            reference_line.visibleLine
-                .attr(coordinates);
-            reference_line.invisibleLine
-                .attr(coordinates);
+            reference_line.visibleLine.attr(coordinates);
+            reference_line.invisibleLine.attr(coordinates);
             reference_line.textLabel.attr('x', coordinates.x1);
             reference_line.textBox.attr('x', coordinates.x1 - 10);
         })
@@ -28,6 +26,5 @@ export default function addDrag(reference_line) {
             select(this).classed('poe-active', false);
         });
 
-    reference_line.invisibleLine
-        .call(drag);
+    reference_line.invisibleLine.call(drag);
 }

@@ -12,8 +12,7 @@ export default function definePopulationDetails() {
             };
 
             IDobject.dataInsideTimeRange = IDobject.data.filter(d => {
-                const
-                    st = this.config.time_function(d[this.config.st_col]),
+                const st = this.config.time_function(d[this.config.st_col]),
                     en = this.config.time_function(d[this.config.en_col]),
                     stInsideTimeRange =
                         this.config.x.domain[0] <= st && st <= this.config.x.domain[1], // start is within the time range

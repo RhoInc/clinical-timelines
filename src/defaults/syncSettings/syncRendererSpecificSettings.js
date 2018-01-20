@@ -62,7 +62,7 @@ export default function syncRendererSpecificSettings(settings) {
                 //label predefined or not
                 referenceLineObject.label = reference_line.label
                     ? reference_line.label
-                    : `${referenceLineObject.time_scale}: ${referenceLineObject.timepoint}`;
+                    : `${referenceLineObject.timepoint}`;
 
                 return referenceLineObject;
             })

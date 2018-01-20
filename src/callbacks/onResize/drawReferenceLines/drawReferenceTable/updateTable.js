@@ -7,10 +7,10 @@ export default function updateTable(reference_line) {
     //Filter data on events that overlap reference line.
     reference_line.wide_data = this.filtered_wide_data.filter(
         d =>
-            this.config.x_parseFormat.parse(d[this.config.st_col]) <=
-                this.config.x_parseFormat.parse(reference_line.timepoint) &&
-            this.config.x_parseFormat.parse(d[this.config.en_col]) >=
-                this.config.x_parseFormat.parse(reference_line.timepoint)
+            this.config.time_function(d[this.config.st_col]) <=
+                this.config.time_function(reference_line.timepoint) &&
+            this.config.time_function(d[this.config.en_col]) >=
+                this.config.time_function(reference_line.timepoint)
     );
 
     //Nest data by grouping and event type.

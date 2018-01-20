@@ -6,14 +6,17 @@ export default function syncTimeScaleSettings(settings) {
         ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
             ? settings.time_scale.toLowerCase()
             : 'date';
+    settings.time_scalePropCased =
+        settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
 
     //Define settings variables to handle both date and day time scales.
     if (settings.time_scale === 'date') {
         settings.st_col = settings.stdt_col;
         settings.en_col = settings.endt_col;
-        settings.x_type = 'time';
+        settings.x.type = 'time';
+        settings.x.format = settings.date_display_format;
         settings.time_unit = 'DT';
-        settings.x_format = settings.date_display_format;
+
         settings.x_parseFormat = time.format(settings.date_format);
         settings.x_displayFormat = time.format(settings.date_display_format);
         settings.time_function = dt =>
@@ -21,19 +24,14 @@ export default function syncTimeScaleSettings(settings) {
     } else if (settings.time_scale === 'day') {
         settings.st_col = settings.stdy_col;
         settings.en_col = settings.endy_col;
-        settings.x_type = 'linear';
+        settings.x.type = 'linear';
+        settings.x.format = '1f';
         settings.time_unit = 'DY';
-        settings.x_format = '1d';
-        settings.x_parseFormat = format(settings.x_format);
-        settings.x_displayFormat = settings.x_parseFormat;
-        settings.time_function = dy => +dy;
-    }
 
-    //Sync x-axis settings with time scale settings.
-    settings.x.type = settings.x_type;
-    settings.x.label =
-        settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
-    settings.x.format = settings.x_format;
+        settings.x_parseFormat = format(settings.x.format);
+        settings.x_displayFormat = settings.x_parseFormat;
+        settings.time_function = dy => +settings.x_displayFormat(+dy);
+    }
 
     //Time intervals (lines)
     settings.marks[0].tooltip =

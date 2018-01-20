@@ -3,7 +3,6 @@ import updateText from './addText/updateText';
 import updateTable from '../drawReferenceTable/updateTable';
 
 export default function addDrag(reference_line) {
-    console.log(reference_line);
     const context = this,
         drag = behavior
             .drag()
@@ -14,21 +13,25 @@ export default function addDrag(reference_line) {
                 select(this).classed('poe-active', true);
             })
             .on('drag', function() {
-                const x = event.dx,
-                    coordinates = {
-                        x1: parseInt(reference_line.invisibleLine.attr('x1')) + x,
-                        x2: parseInt(reference_line.invisibleLine.attr('x2')) + x
-                    };
-                reference_line.timepoint = context.config.x_parseFormat(
-                    context.x.invert(coordinates.x1)
-                );
-                reference_line.label = context.config.x_displayFormat(
-                    context.x.invert(coordinates.x1)
-                );
-                reference_line.lineDatum.x1 = coordinates.x1;
-                reference_line.lineDatum.x2 = coordinates.x2;
-                reference_line.visibleLine.attr(coordinates);
-                reference_line.invisibleLine.attr(coordinates);
+                const dx = event.dx;
+
+                //Calculate x-coordinate of drag line.
+                let x = parseInt(reference_line.invisibleLine.attr('x1')) + dx;
+                if (x < 0) x = 0;
+                if (x > context.plot_width) x = context.plot_width;
+
+                //Invert x-coordinate with x-scale.
+                const xInverted = context.x.invert(x);
+
+                //Update reference line datum.
+                reference_line.timepoint = context.config.x_parseFormat(xInverted);
+                reference_line.label = context.config.x_displayFormat(xInverted);
+                reference_line.lineDatum.x1 = x;
+                reference_line.lineDatum.x2 = x;
+                reference_line.visibleLine.attr({ x1: x, x2: x });
+                reference_line.invisibleLine.attr({ x1: x, x2: x });
+
+                //Update reference line text label and table.
                 updateText.call(context, reference_line);
                 updateTable.call(context, reference_line);
             })

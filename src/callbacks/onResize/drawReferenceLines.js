@@ -7,7 +7,7 @@ export default function drawReferenceLines() {
 
         //Add group for reference lines.
         this.svg.select('.reference-lines').remove();
-        if (!this.parent) this.leftSide.selectAll('.poe-reference-line-container').remove();
+        if (!this.parent) this.leftSide.selectAll('.poe-reference-line-table-container').remove();
         this.referenceLinesGroup = this.svg
             .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
             .classed('reference-lines', true);

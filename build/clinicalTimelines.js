@@ -761,7 +761,7 @@
                     //label predefined or not
                     referenceLineObject.label = reference_line.label
                         ? reference_line.label
-                        : referenceLineObject.time_scale + ': ' + referenceLineObject.timepoint;
+                        : '' + referenceLineObject.timepoint;
 
                     return referenceLineObject;
                 })
@@ -833,14 +833,17 @@
             ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
                 ? settings.time_scale.toLowerCase()
                 : 'date';
+        settings.time_scalePropCased =
+            settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
 
         //Define settings variables to handle both date and day time scales.
         if (settings.time_scale === 'date') {
             settings.st_col = settings.stdt_col;
             settings.en_col = settings.endt_col;
-            settings.x_type = 'time';
+            settings.x.type = 'time';
+            settings.x.format = settings.date_display_format;
             settings.time_unit = 'DT';
-            settings.x_format = settings.date_display_format;
+
             settings.x_parseFormat = d3$1.time.format(settings.date_format);
             settings.x_displayFormat = d3$1.time.format(settings.date_display_format);
             settings.time_function = function(dt) {
@@ -851,21 +854,16 @@
         } else if (settings.time_scale === 'day') {
             settings.st_col = settings.stdy_col;
             settings.en_col = settings.endy_col;
-            settings.x_type = 'linear';
+            settings.x.type = 'linear';
+            settings.x.format = '1f';
             settings.time_unit = 'DY';
-            settings.x_format = '1d';
-            settings.x_parseFormat = d3$1.format(settings.x_format);
+
+            settings.x_parseFormat = d3$1.format(settings.x.format);
             settings.x_displayFormat = settings.x_parseFormat;
             settings.time_function = function(dy) {
-                return +dy;
+                return +settings.x_displayFormat(+dy);
             };
         }
-
-        //Sync x-axis settings with time scale settings.
-        settings.x.type = settings.x_type;
-        settings.x.label =
-            settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
-        settings.x.format = settings.x_format;
 
         //Time intervals (lines)
         settings.marks[0].tooltip =
@@ -3031,10 +3029,10 @@
         //Filter data on events that overlap reference line.
         reference_line.wide_data = this.filtered_wide_data.filter(function(d) {
             return (
-                _this.config.x_parseFormat.parse(d[_this.config.st_col]) <=
-                    _this.config.x_parseFormat.parse(reference_line.timepoint) &&
-                _this.config.x_parseFormat.parse(d[_this.config.en_col]) >=
-                    _this.config.x_parseFormat.parse(reference_line.timepoint)
+                _this.config.time_function(d[_this.config.st_col]) <=
+                    _this.config.time_function(reference_line.timepoint) &&
+                _this.config.time_function(d[_this.config.en_col]) >=
+                    _this.config.time_function(reference_line.timepoint)
             );
         });
 
@@ -3094,7 +3092,6 @@
     }
 
     function addDrag(reference_line) {
-        console.log(reference_line);
         var context = this,
             drag = d3$1.behavior
                 .drag()
@@ -3105,21 +3102,25 @@
                     d3$1.select(this).classed('poe-active', true);
                 })
                 .on('drag', function() {
-                    var x = d3$1.event.dx,
-                        coordinates = {
-                            x1: parseInt(reference_line.invisibleLine.attr('x1')) + x,
-                            x2: parseInt(reference_line.invisibleLine.attr('x2')) + x
-                        };
-                    reference_line.timepoint = context.config.x_parseFormat(
-                        context.x.invert(coordinates.x1)
-                    );
-                    reference_line.label = context.config.x_displayFormat(
-                        context.x.invert(coordinates.x1)
-                    );
-                    reference_line.lineDatum.x1 = coordinates.x1;
-                    reference_line.lineDatum.x2 = coordinates.x2;
-                    reference_line.visibleLine.attr(coordinates);
-                    reference_line.invisibleLine.attr(coordinates);
+                    var dx = d3$1.event.dx;
+
+                    //Calculate x-coordinate of drag line.
+                    var x = parseInt(reference_line.invisibleLine.attr('x1')) + dx;
+                    if (x < 0) x = 0;
+                    if (x > context.plot_width) x = context.plot_width;
+
+                    //Invert x-coordinate with x-scale.
+                    var xInverted = context.x.invert(x);
+
+                    //Update reference line datum.
+                    reference_line.timepoint = context.config.x_parseFormat(xInverted);
+                    reference_line.label = context.config.x_displayFormat(xInverted);
+                    reference_line.lineDatum.x1 = x;
+                    reference_line.lineDatum.x2 = x;
+                    reference_line.visibleLine.attr({ x1: x, x2: x });
+                    reference_line.invisibleLine.attr({ x1: x, x2: x });
+
+                    //Update reference line text label and table.
                     updateText.call(context, reference_line);
                     updateTable.call(context, reference_line);
                 })
@@ -3189,7 +3190,8 @@
 
         if (this.config.reference_lines) {
             this.svg.select('.reference-lines').remove();
-            if (!this.parent) this.leftSide.selectAll('.poe-reference-line-container').remove();
+            if (!this.parent)
+                this.leftSide.selectAll('.poe-reference-line-table-container').remove();
             this.referenceLinesGroup = this.svg
                 .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
                 .classed('reference-lines', true);

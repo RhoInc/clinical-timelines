@@ -46,9 +46,11 @@ export default function vertically() {
                         dy: this.y.rangeBand()
                     })
                     .text(
-                        `${this.config.groupings.filter(
-                            grouping => grouping.value_col === this.config.y.grouping
-                        )[0].label}: ${d.key}`
+                        `${
+                            this.config.groupings.filter(
+                                grouping => grouping.value_col === this.config.y.grouping
+                            )[0].label
+                        }: ${d.key}`
                     );
         }
     });

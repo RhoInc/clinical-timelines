@@ -16,16 +16,20 @@ export default function drawIDtimeline() {
     this.wrap.select('svg.wc-svg').classed('hidden', true);
 
     //Define ID data.
-    const longIDdata = this.long_data.filter(di => di[this.config.id_col] === this.selected_id),
-        wideIDdata = this.wide_data.filter(di => di[this.config.id_col] === this.selected_id);
+    const longIDdata = this.long_data.filter(d => d[this.config.id_col] === this.selected_id),
+        wideIDdata = this.wide_data.filter(d => d[this.config.id_col] === this.selected_id);
 
-    //Draw row identifier characteristics.
-    if (this.config.id_characteristics)
-        this.IDdetails.wrap.selectAll('div.characteristic').each(function(d) {
+    //Draw ID characteristics.
+    if (this.config.id_characteristics) {
+        const id_characteristics = this.initial_data.filter(
+            d => d[this.config.id_col] === this.selected_id
+        )[0];
+        this.IDdetails.wrap.selectAll('.characteristic').each(function(d) {
             select(this)
                 .select('span')
-                .text(wideIDdata[0][d.value_col]);
+                .text(id_characteristics[d.value_col]);
         });
+    }
 
     //Draw ID timeline.
     this.IDtimeline.wrap.classed('hidden', false);

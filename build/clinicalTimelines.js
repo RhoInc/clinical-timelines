@@ -190,14 +190,12 @@
                 //Lines
                 '#clinical-timelines path.wc-data-mark {' +
                     '    stroke-width: 4;' +
-                    '    clip-path: url(#1);' +
                     '    stroke-opacity: 1;' +
                     '}',
                 '#clinical-timelines path.wc-data-mark.highlighted {' +
                     '    stroke-width: 7;' +
                     '}',
                 '#clinical-timelines line.highlight-overlay {' +
-                    '    clip-path: url(#1);' +
                     '    stroke-width: 3;' +
                     '    stroke-linecap: round;' +
                     '}',
@@ -205,7 +203,6 @@
                 //Circles
                 '#clinical-timelines circle.wc-data-mark {' +
                     '    stroke-width: 0;' +
-                    '    clip-path: url(#1);' +
                     '    fill-opacity: 1;' +
                     '}',
                 '#clinical-timelines circle.wc-data-mark.highlighted {' +
@@ -214,7 +211,7 @@
                     '}',
 
                 //Arrows
-                '#clinical-timelines polygon.ongoing-event {' + '    clip-path: url(#1);' + '}',
+                '#clinical-timelines polygon.ongoing-event {' + '}',
                 '#clinical-timelines polygon.ongoing-event.highlighted {' +
                     '    stroke-width: 2;' +
                     '}',
@@ -550,6 +547,7 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
+                    'clip-path': 'url(#1)',
                     'stroke-width': 4
                 }
             },
@@ -559,6 +557,7 @@
                 tooltip: null, // set in syncSettings()
                 radius: 4,
                 attributes: {
+                    'clip-path': 'url(#1)',
                     'stroke-width': 2
                 }
             }
@@ -764,10 +763,13 @@
             settings.en_col = settings.endt_col;
             settings.x_type = 'time';
             settings.time_unit = 'DT';
-            settings.x_format = settings.date_format;
-            settings.x_d3format = d3.time.format(settings.x_format);
+            settings.x_format = settings.date_display_format;
+            settings.x_parseFormat = d3.time.format(settings.date_format);
+            settings.x_displayFormat = d3.time.format(settings.x_format);
             settings.time_function = function(dt) {
-                return settings.x_d3format.parse(dt) ? settings.x_d3format.parse(dt) : new Date(dt);
+                return settings.x_parseFormat.parse(dt)
+                    ? settings.x_parseFormat.parse(dt)
+                    : new Date(dt);
             };
         } else if (settings.time_scale === 'day') {
             settings.st_col = settings.stdy_col;
@@ -775,7 +777,8 @@
             settings.x_type = 'linear';
             settings.time_unit = 'DY';
             settings.x_format = '1d';
-            settings.x_d3format = d3.format(settings.x_format);
+            settings.x_parseFormat = d3.format(settings.x_format);
+            settings.x_displayFormat = settings.x_parseFormat;
             settings.time_function = function(dy) {
                 return +dy;
             };
@@ -954,11 +957,11 @@
 
             //Concatenate date and day values for listing.
             d.stdtdy =
-                has_stdt && has_stdy
+                has_stdt && has_stdy && d[_this.config.stdy_col] !== ''
                     ? d[_this.config.stdt_col] + ' (' + d[_this.config.stdy_col] + ')'
                     : d[_this.config.stdt_col] || d[_this.config.stdy_col];
             d.endtdy =
-                has_endt && has_endy
+                has_endt && has_endy && d[_this.config.endy_col] !== ''
                     ? d[_this.config.endt_col] + ' (' + d[_this.config.endy_col] + ')'
                     : d[_this.config.endt_col] || d[_this.config.endy_col];
         });
@@ -1112,30 +1115,54 @@
             if (input.description !== 'X-axis scale') return true;
             else {
                 var anyDates = _this.initial_data.some(function(d) {
-                        return d.hasOwnProperty(_this.config.stdt_col);
+                        return (
+                            d.hasOwnProperty(_this.config.stdt_col) &&
+                            d[_this.config.stdt_col] !== ''
+                        );
                     }),
                     anyDays = _this.initial_data.some(function(d) {
-                        return d.hasOwnProperty(_this.config.stdy_col);
+                        return (
+                            d.hasOwnProperty(_this.config.stdy_col) &&
+                            d[_this.config.stdy_col] !== ''
+                        );
                     });
 
                 if (!anyDates && !anyDays) {
                     var errorText =
-                        'The data contain neither ' +
+                        'The data either contain neither ' +
                         _this.config.stdt_col +
                         ' nor ' +
                         _this.config.stdy_col +
-                        '.  Please update the settings object to match the variables in the data.';
+                        ' or both ' +
+                        _this.config.stdt_col +
+                        ' and ' +
+                        _this.config.stdy_col +
+                        ' contain no valid values.  Please update the settings object to match the variables in the data or clean the data.';
                     _this.wrap
                         .append('div')
                         .style('color', 'red')
                         .html(errorText);
                     throw new Error(errorText);
                 } else if (!anyDates && _this.config.time_scale === 'date') {
+                    console.warn(
+                        'The data either do not contain a variable named ' +
+                            _this.config.stdt_col +
+                            ' or ' +
+                            _this.config.stdt_col +
+                            ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
+                    );
                     _this.config.time_scale = 'day';
                     syncTimeScaleSettings(_this.config);
                     _this.IDtimeline.config.time_scale = 'day';
                     syncTimeScaleSettings(_this.IDtimeline.config);
                 } else if (!anyDays && _this.config.time_scale === 'day') {
+                    console.warn(
+                        'The data either do not contain a variable named ' +
+                            _this.config.stdy_col +
+                            ' or ' +
+                            _this.config.stdy_col +
+                            ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
+                    );
                     _this.config.time_scale = 'date';
                     syncTimeScaleSettings(_this.config);
                     _this.IDtimeline.config.time_scale = 'date';
@@ -1236,6 +1263,10 @@
                 !/^\s*$/.test(d[_this.config.id_col]) && !/^\s*$/.test(d[_this.config.event_col])
             );
         });
+
+        //Manually set controls' data.
+        this.controls.data = this.initial_data;
+        this.controls.ready = true;
 
         //Warn user of removed records.
         if (this.initial_data.length < this.raw_data.length)
@@ -1429,21 +1460,25 @@
         this.wrap.select('svg.wc-svg').classed('hidden', true);
 
         //Define ID data.
-        var longIDdata = this.long_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
+        var longIDdata = this.long_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
             }),
-            wideIDdata = this.wide_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
+            wideIDdata = this.wide_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
             });
 
-        //Draw row identifier characteristics.
-        if (this.config.id_characteristics)
-            this.IDdetails.wrap.selectAll('div.characteristic').each(function(d) {
+        //Draw ID characteristics.
+        if (this.config.id_characteristics) {
+            var id_characteristics = this.initial_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
+            })[0];
+            this.IDdetails.wrap.selectAll('.characteristic').each(function(d) {
                 d3
                     .select(this)
                     .select('span')
-                    .text(wideIDdata[0][d.value_col]);
+                    .text(id_characteristics[d.value_col]);
             });
+        }
 
         //Draw ID timeline.
         this.IDtimeline.wrap.classed('hidden', false);
@@ -1469,11 +1504,11 @@
         );
     }
 
-    function IDchange(select) {
+    function IDchange(select$$1) {
         var _this = this;
 
         this.selected_id = d3
-            .select(select)
+            .select(select$$1)
             .select('option:checked')
             .text();
         this.filters.filter(function(filter) {
@@ -1513,11 +1548,11 @@
         enableDisableControls.call(this);
     }
 
-    function eventTypeChange(select) {
+    function eventTypeChange(select$$1) {
         var _this = this;
 
         this.currentEventTypes = d3
-            .select(select)
+            .select(select$$1)
             .selectAll('select option:checked')
             .pop()
             .map(function(d) {
@@ -1571,10 +1606,10 @@
         });
     }
 
-    function eventHighlightingChange(select, d) {
+    function eventHighlightingChange(select$$1, d) {
         //Update event highlighting settings.
         this.config.event_highlighted = d3
-            .select(select)
+            .select(select$$1)
             .select('option:checked')
             .text();
         this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
@@ -1804,9 +1839,12 @@
                             _this.config.x.domain[0] <= st && st <= _this.config.x.domain[1],
                         // start is within the time range
                         enInsideTimeRange =
-                            _this.config.x.domain[0] <= en && en <= _this.config.x.domain[1]; // end is within the time range
+                            _this.config.x.domain[0] <= en && en <= _this.config.x.domain[1],
+                        // end is within the time range
+                        surroundingTimeRange =
+                            _this.config.x.domain[0] > st && en > _this.config.x.domain[1]; // start is prior to time range and end is after time range
 
-                    return stInsideTimeRange || enInsideTimeRange;
+                    return stInsideTimeRange || enInsideTimeRange || surroundingTimeRange;
                 });
 
                 return IDobject;
@@ -2145,22 +2183,18 @@
                 .axis()
                 .scale(this.x)
                 .orient('top')
-                .tickFormat(this.config.x_d3format)
+                .ticks(this.xAxis.ticks()[0])
+                .tickFormat(this.config.x_displayFormat)
                 .innerTickSize(this.xAxis.innerTickSize())
-                .outerTickSize(this.xAxis.outerTickSize())
-                .ticks(this.xAxis.ticks()[0]),
+                .outerTickSize(this.xAxis.outerTickSize()),
             topXaxisSelection = this.svg.select('g.x-top.axis').attr('class', 'x-top axis linear');
         topXaxisSelection.call(topXaxis);
         topXaxisSelection
             .select('text.axis-title.top')
-            .attr(
-                'transform',
-                'translate(' +
-                    (this.raw_width / 2 - this.margin.left) +
-                    ',-' +
-                    9 * this.config.margin.top / 16 +
-                    ')'
-            )
+            .attr({
+                transform: 'translate(' + this.plot_width / 2 + ',' + -this.margin.top / 2 + ')',
+                'text-anchor': 'middle'
+            })
             .text(this.config.x.label);
     }
 
@@ -2600,7 +2634,8 @@
                         x2: x2,
                         y1: y,
                         y2: y,
-                        stroke: color
+                        stroke: color,
+                        'clip-path': 'url(#' + context.id + ')'
                     });
 
             if (d.ongoing === context.config.ongo_val) {
@@ -2663,50 +2698,56 @@
                         .datum(d)
                         .classed('ongoing-event', true)
                         .attr({
-                            'clip-path': 'url(#1)',
                             points: arrow
                                 .map(function(coordinate) {
                                     return coordinate.join(',');
                                 })
                                 .join(' '),
                             fill: color,
-                            stroke: color
+                            stroke: color,
+                            'clip-path': 'url(#' + context.id + ')'
                         });
                 });
         }
     }
 
     function offsetBottomXaxis() {
-        var bottomXaxis = this.svg.select('.x.axis'),
-            bottomXaxisTransform = bottomXaxis.attr('transform'),
-            bottomXaxisTransformX =
+        var //capture x-axis and its translation coordinates
+            bottomXaxis = this.svg.select('.x.axis'),
+            bottomXaxisTransform = bottomXaxis
+                .attr('transform')
+                .replace(/^translate\((.*)\)$/, '$1'),
+            bottomXaxisTransformCoordinates =
                 bottomXaxisTransform.indexOf(',') > -1
-                    ? +bottomXaxisTransform.split(',')[0].split('(')[1]
-                    : +bottomXaxisTransform.split(' ')[0].split('(')[1],
-            bottomXaxisTransformY =
-                bottomXaxisTransform.indexOf(',') > -1
-                    ? +bottomXaxisTransform.split(',')[1].split(')')[0]
-                    : +bottomXaxisTransform.split(' ')[1].split(')')[0],
+                    ? bottomXaxisTransform.split(',')
+                    : bottomXaxisTransform.split(' '),
+            //capture x-axis title and its translation coordinates
             bottomXaxisTitle = bottomXaxis.select('.axis-title'),
-            bottomXaxisTitleTransform = bottomXaxisTitle.attr('transform'),
-            bottomXaxisTitleTransformX =
+            bottomXaxisTitleTransform = bottomXaxisTitle
+                .attr('transform')
+                .replace(/^translate\((.*)\)$/, '$1'),
+            bottomXaxisTitleTransformCoordinates =
                 bottomXaxisTitleTransform.indexOf(',') > -1
-                    ? +bottomXaxisTitleTransform.split(',')[0].split('(')[1]
-                    : +bottomXaxisTitleTransform.split(' ')[0].split('(')[1],
-            bottomXaxisTitleTransformY =
-                bottomXaxisTitleTransform.indexOf(',') > -1
-                    ? +bottomXaxisTitleTransform.split(',')[1].split(')')[0]
-                    : +bottomXaxisTitleTransform.split(' ')[1].split(')')[0];
+                    ? bottomXaxisTitleTransform.split(',')
+                    : bottomXaxisTitleTransform.split(' ');
+
+        //offset x-axis
         bottomXaxis.attr(
             'transform',
-            'translate(0,' + (bottomXaxisTransformY + this.y.rangeBand()) + ')'
+            'translate(' +
+                +bottomXaxisTransformCoordinates[0] +
+                ',' +
+                (+bottomXaxisTransformCoordinates[1] + this.y.rangeBand()) +
+                ')'
         );
+
+        //offset x-axis title
         bottomXaxisTitle.attr(
             'transform',
             'translate(' +
-                bottomXaxisTitleTransformX +
+                +bottomXaxisTitleTransformCoordinates[0] +
                 ',' +
-                (bottomXaxisTitleTransformY - 7 * this.margin.bottom / 16) +
+                (+bottomXaxisTitleTransformCoordinates[1] - 7 * this.margin.bottom / 16) +
                 ')'
         );
     }
@@ -2809,7 +2850,7 @@
     function IEsucks() {
         if (!!document.documentMode)
             this.svg.selectAll('.line,.point').each(function(d) {
-                var mark = select(this),
+                var mark = d3.select(this),
                     tooltip = mark.select('title'),
                     text = tooltip.text().split('\n');
                 tooltip.text(text.join('--|--'));
@@ -2866,9 +2907,14 @@
     };
 
     function onInit$1() {
+        var _this = this;
+
         this.config.color_dom = this.parent.clinicalTimelines.config.color_dom;
         this.config.legend.order = this.parent.clinicalTimelines.config.legend.order;
         this.config.x.domain = null;
+        this.config.marks.forEach(function(mark) {
+            mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
+        });
     }
 
     function onLayout$1() {}
@@ -2963,6 +3009,9 @@
 
         //Highlight events.
         highlightMarks.call(this);
+
+        //Replace newline characters with html line break entities to cater to Internet Explorer.
+        IEsucks.call(this);
     }
 
     function onDestroy$1() {}

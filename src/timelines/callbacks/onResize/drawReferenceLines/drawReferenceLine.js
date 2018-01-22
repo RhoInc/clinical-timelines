@@ -7,8 +7,8 @@ import addDrag from './drawReferenceLine/addDrag';
 export default function drawReferenceLine(reference_line, i) {
     reference_line.g = this.referenceLinesGroup
         .append('g')
-        .classed('reference-line', true)
-        .attr('id', 'reference-line-' + i);
+        .classed('ct-reference-line', true)
+        .attr('id', 'ct-reference-line-' + i);
     reference_line.timepointN = this.config.time_function(reference_line.timepoint);
     reference_line.lineDatum = {
         x1: this.x(reference_line.timepointN),

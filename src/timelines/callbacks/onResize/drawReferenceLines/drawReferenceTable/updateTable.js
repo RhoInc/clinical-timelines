@@ -22,13 +22,13 @@ export default function updateTable(reference_line) {
     reference_line.flattened_data = [];
     reference_line.nested_data.forEach(d => {
         reference_line.flattened_data.push({
-            class: 'poe-higher-level',
+            class: 'ct-higher-level',
             key: d.key,
             n: sum(d.values, di => di.values)
         });
         d.values.forEach(di => {
             reference_line.flattened_data.push({
-                class: 'poe-lower-level',
+                class: 'ct-lower-level',
                 key: di.key,
                 n: di.values
             });
@@ -47,7 +47,7 @@ export default function updateTable(reference_line) {
             row
                 .append('td')
                 .text(d.key)
-                .attr('class', d => d.class + (d.class === 'poe-lower-level' ? ' poe-indent' : ''));
+                .attr('class', d => d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : ''));
             row
                 .append('td')
                 .text(d.n)

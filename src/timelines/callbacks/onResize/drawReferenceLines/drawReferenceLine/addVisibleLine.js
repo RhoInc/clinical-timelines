@@ -2,7 +2,7 @@ export default function addVisibleLine(reference_line) {
     reference_line.visibleLine = reference_line.g
         .append('line')
         .datum(reference_line.lineDatum)
-        .classed('visible-reference-line', true)
+        .classed('ct-visible-reference-line', true)
         .attr({
             x1: d => d.x1,
             x2: d => d.x2,

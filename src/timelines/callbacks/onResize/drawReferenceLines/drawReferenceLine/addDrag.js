@@ -10,7 +10,7 @@ export default function addDrag(reference_line) {
                 return d;
             })
             .on('dragstart', function() {
-                select(this).classed('poe-active', true);
+                select(this).classed('ct-active', true);
             })
             .on('drag', function() {
                 const dx = event.dx;
@@ -36,7 +36,7 @@ export default function addDrag(reference_line) {
                 updateTable.call(context, reference_line);
             })
             .on('dragend', function() {
-                select(this).classed('poe-active', false);
+                select(this).classed('ct-active', false);
             });
 
     reference_line.invisibleLine.call(drag);

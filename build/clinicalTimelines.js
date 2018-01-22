@@ -803,28 +803,28 @@
                     '}',
 
                 //Reference Tables
-                '#clinical-timelines > #left-side .poe-reference-line-header {' +
+                '#clinical-timelines #ct-left-column .ct-reference-line-header {' +
                     '    text-align: center;' +
                     '    border-bottom: 1px solid black;' +
                     '    padding-bottom: 5px;' +
                     '}',
-                '#clinical-timelines > #left-side .poe-reference-line-table {' +
+                '#clinical-timelines #ct-left-column .ct-reference-line-table {' +
                     '    width: 100%;' +
                     '    display: table;' +
                     '}',
-                '#clinical-timelines > #left-side .poe-reference-line-table th,' +
-                    '#clinical-timelines > #left-side .poe-reference-line-table td {' +
+                '#clinical-timelines #ct-left-column .ct-reference-line-table th,' +
+                    '#clinical-timelines #ct-left-column .ct-reference-line-table td {' +
                     '    text-align: left;' +
                     '}',
-                '#clinical-timelines > #left-side .poe-higher-level {' +
+                '#clinical-timelines #ct-left-column .ct-higher-level {' +
                     '    border-bottom: 1px dotted lightgray;' +
                     '    font-weight: bold;' +
                     '    font-size: 14px;' +
                     '}',
-                '#clinical-timelines > #left-side .poe-lower-level {' +
+                '#clinical-timelines #ct-left-column .ct-lower-level {' +
                     '    font-size: 12px;' +
                     '}',
-                '#clinical-timelines > #left-side .poe-lower-level.poe-indent {' +
+                '#clinical-timelines #ct-left-column .ct-lower-level.ct-indent {' +
                     '    padding-left: 5%;' +
                     '}',
 
@@ -940,7 +940,7 @@
                     '    stroke-width: 20;' +
                     '    stroke-opacity: 0;' +
                     '}',
-                '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-text {' +
+                '#clinical-timelines #ct-right-column .wc-chart .wc-svg .reference-line-text {' +
                     '    font-weight: bold;' +
                     '    font-size: 24px;' +
                     '}',
@@ -2998,7 +2998,7 @@
         reference_line.visibleLine = reference_line.g
             .append('line')
             .datum(reference_line.lineDatum)
-            .classed('visible-reference-line', true)
+            .classed('ct-visible-reference-line', true)
             .attr({
                 x1: function x1(d) {
                     return d.x1;
@@ -3019,7 +3019,7 @@
         reference_line.invisibleLine = reference_line.g
             .append('line')
             .datum(reference_line.lineDatum)
-            .classed('invisible-reference-line', true)
+            .classed('ct-invisible-reference-line', true)
             .attr({
                 x1: function x1(d) {
                     return d.x1;
@@ -3049,7 +3049,9 @@
     }
 
     function addText(reference_line) {
-        reference_line.text = reference_line.g.append('text').classed('reference-line-text', true);
+        reference_line.text = reference_line.g
+            .append('text')
+            .classed('ct-reference-line-text', true);
         updateText.call(this, reference_line);
     }
 
@@ -3057,19 +3059,19 @@
         var context = this;
 
         //Hide reference labels initially.
-        reference_line.text.classed('hidden', true);
+        reference_line.text.classed('ct-hidden', true);
 
         //Add event listeners to invisible reference line.
         reference_line.invisibleLine
             .on('mouseover', function() {
                 var mouse = d3.mouse(this);
-                reference_line.visibleLine.classed('hover', true);
-                reference_line.text.classed('hidden', false).attr('y', mouse[1]);
+                reference_line.visibleLine.classed('ct-hover', true);
+                reference_line.text.classed('ct-hidden', false).attr('y', mouse[1]);
                 context.svg.node().appendChild(reference_line.text.node());
             })
             .on('mouseout', function() {
-                reference_line.visibleLine.classed('hover', false);
-                reference_line.text.classed('hidden', true);
+                reference_line.visibleLine.classed('ct-hover', false);
+                reference_line.text.classed('ct-hidden', true);
             });
     }
 
@@ -3105,7 +3107,7 @@
         reference_line.flattened_data = [];
         reference_line.nested_data.forEach(function(d) {
             reference_line.flattened_data.push({
-                class: 'poe-higher-level',
+                class: 'ct-higher-level',
                 key: d.key,
                 n: d3$1.sum(d.values, function(di) {
                     return di.values;
@@ -3113,7 +3115,7 @@
             });
             d.values.forEach(function(di) {
                 reference_line.flattened_data.push({
-                    class: 'poe-lower-level',
+                    class: 'ct-lower-level',
                     key: di.key,
                     n: di.values
                 });
@@ -3133,7 +3135,7 @@
                     .append('td')
                     .text(d.key)
                     .attr('class', function(d) {
-                        return d.class + (d.class === 'poe-lower-level' ? ' poe-indent' : '');
+                        return d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : '');
                     });
                 row
                     .append('td')
@@ -3152,7 +3154,7 @@
                     return d;
                 })
                 .on('dragstart', function() {
-                    d3$1.select(this).classed('poe-active', true);
+                    d3$1.select(this).classed('ct-active', true);
                 })
                 .on('drag', function() {
                     var dx = d3$1.event.dx;
@@ -3178,7 +3180,7 @@
                     updateTable.call(context, reference_line);
                 })
                 .on('dragend', function() {
-                    d3$1.select(this).classed('poe-active', false);
+                    d3$1.select(this).classed('ct-active', false);
                 });
 
         reference_line.invisibleLine.call(drag);
@@ -3187,8 +3189,8 @@
     function drawReferenceLine(reference_line, i) {
         reference_line.g = this.referenceLinesGroup
             .append('g')
-            .classed('reference-line', true)
-            .attr('id', 'reference-line-' + i);
+            .classed('ct-reference-line', true)
+            .attr('id', 'ct-reference-line-' + i);
         reference_line.timepointN = this.config.time_function(reference_line.timepoint);
         reference_line.lineDatum = {
             x1: this.x(reference_line.timepointN),
@@ -3218,20 +3220,20 @@
     function drawReferenceTable(reference_line, i) {
         //Add reference line table container.
         if (reference_line.tableContainer) reference_line.tableContainer.remove();
-        reference_line.tableContainer = this.leftSide
+        reference_line.tableContainer = this.clinicalTimelines.containers.leftColumn
             .append('div')
-            .classed('poe-reference-line-table-container', true)
-            .attr('id', 'poe-reference-line-table-container-' + i);
+            .classed('ct-reference-line-table-container', true)
+            .attr('id', 'ct-reference-line-table-container-' + i);
 
         //Add reference line table header.
         reference_line.tableHeader = reference_line.tableContainer
             .append('h3')
-            .classed('poe-reference-line-header', true);
+            .classed('ct-reference-line-header', true);
 
         //Add reference line table.
         reference_line.table = reference_line.tableContainer
             .append('table')
-            .classed('poe-reference-line-table', true)
+            .classed('ct-reference-line-table', true)
             .append('tbody');
 
         //Add table data.
@@ -3242,12 +3244,14 @@
         var _this = this;
 
         if (this.config.reference_lines) {
-            this.svg.select('.reference-lines').remove();
+            this.svg.select('.ct-reference-lines').remove();
             if (!this.parent)
-                this.leftSide.selectAll('.poe-reference-line-table-container').remove();
+                this.clinicalTimelines.containers.leftColumn
+                    .selectAll('.ct-reference-line-table-container')
+                    .remove();
             this.referenceLinesGroup = this.svg
                 .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
-                .classed('reference-lines', true);
+                .classed('ct-reference-lines', true);
 
             //Append reference line for each item in config.reference_lines.
             this.config.reference_lines

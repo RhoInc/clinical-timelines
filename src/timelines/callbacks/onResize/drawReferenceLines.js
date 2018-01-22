@@ -6,11 +6,14 @@ export default function drawReferenceLines() {
         const context = this;
 
         //Add group for reference lines.
-        this.svg.select('.reference-lines').remove();
-        if (!this.parent) this.leftSide.selectAll('.poe-reference-line-table-container').remove();
+        this.svg.select('.ct-reference-lines').remove();
+        if (!this.parent)
+            this.clinicalTimelines.containers.leftColumn
+                .selectAll('.ct-reference-line-table-container')
+                .remove();
         this.referenceLinesGroup = this.svg
             .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
-            .classed('reference-lines', true);
+            .classed('ct-reference-lines', true);
 
         //Append reference line for each item in config.reference_lines.
         this.config.reference_lines

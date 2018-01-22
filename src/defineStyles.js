@@ -68,7 +68,6 @@ export default function defineStyles() {
                 '    text-align: right;' +
                 '}',
             '#clinical-timelines #ct-left-column .ct-annotation .ct-stats,' +
-            '#clinical-timelines #ct-left-column .ct-annotation #ID,' +
             '#clinical-timelines #ct-left-column .ct-annotation .ct-characteristic span {' +
                 '    font-weight: bold;' +
                 '}',

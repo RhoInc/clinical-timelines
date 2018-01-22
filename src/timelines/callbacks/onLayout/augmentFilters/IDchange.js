@@ -19,7 +19,6 @@ export default function IDchange(select) {
 
         //Hide ID information.
         this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', true);
-        this.clinicalTimelines.containers.IDdetails.select('#ID').text('');
 
         //Hide clinical timelines.
         this.wrap.select('svg.wc-svg').classed('ct-hidden', false);

@@ -7,7 +7,6 @@ export default function drawIDtimeline() {
 
     //Display ID information.
     this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', false);
-    this.clinicalTimelines.containers.IDdetails.select('#ID').text(this.selected_id);
 
     //Hide clinical timelines.
     this.wrap.select('svg.wc-svg').classed('ct-hidden', true);
@@ -21,7 +20,9 @@ export default function drawIDtimeline() {
         const id_characteristics = this.initial_data.filter(
             d => d[this.config.id_col] === this.selected_id
         )[0];
-        this.IDdetails.wrap.selectAll('.characteristic').each(function(d) {
+        this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(function(
+            d
+        ) {
             select(this)
                 .select('span')
                 .text(id_characteristics[d.value_col]);

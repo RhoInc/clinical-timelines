@@ -1532,7 +1532,6 @@
 
         //Display ID information.
         this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', false);
-        this.clinicalTimelines.containers.IDdetails.select('#ID').text(this.selected_id);
 
         //Hide clinical timelines.
         this.wrap.select('svg.wc-svg').classed('ct-hidden', true);
@@ -1550,12 +1549,14 @@
             var id_characteristics = this.initial_data.filter(function(d) {
                 return d[_this.config.id_col] === _this.selected_id;
             })[0];
-            this.IDdetails.wrap.selectAll('.characteristic').each(function(d) {
-                d3
-                    .select(this)
-                    .select('span')
-                    .text(id_characteristics[d.value_col]);
-            });
+            this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(
+                function(d) {
+                    d3
+                        .select(this)
+                        .select('span')
+                        .text(id_characteristics[d.value_col]);
+                }
+            );
         }
 
         //Draw ID timeline.
@@ -1782,7 +1783,6 @@
 
             //Hide ID information.
             this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', true);
-            this.clinicalTimelines.containers.IDdetails.select('#ID').text('');
 
             //Hide clinical timelines.
             this.wrap.select('svg.wc-svg').classed('ct-hidden', false);
@@ -3104,6 +3104,7 @@
     function onInit$1() {
         var _this = this;
 
+        this.clinicalTimelines = this.parent.clinicalTimelines;
         this.config.color_dom = this.parent.timelines.config.color_dom;
         this.config.legend.order = this.parent.timelines.config.legend.order;
         this.config.x.domain = null;

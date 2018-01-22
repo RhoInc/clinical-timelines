@@ -1,5 +1,5 @@
-import enableDisableControls from '../functions/enableDisableControls';
-import updateIDfilter from '../functions/updateIDfilter';
+import enableDisableControls from '../../functions/enableDisableControls';
+import updateIDfilter from '../../functions/updateIDfilter';
 
 export default function backButton() {
     delete this.selected_id;

@@ -2,6 +2,7 @@ import updateTimeRangeControls from './onPreprocess/updateTimeRangeControls';
 import defineFilteredData from './onPreprocess/defineFilteredData';
 import definePopulationDetails from './onPreprocess/definePopulationDetails';
 import defineDataInsideTimeRange from './onPreprocess/defineDataInsideTimeRange';
+import exportData from './onPreprocess/exportData';
 import defineGroupingData from './onPreprocess/defineGroupingData';
 import sortYdomain from './onPreprocess/sortYdomain';
 
@@ -20,6 +21,9 @@ export default function onPreprocess() {
 
     //Define data inside time range.
     defineDataInsideTimeRange.call(this);
+
+    //Attach data inside time range to export button.
+    exportData.call(this);
 
     //Insert groupings into data to draw empty rows in which to draw groupings.
     defineGroupingData.call(this);

@@ -62,25 +62,47 @@ export default function defineStyles() {
             '#clinical-timelines #ct-left-column > * {' +
                 '}',
 
-          //Annotations
-            '#clinical-timelines #ct-left-column .ct-annotation {' +
+          //Details
+            '#clinical-timelines #ct-left-column .ct-details {' +
                 '    font-size: 90%;' +
                 '    text-align: right;' +
                 '}',
-            '#clinical-timelines #ct-left-column .ct-annotation .ct-stats,' +
-            '#clinical-timelines #ct-left-column .ct-annotation .ct-characteristic span {' +
+            '#clinical-timelines #ct-left-column .ct-details .ct-details-button {' +
+                '    display: inline-block;' +
+                '    float: left;' +
+                '    font-size: 110%;' +
+                '    font-weight: bold;' +
+                '    text-decoration: none;' +
+                '    padding: 2px;' +
+                '    border: 2px solid black;' +
+                '    cursor: pointer;' +
+                '    color: blue;' +
+                '    background: lightgray;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-details .ct-details-button:hover {' +
+                '    color: lightblue;' +
+                '    background: black;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-details .ct-details-button a {' +
+                '    text-decoration: none;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-details .ct-details-button:hover a {' +
+                '    color: lightblue;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-details .ct-stats,' +
+            '#clinical-timelines #ct-left-column .ct-details .ct-characteristic span {' +
                 '    font-weight: bold;' +
                 '}',
-            '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample {' +
+            '#clinical-timelines #ct-left-column .ct-details .ct-stats.ct-sample {' +
                 '    color: green;' +
                 '}',
-            '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample-inside-time-range {' +
+            '#clinical-timelines #ct-left-column .ct-details .ct-stats.ct-sample-inside-time-range {' +
                 '    color: blue;' +
                 '}',
-            '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample-outside-time-range {' +
+            '#clinical-timelines #ct-left-column .ct-details .ct-stats.ct-sample-outside-time-range {' +
                 '    color: red;' +
                 '}',
-            '#clinical-timelines #ct-left-column .ct-annotation .ct-info-icon {' +
+            '#clinical-timelines #ct-left-column .ct-details .ct-info-icon {' +
                 '    font-weight: bold;' +
                 '    color: blue;' +
                 '    cursor: help;' +
@@ -122,15 +144,6 @@ export default function defineStyles() {
                 '    clear: right;' +
                 '    box-sizing: border-box;' +
                 '}',
-            '#clinical-timelines #ct-left-column #ct-ID-details #ct-back-button {' +
-                '    display: inline-block;' +
-                '    float: left;' +
-                '}',
-            '#clinical-timelines #ct-left-column #ct-ID-details #ct-back-button button {' +
-                '    padding: 0 5px;' +
-                '    font-size: 110%;' +
-                '}',
-
 
           //Reference Tables
             '#clinical-timelines #ct-left-column .ct-reference-line-header {' +

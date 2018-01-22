@@ -1,4 +1,4 @@
-import { time, set, min, max } from 'd3';
+import { set } from 'd3';
 import manipulateData from './onInit/manipulateData';
 import cleanData from './functions/cleanData';
 import defineData from './functions/defineData';
@@ -9,8 +9,6 @@ import checkFilters from './onInit/checkFilters';
 import addDataDrivenTooltips from './onInit/addDataDrivenTooltips';
 
 export default function onInit() {
-    const context = this;
-
     //Capture and count all IDs in data.
     this.populationDetails = {
         population: set(this.raw_data.map(d => d[this.config.id_col])).values()
@@ -24,6 +22,10 @@ export default function onInit() {
     this.initial_data = this.raw_data.filter(
         d => !/^\s*$/.test(d[this.config.id_col]) && !/^\s*$/.test(d[this.config.event_col])
     );
+
+    //Manually set controls' data.
+    this.controls.data = this.initial_data;
+    this.controls.ready = true;
 
     //Warn user of removed records.
     if (this.initial_data.length < this.raw_data.length)

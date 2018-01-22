@@ -6,8 +6,6 @@ import augmentFilters from './onLayout/augmentFilters';
 import topXaxis from './onLayout/topXaxis';
 
 export default function onLayout() {
-    const context = this;
-
     //Lay out details container.
     IDdetails.call(this);
 

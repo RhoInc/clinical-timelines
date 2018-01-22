@@ -2,10 +2,9 @@ import drawOngoingMarks from '../../timelines/callbacks/onResize/drawOngoingMark
 import drawTimeRange from './onResize/drawTimeRange';
 import drawReferenceLines from '../../timelines/callbacks/onResize/drawReferenceLines';
 import highlightMarks from '../../timelines/callbacks/onResize/highlightMarks';
+import IEsucks from '../../timelines/callbacks/onResize/IEsucks';
 
 export default function onResize() {
-    const context = this;
-
     //Hide legend.
     this.wrap.select('.legend').classed('ct-hidden', true);
 
@@ -30,4 +29,7 @@ export default function onResize() {
 
     //Highlight events.
     highlightMarks.call(this);
+
+    //Replace newline characters with html line break entities to cater to Internet Explorer.
+    IEsucks.call(this);
 }

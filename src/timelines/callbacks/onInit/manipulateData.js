@@ -26,11 +26,11 @@ export default function manipulateData() {
 
         //Concatenate date and day values for listing.
         d.stdtdy =
-            has_stdt && has_stdy
+            has_stdt && has_stdy && d[this.config.stdy_col] !== ''
                 ? d[this.config.stdt_col] + ' (' + d[this.config.stdy_col] + ')'
                 : d[this.config.stdt_col] || d[this.config.stdy_col];
         d.endtdy =
-            has_endt && has_endy
+            has_endt && has_endy && d[this.config.endy_col] !== ''
                 ? d[this.config.endt_col] + ' (' + d[this.config.endy_col] + ')'
                 : d[this.config.endt_col] || d[this.config.endy_col];
     });

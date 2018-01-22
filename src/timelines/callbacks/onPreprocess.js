@@ -6,8 +6,6 @@ import defineGroupingData from './onPreprocess/defineGroupingData';
 import sortYdomain from './onPreprocess/sortYdomain';
 
 export default function onPreprocess() {
-    const context = this;
-
     //Set x-domain.
     this.config.x.domain = this.time_range;
 

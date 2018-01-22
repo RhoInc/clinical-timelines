@@ -203,7 +203,6 @@ export default function defineStyles() {
           //Lines
             '#clinical-timelines path.wc-data-mark {' +
                 '    stroke-width: 4;' +
-                '    clip-path: url(#1);' +
                 '    stroke-opacity: 1;' +
                 '}',
             '#clinical-timelines path.wc-data-mark.ct-highlighted {' +
@@ -218,7 +217,6 @@ export default function defineStyles() {
           //Circles
             '#clinical-timelines circle.wc-data-mark {' +
                 '    stroke-width: 0;' +
-                '    clip-path: url(#1);' +
                 '    fill-opacity: 1;' +
                 '}',
             '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +

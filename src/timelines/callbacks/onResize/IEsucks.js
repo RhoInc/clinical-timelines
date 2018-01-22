@@ -1,3 +1,5 @@
+import { select } from 'd3';
+
 export default function IEsucks() {
     const inIE = this.clinicalTimelines.test ? false : !!document.documentMode;
     if (inIE)

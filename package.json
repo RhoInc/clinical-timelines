@@ -25,7 +25,7 @@
     "format": "npm run format-src && npm run format-build",
     "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write \"src/**/!(*defineStyles|*settings).js\"",
     "format-build": "prettier --print-width=100 --tab-width=4 --single-quote --write build/clinicalTimelines.js",
-    "test": "mocha --timeout 5000 --require babel-register --recursive ./test/init.js",
+    "test": "mocha --timeout 5000 --require babel-register --recursive ./test/**/*.js",
     "watch": "rollup -c -w"
   },
   "devDependencies": {

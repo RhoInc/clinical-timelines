@@ -33,6 +33,7 @@ describe('clinical-timelines object creation', () => {
                     properties = [
                         'element',
                         'settings',
+                        'dom',
                         'containers',
                         'init',
                         'controls',

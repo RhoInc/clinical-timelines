@@ -273,7 +273,7 @@ export default function defineStyles() {
                 '    stroke-width: 20;' +
                 '    stroke-opacity: 0;' +
                 '}',
-            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .reference-line-text {' +
+            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-reference-line-text {' +
                 '    font-weight: bold;' +
                 '    font-size: 24px;' +
                 '}',

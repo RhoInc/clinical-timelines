@@ -8,6 +8,7 @@ export default function syncTimeScaleSettings(settings) {
             : 'date';
     settings.time_scalePropCased =
         settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
+    settings.x.label = settings.time_scalePropCased;
 
     //Define settings variables to handle both date and day time scales.
     if (settings.time_scale === 'date') {

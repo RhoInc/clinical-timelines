@@ -1,5 +1,6 @@
 import legendFilter from './onResize/legendFilter';
 import drawTopXaxis from './onResize/drawTopXaxis';
+import addTooltip from './onResize/addTooltip';
 import tickClick from './onResize/tickClick';
 import annotateGrouping from './onResize/annotateGrouping';
 import addStriping from './onResize/addStriping';
@@ -16,6 +17,9 @@ export default function onResize() {
 
     //Draw second x-axis at top of chart.
     drawTopXaxis.call(this);
+
+    //Add tick lines that display the tick label on hover.
+    addTooltip.call(this);
 
     //Draw second chart when y-axis tick label is clicked.
     tickClick.call(this);

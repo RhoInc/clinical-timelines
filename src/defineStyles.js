@@ -267,7 +267,7 @@ export default function defineStyles() {
             '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line.ct-hover {' +
                 '    stroke-dasharray: none;' +
                 '}',
-            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-invisible-reference-line {' +
+            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-hover-line {' +
                 '    cursor: pointer;' +
                 '    stroke: black;' +
                 '    stroke-width: 20;' +

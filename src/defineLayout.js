@@ -1,4 +1,6 @@
 import { select } from 'd3';
+import exportData from './defineLayout/exportData';
+import goBackToTimelines from './defineLayout/goBackToTimelines';
 
 export default function defineLayout() {
     this.containers.main = select(this.element)
@@ -33,10 +35,13 @@ export default function defineLayout() {
 
                 //Add button to export timelines data.
                 this.containers.exportButton = this.containers.populationDetails.append('div')
-                    .classed('ct-details-button', true)
+                    .classed('ct-button', true)
                     .attr('id', 'ct-export-button')
                         .append('a')
-                        .html('&dArr; Data');
+                        .html('&dArr; Data')
+                        .on('click', () => {
+                            exportData.call(this);
+                        });
 
                 //Add container for population details given current filters.
                 this.containers.popCurrentFilters = this.containers.populationDetails
@@ -67,10 +72,13 @@ export default function defineLayout() {
 
                 //Add button to return from ID timeline to timelines.
                 this.containers.backButton = this.containers.IDdetails.append('div')
-                    .classed('ct-details-button', true)
+                    .classed('ct-button', true)
                     .attr('id', 'ct-back-button')
                         .append('a')
-                        .html('&lArr; Back');
+                        .html('&lArr; Back')
+                        .on('click', () => {
+                            goBackToTimelines.call(this);
+                        });
 
         /***--------------------------------------------------------------------------------------\
           Controls

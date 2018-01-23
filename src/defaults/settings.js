@@ -44,6 +44,7 @@ export default {
         ongo_col: 'ONGO',
         ongo_val: 'Y',
         reference_lines: null,
+        transpose_data: false,
 
       //Listing settings
         details: null,

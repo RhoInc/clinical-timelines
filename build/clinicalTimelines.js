@@ -842,7 +842,7 @@
             settings.time_unit = 'DT';
             settings.x_format = settings.date_display_format;
             settings.x_parseFormat = d3.time.format(settings.date_format);
-            settings.x_displayFormat = d3.time.format(settings.date_display_format);
+            settings.x_displayFormat = d3.time.format(settings.x_format);
             settings.time_function = function(dt) {
                 return settings.x_parseFormat.parse(dt)
                     ? settings.x_parseFormat.parse(dt)

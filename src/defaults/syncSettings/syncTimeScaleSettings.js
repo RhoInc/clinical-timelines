@@ -15,7 +15,7 @@ export default function syncTimeScaleSettings(settings) {
         settings.time_unit = 'DT';
         settings.x_format = settings.date_display_format;
         settings.x_parseFormat = time.format(settings.date_format);
-        settings.x_displayFormat = time.format(settings.date_display_format);
+        settings.x_displayFormat = time.format(settings.x_format);
         settings.time_function = dt =>
             settings.x_parseFormat.parse(dt) ? settings.x_parseFormat.parse(dt) : new Date(dt);
     } else if (settings.time_scale === 'day') {

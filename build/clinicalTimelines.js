@@ -766,7 +766,7 @@
             settings.time_unit = 'DT';
             settings.x_format = settings.date_display_format;
             settings.x_parseFormat = d3.time.format(settings.date_format);
-            settings.x_displayFormat = d3.time.format(settings.date_display_format);
+            settings.x_displayFormat = d3.time.format(settings.x_format);
             settings.time_function = function(dt) {
                 return settings.x_parseFormat.parse(dt)
                     ? settings.x_parseFormat.parse(dt)
@@ -1921,9 +1921,12 @@
                             _this.config.x.domain[0] <= st && st <= _this.config.x.domain[1],
                         // start is within the time range
                         enInsideTimeRange =
-                            _this.config.x.domain[0] <= en && en <= _this.config.x.domain[1]; // end is within the time range
+                            _this.config.x.domain[0] <= en && en <= _this.config.x.domain[1],
+                        // end is within the time range
+                        surroundingTimeRange =
+                            _this.config.x.domain[0] > st && en > _this.config.x.domain[1]; // start is prior to time range and end is after time range
 
-                    return stInsideTimeRange || enInsideTimeRange;
+                    return stInsideTimeRange || enInsideTimeRange || surroundingTimeRange;
                 });
 
                 return IDobject;

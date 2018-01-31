@@ -1,8 +1,15 @@
-import drawIDtimeline from '../functions/drawIDtimeline';
-import enableDisableControls from '../functions/enableDisableControls';
+import { select as d3select } from 'd3';
+import drawIDtimeline from '../../functions/drawIDtimeline';
+import enableDisableControls from '../../functions/enableDisableControls';
 
-export default function toggleView() {
-    if (this.selected_id && this.selected_id !== 'All') {
+export default function IDchange(select) {
+    this.selected_id = d3select(select)
+        .select('option:checked')
+        .text();
+    this.filters.filter(filter => filter.col === this.config.id_col)[0].val = this.selected_id;
+
+    //Redraw.
+    if (this.selected_id !== 'All') {
         drawIDtimeline.call(this);
     } else {
         delete this.selected_id;
@@ -30,5 +37,6 @@ export default function toggleView() {
         this.listing.wrap.classed('hidden', true);
     }
 
+    //Update controls given the current view.
     enableDisableControls.call(this);
 }

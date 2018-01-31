@@ -1,42 +1,17 @@
 import { nest, min, time, set } from 'd3';
 
 export default function sortYdomain() {
-    //Redefine filtered data as it defaults to the final mark drawn, which might be filtered in
-    //addition to the current filter selections.
-    const filtered_data = this.raw_data.filter(d => {
-        let filtered = false;
+    /**-------------------------------------------------------------------------------------------\
+      Sort y-domain by the earliest event of each ID.
+    \-------------------------------------------------------------------------------------------**/
 
-        this.filters.forEach(di => {
-            if (filtered === false && di.val !== 'All' && d[this.config.event_col] !== 'Grouping') {
-                filtered =
-                    di.val instanceof Array
-                        ? di.val.indexOf(d[di.col]) === -1
-                        : di.val !== d[di.col];
-            }
-        });
-
-        return !filtered;
-    });
-
-    //Sort y-domain by the earliest event of each ID.
     if (this.config.y.sort === 'earliest') {
-        //Sort IDs by grouping then earliest event start date if y-axis is grouped.
         if (this.config.y.grouping) {
-            //Nest data by grouping and ID.
+            //Sort IDs by grouping then earliest event if y-axis is grouped.
             const nestedData = nest()
                 .key(d => d[this.config.y.grouping] + '|' + d[this.config.id_col])
-                .rollup(d =>
-                    min(
-                        d,
-                        di =>
-                            this.config.time_scale === 'Study Day'
-                                ? +di[this.config.stdy_col]
-                                : time
-                                      .format(this.config.date_format)
-                                      .parse(di[this.config.stdt_col])
-                    )
-                )
-                .entries(filtered_data)
+                .rollup(d => min(d, di => this.config.time_function(di[this.config.st_col])))
+                .entries(this.longDataInsideTimeRange)
                 .sort((a, b) => {
                     const aGrouping = a.key.split('|')[0],
                         bGrouping = b.key.split('|')[0],
@@ -48,7 +23,7 @@ export default function sortYdomain() {
                     return aGrouping > bGrouping
                         ? -1
                         : aGrouping < bGrouping ? 1 : earliestEventSort;
-                });
+                }); // nest data by grouping and ID.
 
             //Capture list of IDs by grouping.
             nestedData.forEach(d => {
@@ -61,24 +36,13 @@ export default function sortYdomain() {
             });
 
             //Set y-domain.
-            this.y_dom = nestedData.map(d => d.key.split('|')[1]);
+            this.config.y.domain = nestedData.map(d => d.key.split('|')[1]);
         } else {
-            //Otherwise sort IDs by earliest event start date.
-            //Set y-domain.
-            this.y_dom = nest()
+            //Otherwise sort IDs by earliest event.
+            this.config.y.domain = nest()
                 .key(d => d[this.config.id_col])
-                .rollup(d =>
-                    min(
-                        d,
-                        di =>
-                            this.config.time_scale === 'Study Day'
-                                ? +di[this.config.stdy_col]
-                                : time
-                                      .format(this.config.date_format)
-                                      .parse(di[this.config.stdt_col])
-                    )
-                )
-                .entries(filtered_data)
+                .rollup(d => min(d, di => this.config.time_function(di[this.config.st_col])))
+                .entries(this.longDataInsideTimeRange)
                 .sort((a, b) => {
                     const earliestEventSort =
                         a.values > b.values ? -2 : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
@@ -88,10 +52,13 @@ export default function sortYdomain() {
                 .map(d => d.key);
         }
     } else {
-        //Sort y-domain alphanumerically.
-        //Sort IDs by grouping then alphanumerically if y-axis is grouped.
+        /**-------------------------------------------------------------------------------------------\
+      Sort y-domain alphanumerically.
+    \-------------------------------------------------------------------------------------------**/
+
         if (this.config.y.grouping) {
-            this.y_dom = set(filtered_data.map(d => d[this.config.id_col]))
+            //Sort IDs by grouping then alphanumerically if y-axis is grouped.
+            this.config.y.domain = set(this.longDataInsideTimeRange.map(d => d[this.config.id_col]))
                 .values()
                 .sort((a, b) => {
                     const aGrouping = this.raw_data.filter(d => d[this.config.id_col] === a)[0][
@@ -107,7 +74,7 @@ export default function sortYdomain() {
                         : aGrouping < bGrouping ? 1 : alphanumericSort;
                 });
 
-            this.y_dom.forEach(d => {
+            this.config.y.domain.forEach(d => {
                 this.groupings
                     .filter(
                         grouping =>
@@ -121,8 +88,7 @@ export default function sortYdomain() {
             });
         } else {
             //Otherwise sort IDs alphanumerically.
-            //Set y-domain.
-            this.y_dom = this.y_dom.sort((a, b) => {
+            this.config.y.domain = this.populationDetails.sampleInsideTimeRange.sort((a, b) => {
                 const alphanumericSort = a > b ? -1 : 1;
 
                 return alphanumericSort;

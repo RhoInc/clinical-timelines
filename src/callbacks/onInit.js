@@ -1,95 +1,65 @@
-import { time, set } from 'd3';
+import { set } from 'd3';
+import manipulateData from './onInit/manipulateData';
+import cleanData from './functions/cleanData';
 import defineData from './functions/defineData';
+import setDefaultTimeRanges from './onInit/setDefaultTimeRanges';
+import handleEventTypes from './onInit/handleEventTypes';
+import checkOtherControls from './onInit/checkOtherControls';
+import checkFilters from './onInit/checkFilters';
+import addDataDrivenTooltips from './onInit/addDataDrivenTooltips';
 
 export default function onInit() {
     const context = this;
 
-    //Data manipulation
-    this.raw_data.forEach((d, i) => {
-        if (!/^ *\d+ *$/.test(d[this.config.stdy_col])) d[this.config.stdy_col] = '';
-        if (!/^ *\d+ *$/.test(d[this.config.endy_col]))
-            d[this.config.endy_col] = d[this.config.stdy_col];
-        if (!time.format(this.config.date_format).parse(d[this.config.stdt_col]))
-            d[this.config.stdt_col] = '';
-        if (!time.format(this.config.date_format).parse(d[this.config.endt_col]))
-            d[this.config.endt_col] = d[this.config.stdt_col];
-    });
-
-    //Calculate number of total IDs and number of IDs with any event.
+    //Capture and count all IDs in data.
     this.populationDetails = {
         population: set(this.raw_data.map(d => d[this.config.id_col])).values()
     };
     this.populationDetails.N = this.populationDetails.population.length;
+
+    //Instantiate ID details.
     this.IDdetails = {};
 
-    //Remove records with insufficient data.
-    this.wide_data = this.raw_data.filter(
-        d =>
-            !(d.hasOwnProperty(this.config.stdy_col) && d[this.config.stdy_col] === '') &&
-            !(d.hasOwnProperty(this.config.endy_col) && d[this.config.endy_col] === '') &&
-            !(d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] === '') &&
-            !(d.hasOwnProperty(this.config.endt_col) && d[this.config.endt_col] === '') &&
-            !/^\s*$/.test(d[this.config.id_col]) && // remove records with missing [id_col]
-            !/^\s*$/.test(d[this.config.event_col]) // remove records with missing [event_col]
+    //Retain initial data array, removing records with missing key variables.
+    this.initial_data = this.raw_data.filter(
+        d => !/^\s*$/.test(d[this.config.id_col]) && !/^\s*$/.test(d[this.config.event_col])
     );
 
-    if (this.wide_data.length < this.raw_data.length) {
+    //Manually set controls' data.
+    this.controls.data = this.initial_data;
+    this.controls.ready = true;
+
+    //Warn user of removed records.
+    if (this.initial_data.length < this.raw_data.length)
         console.warn(
-            `${''}${this.raw_data.length -
-                this.wide_data
-                    .length} records have been removed due to invalid data.\n${''}Possible issues include\n${''}  - missing or invalid study day variable values\n${''}  - missing or invalid date variable values\n${''}  - date variable values that do not match settings.date_format (${
-                this.config.date_format
-            })\n${''}  - missing identifiers or event types`
+            `${this.raw_data.length -
+                this.initial_data
+                    .length} records have been removed due to missing identifiers or event types.`
         );
-    }
+
+    //Standardize invalid day and date values.
+    manipulateData.call(this);
+
+    //Default event types to 'All'.
+    handleEventTypes.call(this);
+
+    //Check other control inputs.
+    checkOtherControls.call(this);
+
+    //Check filters for non-existent or single-value variables.
+    checkFilters.call(this);
+
+    //Set default time ranges.
+    setDefaultTimeRanges.call(this);
+    this.config.time_range =
+        this.config.time_scale === 'day' ? this.config.day_range : this.config.date_range;
+
+    //Add data-driven tooltips.
+    addDataDrivenTooltips.call(this);
+
+    //Remove unusable data.
+    cleanData.call(this);
 
     //Define a record for each start day and stop day.
     defineData.call(this);
-
-    //Default event types to 'All'.
-    this.allEventTypes = set(this.raw_data.map(d => d[this.config.event_col]))
-        .values()
-        .sort();
-    this.currentEventTypes = this.config.event_types || this.allEventTypes;
-    this.config.color_dom =
-        this.currentEventTypes !== 'All'
-            ? this.currentEventTypes.concat(
-                  this.allEventTypes
-                      .filter(eventType => this.currentEventTypes.indexOf(eventType) === -1)
-                      .sort()
-              )
-            : this.allEventTypes;
-    this.config.legend.order = this.config.color_dom;
-
-    //Remove filters for variables fewer than two levels.
-    this.controls.config.inputs = this.controls.config.inputs.filter(input => {
-        if (input.type !== 'subsetter') {
-            //Set values of Event Type highlighting control to event types present in the data.
-            if (input.description === 'Event highlighting') input.values = this.config.color_dom;
-            else if (input.description === 'Y-axis grouping')
-                input.values = this.config.groupings.map(grouping => grouping.value_col);
-
-            return true;
-        } else {
-            const levels = set(this.raw_data.map(d => d[input.value_col])).values();
-
-            if (levels.length < 2) {
-                console.warn(
-                    input.value_col + ' filter removed because the variable has only one level.'
-                );
-            }
-
-            return levels.length > 1;
-        }
-    });
-
-    //Add data-driven tooltips.
-    if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
-        this.config.marks.forEach(mark => {
-            mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
-        });
-        this.config.IDtimelineSettings.marks.forEach(mark => {
-            mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
-        });
-    }
 }

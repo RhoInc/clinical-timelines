@@ -1,6 +1,4 @@
 import { select } from 'd3';
-import defineData from '../functions/defineData';
-import drawIDtimeline from '../functions/drawIDtimeline';
 import eventHighlightingChange from './augmentOtherControls/eventHighlightingChange';
 import timeScaleChange from './augmentOtherControls/timeScaleChange';
 
@@ -8,7 +6,8 @@ export default function augmentOtherControls() {
     const context = this,
         otherControls = this.controls.wrap
             .selectAll('.control-group')
-            .filter(d => d.type !== 'subsetter');
+            .filter(d => d.type !== 'subsetter')
+            .classed('ct-control', true);
 
     //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
     otherControls

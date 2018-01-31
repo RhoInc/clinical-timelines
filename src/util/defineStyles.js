@@ -1,10 +1,17 @@
 export default function defineStyles() {
     const styles = [
-            /***--------------------------------------------------------------------------------------\
+
+        /***--------------------------------------------------------------------------------------\
           Global styles
         \--------------------------------------------------------------------------------------***/
 
-            '#clinical-timelines .hidden {' + '    display: none !important;' + '}',
+            '#clinical-timelines {' +
+                '    display: inline-block;' +
+                '    width: 100%;' +
+                '}',
+            '#clinical-timelines .hidden {' +
+                '    display: none !important;' +
+                '}',
             '#clinical-timelines .ct-button {' +
                 '    cursor: pointer !important;' +
                 '    border-radius: 4px !important;' +
@@ -13,42 +20,67 @@ export default function defineStyles() {
             '#clinical-timelines .ct-button.highlighted {' +
                 '    border: 2px solid black !important;' +
                 '}',
-            '#clinical-timelines .ct-button.selected {' + '    background: lightgray;' + '}',
+            '#clinical-timelines .ct-button.selected {' +
+                '    background: lightgray;' +
+                '}',
 
-            /***--------------------------------------------------------------------------------------\
+        /***--------------------------------------------------------------------------------------\
           Left and right side containers
         \--------------------------------------------------------------------------------------***/
 
-            '#clinical-timelines > * {' + '    display: inline-block;' + '    padding: .5%;' + '}',
-            '#clinical-timelines > #left-side {' + '    width: 22%;' + '    float: left;' + '}',
-            '#clinical-timelines > #right-side {' + '    width: 75%;' + '    float: right;' + '}',
+            '#clinical-timelines > * {' +
+                '    display: inline-block;' +
+                '}',
+            '#clinical-timelines > #left-side {' +
+                '    width: 22%;' +
+                '    float: left;' +
+                '}',
+            '#clinical-timelines > #right-side {' +
+                '    width: 75%;' +
+                '    float: right;' +
+                '}',
             '#clinical-timelines > * > * {' +
                 '    width: 100%;' +
-                '    padding: 1%;' +
                 '    vertical-align: top;' +
-                '    border: 1px solid #eee;' +
                 '    display: inline-block;' +
                 '    margin-bottom: 10px;' +
                 '}',
 
-            /***--------------------------------------------------------------------------------------\
+        /***--------------------------------------------------------------------------------------\
           Left side container elements
         \--------------------------------------------------------------------------------------***/
 
-            '#clinical-timelines > #left-side > * {' + '}',
+            '#clinical-timelines > #left-side > * {' +
+                '    border: 1px solid #eee;' +
+                '    padding: 10px;' +
+                '}',
 
-            //Annotations
+          //Annotations
             '#clinical-timelines > #left-side > .annotation {' +
-                '    font-size: 16px;' +
+                '    font-size: 90%;' +
                 '    text-align: right;' +
                 '}',
-            '#clinical-timelines > #left-side > .annotation .stats,' +
-                '#clinical-timelines > #left-side > .annotation #ID,' +
-                '#clinical-timelines > #left-side > .annotation .characteristic span {' +
+            '#clinical-timelines > #left-side > .annotation .ct-stats,' +
+            '#clinical-timelines > #left-side > .annotation #ID,' +
+            '#clinical-timelines > #left-side > .annotation .characteristic span {' +
                 '    font-weight: bold;' +
                 '}',
+            '#clinical-timelines > #left-side > .annotation .ct-stats.sample {' +
+                '    color: green;' +
+                '}',
+            '#clinical-timelines > #left-side > .annotation .ct-stats.sample-inside-time-range {' +
+                '    color: blue;' +
+                '}',
+            '#clinical-timelines > #left-side > .annotation .ct-stats.sample-outside-time-range {' +
+                '    color: red;' +
+                '}',
+            '#clinical-timelines > #left-side > .annotation .ct-info-icon {' +
+                '    font-weight: bold;' +
+                '    color: blue;' +
+                '    cursor: help;' +
+                '}',
 
-            //Controls
+          //Controls
             '#clinical-timelines > #left-side > .wc-controls {' +
                 '    margin-bottom: 0;' +
                 '    clear: left;' +
@@ -89,16 +121,17 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                 '    padding: 0 5px;' +
-                '    font-size: 14px;' +
+                '    font-size: 110%;' +
                 '}',
 
-            /***--------------------------------------------------------------------------------------\
+        /***--------------------------------------------------------------------------------------\
           Right side container elements
         \--------------------------------------------------------------------------------------***/
 
-            '#clinical-timelines > #right-side > * {' + '}',
+            '#clinical-timelines > #right-side > * {' +
+                '}',
 
-            //Legend
+          //Legend
             '#clinical-timelines > #right-side > .wc-chart .legend {' +
                 '    display: flex !important;' +
                 '    justify-content: center;' +
@@ -126,59 +159,93 @@ export default function defineStyles() {
                 '    border: 2px solid black;' +
                 '}',
 
-            //Mark highlighting
-            '#clinical-timelines path.highlighted {' + '    stroke: black;' + '}',
-            '#clinical-timelines line.highlight-overlay {' + '    stroke-width: 2px;' + '}',
-            '#clinical-timelines circle.highlighted {' +
-                '    stroke: black;' +
-                '    stroke-width: 2px;' +
+          //Y-axis
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick {' +
+                '    cursor: pointer;' +
+                '    fill: blue;' +
+                '    text-decoration: none;' +
+                '    font-weight: bolder;' +
                 '}',
-            '#clinical-timelines polygon.highlighted {' + '    stroke: black;' + '}',
-            '    stroke-width: 2px;' + '}',
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:hover {' +
+                '    text-decoration: underline;' +
+                '}',
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
+                '    stroke: #aaa;' +
+                '    stroke-width: 1;' +
+                '    fill: none;' +
+                '}',
+            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick:nth-child(even) rect.ct-stripe {' +
+                '    fill: #eee;' +
+                '}',
 
-            //Grouping
+          //Grouping
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +
                 '    stroke: black;' +
                 '    stroke-width: 2px;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .annotation {' +
-                '    font-size: 24px;' +
-                '    font-weight: bold;' +
-                '    text-anchor: beginning;' +
+                '    font-size: 150%;' +
+                '    font-weight: normal;' +
+                '    text-anchor: start;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping.vertical .annotation {' +
                 '    writing-mode: tb-rl;' +
                 '}',
 
-            //Y-axis
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .y.axis .tick {' +
-                '    cursor: pointer;' +
-                '    fill: blue;' +
-                '    text-decoration: underline;' +
+          //Lines
+            '#clinical-timelines path.wc-data-mark {' +
+                '    stroke-width: 4;' +
+                '    stroke-opacity: 1;' +
+                '}',
+            '#clinical-timelines path.wc-data-mark.highlighted {' +
+                '    stroke-width: 7;' +
+                '}',
+            '#clinical-timelines line.highlight-overlay {' +
+                '    stroke-width: 3;' +
+                '    stroke-linecap: round;' +
                 '}',
 
-            //Reference lines
-            '#clinical-timelines .wc-chart .wc-svg title {' + '    white-space: pre;' + '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line {' +
+          //Circles
+            '#clinical-timelines circle.wc-data-mark {' +
+                '    stroke-width: 0;' +
+                '    fill-opacity: 1;' +
+                '}',
+            '#clinical-timelines circle.wc-data-mark.highlighted {' +
+                '    stroke-opacity: 1;' +
+                '    stroke-width: 2;' +
+                '}',
+
+          //Arrows
+            '#clinical-timelines polygon.ongoing-event {' +
+                '}',
+            '#clinical-timelines polygon.ongoing-event.highlighted {' +
+                '    stroke-width: 2;' +
+                '}',
+
+          //Reference lines
+            '#clinical-timelines .wc-chart .wc-svg title {' +
+                '    white-space: pre;' +
+                '}',
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 2px;' +
                 '    stroke-dasharray: 2,2;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .visible-reference-line.hover {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
                 '    stroke-dasharray: none;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .invisible-reference-line {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .invisible-reference-line {' +
                 '    stroke: black;' +
                 '    stroke-width: 20px;' +
                 '    stroke-opacity: 0;' +
                 '}',
-            '#clinical-timelines > #right-side > .wc-chart .wc-svg .reference-line-label-box {' +
+            '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
                 '    fill: white;' +
                 '    stroke: black;' +
                 '    stroke-width: black;' +
                 '}',
 
-            //ID timeline
+          //ID timeline
             '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart {' +
                 '    width: 100%;' +
                 '    padding: 0;' +
@@ -194,12 +261,16 @@ export default function defineStyles() {
             '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-chart-title {' +
                 '    float: right;' +
                 '    text-align: left;' +
-                '    font-size: 21px;' +
+                '    font-size: 150%;' +
+                '    font-weight: normal;' +
                 '    padding-left: 10px;' +
                 '    width: 24%;' +
                 '}',
+            '#clinical-timelines > #right-side > .wc-small-multiples .wc-chart .wc-svg .time-range {' +
+                '    opacity: .1;' +
+                '}',
 
-            //Listing
+          //Listing
             '#clinical-timelines > #right-side > .wc-chart.wc-table table {' +
                 '    display: table;' +
                 '    width: 100%;' +

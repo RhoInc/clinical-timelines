@@ -9,30 +9,30 @@
         ,"default": "USUBJID"
         ,"type": "string"
         }
-        ,"id_unit":
-            {"title": "ID Unit"
-            ,"description": "unique identifier unit"
-            ,"default": "participant"
-            ,"type": "string"
-            }
-        ,"id_characteristics":
-            {"title": "ID Characteristics"
-            ,"description": "an array of identifier characteristic variables and associated metadata"
-            ,"type": "array"
-            ,"items":
-                {"type": "object"
-                ,"properties":
-                    {"value_col":
-                        {"title": "Variable name"
-                        ,"type": "string"
-                        }
-                    ,"label":
-                        {"title": "Variable label"
-                        ,"type": "string"
-                        }
+    ,"id_unit":
+        {"title": "ID Unit"
+        ,"description": "unique identifier unit"
+        ,"default": "participant"
+        ,"type": "string"
+        }
+    ,"id_characteristics":
+        {"title": "ID Characteristics"
+        ,"description": "an array of identifier characteristic variables and associated metadata"
+        ,"type": "array"
+        ,"items":
+            {"type": "object"
+            ,"properties":
+                {"value_col":
+                    {"title": "Variable name"
+                    ,"type": "string"
+                    }
+                ,"label":
+                    {"title": "Variable label"
+                    ,"type": "string"
                     }
                 }
             }
+        }
 
 
 
@@ -42,19 +42,25 @@
         ,"default": "DOMAIN"
         ,"type": "string"
         }
-        ,"event_types":
-            {"title": "Initial Event Types"
-            ,"description": "an array of event types displayed initially"
-            ,"type": "array"
-            ,"items":
-                {"type": "string"}
-            }
-        ,"event_highlighted":
-            {"title": "Highlighted Event"
-            ,"description": "highlighted event type"
-            ,"default": null
-            ,"type": "string"
-            }
+    ,"event_types":
+        {"title": "Initial Event Types"
+        ,"description": "an array of event types displayed initially"
+        ,"type": "array"
+        ,"items":
+            {"type": "string"}
+        }
+    ,"event_highlighted":
+        {"title": "Highlighted Event"
+        ,"description": "initial highlighted event type"
+        ,"default": null
+        ,"type": "string"
+        }
+    ,"event_highlight_color":
+        {"title": "Highlighted Event Color"
+        ,"description": "fill color of highlighted events"
+        ,"default": null
+        ,"type": "string"
+        }
 
 
 
@@ -80,7 +86,7 @@
 
 
     ,"groupings":
-        {"title": "ID grouping"
+        {"title": "ID Grouping"
         ,"description": "an array of categorical ID characteristic variables with which to group IDs"
         ,"type": "array"
         ,"items":
@@ -97,18 +103,22 @@
                 }
             }
         }
-        ,"grouping_initial":
-            {"title": "Initial ID grouping"
-            ,"description": "initial ID grouping variable"
-            ,"default": null
-            ,"type": "string"
-            }
-        ,"grouping_direction":
-            {"title": "Grouping annotation placement"
-            ,"description": "grouping annotation placement, 'horizontal' or 'vertical'"
-            ,"default": "horizontal"
-            ,"type": "string"
-            }
+    ,"grouping_initial":
+        {"title": "Initial ID Grouping"
+        ,"description": "initial ID grouping variable"
+        ,"default": null
+        ,"type": "string"
+        }
+    ,"grouping_direction":
+        {"title": "Grouping Annotation Placement"
+        ,"description": "grouping annotation placement"
+        ,"default": "horizontal"
+        ,"type": "string"
+        ,"enum":
+            ["horizontal"
+            ,"vertical"
+            ]
+        }
 
 
 
@@ -116,41 +126,65 @@
         {"title": "Time Scale"
         ,"description": "the time scale on which to plot events"
         ,"type": "string"
-        ,"default": "Study Day"
+        ,"default": "date"
         ,"enum":
-            ["Study Day"
-            ,"Date"]
+            ["date"
+            ,"day"]
         }
-        ,"stdy_col":
-            {"title": "Start Day"
-            ,"description": "start day variable name"
-            ,"default": "STDY"
-            ,"type": "string"
-            }
-        ,"endy_col":
-            {"title": "End Day"
-            ,"description": "end day variable name"
-            ,"default": "ENDY"
-            ,"type": "string"
-            }
-        ,"stdt_col":
-            {"title": "Start Date"
-            ,"description": "start date variable name"
-            ,"default": "STDT"
-            ,"type": "string"
-            }
-        ,"endt_col":
-            {"title": "End Date"
-            ,"description": "end date variable name"
-            ,"default": "ENDT"
-            ,"type": "string"
-            }
-        ,"date_format":
-            {"title": "Date Format"
-            ,"description": "format of date variables"
-            ,"default": "%Y-%m-%d"
-            ,"type": "string"
-            }
+    ,"stdt_col":
+        {"title": "Start Date"
+        ,"description": "start date variable name"
+        ,"default": "STDT"
+        ,"type": "string"
+        }
+    ,"endt_col":
+        {"title": "End Date"
+        ,"description": "end date variable name"
+        ,"default": "ENDT"
+        ,"type": "string"
+        }
+    ,"date_range":
+        {"title": "Date Range"
+        ,"description": "start and stop dates with which to define the x-axis domain and which match settings.date_format"
+        ,"type": "array"
+        ,"minItems": 2
+        ,"maxItems": 2
+        ,"items":
+            {"type": "string"}
+        }
+    ,"date_format":
+        {"title": "Input Date Format"
+        ,"description": "date format of start and stop date variables"
+        ,"default": "%Y-%m-%d"
+        ,"type": "string"
+        }
+    ,"date_display_format":
+        {"title": "Displayed Date Format"
+        ,"description": "date format of x-axis"
+        ,"default": "%Y-%m-%d"
+        ,"type": "string"
+        }
+    ,"stdy_col":
+        {"title": "Start Day"
+        ,"description": "start day variable name"
+        ,"default": "STDY"
+        ,"type": "string"
+        }
+    ,"endy_col":
+        {"title": "End Day"
+        ,"description": "end day variable name"
+        ,"default": "ENDY"
+        ,"type": "string"
+        }
+    ,"day_range":
+        {"title": "Day Range"
+        ,"description": "start and stop days with which to define the x-axis domain"
+        ,"type": "array"
+        ,"minItems": 2
+        ,"maxItems": 2
+        ,"items":
+            {"type": "number"}
+        }
 
 
 
@@ -217,44 +251,44 @@
                 }
             }
         }
-        ,"details_config":
-            {"title": "Details Listing Settings"
-            ,"description": "a webcharts table settings object"
-            ,"type": "object"
-            ,"properties":
-                {"cols":
-                    {"title": "List of variables"
-                    ,"type": "array"
-                    ,"items":
-                        {"type": "string"}
-                    }
-                ,"headers":
-                    {"title": "List of headers"
-                    ,"type": "string"
-                    ,"items":
-                        {"type": "string"}
-                    }
-                ,"searchable":
-                    {"title": "Searchable?"
-                    ,"type": "boolean"
-                    ,"default": true
-                    }
-                ,"sortable":
-                    {"title": "sortable?"
-                    ,"type": "boolean"
-                    ,"default": true
-                    }
-                ,"pagination":
-                    {"title": "Paginated?"
-                    ,"type": "boolean"
-                    ,"default": true
-                    }
-                ,"exportable":
-                    {"title": "Exportable?"
-                    ,"type": "boolean"
-                    ,"default": true
-                    }
+    ,"details_config":
+        {"title": "Details Listing Settings"
+        ,"description": "a webcharts table settings object"
+        ,"type": "object"
+        ,"properties":
+            {"cols":
+                {"title": "List of variables"
+                ,"type": "array"
+                ,"items":
+                    {"type": "string"}
+                }
+            ,"headers":
+                {"title": "List of headers"
+                ,"type": "string"
+                ,"items":
+                    {"type": "string"}
+                }
+            ,"searchable":
+                {"title": "Searchable?"
+                ,"type": "boolean"
+                ,"default": true
+                }
+            ,"sortable":
+                {"title": "sortable?"
+                ,"type": "boolean"
+                ,"default": true
+                }
+            ,"pagination":
+                {"title": "Paginated?"
+                ,"type": "boolean"
+                ,"default": true
+                }
+            ,"exportable":
+                {"title": "Exportable?"
+                ,"type": "boolean"
+                ,"default": true
                 }
             }
+        }
     }
 }

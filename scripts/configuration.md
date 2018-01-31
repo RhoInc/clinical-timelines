@@ -57,7 +57,16 @@ an array of event types displayed initially
 ## settings.event_highlighted
 `string`
 
-highlighted event type
+initial highlighted event type
+
+**default:** none
+
+
+
+## settings.event_highlight_color
+`string`
+
+fill color of highlighted events
 
 **default:** none
 
@@ -115,7 +124,7 @@ initial ID grouping variable
 ## settings.grouping_direction
 `string`
 
-grouping annotation placement, 'horizontal' or 'vertical'
+grouping annotation placement
 
 **default:** `"horizontal"`
 
@@ -126,25 +135,7 @@ grouping annotation placement, 'horizontal' or 'vertical'
 
 the time scale on which to plot events
 
-**default:** `"Study Day"`
-
-
-
-## settings.stdy_col
-`string`
-
-start day variable name
-
-**default:** `"STDY"`
-
-
-
-## settings.endy_col
-`string`
-
-end day variable name
-
-**default:** `"ENDY"`
+**default:** `"date"`
 
 
 
@@ -166,12 +157,57 @@ end date variable name
 
 
 
+## settings.date_range
+`array`
+
+start and stop dates with which to define the x-axis domain and which match settings.date_format
+
+**default:** none
+
+
+
 ## settings.date_format
 `string`
 
-format of date variables
+date format of start and stop date variables
 
 **default:** `"%Y-%m-%d"`
+
+
+
+## settings.date_display_format
+`string`
+
+date format of x-axis
+
+**default:** `"%Y-%m-%d"`
+
+
+
+## settings.stdy_col
+`string`
+
+start day variable name
+
+**default:** `"STDY"`
+
+
+
+## settings.endy_col
+`string`
+
+end day variable name
+
+**default:** `"ENDY"`
+
+
+
+## settings.day_range
+`array`
+
+start and stop days with which to define the x-axis domain
+
+**default:** none
 
 
 

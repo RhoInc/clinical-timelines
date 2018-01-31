@@ -2,29 +2,20 @@ import lengthenRaw from './lengthenRaw';
 import { merge } from 'd3';
 
 export default function defineData() {
-    const singleDayEvents = this.wide_data
-            .filter(
-                d =>
-                    d[this.config.stdy_col] === d[this.config.endy_col] ||
-                    d[this.config.stdt_col] === d[this.config.endt_col]
-            )
+    //Separate out timepoints and time intervals.
+    const timepoints = this.wide_data
+            .filter(d => d[this.config.st_col] === d[this.config.en_col])
             .map(d => {
-                d.wc_category = this.config.time_scale === 'Study Day' ? 'DY' : 'DT';
-                d.wc_value =
-                    this.config.time_scale === 'Study Day'
-                        ? d[this.config.stdy_col]
-                        : d[this.config.stdt_col];
+                d.wc_category = this.config.time_unit;
+                d.wc_value = d[this.config.st_col];
+
                 return d;
             }),
-        multiDayEvents = lengthenRaw(
-            this.wide_data.filter(
-                d =>
-                    d[this.config.stdy_col] !== d[this.config.endy_col] ||
-                    d[this.config.stdt_col] !== d[this.config.endt_col]
-            ),
-            this.config.time_scale === 'Study Day'
-                ? [this.config.stdy_col, this.config.endy_col]
-                : [this.config.stdt_col, this.config.endt_col]
+        timeIntervals = lengthenRaw(
+            this.wide_data.filter(d => d[this.config.st_col] !== d[this.config.en_col]),
+            [this.config.st_col, this.config.en_col]
         );
-    this.raw_data = merge([singleDayEvents, multiDayEvents]);
+
+    this.long_data = merge([timepoints, timeIntervals]);
+    this.raw_data = this.long_data;
 }

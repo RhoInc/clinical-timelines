@@ -1,5 +1,5 @@
 export default function horizontally() {
-    this.groupings.forEach(d => {
+    this.groupings.sort((a, b) => (a.key < b.key ? -1 : 1)).forEach((d, i) => {
         if (d.IDs.length) {
             const nIDs = d.IDs.length,
                 firstID = d.IDs[nIDs - 1],
@@ -14,11 +14,25 @@ export default function horizontally() {
                     .classed('annotation', true)
                     .attr({
                         x: 0,
-                        dx: -this.margin.left,
                         y: y1,
-                        dy: this.y.rangeBand() * 1.75
+                        dy: this.y.rangeBand() * 1.25
                     })
-                    .text(d.key);
+                    .text(
+                        `${
+                            this.config.groupings.filter(
+                                grouping => grouping.value_col === this.config.y.grouping
+                            )[0].label
+                        }: ${d.key}`
+                    ),
+                rule = g
+                    .append('line')
+                    .classed('boundary horizontal', true)
+                    .attr({
+                        x1: 0,
+                        y1: y1 + this.y.rangeBand() / 4,
+                        x2: this.plot_width,
+                        y2: y1 + this.y.rangeBand() / 4
+                    });
         }
     });
 }

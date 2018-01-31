@@ -17,9 +17,11 @@ export default function definePopulationDetails() {
                     stInsideTimeRange =
                         this.config.x.domain[0] <= st && st <= this.config.x.domain[1], // start is within the time range
                     enInsideTimeRange =
-                        this.config.x.domain[0] <= en && en <= this.config.x.domain[1]; // end is within the time range
+                        this.config.x.domain[0] <= en && en <= this.config.x.domain[1], // end is within the time range
+                    surroundingTimeRange =
+                        this.config.x.domain[0] > st && en > this.config.x.domain[1]; // start is prior to time range and end is after time range
 
-                return stInsideTimeRange || enInsideTimeRange;
+                return stInsideTimeRange || enInsideTimeRange || surroundingTimeRange;
             });
 
             return IDobject;

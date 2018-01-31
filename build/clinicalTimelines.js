@@ -1907,14 +1907,19 @@
     function updateTimeRangeControls() {
         var _this = this;
 
-        this.controls.wrap.selectAll('.time-range input').property({
-            type: this.config.time_scale === 'date' ? 'date' : 'number',
-            value: function value(d) {
-                return _this.config.time_scale === 'date'
-                    ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
-                    : +_this.time_range[d.index];
-            }
+        var timeRangeControls = this.controls.wrap.selectAll('.time-range input');
+        timeRangeControls.property('value', function(d) {
+            return _this.config.time_scale === 'date'
+                ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
+                : +_this.time_range[d.index];
         });
+
+        //Internet Explorer does not support input date type.
+        if (!document.documentMode)
+            timeRangeControls.property(
+                'type',
+                this.config.time_scale === 'date' ? 'date' : 'number'
+            );
     }
 
     function defineFilteredData() {
@@ -3047,7 +3052,8 @@
                                 x1: x,
                                 x2: x,
                                 y1: 0,
-                                y2: y2
+                                y2: y2,
+                                'clip-path': 'url(#' + _this.id + ')'
                             }),
                         invisibleReferenceLine = referenceLineGroup
                             .append('line')
@@ -3056,7 +3062,8 @@
                                 x1: x,
                                 x2: x,
                                 y1: 0,
-                                y2: y2
+                                y2: y2,
+                                'clip-path': 'url(#' + _this.id + ')'
                             }),
                         // invisible reference line has no dasharray and is much thicker to make hovering easier
                         direction =
@@ -3071,7 +3078,8 @@
                                 y: 0,
                                 'text-anchor': direction === 'right' ? 'beginning' : 'end',
                                 dx: direction === 'right' ? 15 : -15,
-                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1),
+                                'clip-path': 'url(#' + _this.id + ')'
                             })
                             .text(reference_line.label),
                         dimensions = referenceLineLabel.node().getBBox(),
@@ -3082,7 +3090,8 @@
                                 x: dimensions.x - 10,
                                 y: dimensions.y - 5,
                                 width: dimensions.width + 20,
-                                height: dimensions.height + 10
+                                height: dimensions.height + 10,
+                                'clip-path': 'url(#' + _this.id + ')'
                             });
 
                     //Display reference line label on hover.

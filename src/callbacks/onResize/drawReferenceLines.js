@@ -30,7 +30,8 @@ export default function drawReferenceLines() {
                             x1: x,
                             x2: x,
                             y1: 0,
-                            y2: y2
+                            y2: y2,
+                            'clip-path': `url(#${this.id})`
                         }),
                     invisibleReferenceLine = referenceLineGroup
                         .append('line')
@@ -39,7 +40,8 @@ export default function drawReferenceLines() {
                             x1: x,
                             x2: x,
                             y1: 0,
-                            y2: y2
+                            y2: y2,
+                            'clip-path': `url(#${this.id})`
                         }), // invisible reference line has no dasharray and is much thicker to make hovering easier
                     direction =
                         reference_line.timepoint <= (this.x_dom[1] - this.x_dom[0]) / 2
@@ -53,7 +55,8 @@ export default function drawReferenceLines() {
                             y: 0,
                             'text-anchor': direction === 'right' ? 'beginning' : 'end',
                             dx: direction === 'right' ? 15 : -15,
-                            dy: this.config.range_band * (this.parent ? 1.5 : 1)
+                            dy: this.config.range_band * (this.parent ? 1.5 : 1),
+                            'clip-path': `url(#${this.id})`
                         })
                         .text(reference_line.label),
                     dimensions = referenceLineLabel.node().getBBox(),
@@ -64,7 +67,8 @@ export default function drawReferenceLines() {
                             x: dimensions.x - 10,
                             y: dimensions.y - 5,
                             width: dimensions.width + 20,
-                            height: dimensions.height + 10
+                            height: dimensions.height + 10,
+                            'clip-path': `url(#${this.id})`
                         });
 
                 //Display reference line label on hover.

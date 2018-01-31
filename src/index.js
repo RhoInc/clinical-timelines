@@ -1,3 +1,5 @@
+import './util/number-isinteger';
+import './util/object-assign';
 import { select } from 'd3';
 import defineStyles from './util/defineStyles';
 import merge from './util/merge';

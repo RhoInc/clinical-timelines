@@ -74,7 +74,7 @@ export const webchartsSettings = {
             type: 'circle',
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
-            radius: 4,
+            radius: 5,
             attributes: {
                 'clip-path': 'url(#1)',
                 'stroke-width': 2
@@ -99,7 +99,7 @@ export const webchartsSettings = {
         order: null, // set in syncSettings()
         mark: 'circle'
     },
-    range_band: 30,
+    range_band: 35,
     margin: {
         top: 60,
         right: 40

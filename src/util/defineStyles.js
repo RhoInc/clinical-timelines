@@ -82,7 +82,6 @@ export default function defineStyles() {
 
           //Controls
             '#clinical-timelines > #left-side > .wc-controls {' +
-                '    margin-bottom: 0;' +
                 '    clear: left;' +
                 '}',
             '#clinical-timelines > #left-side > .wc-controls .control-group {' +
@@ -123,6 +122,33 @@ export default function defineStyles() {
             '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                 '    padding: 0 5px;' +
                 '    font-size: 110%;' +
+                '}',
+
+
+          //Reference Tables
+            '#clinical-timelines > #left-side .poe-reference-line-header {' +
+                '    text-align: center;' +
+                '    border-bottom: 1px solid black;' +
+                '    padding-bottom: 5px;' +
+                '}',
+            '#clinical-timelines > #left-side .poe-reference-line-table {' +
+                '    width: 100%;' +
+                '    display: table;' +
+                '}',
+            '#clinical-timelines > #left-side .poe-reference-line-table th,' +
+            '#clinical-timelines > #left-side .poe-reference-line-table td {' +
+                '    text-align: left;' +
+                '}',
+            '#clinical-timelines > #left-side .poe-higher-level {' +
+                '    border-bottom: 1px dotted lightgray;' +
+                '    font-weight: bold;' +
+                '    font-size: 14px;' +
+                '}',
+            '#clinical-timelines > #left-side .poe-lower-level {' +
+                '    font-size: 12px;' +
+                '}',
+            '#clinical-timelines > #left-side .poe-lower-level.poe-indent {' +
+                '    padding-left: 5%;' +
                 '}',
 
         /***--------------------------------------------------------------------------------------\
@@ -182,7 +208,7 @@ export default function defineStyles() {
           //Grouping
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +
                 '    stroke: black;' +
-                '    stroke-width: 2px;' +
+                '    stroke-width: 2;' +
                 '}',
             '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .annotation {' +
                 '    font-size: 150%;' +
@@ -202,7 +228,7 @@ export default function defineStyles() {
                 '    stroke-width: 7;' +
                 '}',
             '#clinical-timelines line.highlight-overlay {' +
-                '    stroke-width: 3;' +
+                '    stroke-width: 2;' +
                 '    stroke-linecap: round;' +
                 '}',
 
@@ -229,7 +255,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                 '    stroke: black;' +
-                '    stroke-width: 2px;' +
+                '    stroke-width: 2;' +
                 '    stroke-dasharray: 2,2;' +
                 '}',
             '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
@@ -237,7 +263,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines > #right-side .wc-chart .wc-svg .invisible-reference-line {' +
                 '    stroke: black;' +
-                '    stroke-width: 20px;' +
+                '    stroke-width: 20;' +
                 '    stroke-opacity: 0;' +
                 '}',
             '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +

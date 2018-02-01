@@ -474,11 +474,7 @@
         })();
     }
 
-    var settings = {
-        /**-------------------------------------------------------------------------------------------\
-      Renderer-specific settings
-    \-------------------------------------------------------------------------------------------**/
-
+    var rendererSpecificSettings = {
         //ID settings
         id_col: 'USUBJID',
         id_unit: 'participant',
@@ -522,12 +518,10 @@
 
         //Listing settings
         details: null,
-        details_config: null,
+        details_config: null
+    };
 
-        /**-------------------------------------------------------------------------------------------\
-      Standard webcharts settings
-    \-------------------------------------------------------------------------------------------**/
-
+    var webchartsSettings = {
         x: {
             type: null, // set in syncSettings()
             column: 'wc_value',
@@ -535,12 +529,12 @@
             format: null // set in syncSettings()
         },
         y: {
-            type: 'ordinal', // set in syncSettings()
-            column: null,
-            label: null,
+            type: 'ordinal',
+            column: null, // set in syncSettings()
+            label: null, // set in syncSettings()
             sort: 'earliest',
             behavior: 'flex',
-            grouping: null
+            grouping: null // set in syncSettings()
         },
         marks: [
             {
@@ -588,6 +582,8 @@
         }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
     };
+
+    var settings = Object.assign({}, rendererSpecificSettings, webchartsSettings);
 
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
@@ -1808,13 +1804,11 @@
         var timeRangeControls = this.controls.wrap.selectAll('.time-range input');
 
         //Internet Explorer does not support input date type.
-        if (!document.documentMode) {
-            console.log(this.config.time_scale);
+        if (!document.documentMode)
             timeRangeControls.property(
                 'type',
                 this.config.time_scale === 'date' ? 'date' : 'number'
             );
-        }
 
         timeRangeControls.property('value', function(d) {
             return _this.config.time_scale === 'date'

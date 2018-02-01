@@ -4,10 +4,8 @@ export default function updateTimeRangeControls() {
     const timeRangeControls = this.controls.wrap.selectAll('.time-range input');
 
     //Internet Explorer does not support input date type.
-    if (!document.documentMode) {
-        console.log(this.config.time_scale);
+    if (!document.documentMode)
         timeRangeControls.property('type', this.config.time_scale === 'date' ? 'date' : 'number');
-    }
 
     timeRangeControls.property(
         'value',

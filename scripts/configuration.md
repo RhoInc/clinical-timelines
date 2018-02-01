@@ -1,3 +1,10 @@
+The most straightforward way to customize the Clinical Timelines is by using a configuration object whose properties describe the behavior and appearance of the chart. Since the Clinical Timelines is a Webcharts `chart` object, many default Webcharts settings are set in the [settings.js file](https://github.com/RhoInc/clinical-timelines/blob/master/src/defaults/settings.js) as [described below](#webcharts-settings). Refer to the [Webcharts documentation](https://github.com/RhoInc/Webcharts/wiki/Chart-Configuration) for more details on these settings.
+
+In addition to the standard Webcharts settings several custom settings not available in the base Webcharts library have been added to the Clinical Timelines to facilitate data mapping and other custom functionality. These custom settings are described in detail below. All defaults can be overwritten by users.
+
+# Renderer-specific settings
+The sections below describe each clinical-timelines setting as of version 1.3.0.
+
 ## settings.id_col
 `string`
 
@@ -22,17 +29,20 @@ unique identifier unit
 an array of identifier characteristic variables and associated metadata
 
 **default:** none
-### settings.id_characteristics.value_col
+
+### settings.id_characteristics[].value_col
 `string`
 
-Variable name
+undefined
 
-### settings.id_characteristics.label
+**default:** none
+
+### settings.id_characteristics[].label
 `string`
 
-Variable label
+undefined
 
-
+**default:** none
 
 
 
@@ -59,7 +69,7 @@ an array of event types displayed initially
 
 initial highlighted event type
 
-**default:** none
+**default:** `"null"`
 
 
 
@@ -68,7 +78,7 @@ initial highlighted event type
 
 fill color of highlighted events
 
-**default:** none
+**default:** `"null"`
 
 
 
@@ -78,17 +88,20 @@ fill color of highlighted events
 an array of filter variables and associated metadata
 
 **default:** none
-### settings.filters.value_col
+
+### settings.filters[].value_col
 `string`
 
-Variable name
+undefined
 
-### settings.filters.label
+**default:** none
+
+### settings.filters[].label
 `string`
 
-Variable label
+undefined
 
-
+**default:** none
 
 
 
@@ -98,17 +111,20 @@ Variable label
 an array of categorical ID characteristic variables with which to group IDs
 
 **default:** none
-### settings.groupings.value_col
+
+### settings.groupings[].value_col
 `string`
 
-Variable name
+undefined
 
-### settings.groupings.label
+**default:** none
+
+### settings.groupings[].label
 `string`
 
-Variable label
+undefined
 
-
+**default:** none
 
 
 
@@ -117,7 +133,7 @@ Variable label
 
 initial ID grouping variable
 
-**default:** none
+**default:** `"null"`
 
 
 
@@ -253,17 +269,20 @@ ongoing event indicator value
 an array of reference timepoints and associated descriptions
 
 **default:** none
-### settings.reference_lines.timepoint
+
+### settings.reference_lines[].timepoint
 `string`
 
-Timepoint
+undefined
 
-### settings.reference_lines.label
+**default:** none
+
+### settings.reference_lines[].label
 `string`
 
-Reference timepoint description
+undefined
 
-
+**default:** none
 
 
 
@@ -273,17 +292,20 @@ Reference timepoint description
 an array of detail listing variables and associated metadata
 
 **default:** none
-### settings.details.value_col
+
+### settings.details[].value_col
 `string`
 
-Variable name
+undefined
 
-### settings.details.label
+**default:** none
+
+### settings.details[].label
 `string`
 
-Variable label
+undefined
 
-
+**default:** none
 
 
 
@@ -292,5 +314,51 @@ Variable label
 
 a webcharts table settings object
 
+### settings.details_config.cols
+`array`
 
+undefined
 
+**default:** none
+
+### settings.details_config.headers
+`string`
+
+undefined
+
+**default:** none
+
+### settings.details_config.searchable
+`boolean`
+
+undefined
+
+**default:** `true`
+
+### settings.details_config.sortable
+`boolean`
+
+undefined
+
+**default:** `true`
+
+### settings.details_config.pagination
+`boolean`
+
+undefined
+
+**default:** `true`
+
+### settings.details_config.exportable
+`boolean`
+
+undefined
+
+**default:** `true`
+
+# Webcharts settings
+The object below contains each Webcharts setting as of version 1.3.0.
+
+```
+{    x: {        type: null, // set in syncSettings()        column: 'wc_value',        label: null, // set in syncSettings()        format: null // set in syncSettings()    },    y: {        type: 'ordinal',        column: null, // set in syncSettings()        label: null, // set in syncSettings()        sort: 'earliest',        behavior: 'flex',        grouping: null // set in syncSettings()    },    marks: [        {            type: 'line',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            attributes: {                'clip-path': 'url(#1)',                'stroke-width': 4            }        },        {            type: 'circle',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            radius: 4,            attributes: {                'clip-path': 'url(#1)',                'stroke-width': 2            }        }    ],    colors: [        '#1b9e77',        '#d95f02',        '#7570b3',        '#a6cee3',        '#1f78b4',        '#b2df8a',        '#66c2a5',        '#fc8d62',        '#8da0cb'    ],    color_dom: null, // set in syncSettings()    legend: {        location: 'top',        label: 'Event Type',        order: null, // set in syncSettings()        mark: 'circle'    },    range_band: 30,    margin: {        top: 60,        right: 40    }, // for second x-axis    resizable: false // can't be resizable so the multiples aren't overlapped by their titles}
+```

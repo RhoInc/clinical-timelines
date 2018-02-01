@@ -1937,18 +1937,21 @@
         var _this = this;
 
         var timeRangeControls = this.controls.wrap.selectAll('.time-range input');
+
+        //Internet Explorer does not support input date type.
+        if (!document.documentMode) {
+            console.log(this.config.time_scale);
+            timeRangeControls.property(
+                'type',
+                this.config.time_scale === 'date' ? 'date' : 'number'
+            );
+        }
+
         timeRangeControls.property('value', function(d) {
             return _this.config.time_scale === 'date'
                 ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
                 : +_this.time_range[d.index];
         });
-
-        //Internet Explorer does not support input date type.
-        if (!document.documentMode)
-            timeRangeControls.property(
-                'type',
-                this.config.time_scale === 'date' ? 'date' : 'number'
-            );
     }
 
     function defineFilteredData() {

@@ -8,7 +8,7 @@ export default function augmentFilters() {
             .selectAll('.control-group')
             .filter(d => d.type === 'subsetter')
             .classed('ct-filter', true)
-            .attr('id', d => d.value_col)
+            .attr('id', d => `filter-${d.value_col}`)
             .classed('ID', d => d.value_col === this.config.id_col),
         IDfilter = filters.filter(filter => filter.value_col === this.config.id_col),
         eventTypeFilter = filters.filter(filter => filter.value_col === this.config.event_col);

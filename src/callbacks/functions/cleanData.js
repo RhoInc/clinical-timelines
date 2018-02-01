@@ -14,9 +14,8 @@ export default function cleanData() {
             console.warn(
                 `${this.initial_data.length -
                     this.wide_data
-                        .length} records have been removed due to missing or invalid date variable values that do not match settings.date_format (${
-                    this.config.date_format
-                })`
+                        .length} records have been removed due to missing or invalid date variable values that do not match settings.date_format (${this
+                    .config.date_format})`
             );
     }
 }

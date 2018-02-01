@@ -7,6 +7,41 @@
 })(this, function(d3, webcharts) {
     'use strict';
 
+    Number.isInteger =
+        Number.isInteger ||
+        function(value) {
+            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+        };
+
+    /*------------------------------------------------------------------------------------------------\
+  Add assign method to Object if nonexistent.
+\------------------------------------------------------------------------------------------------*/
+
+    if (typeof Object.assign != 'function') {
+        (function() {
+            Object.assign = function(target) {
+                'use strict';
+
+                if (target === undefined || target === null) {
+                    throw new TypeError('Cannot convert undefined or null to object');
+                }
+
+                var output = Object(target);
+                for (var index = 1; index < arguments.length; index++) {
+                    var source = arguments[index];
+                    if (source !== undefined && source !== null) {
+                        for (var nextKey in source) {
+                            if (source.hasOwnProperty(nextKey)) {
+                                output[nextKey] = source[nextKey];
+                            }
+                        }
+                    }
+                }
+                return output;
+            };
+        })();
+    }
+
     function defineStyles() {
         var styles = [
                 /***--------------------------------------------------------------------------------------\
@@ -77,10 +112,7 @@
                     '}',
 
                 //Controls
-                '#clinical-timelines > #left-side > .wc-controls {' +
-                    '    margin-bottom: 0;' +
-                    '    clear: left;' +
-                    '}',
+                '#clinical-timelines > #left-side > .wc-controls {' + '    clear: left;' + '}',
                 '#clinical-timelines > #left-side > .wc-controls .control-group {' +
                     '    margin: 0 0 5px 0;' +
                     '    display: block;' +
@@ -119,6 +151,32 @@
                 '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                     '    padding: 0 5px;' +
                     '    font-size: 110%;' +
+                    '}',
+
+                //Reference Tables
+                '#clinical-timelines > #left-side .poe-reference-line-header {' +
+                    '    text-align: center;' +
+                    '    border-bottom: 1px solid black;' +
+                    '    padding-bottom: 5px;' +
+                    '}',
+                '#clinical-timelines > #left-side .poe-reference-line-table {' +
+                    '    width: 100%;' +
+                    '    display: table;' +
+                    '}',
+                '#clinical-timelines > #left-side .poe-reference-line-table th,' +
+                    '#clinical-timelines > #left-side .poe-reference-line-table td {' +
+                    '    text-align: left;' +
+                    '}',
+                '#clinical-timelines > #left-side .poe-higher-level {' +
+                    '    border-bottom: 1px dotted lightgray;' +
+                    '    font-weight: bold;' +
+                    '    font-size: 14px;' +
+                    '}',
+                '#clinical-timelines > #left-side .poe-lower-level {' +
+                    '    font-size: 12px;' +
+                    '}',
+                '#clinical-timelines > #left-side .poe-lower-level.poe-indent {' +
+                    '    padding-left: 5%;' +
                     '}',
 
                 /***--------------------------------------------------------------------------------------\
@@ -177,7 +235,7 @@
                 //Grouping
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +
                     '    stroke: black;' +
-                    '    stroke-width: 2px;' +
+                    '    stroke-width: 2;' +
                     '}',
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .annotation {' +
                     '    font-size: 150%;' +
@@ -190,11 +248,11 @@
 
                 //Lines
                 '#clinical-timelines path.wc-data-mark {' +
-                    '    stroke-width: 4;' +
+                    '    stroke-width: 6;' +
                     '    stroke-opacity: 1;' +
                     '}',
                 '#clinical-timelines path.wc-data-mark.highlighted {' +
-                    '    stroke-width: 7;' +
+                    '    stroke-width: 9;' +
                     '}',
                 '#clinical-timelines line.highlight-overlay {' +
                     '    stroke-width: 3;' +
@@ -208,20 +266,20 @@
                     '}',
                 '#clinical-timelines circle.wc-data-mark.highlighted {' +
                     '    stroke-opacity: 1;' +
-                    '    stroke-width: 2;' +
+                    '    stroke-width: 3;' +
                     '}',
 
                 //Arrows
                 '#clinical-timelines polygon.ongoing-event {' + '}',
                 '#clinical-timelines polygon.ongoing-event.highlighted {' +
-                    '    stroke-width: 2;' +
+                    '    stroke-width: 3;' +
                     '}',
 
                 //Reference lines
                 '#clinical-timelines .wc-chart .wc-svg title {' + '    white-space: pre;' + '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                     '    stroke: black;' +
-                    '    stroke-width: 2px;' +
+                    '    stroke-width: 2;' +
                     '    stroke-dasharray: 2,2;' +
                     '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
@@ -229,7 +287,7 @@
                     '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .invisible-reference-line {' +
                     '    stroke: black;' +
-                    '    stroke-width: 20px;' +
+                    '    stroke-width: 20;' +
                     '    stroke-opacity: 0;' +
                     '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
@@ -406,72 +464,76 @@
         };
     })();
 
-    /*------------------------------------------------------------------------------------------------\
-  Clone a variable (http://stackoverflow.com/a/728694).
-\------------------------------------------------------------------------------------------------*/
+    var hasOwnProperty = Object.prototype.hasOwnProperty;
+    var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
-    function clone(obj) {
-        var copy;
-
-        //Handle the 3 simple types, and null or undefined
-        if (null == obj || 'object' != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)))
-            return obj;
-
-        //Handle Date
-        if (obj instanceof Date) {
-            copy = new Date();
-            copy.setTime(obj.getTime());
-            return copy;
+    function toObject(val) {
+        if (val === null || val === undefined) {
+            throw new TypeError('Cannot convert undefined or null to object');
         }
 
-        //Handle Array
-        if (obj instanceof Array) {
-            copy = [];
-            for (var i = 0, len = obj.length; i < len; i++) {
-                copy[i] = clone(obj[i]);
-            }
-            return copy;
-        }
-
-        //Handle Object
-        if (obj instanceof Object) {
-            copy = {};
-            for (var attr in obj) {
-                if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
-            }
-            return copy;
-        }
-
-        throw new Error("Unable to copy obj! Its type isn't supported.");
+        return Object(val);
     }
 
-    /*------------------------------------------------------------------------------------------------\
-  Add assign method to Object if nonexistent.
-\------------------------------------------------------------------------------------------------*/
+    function isObj(x) {
+        var type = typeof x === 'undefined' ? 'undefined' : _typeof(x);
+        return x !== null && (type === 'object' || type === 'function');
+    }
 
-    if (typeof Object.assign != 'function') {
-        (function() {
-            Object.assign = function(target) {
-                'use strict';
+    function assignKey(to, from, key) {
+        var val = from[key];
 
-                if (target === undefined || target === null) {
-                    throw new TypeError('Cannot convert undefined or null to object');
+        if (val === undefined || val === null) {
+            return;
+        }
+
+        if (hasOwnProperty.call(to, key)) {
+            if (to[key] === undefined || to[key] === null) {
+                throw new TypeError('Cannot convert undefined or null to object (' + key + ')');
+            }
+        }
+
+        if (!hasOwnProperty.call(to, key) || !isObj(val) || val instanceof Array) {
+            to[key] = val;
+        } else {
+            to[key] = assign(Object(to[key]), from[key]);
+        }
+    }
+
+    function assign(to, from) {
+        if (to === from) {
+            return to;
+        }
+
+        from = Object(from);
+
+        for (var key in from) {
+            if (hasOwnProperty.call(from, key)) {
+                assignKey(to, from, key);
+            }
+        }
+
+        if (Object.getOwnPropertySymbols) {
+            var symbols = Object.getOwnPropertySymbols(from);
+
+            for (var i = 0; i < symbols.length; i++) {
+                if (propIsEnumerable.call(from, symbols[i])) {
+                    assignKey(to, from, symbols[i]);
                 }
+            }
+        }
 
-                var output = Object(target);
-                for (var index = 1; index < arguments.length; index++) {
-                    var source = arguments[index];
-                    if (source !== undefined && source !== null) {
-                        for (var nextKey in source) {
-                            if (source.hasOwnProperty(nextKey)) {
-                                output[nextKey] = source[nextKey];
-                            }
-                        }
-                    }
-                }
-                return output;
-            };
-        })();
+        return to;
+    }
+
+    function merge$1(target) {
+        target = toObject(target);
+
+        for (var s = 1; s < arguments.length; s++) {
+            assign(target, arguments[s]);
+        }
+
+        return target;
     }
 
     var settings = {
@@ -549,17 +611,17 @@
                 tooltip: null, // set in syncSettings()
                 attributes: {
                     'clip-path': 'url(#1)',
-                    'stroke-width': 4
+                    'stroke-width': 6
                 }
             },
             {
                 type: 'circle',
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
-                radius: 4,
+                radius: 6,
                 attributes: {
                     'clip-path': 'url(#1)',
-                    'stroke-width': 2
+                    'stroke-width': 3
                 }
             }
         ],
@@ -588,6 +650,45 @@
         }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
     };
+
+    /*------------------------------------------------------------------------------------------------\
+  Clone a variable (http://stackoverflow.com/a/728694).
+\------------------------------------------------------------------------------------------------*/
+
+    function clone(obj) {
+        var copy;
+
+        //Handle the 3 simple types, and null or undefined
+        if (null == obj || 'object' != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)))
+            return obj;
+
+        //Handle Date
+        if (obj instanceof Date) {
+            copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
+        }
+
+        //Handle Array
+        if (obj instanceof Array) {
+            copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                copy[i] = clone(obj[i]);
+            }
+            return copy;
+        }
+
+        //Handle Object
+        if (obj instanceof Object) {
+            copy = {};
+            for (var attr in obj) {
+                if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+            }
+            return copy;
+        }
+
+        throw new Error("Unable to copy obj! Its type isn't supported.");
+    }
 
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
@@ -624,12 +725,6 @@
 
         return validSetting;
     }
-
-    Number.isInteger =
-        Number.isInteger ||
-        function(value) {
-            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
-        };
 
     function syncRendererSpecificSettings(settings) {
         //ID settings
@@ -736,7 +831,17 @@
     function syncWebchartsSettings(settings) {
         //Y-axis
         settings.y.column = settings.id_col;
-        settings.y.grouping = settings.grouping_initial;
+        if (settings.grouping_initial) {
+            settings.y.grouping = settings.grouping_initial;
+            settings.y.groupingLabel =
+                settings.groupings[
+                    settings.groupings
+                        .map(function(grouping) {
+                            return grouping.value_col;
+                        })
+                        .indexOf(settings.grouping_initial)
+                ].label;
+        }
 
         //Lines
         settings.marks[0].per = [settings.id_col, settings.event_col, settings.seq_col];
@@ -1541,6 +1646,22 @@
         else this.draw();
     }
 
+    function yAxisGrouping(select$$1, d) {
+        var selected = d3.select(select$$1).select('option:checked');
+
+        //Update grouping settings.
+        if (selected.text() !== 'None') {
+            this.config.y.grouping = selected.text();
+            this.config.y.groupingLabel = selected.property('label');
+        } else {
+            delete this.config.y.grouping;
+            this.config.y.groupingLabel = 'Event Types';
+        }
+
+        //Redraw.
+        this.draw();
+    }
+
     function augmentOtherControls() {
         var context = this,
             otherControls = this.controls.wrap
@@ -1606,6 +1727,16 @@
             .select('select')
             .on('change', function(d) {
                 timeScaleChange.call(context, this, d);
+            });
+
+        //Redefine y-axis grouping event listener.
+        otherControls
+            .filter(function(d) {
+                return d.option === 'y.grouping';
+            })
+            .select('select')
+            .on('change', function(d) {
+                yAxisGrouping.call(context, this, d);
             });
     }
 
@@ -2351,13 +2482,7 @@
                                 y: y1,
                                 dy: _this.y.rangeBand() * 1.25
                             })
-                            .text(
-                                _this.config.groupings.filter(function(grouping) {
-                                    return grouping.value_col === _this.config.y.grouping;
-                                })[0].label +
-                                    ': ' +
-                                    d.key
-                            ),
+                            .text(_this.config.y.groupingLabel + ': ' + d.key),
                         rule = g
                             .append('line')
                             .classed('boundary horizontal', true)
@@ -2845,6 +2970,87 @@
         );
     }
 
+    function drawReferenceTable(reference_line) {
+        var _this = this;
+
+        //Filter data on events that overlap reference line.
+        reference_line.wide_data = this.filtered_wide_data.filter(function(d) {
+            return (
+                _this.config.x_parseFormat.parse(d[_this.config.st_col]) <=
+                    _this.config.x_parseFormat.parse(reference_line.timepoint) &&
+                _this.config.x_parseFormat.parse(d[_this.config.en_col]) >=
+                    _this.config.x_parseFormat.parse(reference_line.timepoint)
+            );
+        });
+
+        //Nest data by grouping and event type.
+        reference_line.nested_data = d3
+            .nest()
+            .key(function(d) {
+                return d[_this.config.y.grouping] || 'All ' + _this.config.id_unitPlural;
+            })
+            .key(function(d) {
+                return d[_this.config.event_col];
+            })
+            .rollup(function(d) {
+                return d.length;
+            })
+            .entries(reference_line.wide_data);
+        reference_line.flattened_data = [];
+        reference_line.nested_data.forEach(function(d) {
+            reference_line.flattened_data.push({
+                class: 'poe-higher-level',
+                key: d.key,
+                n: d3.sum(d.values, function(di) {
+                    return di.values;
+                })
+            });
+            d.values.forEach(function(di) {
+                reference_line.flattened_data.push({
+                    class: 'poe-lower-level',
+                    key: di.key,
+                    n: di.values
+                });
+            });
+        });
+
+        //Add reference table container and header.
+        if (reference_line.container) reference_line.container.remove();
+        reference_line.container = this.leftSide
+            .append('div')
+            .classed('poe-reference-line-container', true);
+        reference_line.container
+            .append('h3')
+            .classed('poe-reference-line-header', true)
+            .text(reference_line.label);
+
+        //Add reference line table table.
+        reference_line.table = reference_line.container
+            .append('table')
+            .classed('poe-reference-line-table', true);
+        reference_line.table
+            .append('tbody')
+            .selectAll('tr')
+            .data(reference_line.flattened_data)
+            .enter()
+            .append('tr')
+            .each(function(d) {
+                var row = d3.select(this);
+                row
+                    .append('td')
+                    .text(d.key)
+                    .attr('class', function(d) {
+                        return d.class + (d.class === 'poe-lower-level' ? ' poe-indent' : '');
+                    });
+                row
+                    .append('td')
+                    .text(d.n)
+                    .attr('class', function(d) {
+                        return d.class;
+                    });
+            });
+    }
+
     function drawReferenceLines() {
         var _this = this;
 
@@ -2940,6 +3146,8 @@
                     //Hide reference labels initially.
                     referenceLineLabel.classed('hidden', true);
                     referenceLineLabelBox.classed('hidden', true);
+
+                    drawReferenceTable.call(_this, reference_line);
                 });
         }
     }
@@ -3184,7 +3392,7 @@
         //Define .css styles to avoid requiring a separate .css file.
         defineStyles();
 
-        var mergedSettings = Object.assign({}, defaults$1.settings, settings),
+        var mergedSettings = merge$1({}, defaults$1.settings, settings),
             syncedSettings = defaults$1.syncSettings(mergedSettings),
             syncedControls = defaults$1.syncControls(defaults$1.controls, syncedSettings),
             controls = webcharts.createControls(leftSide.node(), {

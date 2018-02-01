@@ -1,4 +1,5 @@
 import { time } from 'd3';
+import drawReferenceTable from './drawReferenceLines/drawReferenceTable';
 
 export default function drawReferenceLines() {
     if (this.config.reference_lines) {
@@ -91,6 +92,8 @@ export default function drawReferenceLines() {
                 //Hide reference labels initially.
                 referenceLineLabel.classed('hidden', true);
                 referenceLineLabelBox.classed('hidden', true);
+
+                drawReferenceTable.call(this, reference_line);
             });
     }
 }

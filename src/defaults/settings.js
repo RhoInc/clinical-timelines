@@ -74,17 +74,17 @@ export default {
                 tooltip: null, // set in syncSettings()
                 attributes: {
                     'clip-path': 'url(#1)',
-                    'stroke-width': 4
+                    'stroke-width': 6
                 }
             },
             {
                 type: 'circle',
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
-                radius: 4,
+                radius: 6,
                 attributes: {
                     'clip-path': 'url(#1)',
-                    'stroke-width': 2
+                    'stroke-width': 3
                 }
             }
         ],

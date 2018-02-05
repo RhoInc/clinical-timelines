@@ -19,13 +19,13 @@ export default function drawReferenceTable(reference_line) {
     reference_line.flattened_data = [];
     reference_line.nested_data.forEach(d => {
         reference_line.flattened_data.push({
-            class: 'poe-higher-level',
+            class: 'ct-higher-level',
             key: d.key,
             n: sum(d.values, di => di.values)
         });
         d.values.forEach(di => {
             reference_line.flattened_data.push({
-                class: 'poe-lower-level',
+                class: 'ct-lower-level',
                 key: di.key,
                 n: di.values
             });
@@ -36,16 +36,16 @@ export default function drawReferenceTable(reference_line) {
     if (reference_line.container) reference_line.container.remove();
     reference_line.container = this.leftSide
         .append('div')
-        .classed('poe-reference-line-container', true);
+        .classed('ct-reference-line-container', true);
     reference_line.container
         .append('h3')
-        .classed('poe-reference-line-header', true)
+        .classed('ct-reference-line-header', true)
         .text(reference_line.label);
 
     //Add reference line table table.
     reference_line.table = reference_line.container
         .append('table')
-        .classed('poe-reference-line-table', true);
+        .classed('ct-reference-line-table', true);
     reference_line.table
         .append('tbody')
         .selectAll('tr')
@@ -57,7 +57,7 @@ export default function drawReferenceTable(reference_line) {
             row
                 .append('td')
                 .text(d.key)
-                .attr('class', d => d.class + (d.class === 'poe-lower-level' ? ' poe-indent' : ''));
+                .attr('class', d => d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : ''));
             row
                 .append('td')
                 .text(d.n)

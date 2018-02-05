@@ -126,28 +126,28 @@ export default function defineStyles() {
 
 
           //Reference Tables
-            '#clinical-timelines > #left-side .poe-reference-line-header {' +
+            '#clinical-timelines > #left-side .ct-reference-line-header {' +
                 '    text-align: center;' +
                 '    border-bottom: 1px solid black;' +
                 '    padding-bottom: 5px;' +
                 '}',
-            '#clinical-timelines > #left-side .poe-reference-line-table {' +
+            '#clinical-timelines > #left-side .ct-reference-line-table {' +
                 '    width: 100%;' +
                 '    display: table;' +
                 '}',
-            '#clinical-timelines > #left-side .poe-reference-line-table th,' +
-            '#clinical-timelines > #left-side .poe-reference-line-table td {' +
+            '#clinical-timelines > #left-side .ct-reference-line-table th,' +
+            '#clinical-timelines > #left-side .ct-reference-line-table td {' +
                 '    text-align: left;' +
                 '}',
-            '#clinical-timelines > #left-side .poe-higher-level {' +
+            '#clinical-timelines > #left-side .ct-higher-level {' +
                 '    border-bottom: 1px dotted lightgray;' +
                 '    font-weight: bold;' +
                 '    font-size: 14px;' +
                 '}',
-            '#clinical-timelines > #left-side .poe-lower-level {' +
+            '#clinical-timelines > #left-side .ct-lower-level {' +
                 '    font-size: 12px;' +
                 '}',
-            '#clinical-timelines > #left-side .poe-lower-level.poe-indent {' +
+            '#clinical-timelines > #left-side .ct-lower-level.ct-indent {' +
                 '    padding-left: 5%;' +
                 '}',
 

@@ -7,6 +7,8 @@ export default function drawReferenceLines() {
 
         //Add group for reference lines.
         this.svg.select('.reference-lines').remove();
+        if (!this.parent)
+            this.leftSide.selectAll('.ct-reference-line-table-container').remove();
         const referenceLinesGroup = this.svg
             .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
             .classed('reference-lines', true);
@@ -93,7 +95,9 @@ export default function drawReferenceLines() {
                 referenceLineLabel.classed('hidden', true);
                 referenceLineLabelBox.classed('hidden', true);
 
-                drawReferenceTable.call(this, reference_line);
+                //Draw reference line frequency table.
+                if (!this.parent)
+                    drawReferenceTable.call(this, reference_line);
             });
     }
 }

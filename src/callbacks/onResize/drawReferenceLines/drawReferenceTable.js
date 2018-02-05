@@ -4,10 +4,10 @@ export default function drawReferenceTable(reference_line) {
     //Filter data on events that overlap reference line.
     reference_line.wide_data = this.filtered_wide_data.filter(
         d =>
-            this.config.x_parseFormat.parse(d[this.config.st_col]) <=
-                this.config.x_parseFormat.parse(reference_line.timepoint) &&
-            this.config.x_parseFormat.parse(d[this.config.en_col]) >=
-                this.config.x_parseFormat.parse(reference_line.timepoint)
+            this.config.time_function(d[this.config.st_col]) <=
+                this.config.time_function(reference_line.timepoint) &&
+            this.config.time_function(d[this.config.en_col]) >=
+                this.config.time_function(reference_line.timepoint)
     );
 
     //Nest data by grouping and event type.
@@ -36,7 +36,7 @@ export default function drawReferenceTable(reference_line) {
     if (reference_line.container) reference_line.container.remove();
     reference_line.container = this.leftSide
         .append('div')
-        .classed('ct-reference-line-container', true);
+        .classed('ct-reference-line-table-container', true);
     reference_line.container
         .append('h3')
         .classed('ct-reference-line-header', true)

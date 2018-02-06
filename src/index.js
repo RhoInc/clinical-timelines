@@ -1,5 +1,6 @@
-import './util/number-isinteger';
+import './util/array-find';
 import './util/object-assign';
+import './util/number-isinteger';
 import { select } from 'd3';
 import defineStyles from './util/defineStyles';
 import merge from './util/merge';

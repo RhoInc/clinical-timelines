@@ -7,6 +7,85 @@
 })(this, function(d3, webcharts) {
     'use strict';
 
+    if (!Array.prototype.find) {
+        Object.defineProperty(Array.prototype, 'find', {
+            value: function value(predicate) {
+                // 1. Let O be ? ToObject(this value).
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
+                }
+
+                var o = Object(this);
+
+                // 2. Let len be ? ToLength(? Get(O, "length")).
+                var len = o.length >>> 0;
+
+                // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+
+                // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+                var thisArg = arguments[1];
+
+                // 5. Let k be 0.
+                var k = 0;
+
+                // 6. Repeat, while k < len
+                while (k < len) {
+                    // a. Let Pk be ! ToString(k).
+                    // b. Let kValue be ? Get(O, Pk).
+                    // c. Let testResult be ToBoolean(? Call(predicate, T, � kValue, k, O �)).
+                    // d. If testResult is true, return kValue.
+                    var kValue = o[k];
+                    if (predicate.call(thisArg, kValue, k, o)) {
+                        return kValue;
+                    }
+                    // e. Increase k by 1.
+                    k++;
+                }
+
+                // 7. Return undefined.
+                return undefined;
+            }
+        });
+    }
+
+    /*------------------------------------------------------------------------------------------------\
+  Add assign method to Object if nonexistent.
+\------------------------------------------------------------------------------------------------*/
+
+    if (typeof Object.assign != 'function') {
+        (function() {
+            Object.assign = function(target) {
+                'use strict';
+
+                if (target === undefined || target === null) {
+                    throw new TypeError('Cannot convert undefined or null to object');
+                }
+
+                var output = Object(target);
+                for (var index = 1; index < arguments.length; index++) {
+                    var source = arguments[index];
+                    if (source !== undefined && source !== null) {
+                        for (var nextKey in source) {
+                            if (source.hasOwnProperty(nextKey)) {
+                                output[nextKey] = source[nextKey];
+                            }
+                        }
+                    }
+                }
+                return output;
+            };
+        })();
+    }
+
+    Number.isInteger =
+        Number.isInteger ||
+        function(value) {
+            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+        };
+
     function defineStyles() {
         var styles = [
                 /***--------------------------------------------------------------------------------------\
@@ -77,10 +156,7 @@
                     '}',
 
                 //Controls
-                '#clinical-timelines > #left-side > .wc-controls {' +
-                    '    margin-bottom: 0;' +
-                    '    clear: left;' +
-                    '}',
+                '#clinical-timelines > #left-side > .wc-controls {' + '    clear: left;' + '}',
                 '#clinical-timelines > #left-side > .wc-controls .control-group {' +
                     '    margin: 0 0 5px 0;' +
                     '    display: block;' +
@@ -110,6 +186,7 @@
                     '    margin-left: 5px;' +
                     '    width: 50%;' +
                     '    clear: right;' +
+                    '    box-sizing: border-box;' +
                     '}',
                 '#clinical-timelines > #left-side > .ID-details .back-button {' +
                     '    display: inline-block;' +
@@ -118,6 +195,30 @@
                 '#clinical-timelines > #left-side > .ID-details .back-button button {' +
                     '    padding: 0 5px;' +
                     '    font-size: 110%;' +
+                    '}',
+
+                //Reference Tables
+                '#clinical-timelines > #left-side .ct-reference-line-header {' +
+                    '    text-align: center;' +
+                    '    border-bottom: 1px solid black;' +
+                    '    padding-bottom: 5px;' +
+                    '}',
+                '#clinical-timelines > #left-side .ct-reference-line-table {' +
+                    '    width: 100%;' +
+                    '    display: table;' +
+                    '}',
+                '#clinical-timelines > #left-side .ct-reference-line-table th,' +
+                    '#clinical-timelines > #left-side .ct-reference-line-table td {' +
+                    '    text-align: left;' +
+                    '}',
+                '#clinical-timelines > #left-side .ct-higher-level {' +
+                    '    border-bottom: 1px dotted lightgray;' +
+                    '    font-weight: bold;' +
+                    '    font-size: 14px;' +
+                    '}',
+                '#clinical-timelines > #left-side .ct-lower-level {' + '    font-size: 12px;' + '}',
+                '#clinical-timelines > #left-side .ct-lower-level.ct-indent {' +
+                    '    padding-left: 5%;' +
                     '}',
 
                 /***--------------------------------------------------------------------------------------\
@@ -176,7 +277,7 @@
                 //Grouping
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .boundary {' +
                     '    stroke: black;' +
-                    '    stroke-width: 2px;' +
+                    '    stroke-width: 2;' +
                     '}',
                 '#clinical-timelines > #right-side > .wc-chart .wc-svg .grouping .annotation {' +
                     '    font-size: 150%;' +
@@ -196,7 +297,7 @@
                     '    stroke-width: 7;' +
                     '}',
                 '#clinical-timelines line.highlight-overlay {' +
-                    '    stroke-width: 3;' +
+                    '    stroke-width: 2;' +
                     '    stroke-linecap: round;' +
                     '}',
 
@@ -220,7 +321,7 @@
                 '#clinical-timelines .wc-chart .wc-svg title {' + '    white-space: pre;' + '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line {' +
                     '    stroke: black;' +
-                    '    stroke-width: 2px;' +
+                    '    stroke-width: 2;' +
                     '    stroke-dasharray: 2,2;' +
                     '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .visible-reference-line.hover {' +
@@ -228,7 +329,7 @@
                     '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .invisible-reference-line {' +
                     '    stroke: black;' +
-                    '    stroke-width: 20px;' +
+                    '    stroke-width: 20;' +
                     '    stroke-opacity: 0;' +
                     '}',
                 '#clinical-timelines > #right-side .wc-chart .wc-svg .reference-line-label-box {' +
@@ -405,79 +506,79 @@
         };
     })();
 
-    /*------------------------------------------------------------------------------------------------\
-  Clone a variable (http://stackoverflow.com/a/728694).
-\------------------------------------------------------------------------------------------------*/
+    var hasOwnProperty = Object.prototype.hasOwnProperty;
+    var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
-    function clone(obj) {
-        var copy;
-
-        //Handle the 3 simple types, and null or undefined
-        if (null == obj || 'object' != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)))
-            return obj;
-
-        //Handle Date
-        if (obj instanceof Date) {
-            copy = new Date();
-            copy.setTime(obj.getTime());
-            return copy;
+    function toObject(val) {
+        if (val === null || val === undefined) {
+            throw new TypeError('Cannot convert undefined or null to object');
         }
 
-        //Handle Array
-        if (obj instanceof Array) {
-            copy = [];
-            for (var i = 0, len = obj.length; i < len; i++) {
-                copy[i] = clone(obj[i]);
-            }
-            return copy;
-        }
-
-        //Handle Object
-        if (obj instanceof Object) {
-            copy = {};
-            for (var attr in obj) {
-                if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
-            }
-            return copy;
-        }
-
-        throw new Error("Unable to copy obj! Its type isn't supported.");
+        return Object(val);
     }
 
-    /*------------------------------------------------------------------------------------------------\
-  Add assign method to Object if nonexistent.
-\------------------------------------------------------------------------------------------------*/
-
-    if (typeof Object.assign != 'function') {
-        (function() {
-            Object.assign = function(target) {
-                'use strict';
-
-                if (target === undefined || target === null) {
-                    throw new TypeError('Cannot convert undefined or null to object');
-                }
-
-                var output = Object(target);
-                for (var index = 1; index < arguments.length; index++) {
-                    var source = arguments[index];
-                    if (source !== undefined && source !== null) {
-                        for (var nextKey in source) {
-                            if (source.hasOwnProperty(nextKey)) {
-                                output[nextKey] = source[nextKey];
-                            }
-                        }
-                    }
-                }
-                return output;
-            };
-        })();
+    function isObj(x) {
+        var type = typeof x === 'undefined' ? 'undefined' : _typeof(x);
+        return x !== null && (type === 'object' || type === 'function');
     }
 
-    var settings = {
-        /**-------------------------------------------------------------------------------------------\
-      Renderer-specific settings
-    \-------------------------------------------------------------------------------------------**/
+    function assignKey(to, from, key) {
+        var val = from[key];
 
+        if (val === undefined || val === null) {
+            return;
+        }
+
+        if (hasOwnProperty.call(to, key)) {
+            if (to[key] === undefined || to[key] === null) {
+                throw new TypeError('Cannot convert undefined or null to object (' + key + ')');
+            }
+        }
+
+        if (!hasOwnProperty.call(to, key) || !isObj(val) || val instanceof Array) {
+            to[key] = val;
+        } else {
+            to[key] = assign(Object(to[key]), from[key]);
+        }
+    }
+
+    function assign(to, from) {
+        if (to === from) {
+            return to;
+        }
+
+        from = Object(from);
+
+        for (var key in from) {
+            if (hasOwnProperty.call(from, key)) {
+                assignKey(to, from, key);
+            }
+        }
+
+        if (Object.getOwnPropertySymbols) {
+            var symbols = Object.getOwnPropertySymbols(from);
+
+            for (var i = 0; i < symbols.length; i++) {
+                if (propIsEnumerable.call(from, symbols[i])) {
+                    assignKey(to, from, symbols[i]);
+                }
+            }
+        }
+
+        return to;
+    }
+
+    function merge$1(target) {
+        target = toObject(target);
+
+        for (var s = 1; s < arguments.length; s++) {
+            assign(target, arguments[s]);
+        }
+
+        return target;
+    }
+
+    var rendererSpecificSettings = {
         //ID settings
         id_col: 'USUBJID',
         id_unit: 'participant',
@@ -521,12 +622,10 @@
 
         //Listing settings
         details: null,
-        details_config: null,
+        details_config: null
+    };
 
-        /**-------------------------------------------------------------------------------------------\
-      Standard webcharts settings
-    \-------------------------------------------------------------------------------------------**/
-
+    var webchartsSettings = {
         x: {
             type: null, // set in syncSettings()
             column: 'wc_value',
@@ -534,12 +633,12 @@
             format: null // set in syncSettings()
         },
         y: {
-            type: 'ordinal', // set in syncSettings()
-            column: null,
-            label: null,
+            type: 'ordinal',
+            column: null, // set in syncSettings()
+            label: null, // set in syncSettings()
             sort: 'earliest',
             behavior: 'flex',
-            grouping: null
+            grouping: null // set in syncSettings()
         },
         marks: [
             {
@@ -555,7 +654,7 @@
                 type: 'circle',
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
-                radius: 4,
+                radius: 5,
                 attributes: {
                     'clip-path': 'url(#1)',
                     'stroke-width': 2
@@ -580,13 +679,54 @@
             order: null, // set in syncSettings()
             mark: 'circle'
         },
-        range_band: 30,
+        range_band: 35,
         margin: {
             top: 60,
             right: 40
         }, // for second x-axis
         resizable: false // can't be resizable so the multiples aren't overlapped by their titles
     };
+
+    var settings = Object.assign({}, rendererSpecificSettings, webchartsSettings);
+
+    /*------------------------------------------------------------------------------------------------\
+  Clone a variable (http://stackoverflow.com/a/728694).
+\------------------------------------------------------------------------------------------------*/
+
+    function clone(obj) {
+        var copy;
+
+        //Handle the 3 simple types, and null or undefined
+        if (null == obj || 'object' != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)))
+            return obj;
+
+        //Handle Date
+        if (obj instanceof Date) {
+            copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
+        }
+
+        //Handle Array
+        if (obj instanceof Array) {
+            copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                copy[i] = clone(obj[i]);
+            }
+            return copy;
+        }
+
+        //Handle Object
+        if (obj instanceof Object) {
+            copy = {};
+            for (var attr in obj) {
+                if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+            }
+            return copy;
+        }
+
+        throw new Error("Unable to copy obj! Its type isn't supported.");
+    }
 
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
@@ -623,12 +763,6 @@
 
         return validSetting;
     }
-
-    Number.isInteger =
-        Number.isInteger ||
-        function(value) {
-            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
-        };
 
     function syncRendererSpecificSettings(settings) {
         //ID settings
@@ -735,7 +869,17 @@
     function syncWebchartsSettings(settings) {
         //Y-axis
         settings.y.column = settings.id_col;
-        settings.y.grouping = settings.grouping_initial;
+        if (settings.grouping_initial) {
+            settings.y.grouping = settings.grouping_initial;
+            settings.y.groupingLabel =
+                settings.groupings[
+                    settings.groupings
+                        .map(function(grouping) {
+                            return grouping.value_col;
+                        })
+                        .indexOf(settings.grouping_initial)
+                ].label;
+        }
 
         //Lines
         settings.marks[0].per = [settings.id_col, settings.event_col, settings.seq_col];
@@ -804,7 +948,7 @@
             'Event: [' +
             settings.event_col +
             ']' +
-            ('\n' + settings.time_scale + ': [' + settings.st_col + ']');
+            ('\n' + settings.x.label + ': [' + settings.st_col + ']');
         settings.marks[1].values = { wc_category: settings.time_unit };
     }
 
@@ -1041,26 +1185,16 @@
     function setDefaultTimeRanges() {
         var _this = this;
 
-        this.config.day_range =
-            this.config.day_range instanceof Array &&
-            this.config.day_range.length === 2 &&
-            this.config.day_range[0].toString() !== this.config.day_range[1].toString() &&
-            this.config.day_range.every(function(day) {
-                return Number.isInteger(+day);
+        //Date range
+        this.full_date_range = [
+            d3.min(this.initial_data, function(d) {
+                return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
+            }),
+            d3.max(this.initial_data, function(d) {
+                return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
             })
-                ? this.config.day_range.map(function(day) {
-                      return +day;
-                  })
-                : [
-                      d3.min(this.initial_data, function(d) {
-                          return +d[_this.config.stdy_col];
-                      }),
-                      d3.max(this.raw_data, function(d) {
-                          return +d[_this.config.endy_col];
-                      })
-                  ];
-
-        this.config.date_range =
+        ];
+        this.date_range =
             this.config.date_range instanceof Array &&
             this.config.date_range.length === 2 &&
             this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
@@ -1072,18 +1206,28 @@
                           ? date
                           : d3.time.format(_this.config.date_format).parse(date);
                   })
-                : [
-                      d3.min(this.raw_data, function(d) {
-                          return d3.time
-                              .format(_this.config.date_format)
-                              .parse(d[_this.config.stdt_col]);
-                      }),
-                      d3.max(this.raw_data, function(d) {
-                          return d3.time
-                              .format(_this.config.date_format)
-                              .parse(d[_this.config.endt_col]);
-                      })
-                  ];
+                : this.full_date_range;
+
+        //Day range
+        this.full_day_range = [
+            d3.min(this.initial_data, function(d) {
+                return +d[_this.config.stdy_col];
+            }),
+            d3.max(this.initial_data, function(d) {
+                return +d[_this.config.endy_col];
+            })
+        ];
+        this.day_range =
+            this.config.day_range instanceof Array &&
+            this.config.day_range.length === 2 &&
+            this.config.day_range[0].toString() !== this.config.day_range[1].toString() &&
+            this.config.day_range.every(function(day) {
+                return Number.isInteger(+day);
+            })
+                ? this.config.day_range.map(function(day) {
+                      return +day;
+                  })
+                : this.full_day_range;
     }
 
     function handleEventTypes() {
@@ -1098,6 +1242,9 @@
             .values()
             .sort();
         this.currentEventTypes = this.config.event_types || this.allEventTypes;
+        this.controls.config.inputs.find(function(input) {
+            return input.description === 'Event Type';
+        }).start = this.currentEventTypes;
         this.config.color_dom = this.currentEventTypes.concat(
             this.allEventTypes
                 .filter(function(eventType) {
@@ -1290,8 +1437,7 @@
 
         //Set default time ranges.
         setDefaultTimeRanges.call(this);
-        this.config.time_range =
-            this.config.time_scale === 'day' ? this.config.day_range : this.config.date_range;
+        this.time_range = this.config.time_scale === 'day' ? this.day_range : this.date_range;
 
         //Add data-driven tooltips.
         addDataDrivenTooltips.call(this);
@@ -1504,6 +1650,201 @@
         );
     }
 
+    function eventHighlightingChange(select$$1, d) {
+        //Update event highlighting settings.
+        this.config.event_highlighted = d3
+            .select(select$$1)
+            .select('option:checked')
+            .text();
+        this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
+
+        //Redraw.
+        if (this.selected_id) drawIDtimeline.call(this);
+        else this.draw();
+    }
+
+    function timeScaleChange(dropdown, d) {
+        //Update clinical timelines time scale settings
+        this.config.time_scale = d3
+            .select(dropdown)
+            .select('option:checked')
+            .text();
+        syncTimeScaleSettings(this.config);
+        this.time_range = this.config.time_scale === 'day' ? this.day_range : this.date_range;
+
+        //Update ID timeline time scale settings
+        this.IDtimeline.config.time_scale = this.config.time_scale;
+        syncTimeScaleSettings(this.IDtimeline.config);
+
+        //Remove records without time data.
+        cleanData.call(this);
+
+        //Redefine data.
+        defineData.call(this);
+
+        //Redraw.
+        if (this.selected_id) drawIDtimeline.call(this);
+        else this.draw();
+    }
+
+    function yAxisGrouping(select$$1, d) {
+        var selected = d3.select(select$$1).select('option:checked');
+
+        //Update grouping settings.
+        if (selected.text() !== 'None') {
+            this.config.y.grouping = selected.text();
+            this.config.y.groupingLabel = selected.property('label');
+        } else {
+            delete this.config.y.grouping;
+            this.config.y.groupingLabel = 'Event Types';
+        }
+
+        //Redraw.
+        this.draw();
+    }
+
+    function augmentOtherControls() {
+        var context = this,
+            otherControls = this.controls.wrap
+                .selectAll('.control-group')
+                .filter(function(d) {
+                    return d.type !== 'subsetter';
+                })
+                .classed('ct-control', true)
+                .attr('id', function(d) {
+                    return 'control-' + d.option.replace('.', '-');
+                });
+
+        //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
+        otherControls
+            .filter(function(d) {
+                return ['Y-axis sort', 'Y-axis grouping'].indexOf(d.description) > -1;
+            })
+            .each(function(d) {
+                // Y-axis controls
+                var options = d3.select(this).selectAll('option');
+
+                if (d.description === 'Y-axis sort')
+                    // Add labels to Y-axis sort.
+                    options.property('label', function(di) {
+                        return d.relabels[
+                            d.values
+                                .filter(function(dii) {
+                                    return dii !== 'None';
+                                })
+                                .indexOf(di)
+                        ];
+                    });
+                else if (d.description === 'Y-axis grouping')
+                    // Add variable labels to Y-axis grouping options.
+                    options.property('label', function(di) {
+                        return di !== 'None'
+                            ? context.config.groupings[
+                                  context.config.groupings
+                                      .map(function(dii) {
+                                          return dii.value_col;
+                                      })
+                                      .indexOf(di)
+                              ].label
+                            : 'None';
+                    });
+            });
+
+        //Redefine event highlighting event listener.
+        otherControls
+            .filter(function(d) {
+                return d.option === 'event_highlighted';
+            })
+            .select('select')
+            .on('change', function(d) {
+                eventHighlightingChange.call(context, this, d);
+            });
+
+        //Redefine time scale event listener.
+        otherControls
+            .filter(function(d) {
+                return d.option === 'time_scale';
+            })
+            .select('select')
+            .on('change', function(d) {
+                timeScaleChange.call(context, this, d);
+            });
+
+        //Redefine y-axis grouping event listener.
+        otherControls
+            .filter(function(d) {
+                return d.option === 'y.grouping';
+            })
+            .select('select')
+            .on('change', function(d) {
+                yAxisGrouping.call(context, this, d);
+            });
+    }
+
+    function timeRangeControl(datum) {
+        var context = this,
+            timeRangeContainer = this.controls.wrap
+                .insert('div', '#control-y-sort')
+                .datum(datum)
+                .classed('control-group time-range ct-control', true)
+                .attr('id', function(d) {
+                    return 'control-' + d.option.replace(/\./g, '-');
+                }),
+            timeRangeInput = timeRangeContainer.append('input').classed('changer', true),
+            timeRangeLabelDescription = timeRangeContainer
+                .append('div')
+                .classed('label-description', true);
+
+        //Add control label and span description nodes.
+        timeRangeLabelDescription.append('span').classed('control-label', true);
+        timeRangeLabelDescription
+            .append('span')
+            .classed('span-description', true)
+            .text(function(d) {
+                return d.description;
+            });
+
+        //Add event listener to input node.
+        timeRangeInput.on('change', function(d) {
+            var time_range = context.config.time_scale + '_range',
+                increment = context.config.time_scale === 'date' ? 24 * 60 * 60 * 1000 : 1;
+            var input =
+                context.config.time_scale === 'date'
+                    ? d3.time.format('%Y-%m-%d').parse(this.value)
+                    : +this.value;
+
+            if (d.index === 0 && input >= context[time_range][1])
+                input =
+                    context.config.time_scale === 'date'
+                        ? new Date(context[time_range][1].getTime() - increment)
+                        : context[time_range][1] - increment;
+            else if (d.index === 1 && input <= context[time_range][0])
+                input =
+                    context.config.time_scale === 'date'
+                        ? new Date(context[time_range][0].getTime() + increment)
+                        : (input = context[time_range][0] + increment);
+
+            context[time_range][d.index] = input;
+            context.time_range = context[time_range];
+            context.draw();
+        });
+    }
+
+    function addTimeRangeControls() {
+        timeRangeControl.call(this, {
+            index: 0,
+            option: 'x.domain.0',
+            label: '',
+            description: 'Start'
+        });
+        timeRangeControl.call(this, {
+            index: 1,
+            option: 'x.domain.1',
+            label: '',
+            description: 'End'
+        });
+    }
+
     function IDchange(select$$1) {
         var _this = this;
 
@@ -1580,7 +1921,7 @@
                 })
                 .classed('ct-filter', true)
                 .attr('id', function(d) {
-                    return d.value_col;
+                    return 'filter-' + d.value_col;
                 })
                 .classed('ID', function(d) {
                     return d.value_col === _this.config.id_col;
@@ -1606,109 +1947,6 @@
         });
     }
 
-    function eventHighlightingChange(select$$1, d) {
-        //Update event highlighting settings.
-        this.config.event_highlighted = d3
-            .select(select$$1)
-            .select('option:checked')
-            .text();
-        this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
-
-        //Redraw.
-        if (this.selected_id) drawIDtimeline.call(this);
-        else this.draw();
-    }
-
-    function timeScaleChange(dropdown, d) {
-        //Update clinical timelines time scale settings
-        this.config.time_scale = d3
-            .select(dropdown)
-            .select('option:checked')
-            .text();
-        syncTimeScaleSettings(this.config);
-        this.config.time_range =
-            this.config.time_scale === 'day' ? this.config.day_range : this.config.date_range;
-
-        //Update ID timeline time scale settings
-        this.IDtimeline.config.time_scale = this.config.time_scale;
-        syncTimeScaleSettings(this.IDtimeline.config);
-
-        //Remove records without time data.
-        cleanData.call(this);
-
-        //Redefine data.
-        defineData.call(this);
-
-        //Redraw.
-        if (this.selected_id) drawIDtimeline.call(this);
-        else this.draw();
-    }
-
-    function augmentOtherControls() {
-        var context = this,
-            otherControls = this.controls.wrap
-                .selectAll('.control-group')
-                .filter(function(d) {
-                    return d.type !== 'subsetter';
-                })
-                .classed('ct-control', true);
-
-        //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-        otherControls
-            .filter(function(d) {
-                return ['Y-axis sort', 'Y-axis grouping'].indexOf(d.description) > -1;
-            })
-            .each(function(d) {
-                // Y-axis controls
-                var options = d3.select(this).selectAll('option');
-
-                if (d.description === 'Y-axis sort')
-                    // Add labels to Y-axis sort.
-                    options.property('label', function(di) {
-                        return d.relabels[
-                            d.values
-                                .filter(function(dii) {
-                                    return dii !== 'None';
-                                })
-                                .indexOf(di)
-                        ];
-                    });
-                else if (d.description === 'Y-axis grouping')
-                    // Add variable labels to Y-axis grouping options.
-                    options.property('label', function(di) {
-                        return di !== 'None'
-                            ? context.config.groupings[
-                                  context.config.groupings
-                                      .map(function(dii) {
-                                          return dii.value_col;
-                                      })
-                                      .indexOf(di)
-                              ].label
-                            : 'None';
-                    });
-            });
-
-        //Redefine event highlighting event listener.
-        otherControls
-            .filter(function(d) {
-                return d.option === 'event_highlighted';
-            })
-            .select('select')
-            .on('change', function(d) {
-                eventHighlightingChange.call(context, this, d);
-            });
-
-        //Redefine time scale event listener.
-        otherControls
-            .filter(function(d) {
-                return d.option === 'time_scale';
-            })
-            .select('select')
-            .on('change', function(d) {
-                timeScaleChange.call(context, this, d);
-            });
-    }
-
     function topXaxis() {
         this.svg
             .append('g')
@@ -1723,14 +1961,36 @@
         //Move control labels and descriptions inside a div to display them vertically, label on top of description.
         controlGroupLayout.call(this);
 
-        //Add additional functionality to filter event listeners.
-        augmentFilters.call(this);
-
         //Add additional functionality to other control event listeners.
         augmentOtherControls.call(this);
 
+        //Add time range functionality.
+        addTimeRangeControls.call(this);
+
+        //Add additional functionality to filter event listeners.
+        augmentFilters.call(this);
+
         //Add top x-axis.
         topXaxis.call(this);
+    }
+
+    function updateTimeRangeControls() {
+        var _this = this;
+
+        var timeRangeControls = this.controls.wrap.selectAll('.time-range input');
+
+        //Internet Explorer does not support input date type.
+        if (!document.documentMode)
+            timeRangeControls.property(
+                'type',
+                this.config.time_scale === 'date' ? 'date' : 'number'
+            );
+
+        timeRangeControls.property('value', function(d) {
+            return _this.config.time_scale === 'date'
+                ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
+                : +_this.time_range[d.index];
+        });
     }
 
     function defineFilteredData() {
@@ -1839,9 +2099,12 @@
                             _this.config.x.domain[0] <= st && st <= _this.config.x.domain[1],
                         // start is within the time range
                         enInsideTimeRange =
-                            _this.config.x.domain[0] <= en && en <= _this.config.x.domain[1]; // end is within the time range
+                            _this.config.x.domain[0] <= en && en <= _this.config.x.domain[1],
+                        // end is within the time range
+                        surroundingTimeRange =
+                            _this.config.x.domain[0] > st && en > _this.config.x.domain[1]; // start is prior to time range and end is after time range
 
-                    return stInsideTimeRange || enInsideTimeRange;
+                    return stInsideTimeRange || enInsideTimeRange || surroundingTimeRange;
                 });
 
                 return IDobject;
@@ -2092,7 +2355,10 @@
     }
 
     function onPreprocess() {
-        this.config.x.domain = this.config.time_range;
+        this.config.x.domain = this.time_range;
+
+        //Set x-domain.
+        updateTimeRangeControls.call(this);
 
         //Define filtered data irrespective of individual mark filtering.
         defineFilteredData.call(this);
@@ -2103,7 +2369,7 @@
         //Define data inside time range.
         defineDataInsideTimeRange.call(this);
 
-        //Insert groupings into data to draw empty rows in which to draw groupings.
+        //Insert dummy grouping data into data array to draw empty rows in which to annotate groupings.
         defineGroupingData.call(this);
 
         //Sort y-axis based on `Sort IDs` control selection.
@@ -2255,13 +2521,7 @@
                                 y: y1,
                                 dy: _this.y.rangeBand() * 1.25
                             })
-                            .text(
-                                _this.config.groupings.filter(function(grouping) {
-                                    return grouping.value_col === _this.config.y.grouping;
-                                })[0].label +
-                                    ': ' +
-                                    d.key
-                            ),
+                            .text(_this.config.y.groupingLabel + ': ' + d.key),
                         rule = g
                             .append('line')
                             .classed('boundary horizontal', true)
@@ -2749,11 +3009,98 @@
         );
     }
 
+    function drawReferenceTable(reference_line) {
+        var _this = this;
+
+        //Filter data on events that overlap reference line.
+        reference_line.wide_data = this.filtered_wide_data.filter(function(d) {
+            return (
+                _this.config.time_function(d[_this.config.st_col]) <=
+                    _this.config.time_function(reference_line.timepoint) &&
+                _this.config.time_function(d[_this.config.en_col]) >=
+                    _this.config.time_function(reference_line.timepoint)
+            );
+        });
+
+        //Nest data by grouping and event type.
+        reference_line.nested_data = d3
+            .nest()
+            .key(function(d) {
+                return d[_this.config.y.grouping] || 'All ' + _this.config.id_unitPlural;
+            })
+            .key(function(d) {
+                return d[_this.config.event_col];
+            })
+            .rollup(function(d) {
+                return d.length;
+            })
+            .entries(reference_line.wide_data);
+        reference_line.flattened_data = [];
+        reference_line.nested_data.forEach(function(d) {
+            reference_line.flattened_data.push({
+                class: 'ct-higher-level',
+                key: d.key,
+                n: d3.sum(d.values, function(di) {
+                    return di.values;
+                })
+            });
+            d.values.forEach(function(di) {
+                reference_line.flattened_data.push({
+                    class: 'ct-lower-level',
+                    key: di.key,
+                    n: di.values
+                });
+            });
+        });
+
+        //Add reference table container and header.
+        if (reference_line.container) reference_line.container.remove();
+        reference_line.container = this.leftSide
+            .append('div')
+            .classed('ct-reference-line-table-container', true);
+        reference_line.container
+            .append('h3')
+            .classed('ct-reference-line-header', true)
+            .text(reference_line.label);
+
+        //Add reference line table table.
+        reference_line.table = reference_line.container
+            .append('table')
+            .classed('ct-reference-line-table', true);
+        reference_line.table
+            .append('tbody')
+            .selectAll('tr')
+            .data(reference_line.flattened_data)
+            .enter()
+            .append('tr')
+            .each(function(d) {
+                var row = d3.select(this);
+                row
+                    .append('td')
+                    .text(d.key)
+                    .attr('class', function(d) {
+                        return d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : '');
+                    });
+                row
+                    .append('td')
+                    .text(d.n)
+                    .attr('class', function(d) {
+                        return d.class;
+                    });
+            });
+    }
+
     function drawReferenceLines() {
         var _this = this;
 
         if (this.config.reference_lines) {
             this.svg.select('.reference-lines').remove();
+            if (!this.parent)
+                this.leftSide.selectAll('.ct-reference-line-table-container').remove();
+            else
+                this.parent.clinicalTimelines.leftSide
+                    .selectAll('.ct-reference-line-table-container')
+                    .remove();
             var referenceLinesGroup = this.svg
                 .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
                 .classed('reference-lines', true);
@@ -2762,6 +3109,12 @@
             this.config.reference_lines
                 .filter(function(reference_line) {
                     return reference_line.time_scale === _this.config.time_scale;
+                })
+                .filter(function(reference_line) {
+                    return (
+                        _this.x_dom[0] <= _this.config.time_function(reference_line.timepoint) &&
+                        _this.x_dom[1] >= _this.config.time_function(reference_line.timepoint)
+                    );
                 })
                 .forEach(function(reference_line, i) {
                     var referenceLineGroup = referenceLinesGroup
@@ -2782,7 +3135,8 @@
                                 x1: x,
                                 x2: x,
                                 y1: 0,
-                                y2: y2
+                                y2: y2,
+                                'clip-path': 'url(#' + _this.id + ')'
                             }),
                         invisibleReferenceLine = referenceLineGroup
                             .append('line')
@@ -2791,7 +3145,8 @@
                                 x1: x,
                                 x2: x,
                                 y1: 0,
-                                y2: y2
+                                y2: y2,
+                                'clip-path': 'url(#' + _this.id + ')'
                             }),
                         // invisible reference line has no dasharray and is much thicker to make hovering easier
                         direction =
@@ -2806,7 +3161,8 @@
                                 y: 0,
                                 'text-anchor': direction === 'right' ? 'beginning' : 'end',
                                 dx: direction === 'right' ? 15 : -15,
-                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
+                                dy: _this.config.range_band * (_this.parent ? 1.5 : 1),
+                                'clip-path': 'url(#' + _this.id + ')'
                             })
                             .text(reference_line.label),
                         dimensions = referenceLineLabel.node().getBBox(),
@@ -2817,7 +3173,8 @@
                                 x: dimensions.x - 10,
                                 y: dimensions.y - 5,
                                 width: dimensions.width + 20,
-                                height: dimensions.height + 10
+                                height: dimensions.height + 10,
+                                'clip-path': 'url(#' + _this.id + ')'
                             });
 
                     //Display reference line label on hover.
@@ -2840,6 +3197,9 @@
                     //Hide reference labels initially.
                     referenceLineLabel.classed('hidden', true);
                     referenceLineLabelBox.classed('hidden', true);
+
+                    //Draw reference line frequency table.
+                    if (!_this.parent) drawReferenceTable.call(_this, reference_line);
                 });
         }
     }
@@ -2855,6 +3215,7 @@
     }
 
     function onResize() {
+        //Add filter functionality to legend.
         legendFilter.call(this);
 
         //Draw second x-axis at top of chart.
@@ -2935,16 +3296,16 @@
             }),
             timeRange =
                 this.parent.clinicalTimelines.config.time_scale === 'day'
-                    ? this.parent.clinicalTimelines.config.day_range
-                    : this.parent.clinicalTimelines.config.date_range.map(function(dt) {
+                    ? this.parent.clinicalTimelines.day_range
+                    : this.parent.clinicalTimelines.date_range.map(function(dt) {
                           return dt.getTime();
                       }),
             timeRangeText =
                 this.config.time_scale === 'day'
-                    ? this.parent.clinicalTimelines.config.day_range.map(function(dy) {
+                    ? this.parent.clinicalTimelines.day_range.map(function(dy) {
                           return dy.toString();
                       })
-                    : this.parent.clinicalTimelines.config.date_range.map(function(dt) {
+                    : this.parent.clinicalTimelines.date_range.map(function(dt) {
                           return d3.time.format(
                               _this.parent.clinicalTimelines.config.date_format
                           )(dt);
@@ -2973,7 +3334,7 @@
                 timeRangeTooltip = timeRangeGroup
                     .append('title')
                     .text(
-                        this.parent.clinicalTimelines.config.time_scale +
+                        this.parent.clinicalTimelines.config.x.label +
                             ' Range: ' +
                             timeRangeText.join(' - ')
                     );
@@ -3084,7 +3445,7 @@
         //Define .css styles to avoid requiring a separate .css file.
         defineStyles();
 
-        var mergedSettings = Object.assign({}, defaults$1.settings, settings),
+        var mergedSettings = merge$1({}, defaults$1.settings, settings),
             syncedSettings = defaults$1.syncSettings(mergedSettings),
             syncedControls = defaults$1.syncControls(defaults$1.controls, syncedSettings),
             controls = webcharts.createControls(leftSide.node(), {

@@ -1,13 +1,15 @@
 import { select } from 'd3';
 import eventHighlightingChange from './augmentOtherControls/eventHighlightingChange';
 import timeScaleChange from './augmentOtherControls/timeScaleChange';
+import yAxisGrouping from './augmentOtherControls/yAxisGrouping';
 
 export default function augmentOtherControls() {
     const context = this,
         otherControls = this.controls.wrap
             .selectAll('.control-group')
             .filter(d => d.type !== 'subsetter')
-            .classed('ct-control', true);
+            .classed('ct-control', true)
+            .attr('id', d => `control-${d.option.replace('.', '-')}`);
 
     //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
     otherControls
@@ -49,5 +51,13 @@ export default function augmentOtherControls() {
         .select('select')
         .on('change', function(d) {
             timeScaleChange.call(context, this, d);
+        });
+
+    //Redefine y-axis grouping event listener.
+    otherControls
+        .filter(d => d.option === 'y.grouping')
+        .select('select')
+        .on('change', function(d) {
+            yAxisGrouping.call(context, this, d);
         });
 }

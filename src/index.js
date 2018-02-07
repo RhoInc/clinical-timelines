@@ -1,10 +1,13 @@
+import './util/array-find';
+import './util/object-assign';
+import './util/number-isinteger';
 import { select } from 'd3';
 import defineStyles from './util/defineStyles';
-import clone from './util/clone';
-import './util/object-assign';
+import merge from './util/merge';
 import defaults from './defaults/index';
 import { createControls, createChart } from 'webcharts';
 import callbacks from './callbacks/index';
+import clone from './util/clone';
 import IDtimeline from './IDtimeline/index';
 import listing from './listing/index';
 
@@ -19,7 +22,7 @@ export default function clinicalTimelines(element = 'body', settings) {
     //Define .css styles to avoid requiring a separate .css file.
     defineStyles();
 
-    const mergedSettings = Object.assign({}, defaults.settings, settings),
+    const mergedSettings = merge({}, defaults.settings, settings),
         syncedSettings = defaults.syncSettings(mergedSettings),
         syncedControls = defaults.syncControls(defaults.controls, syncedSettings),
         controls = createControls(leftSide.node(), { location: 'top', inputs: syncedControls }),

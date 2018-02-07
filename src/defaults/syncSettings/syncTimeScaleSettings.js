@@ -44,6 +44,6 @@ export default function syncTimeScaleSettings(settings) {
 
     //Timepoints (circles)
     settings.marks[1].tooltip =
-        `Event: [${settings.event_col}]` + `\n${settings.time_scale}: [${settings.st_col}]`;
+        `Event: [${settings.event_col}]` + `\n${settings.x.label}: [${settings.st_col}]`;
     settings.marks[1].values = { wc_category: settings.time_unit };
 }

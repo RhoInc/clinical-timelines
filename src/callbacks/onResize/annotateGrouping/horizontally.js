@@ -17,13 +17,7 @@ export default function horizontally() {
                         y: y1,
                         dy: this.y.rangeBand() * 1.25
                     })
-                    .text(
-                        `${
-                            this.config.groupings.filter(
-                                grouping => grouping.value_col === this.config.y.grouping
-                            )[0].label
-                        }: ${d.key}`
-                    ),
+                    .text(`${this.config.y.groupingLabel}: ${d.key}`),
                 rule = g
                     .append('line')
                     .classed('boundary horizontal', true)

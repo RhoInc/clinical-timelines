@@ -11,8 +11,6 @@ import drawReferenceLines from './onResize/drawReferenceLines';
 import IEsucks from './onResize/IEsucks';
 
 export default function onResize() {
-    const context = this;
-
     //Add filter functionality to legend.
     legendFilter.call(this);
 

@@ -1,3 +1,4 @@
+import updateTimeRangeControls from './onPreprocess/updateTimeRangeControls';
 import defineFilteredData from './onPreprocess/defineFilteredData';
 import definePopulationDetails from './onPreprocess/definePopulationDetails';
 import defineDataInsideTimeRange from './onPreprocess/defineDataInsideTimeRange';
@@ -8,7 +9,10 @@ export default function onPreprocess() {
     const context = this;
 
     //Set x-domain.
-    this.config.x.domain = this.config.time_range;
+    this.config.x.domain = this.time_range;
+
+    //Set x-domain.
+    updateTimeRangeControls.call(this);
 
     //Define filtered data irrespective of individual mark filtering.
     defineFilteredData.call(this);
@@ -19,7 +23,7 @@ export default function onPreprocess() {
     //Define data inside time range.
     defineDataInsideTimeRange.call(this);
 
-    //Insert groupings into data to draw empty rows in which to draw groupings.
+    //Insert dummy grouping data into data array to draw empty rows in which to annotate groupings.
     defineGroupingData.call(this);
 
     //Sort y-axis based on `Sort IDs` control selection.

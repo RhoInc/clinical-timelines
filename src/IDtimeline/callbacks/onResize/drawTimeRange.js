@@ -8,12 +8,12 @@ export default function drawTimeRange() {
     const x_dom = this.x_dom.map(x => (x instanceof Date ? x.getTime() : x)),
         timeRange =
             this.parent.clinicalTimelines.config.time_scale === 'day'
-                ? this.parent.clinicalTimelines.config.day_range
-                : this.parent.clinicalTimelines.config.date_range.map(dt => dt.getTime()),
+                ? this.parent.clinicalTimelines.day_range
+                : this.parent.clinicalTimelines.date_range.map(dt => dt.getTime()),
         timeRangeText =
             this.config.time_scale === 'day'
-                ? this.parent.clinicalTimelines.config.day_range.map(dy => dy.toString())
-                : this.parent.clinicalTimelines.config.date_range.map(dt =>
+                ? this.parent.clinicalTimelines.day_range.map(dy => dy.toString())
+                : this.parent.clinicalTimelines.date_range.map(dt =>
                       time.format(this.parent.clinicalTimelines.config.date_format)(dt)
                   ); // update to date_display_format at some point
 
@@ -40,7 +40,7 @@ export default function drawTimeRange() {
             timeRangeTooltip = timeRangeGroup
                 .append('title')
                 .text(
-                    `${this.parent.clinicalTimelines.config.time_scale} Range: ${timeRangeText.join(
+                    `${this.parent.clinicalTimelines.config.x.label} Range: ${timeRangeText.join(
                         ' - '
                     )}`
                 );

@@ -845,26 +845,28 @@
                     '}',
 
                 //Reference Tables
-                '#clinical-timelines > #left-side .ct-reference-line-header {' +
+                '#clinical-timelines #ct-left-column .ct-reference-line-table-header {' +
                     '    text-align: center;' +
                     '    border-bottom: 1px solid black;' +
                     '    padding-bottom: 5px;' +
                     '}',
-                '#clinical-timelines > #left-side .ct-reference-line-table {' +
+                '#clinical-timelines #ct-left-column .ct-reference-line-table-body table {' +
                     '    width: 100%;' +
                     '    display: table;' +
                     '}',
-                '#clinical-timelines > #left-side .ct-reference-line-table th,' +
-                    '#clinical-timelines > #left-side .ct-reference-line-table td {' +
+                '#clinical-timelines #ct-left-column .ct-reference-line-table-body th,' +
+                    '#clinical-timelines #ct-left-column .ct-reference-line-table-body td {' +
                     '    text-align: left;' +
                     '}',
-                '#clinical-timelines > #left-side .ct-higher-level {' +
+                '#clinical-timelines #ct-left-column .ct-higher-level {' +
                     '    border-bottom: 1px dotted lightgray;' +
                     '    font-weight: bold;' +
                     '    font-size: 14px;' +
                     '}',
-                '#clinical-timelines > #left-side .ct-lower-level {' + '    font-size: 12px;' + '}',
-                '#clinical-timelines > #left-side .ct-lower-level.ct-indent {' +
+                '#clinical-timelines #ct-left-column .ct-lower-level {' +
+                    '    font-size: 12px;' +
+                    '}',
+                '#clinical-timelines #ct-left-column .ct-lower-level.ct-indent {' +
                     '    padding-left: 5%;' +
                     '}',
 
@@ -3047,11 +3049,99 @@
         }
     }
 
+    function drawReferenceTable(reference_line) {
+        var _this = this;
+
+        //Filter data on events that overlap reference line.
+        reference_line.wide_data = this.filtered_wide_data.filter(function(d) {
+            return (
+                _this.config.time_function(d[_this.config.st_col]) <=
+                    _this.config.time_function(reference_line.timepoint) &&
+                _this.config.time_function(d[_this.config.en_col]) >=
+                    _this.config.time_function(reference_line.timepoint)
+            );
+        });
+
+        //Nest data by grouping and event type.
+        reference_line.nested_data = d3
+            .nest()
+            .key(function(d) {
+                return d[_this.config.y.grouping] || 'All ' + _this.config.id_unitPlural;
+            })
+            .key(function(d) {
+                return d[_this.config.event_col];
+            })
+            .rollup(function(d) {
+                return d.length;
+            })
+            .entries(reference_line.wide_data);
+        reference_line.flattened_data = [];
+        reference_line.nested_data.forEach(function(d) {
+            reference_line.flattened_data.push({
+                class: 'ct-higher-level',
+                key: d.key,
+                n: d3.sum(d.values, function(di) {
+                    return di.values;
+                })
+            });
+            d.values.forEach(function(di) {
+                reference_line.flattened_data.push({
+                    class: 'ct-lower-level',
+                    key: di.key,
+                    n: di.values
+                });
+            });
+        });
+
+        //Add reference table container and header.
+        if (reference_line.container) reference_line.container.remove();
+        reference_line.container = this.clinicalTimelines.containers.leftColumn
+            .append('div')
+            .classed('ct-reference-line-table-container', true);
+        reference_line.container
+            .append('h3')
+            .classed('ct-reference-line-table-header', true)
+            .text(reference_line.label);
+
+        //Add reference line table table.
+        reference_line.table = reference_line.container
+            .append('div')
+            .classed('ct-reference-line-table-body', true)
+            .append('table');
+        reference_line.table
+            .append('tbody')
+            .selectAll('tr')
+            .data(reference_line.flattened_data)
+            .enter()
+            .append('tr')
+            .each(function(d) {
+                var row = d3.select(this);
+                row
+                    .append('td')
+                    .text(d.key)
+                    .attr('class', function(d) {
+                        return d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : '');
+                    });
+                row
+                    .append('td')
+                    .text(d.n)
+                    .attr('class', function(d) {
+                        return d.class;
+                    });
+            });
+    }
+
     function drawReferenceLines() {
         var _this = this;
 
         if (this.config.reference_lines) {
+            //Remove previously reference lines and tables.
             this.svg.select('.ct-reference-lines').remove();
+            this.clinicalTimelines.containers.leftColumn
+                .selectAll('.ct-reference-line-label-container')
+                .remove();
+
+            //Add group for reference lines.
             var referenceLinesGroup = this.svg
                 .insert('g', '#clinical-timelines .wc-chart .wc-svg .line-supergroup')
                 .classed('ct-reference-lines', true);
@@ -3061,83 +3151,92 @@
                 .filter(function(reference_line) {
                     return reference_line.time_scale === _this.config.time_scale;
                 })
+                .filter(function(reference_line) {
+                    return (
+                        _this.x_dom[0] <= _this.config.time_function(reference_line.timepoint) &&
+                        _this.x_dom[1] >= _this.config.time_function(reference_line.timepoint)
+                    );
+                })
                 .forEach(function(reference_line, i) {
                     var referenceLineGroup = referenceLinesGroup
-                            .append('g')
-                            .classed('ct-reference-line', true)
-                            .attr('id', 'reference-line-' + i),
-                        timepoint = _this.config.time_function(reference_line.timepoint);
+                        .append('g')
+                        .classed('ct-reference-line', true)
+                        .attr('id', 'ct-reference-line-' + i);
+                    var timepoint = _this.config.time_function(reference_line.timepoint);
+                    var x = _this.x(timepoint);
+                    var y2 =
+                        _this.plot_height +
+                        (_this.config.y.column === _this.config.id_col ? _this.y.rangeBand() : 0);
+                    var visibleReferenceLine = referenceLineGroup
+                        .append('line')
+                        .classed('ct-visible-reference-line', true)
+                        .attr({
+                            x1: x,
+                            x2: x,
+                            y1: 0,
+                            y2: y2,
+                            'clip-path': 'url(#' + _this.id + ')'
+                        });
 
-                    if (_this.x_dom[0] <= timepoint && timepoint <= _this.x_dom[1]) {
-                        var x = _this.x(timepoint),
-                            y2 =
-                                _this.plot_height +
-                                (_this.config.y.column === _this.config.id_col
-                                    ? _this.y.rangeBand()
-                                    : 0),
-                            visibleReferenceLine = referenceLineGroup
-                                .append('line')
-                                .classed('ct-visible-reference-line', true)
-                                .attr({
-                                    x1: x,
-                                    x2: x,
-                                    y1: 0,
-                                    y2: y2
-                                }),
-                            invisibleReferenceLine = referenceLineGroup
-                                .append('line')
-                                .classed('ct-invisible-reference-line', true)
-                                .attr({
-                                    x1: x,
-                                    x2: x,
-                                    y1: 0,
-                                    y2: y2
-                                }),
-                            // invisible reference line has no dasharray and is much thicker to make hovering easier
-                            direction = x <= _this.plot_width / 2 ? 'right' : 'left',
-                            referenceLineLabel = referenceLineGroup
-                                .append('text')
-                                .classed('ct-reference-line-label', true)
-                                .attr({
-                                    x: x,
-                                    y: 0,
-                                    'text-anchor': direction === 'right' ? 'beginning' : 'end',
-                                    dx: direction === 'right' ? 15 : -15,
-                                    dy: _this.config.range_band * (_this.parent ? 1.5 : 1)
-                                })
-                                .text(reference_line.label),
-                            dimensions = referenceLineLabel.node().getBBox(),
-                            referenceLineLabelBox = referenceLineGroup
-                                .insert('rect', '.ct-reference-line-label')
-                                .classed('ct-reference-line-label-box', true)
-                                .attr({
-                                    x: dimensions.x - 10,
-                                    y: dimensions.y - 5,
-                                    width: dimensions.width + 20,
-                                    height: dimensions.height + 10
-                                });
+                    //Invisible reference line has no dasharray and is much thicker to make hovering easier.
+                    var invisibleReferenceLine = referenceLineGroup
+                        .append('line')
+                        .classed('ct-invisible-reference-line', true)
+                        .attr({
+                            x1: x,
+                            x2: x,
+                            y1: 0,
+                            y2: y2,
+                            'clip-path': 'url(#' + _this.id + ')'
+                        });
+                    var direction = x <= _this.plot_width / 2 ? 'right' : 'left';
+                    var referenceLineLabel = referenceLineGroup
+                        .append('text')
+                        .classed('ct-reference-line-label', true)
+                        .attr({
+                            x: x,
+                            dx: direction === 'right' ? 15 : -15,
+                            y: 0,
+                            dy: _this.config.range_band * (_this.parent ? 1.5 : 1),
+                            'text-anchor': direction === 'right' ? 'beginning' : 'end',
+                            'clip-path': 'url(#' + _this.id + ')'
+                        })
+                        .text(reference_line.label);
+                    var dimensions = referenceLineLabel.node().getBBox();
+                    var referenceLineLabelBox = referenceLineGroup
+                        .insert('rect', '.ct-reference-line-label')
+                        .classed('ct-reference-line-label-box', true)
+                        .attr({
+                            x: dimensions.x - 10,
+                            y: dimensions.y - 5,
+                            width: dimensions.width + 20,
+                            height: dimensions.height + 10,
+                            'clip-path': 'url(#' + _this.id + ')'
+                        });
 
-                        //Display reference line label on hover.
-                        invisibleReferenceLine
-                            .on('mouseover', function() {
-                                visibleReferenceLine.classed('ct-hover', true);
-                                referenceLineLabel.classed('ct-hidden', false);
-                                referenceLineLabelBox.classed('ct-hidden', false);
-                                _this.svg.node().appendChild(referenceLineLabelBox.node());
-                                _this.svg.node().appendChild(referenceLineLabel.node());
-                            })
-                            .on('mouseout', function() {
-                                visibleReferenceLine.classed('ct-hover', false);
-                                referenceLineLabel.classed('ct-hidden', true);
-                                referenceLineLabelBox.classed('ct-hidden', true);
-                                referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
-                                referenceLineGroup.node().appendChild(referenceLineLabel.node());
-                            });
+                    //Display reference line label on hover.
+                    invisibleReferenceLine
+                        .on('mouseover', function() {
+                            visibleReferenceLine.classed('ct-hover', true);
+                            referenceLineLabel.classed('ct-hidden', false);
+                            referenceLineLabelBox.classed('ct-hidden', false);
+                            _this.svg.node().appendChild(referenceLineLabelBox.node());
+                            _this.svg.node().appendChild(referenceLineLabel.node());
+                        })
+                        .on('mouseout', function() {
+                            visibleReferenceLine.classed('ct-hover', false);
+                            referenceLineLabel.classed('ct-hidden', true);
+                            referenceLineLabelBox.classed('ct-hidden', true);
+                            referenceLineGroup.node().appendChild(referenceLineLabelBox.node());
+                            referenceLineGroup.node().appendChild(referenceLineLabel.node());
+                        });
 
-                        //Hide reference labels initially.
-                        referenceLineLabel.classed('ct-hidden', true);
-                        referenceLineLabelBox.classed('ct-hidden', true);
-                    }
+                    //Hide reference labels initially.
+                    referenceLineLabel.classed('ct-hidden', true);
+                    referenceLineLabelBox.classed('ct-hidden', true);
+
+                    //Draw reference line frequency table.
+                    if (!_this.parent) drawReferenceTable.call(_this, reference_line);
                 });
         }
     }

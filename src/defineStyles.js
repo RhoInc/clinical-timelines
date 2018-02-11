@@ -131,30 +131,29 @@ export default function defineStyles() {
                 '    font-size: 110%;' +
                 '}',
 
-
           //Reference Tables
-            '#clinical-timelines > #left-side .ct-reference-line-header {' +
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-header {' +
                 '    text-align: center;' +
                 '    border-bottom: 1px solid black;' +
                 '    padding-bottom: 5px;' +
                 '}',
-            '#clinical-timelines > #left-side .ct-reference-line-table {' +
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-body table {' +
                 '    width: 100%;' +
                 '    display: table;' +
                 '}',
-            '#clinical-timelines > #left-side .ct-reference-line-table th,' +
-            '#clinical-timelines > #left-side .ct-reference-line-table td {' +
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-body th,' +
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-body td {' +
                 '    text-align: left;' +
                 '}',
-            '#clinical-timelines > #left-side .ct-higher-level {' +
+            '#clinical-timelines #ct-left-column .ct-higher-level {' +
                 '    border-bottom: 1px dotted lightgray;' +
                 '    font-weight: bold;' +
                 '    font-size: 14px;' +
                 '}',
-            '#clinical-timelines > #left-side .ct-lower-level {' +
+            '#clinical-timelines #ct-left-column .ct-lower-level {' +
                 '    font-size: 12px;' +
                 '}',
-            '#clinical-timelines > #left-side .ct-lower-level.ct-indent {' +
+            '#clinical-timelines #ct-left-column .ct-lower-level.ct-indent {' +
                 '    padding-left: 5%;' +
                 '}',
 

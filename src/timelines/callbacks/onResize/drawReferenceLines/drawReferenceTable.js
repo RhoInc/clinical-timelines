@@ -34,18 +34,19 @@ export default function drawReferenceTable(reference_line) {
 
     //Add reference table container and header.
     if (reference_line.container) reference_line.container.remove();
-    reference_line.container = this.leftSide
+    reference_line.container = this.clinicalTimelines.containers.leftColumn
         .append('div')
         .classed('ct-reference-line-table-container', true);
     reference_line.container
         .append('h3')
-        .classed('ct-reference-line-header', true)
+        .classed('ct-reference-line-table-header', true)
         .text(reference_line.label);
 
     //Add reference line table table.
     reference_line.table = reference_line.container
-        .append('table')
-        .classed('ct-reference-line-table', true);
+        .append('div')
+        .classed('ct-reference-line-table-body', true)
+        .append('table');
     reference_line.table
         .append('tbody')
         .selectAll('tr')

@@ -7,6 +7,12 @@
 })(this, function(d3, webcharts) {
     'use strict';
 
+    Number.isInteger =
+        Number.isInteger ||
+        function(value) {
+            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+        };
+
     /*------------------------------------------------------------------------------------------------\
   Add assign method to Object if nonexistent.
 \------------------------------------------------------------------------------------------------*/
@@ -36,120 +42,49 @@
         })();
     }
 
-    var settings = {
-        /**-------------------------------------------------------------------------------------------\
-      Renderer-specific settings
-    \-------------------------------------------------------------------------------------------**/
-
-        //ID settings
-        id_col: 'USUBJID',
-        id_unit: 'participant',
-        id_characteristics: null,
-
-        //Event settings
-        event_col: 'DOMAIN',
-        event_types: null,
-        event_highlighted: null,
-        event_highlight_color: 'black',
-
-        //Filter settings
-        filters: null,
-
-        //Grouping settings
-        groupings: null,
-        grouping_initial: null,
-        grouping_direction: 'horizontal',
-
-        //Timing settings
-        time_scale: 'date',
-
-        //Date settings
-        stdt_col: 'STDT',
-        endt_col: 'ENDT',
-        date_range: null,
-        date_format: '%Y-%m-%d',
-        date_display_format: '%b %y', // sync in syncSettings()
-
-        //Day settings
-        stdy_col: 'STDY',
-        endy_col: 'ENDY',
-        day_range: null,
-
-        //Miscellaneous settings
-        seq_col: 'SEQ',
-        tooltip_col: 'TOOLTIP',
-        ongo_col: 'ONGO',
-        ongo_val: 'Y',
-        reference_lines: null,
-
-        //Listing settings
-        details: null,
-        details_config: null,
-
-        /**-------------------------------------------------------------------------------------------\
-      Standard webcharts settings
-    \-------------------------------------------------------------------------------------------**/
-
-        x: {
-            type: null, // set in syncSettings()
-            column: 'wc_value',
-            label: null, // set in syncSettings()
-            format: null // set in syncSettings()
-        },
-        y: {
-            type: 'ordinal', // set in syncSettings()
-            column: null,
-            label: null,
-            sort: 'earliest',
-            behavior: 'flex',
-            grouping: null
-        },
-        marks: [
-            {
-                type: 'line',
-                per: null, // set in syncSettings()
-                tooltip: null, // set in syncSettings()
-                attributes: {
-                    'clip-path': 'url(#1)',
-                    'stroke-width': 4
+    if (!Array.prototype.find) {
+        Object.defineProperty(Array.prototype, 'find', {
+            value: function value(predicate) {
+                // 1. Let O be ? ToObject(this value).
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
                 }
-            },
-            {
-                type: 'circle',
-                per: null, // set in syncSettings()
-                tooltip: null, // set in syncSettings()
-                radius: 4,
-                attributes: {
-                    'clip-path': 'url(#1)',
-                    'stroke-width': 2
+
+                var o = Object(this);
+
+                // 2. Let len be ? ToLength(? Get(O, "length")).
+                var len = o.length >>> 0;
+
+                // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
                 }
+
+                // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+                var thisArg = arguments[1];
+
+                // 5. Let k be 0.
+                var k = 0;
+
+                // 6. Repeat, while k < len
+                while (k < len) {
+                    // a. Let Pk be ! ToString(k).
+                    // b. Let kValue be ? Get(O, Pk).
+                    // c. Let testResult be ToBoolean(? Call(predicate, T, � kValue, k, O �)).
+                    // d. If testResult is true, return kValue.
+                    var kValue = o[k];
+                    if (predicate.call(thisArg, kValue, k, o)) {
+                        return kValue;
+                    }
+                    // e. Increase k by 1.
+                    k++;
+                }
+
+                // 7. Return undefined.
+                return undefined;
             }
-        ],
-        colors: [
-            '#1b9e77',
-            '#d95f02',
-            '#7570b3',
-            '#a6cee3',
-            '#1f78b4',
-            '#b2df8a',
-            '#66c2a5',
-            '#fc8d62',
-            '#8da0cb'
-        ],
-        color_dom: null, // set in syncSettings()
-        legend: {
-            location: 'top',
-            label: 'Event Type',
-            order: null, // set in syncSettings()
-            mark: 'circle'
-        },
-        range_band: 30,
-        margin: {
-            top: 60,
-            right: 40
-        }, // for second x-axis
-        resizable: false // can't be resizable so the multiples aren't overlapped by their titles
-    };
+        });
+    }
 
     var _typeof =
         typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
@@ -320,6 +255,117 @@
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
+    var rendererSpecificSettings = {
+        //ID settings
+        id_col: 'USUBJID',
+        id_unit: 'participant',
+        id_characteristics: null,
+
+        //Event settings
+        event_col: 'DOMAIN',
+        event_types: null,
+        event_highlighted: null,
+        event_highlight_color: 'black',
+
+        //Filter settings
+        filters: null,
+
+        //Grouping settings
+        groupings: null,
+        grouping_initial: null,
+        grouping_direction: 'horizontal',
+
+        //Timing settings
+        time_scale: 'date',
+
+        //Date settings
+        stdt_col: 'STDT',
+        endt_col: 'ENDT',
+        date_range: null,
+        date_format: '%Y-%m-%d',
+        date_display_format: '%b %y', // sync in syncSettings()
+
+        //Day settings
+        stdy_col: 'STDY',
+        endy_col: 'ENDY',
+        day_range: null,
+
+        //Miscellaneous settings
+        seq_col: 'SEQ',
+        tooltip_col: 'TOOLTIP',
+        ongo_col: 'ONGO',
+        ongo_val: 'Y',
+        reference_lines: null,
+
+        //Listing settings
+        details: null,
+        details_config: null
+    };
+
+    var webchartsSettings = {
+        x: {
+            type: null, // set in syncSettings()
+            column: 'wc_value',
+            label: null, // set in syncSettings()
+            format: null // set in syncSettings()
+        },
+        y: {
+            type: 'ordinal',
+            column: null, // set in syncSettings()
+            label: null, // set in syncSettings()
+            sort: 'earliest',
+            behavior: 'flex',
+            grouping: null // set in syncSettings()
+        },
+        marks: [
+            {
+                type: 'line',
+                per: null, // set in syncSettings()
+                tooltip: null, // set in syncSettings()
+                attributes: {
+                    'clip-path': 'url(#1)',
+                    'stroke-width': 4
+                }
+            },
+            {
+                type: 'circle',
+                per: null, // set in syncSettings()
+                tooltip: null, // set in syncSettings()
+                radius: 5,
+                attributes: {
+                    'clip-path': 'url(#1)',
+                    'stroke-width': 2
+                }
+            }
+        ],
+        colors: [
+            '#1b9e77',
+            '#d95f02',
+            '#7570b3',
+            '#a6cee3',
+            '#1f78b4',
+            '#b2df8a',
+            '#66c2a5',
+            '#fc8d62',
+            '#8da0cb'
+        ],
+        color_dom: null, // set in syncSettings()
+        legend: {
+            location: 'top',
+            label: 'Event Type',
+            order: null, // set in syncSettings()
+            mark: 'circle'
+        },
+        range_band: 35,
+        margin: {
+            top: 60,
+            right: 40
+        }, // for second x-axis
+        resizable: false // can't be resizable so the multiples aren't overlapped by their titles
+    };
+
+    var settings = Object.assign({}, rendererSpecificSettings, webchartsSettings);
+
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
             userDefinedVariables instanceof Array && userDefinedVariables.length
@@ -355,12 +401,6 @@
 
         return validSetting;
     }
-
-    Number.isInteger =
-        Number.isInteger ||
-        function(value) {
-            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
-        };
 
     function syncRendererSpecificSettings(settings) {
         //ID settings
@@ -470,7 +510,17 @@
     function syncWebchartsSettings(settings) {
         //Y-axis
         settings.y.column = settings.id_col;
-        settings.y.grouping = settings.grouping_initial;
+        if (settings.grouping_initial) {
+            settings.y.grouping = settings.grouping_initial;
+            settings.y.groupingLabel =
+                settings.groupings[
+                    settings.groupings
+                        .map(function(grouping) {
+                            return grouping.value_col;
+                        })
+                        .indexOf(settings.grouping_initial)
+                ].label;
+        }
 
         //Lines
         settings.marks[0].per = [settings.id_col, settings.event_col, settings.seq_col];
@@ -657,7 +707,7 @@
         return syncedControls;
     }
 
-    var defaults = {
+    var defaults$1 = {
         settings: settings,
         syncSettings: syncSettings,
         controls: controls,
@@ -665,12 +715,12 @@
     };
 
     function defineSettings() {
-        this.settings.merged = Object.assign({}, defaults.settings, clone(this.settings.user));
-        this.settings.synced = defaults.syncSettings(clone(this.settings.merged));
+        this.settings.merged = Object.assign({}, defaults$1.settings, clone(this.settings.user));
+        this.settings.synced = defaults$1.syncSettings(clone(this.settings.merged));
         this.settings.IDtimeline = this.settings.synced.IDtimelineSettings;
         this.settings.listing = this.settings.synced.details_config;
-        this.settings.controls = defaults.syncControls(
-            defaults.controls,
+        this.settings.controls = defaults$1.syncControls(
+            defaults$1.controls,
             clone(this.settings.synced)
         );
     }
@@ -731,7 +781,6 @@
                     '    text-align: right;' +
                     '}',
                 '#clinical-timelines #ct-left-column .ct-annotation .ct-stats,' +
-                    '#clinical-timelines #ct-left-column .ct-annotation #ID,' +
                     '#clinical-timelines #ct-left-column .ct-annotation .ct-characteristic span {' +
                     '    font-weight: bold;' +
                     '}',
@@ -795,6 +844,30 @@
                     '    font-size: 110%;' +
                     '}',
 
+                //Reference Tables
+                '#clinical-timelines > #left-side .ct-reference-line-header {' +
+                    '    text-align: center;' +
+                    '    border-bottom: 1px solid black;' +
+                    '    padding-bottom: 5px;' +
+                    '}',
+                '#clinical-timelines > #left-side .ct-reference-line-table {' +
+                    '    width: 100%;' +
+                    '    display: table;' +
+                    '}',
+                '#clinical-timelines > #left-side .ct-reference-line-table th,' +
+                    '#clinical-timelines > #left-side .ct-reference-line-table td {' +
+                    '    text-align: left;' +
+                    '}',
+                '#clinical-timelines > #left-side .ct-higher-level {' +
+                    '    border-bottom: 1px dotted lightgray;' +
+                    '    font-weight: bold;' +
+                    '    font-size: 14px;' +
+                    '}',
+                '#clinical-timelines > #left-side .ct-lower-level {' + '    font-size: 12px;' + '}',
+                '#clinical-timelines > #left-side .ct-lower-level.ct-indent {' +
+                    '    padding-left: 5%;' +
+                    '}',
+
                 /***--------------------------------------------------------------------------------------\
       Right column elements
     \--------------------------------------------------------------------------------------***/
@@ -851,7 +924,7 @@
                 //Grouping
                 '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping .ct-boundary {' +
                     '    stroke: black;' +
-                    '    stroke-width: 2px;' +
+                    '    stroke-width: 2;' +
                     '}',
                 '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping .ct-annotation {' +
                     '    font-size: 150%;' +
@@ -895,7 +968,7 @@
                 //Reference lines
                 '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line {' +
                     '    stroke: black;' +
-                    '    stroke-width: 2px;' +
+                    '    stroke-width: 2;' +
                     '    stroke-dasharray: 2,2;' +
                     '}',
                 '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line.ct-hover {' +
@@ -903,7 +976,7 @@
                     '}',
                 '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-invisible-reference-line {' +
                     '    stroke: black;' +
-                    '    stroke-width: 20px;' +
+                    '    stroke-width: 20;' +
                     '    stroke-opacity: 0;' +
                     '}',
                 '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-reference-line-label-box {' +
@@ -969,6 +1042,7 @@
             .append('div')
             .classed('ct-column', true)
             .attr('id', 'ct-left-column')),
+            //Details container
             (this.containers.details = this.containers.leftColumn
                 .append('div')
                 .attr('id', 'ct-details'));
@@ -986,7 +1060,8 @@
             .attr('id', 'ct-ID-details');
 
         //Add back button to return from ID timeline to clinical timelines.
-        this.containers.IDdetails.append('div')
+        this.containers.IDdetails
+            .append('div')
             .attr('id', 'ct-back-button')
             .append('button')
             .html('&#8592; Back');
@@ -1021,6 +1096,15 @@
             .append('div')
             .classed('ct-hidden', true)
             .attr('id', 'ct-listing');
+    }
+
+    function recurse() {
+        this.timelines.IDtimeline = this.IDtimeline;
+        this.timelines.listing = this.listing;
+        this.IDtimeline.timelines = this.timelines;
+        this.IDtimeline.listing = this.listing;
+        this.listing.timelines = this.timelines;
+        this.listing.IDtimeline = this.IDtimeline;
     }
 
     function controls$1() {
@@ -1199,6 +1283,9 @@
             .values()
             .sort();
         this.currentEventTypes = this.config.event_types || this.allEventTypes;
+        this.controls.config.inputs.find(function(input) {
+            return input.description === 'Event Type';
+        }).start = this.currentEventTypes;
         this.config.color_dom = this.currentEventTypes.concat(
             this.allEventTypes
                 .filter(function(eventType) {
@@ -1476,7 +1563,8 @@
         var _this = this;
 
         //Add ID characteristics.
-        this.clinicalTimelines.containers.IDdetails.selectAll('div.characteristic')
+        this.clinicalTimelines.containers.IDdetails
+            .selectAll('div.characteristic')
             .data(this.config.id_characteristics)
             .enter()
             .append('div')
@@ -1486,12 +1574,11 @@
             });
 
         //Add back button to return from ID timeline to clinical timelines.
-        this.clinicalTimelines.containers.IDdetails.select('#ct-back-button button').on(
-            'click',
-            function() {
+        this.clinicalTimelines.containers.IDdetails
+            .select('#ct-back-button button')
+            .on('click', function() {
                 backButton.call(_this);
-            }
-        );
+            });
     }
 
     function controlGroupLayout() {
@@ -1549,19 +1636,20 @@
             var id_characteristics = this.initial_data.filter(function(d) {
                 return d[_this.config.id_col] === _this.selected_id;
             })[0];
-            this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(
-                function(d) {
+            this.clinicalTimelines.containers.IDdetails
+                .selectAll('.ct-characteristic')
+                .each(function(d) {
                     d3
                         .select(this)
                         .select('span')
                         .text(id_characteristics[d.value_col]);
-                }
-            );
+                });
         }
 
         //Draw ID timeline.
         this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-        this.clinicalTimelines.containers.IDtimeline.select('div')
+        this.clinicalTimelines.containers.IDtimeline
+            .select('div')
             .selectAll('*')
             .remove();
         webcharts.multiply(
@@ -1629,6 +1717,22 @@
         else this.draw();
     }
 
+    function yAxisGrouping(select$$1, d) {
+        var selected = d3.select(select$$1).select('option:checked');
+
+        //Update grouping settings.
+        if (selected.text() !== 'None') {
+            this.config.y.grouping = selected.text();
+            this.config.y.groupingLabel = selected.property('label');
+        } else {
+            delete this.config.y.grouping;
+            this.config.y.groupingLabel = 'Event Types';
+        }
+
+        //Redraw.
+        this.draw();
+    }
+
     function augmentOtherControls() {
         var context = this,
             otherControls = this.controls.wrap
@@ -1694,6 +1798,16 @@
             .select('select')
             .on('change', function(d) {
                 timeScaleChange.call(context, this, d);
+            });
+
+        //Redefine y-axis grouping event listener.
+        otherControls
+            .filter(function(d) {
+                return d.option === 'y.grouping';
+            })
+            .select('select')
+            .on('change', function(d) {
+                yAxisGrouping.call(context, this, d);
             });
     }
 
@@ -1789,7 +1903,8 @@
             this.draw();
 
             //Hide ID timeline.
-            this.clinicalTimelines.containers.IDtimeline.select('div')
+            this.clinicalTimelines.containers.IDtimeline
+                .select('div')
                 .selectAll('*')
                 .remove();
             this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', true);
@@ -1895,13 +2010,20 @@
     function updateTimeRangeControls() {
         var _this = this;
 
-        this.controls.wrap.selectAll('.ct-time-range input').property({
-            type: this.config.time_scale === 'date' ? 'date' : 'number',
-            value: function value(d) {
-                return _this.config.time_scale === 'date'
-                    ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
-                    : +_this.time_range[d.index];
-            }
+        var timeRangeControls = this.controls.wrap.selectAll('.ct-time-range input');
+
+        //Internet Explorer does not support input date type.
+        timeRangeControls.property(
+            'type',
+            !document.documentMode
+                ? this.config.time_scale === 'date' ? 'date' : 'number'
+                : 'text'
+        );
+
+        timeRangeControls.property('value', function(d) {
+            return _this.config.time_scale === 'date'
+                ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
+                : +_this.time_range[d.index];
         });
     }
 
@@ -2282,7 +2404,7 @@
         //Define data inside time range.
         defineDataInsideTimeRange.call(this);
 
-        //Insert groupings into data to draw empty rows in which to draw groupings.
+        //Insert dummy grouping data into data array to draw empty rows in which to annotate groupings.
         defineGroupingData.call(this);
 
         //Sort y-axis based on `Sort IDs` control selection.
@@ -2416,13 +2538,7 @@
                                 y: y1,
                                 dy: _this.y.rangeBand() * 1.25
                             })
-                            .text(
-                                _this.config.groupings.filter(function(grouping) {
-                                    return grouping.value_col === _this.config.y.grouping;
-                                })[0].label +
-                                    ': ' +
-                                    d.key
-                            ),
+                            .text(_this.config.y.groupingLabel + ': ' + d.key),
                         rule = g
                             .append('line')
                             .classed('ct-boundary ct-horizontal', true)
@@ -3258,15 +3374,6 @@
         this.listing.clinicalTimelines = this;
     }
 
-    function recurse() {
-        this.timelines.IDtimeline = this.IDtimeline;
-        this.timelines.listing = this.listing;
-        this.IDtimeline.timelines = this.timelines;
-        this.IDtimeline.listing = this.listing;
-        this.listing.timelines = this.timelines;
-        this.listing.IDtimeline = this.IDtimeline;
-    }
-
     function init(data) {
         this.data = {
             raw: data
@@ -3274,6 +3381,10 @@
         this.timelines.init(data, this.test);
     }
 
+    //polyfills and utility functions
+    //setup functions
+    //components
+    //initialization method
     function clinicalTimelines$1() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};

@@ -2,7 +2,8 @@ import backButton from './backButton';
 
 export default function IDdetails() {
     //Add ID characteristics.
-    this.clinicalTimelines.containers.IDdetails.selectAll('div.characteristic')
+    this.clinicalTimelines.containers.IDdetails
+        .selectAll('div.characteristic')
         .data(this.config.id_characteristics)
         .enter()
         .append('div')

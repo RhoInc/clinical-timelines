@@ -1,6 +1,7 @@
 import { select } from 'd3';
 import eventHighlightingChange from './augmentOtherControls/eventHighlightingChange';
 import timeScaleChange from './augmentOtherControls/timeScaleChange';
+import yAxisGrouping from './augmentOtherControls/yAxisGrouping';
 
 export default function augmentOtherControls() {
     const context = this,
@@ -50,5 +51,13 @@ export default function augmentOtherControls() {
         .select('select')
         .on('change', function(d) {
             timeScaleChange.call(context, this, d);
+        });
+
+    //Redefine y-axis grouping event listener.
+    otherControls
+        .filter(d => d.option === 'y.grouping')
+        .select('select')
+        .on('change', function(d) {
+            yAxisGrouping.call(context, this, d);
         });
 }

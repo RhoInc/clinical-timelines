@@ -131,6 +131,33 @@ export default function defineStyles() {
                 '    font-size: 110%;' +
                 '}',
 
+
+          //Reference Tables
+            '#clinical-timelines > #left-side .ct-reference-line-header {' +
+                '    text-align: center;' +
+                '    border-bottom: 1px solid black;' +
+                '    padding-bottom: 5px;' +
+                '}',
+            '#clinical-timelines > #left-side .ct-reference-line-table {' +
+                '    width: 100%;' +
+                '    display: table;' +
+                '}',
+            '#clinical-timelines > #left-side .ct-reference-line-table th,' +
+            '#clinical-timelines > #left-side .ct-reference-line-table td {' +
+                '    text-align: left;' +
+                '}',
+            '#clinical-timelines > #left-side .ct-higher-level {' +
+                '    border-bottom: 1px dotted lightgray;' +
+                '    font-weight: bold;' +
+                '    font-size: 14px;' +
+                '}',
+            '#clinical-timelines > #left-side .ct-lower-level {' +
+                '    font-size: 12px;' +
+                '}',
+            '#clinical-timelines > #left-side .ct-lower-level.ct-indent {' +
+                '    padding-left: 5%;' +
+                '}',
+
         /***--------------------------------------------------------------------------------------\
           Right column elements
         \--------------------------------------------------------------------------------------***/
@@ -188,7 +215,7 @@ export default function defineStyles() {
           //Grouping
             '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping .ct-boundary {' +
                 '    stroke: black;' +
-                '    stroke-width: 2px;' +
+                '    stroke-width: 2;' +
                 '}',
             '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping .ct-annotation {' +
                 '    font-size: 150%;' +
@@ -234,7 +261,7 @@ export default function defineStyles() {
           //Reference lines
             '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line {' +
                 '    stroke: black;' +
-                '    stroke-width: 2px;' +
+                '    stroke-width: 2;' +
                 '    stroke-dasharray: 2,2;' +
                 '}',
             '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line.ct-hover {' +
@@ -242,7 +269,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-invisible-reference-line {' +
                 '    stroke: black;' +
-                '    stroke-width: 20px;' +
+                '    stroke-width: 20;' +
                 '    stroke-opacity: 0;' +
                 '}',
             '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-reference-line-label-box {' +

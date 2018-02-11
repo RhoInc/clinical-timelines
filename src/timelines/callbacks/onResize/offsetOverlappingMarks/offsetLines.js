@@ -106,35 +106,13 @@ export default function offsetLines(mark, markData) {
                     }
                 }
 
-                //Offset lines.
-                if (currentLine.offset > 0) {
-                    //Capture line via its class name and offset vertically.
-                    const className = `${currentLine.key} line`,
-                        g = this.clinicalTimelines.test
-                            ? select(
-                                  this.clinicalTimelines.dom.window.document.getElementsByClassName(
-                                      className
-                                  )[0]
-                              )
-                            : select(document.getElementsByClassName(className)[0]);
-                    g.attr(
-                        'transform',
-                        `translate(0,${currentLine.offset *
-                            +mark.attributes['stroke-width'] *
-                            1.5})`
-                    );
-                } else {
-                    //Capture line via its class name and offset vertically.
-                    const className = `${currentLine.key} line`,
-                        g = this.clinicalTimelines.test
-                            ? select(
-                                  this.clinicalTimelines.dom.window.document.getElementsByClassName(
-                                      className
-                                  )[0]
-                              )
-                            : select(document.getElementsByClassName(className)[0]);
-                    g.attr('transform', 'translate(0,0)');
-                }
+                //Offset lines vertically.
+                const className = `${currentLine.key} line`;
+                const g = select(this.clinicalTimelines.document.getElementsByClassName(className)[0]);
+                g.attr('transform', currentLine.offset > 0
+                    ? `translate(0,${currentLine.offset * +mark.attributes['stroke-width'] * 1.5})`
+                    : 'translate(0,0)'
+                );
             });
         }
     });

@@ -6,7 +6,7 @@ export default function updateTimeRangeControls() {
     //Internet Explorer does not support input date type.
     timeRangeControls.property(
         'type',
-        !document.documentMode ? (this.config.time_scale === 'date' ? 'date' : 'number') : 'text'
+        !this.clinicalTimelines.document.documentMode ? (this.config.time_scale === 'date' ? 'date' : 'number') : 'text'
     );
 
     timeRangeControls.property(

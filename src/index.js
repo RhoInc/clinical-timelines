@@ -29,7 +29,9 @@ export default function clinicalTimelines(element = 'body', settings = {}, dom) 
         containers: {},
         init: init,
         test: !!dom,
-        dom: dom
+        document: dom
+            ? dom.window.document
+            : document
     };
 
     //Merge and sync settings.

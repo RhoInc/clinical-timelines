@@ -1,4 +1,5 @@
 export default function defineStyles() {
+    //Define styles.
     const
         styles = [
 
@@ -309,15 +310,11 @@ export default function defineStyles() {
                 '    display: table;' +
                 '    width: 100%;' +
                 '}'
-        ],
-        style = this.test
-            ? this.dom.window.document.createElement('style')
-            : document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = styles.join('\n');
+        ];
 
-    if (this.test)
-        this.dom.window.document.getElementsByTagName('head')[0].appendChild(style);
-    else
-        document.getElementsByTagName('head')[0].appendChild(style);
+    //Attach styles to DOM.
+    const style = this.document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = styles.join('\n');
+    this.document.getElementsByTagName('head')[0].appendChild(style);
 }

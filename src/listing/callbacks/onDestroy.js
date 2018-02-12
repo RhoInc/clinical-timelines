@@ -1,3 +1,1 @@
-export default function onDestroy() {
-    const context = this;
-}
+export default function onDestroy() {}

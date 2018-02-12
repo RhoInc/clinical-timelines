@@ -1,3 +1,1 @@
-export default function onLayout() {
-    const context = this;
-}
+export default function onLayout() {}

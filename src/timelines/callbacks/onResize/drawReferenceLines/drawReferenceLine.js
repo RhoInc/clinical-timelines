@@ -32,6 +32,5 @@ export default function drawReferenceLine(reference_line, i) {
     addHover.call(this, reference_line);
 
     //Make line draggable.
-    if (!this.parent)
-        addDrag.call(this, reference_line);
+    if (!this.parent) addDrag.call(this, reference_line);
 }

@@ -1,6 +1,10 @@
 export default function defineStyles() {
-    const
-        styles = [
+    //Define styles.
+    const line = this.settings.synced.marks
+        .find(mark => mark.type === 'line');
+    const circle = this.settings.synced.marks
+        .find(mark => mark.type === 'circle');
+    const styles = [
 
         /***--------------------------------------------------------------------------------------\
           Global styles
@@ -143,17 +147,17 @@ export default function defineStyles() {
                 '}',
 
           //Reference Tables
-            '#clinical-timelines #ct-left-column .ct-reference-line-header {' +
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-header {' +
                 '    text-align: center;' +
                 '    border-bottom: 1px solid black;' +
                 '    padding-bottom: 5px;' +
                 '}',
-            '#clinical-timelines #ct-left-column .ct-reference-line-table {' +
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-body table {' +
                 '    width: 100%;' +
                 '    display: table;' +
                 '}',
-            '#clinical-timelines #ct-left-column .ct-reference-line-table th,' +
-            '#clinical-timelines #ct-left-column .ct-reference-line-table td {' +
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-body th,' +
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-body td {' +
                 '    text-align: left;' +
                 '}',
             '#clinical-timelines #ct-left-column .ct-higher-level {' +
@@ -241,15 +245,15 @@ export default function defineStyles() {
 
           //Lines
             '#clinical-timelines path.wc-data-mark {' +
-                '    stroke-width: 6;' +
+                `    stroke-width: ${line.attributes['stroke-width']};` +
                 '    stroke-opacity: 1;' +
                 '}',
             '#clinical-timelines path.wc-data-mark.ct-highlighted {' +
-                '    stroke-width: 9;' +
+                `    stroke-width: ${line.attributes['stroke-width'] * 1.5};` +
                 '}',
             '#clinical-timelines line.ct-highlight-overlay {' +
                 '    clip-path: url(#1);' +
-                '    stroke-width: 3;' +
+                `    stroke-width: ${line.attributes['stroke-width'] / 2};` +
                 '    stroke-linecap: round;' +
                 '}',
 
@@ -260,7 +264,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +
                 '    stroke-opacity: 1;' +
-                '    stroke-width: 3;' +
+                `    stroke-width: ${circle.attributes['stroke-width']};` +
                 '}',
 
           //Arrows
@@ -268,7 +272,7 @@ export default function defineStyles() {
                 '    clip-path: url(#1);' +
                 '}',
             '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
-                '    stroke-width: 3;' +
+                `    stroke-width: ${line.attributes['stroke-width'] / 3};` +
                 '}',
 
           //Reference lines
@@ -323,15 +327,11 @@ export default function defineStyles() {
                 '    display: table;' +
                 '    width: 100%;' +
                 '}'
-        ],
-        style = this.test
-            ? this.dom.window.document.createElement('style')
-            : document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = styles.join('\n');
+        ];
 
-    if (this.test)
-        this.dom.window.document.getElementsByTagName('head')[0].appendChild(style);
-    else
-        document.getElementsByTagName('head')[0].appendChild(style);
+    //Attach styles to DOM.
+    const style = this.document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = styles.join('\n');
+    this.document.getElementsByTagName('head')[0].appendChild(style);
 }

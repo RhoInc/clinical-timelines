@@ -7,6 +7,12 @@
 })(this, function(d3$1, webcharts) {
     'use strict';
 
+    Number.isInteger =
+        Number.isInteger ||
+        function(value) {
+            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+        };
+
     /*------------------------------------------------------------------------------------------------\
   Add assign method to Object if nonexistent.
 \------------------------------------------------------------------------------------------------*/
@@ -36,120 +42,49 @@
         })();
     }
 
-    var settings = {
-        /**-------------------------------------------------------------------------------------------\
-      Renderer-specific settings
-    \-------------------------------------------------------------------------------------------**/
-
-        //ID settings
-        id_col: 'USUBJID',
-        id_unit: 'participant',
-        id_characteristics: null,
-
-        //Event settings
-        event_col: 'DOMAIN',
-        event_types: null,
-        event_highlighted: null,
-        event_highlight_color: 'black',
-
-        //Filter settings
-        filters: null,
-
-        //Grouping settings
-        groupings: null,
-        grouping_initial: null,
-        grouping_direction: 'horizontal',
-
-        //Timing settings
-        time_scale: 'date',
-
-        //Date settings
-        stdt_col: 'STDT',
-        endt_col: 'ENDT',
-        date_range: null,
-        date_format: '%Y-%m-%d',
-        date_display_format: '%b %y', // sync in syncSettings()
-
-        //Day settings
-        stdy_col: 'STDY',
-        endy_col: 'ENDY',
-        day_range: null,
-
-        //Miscellaneous settings
-        seq_col: 'SEQ',
-        tooltip_col: 'TOOLTIP',
-        ongo_col: 'ONGO',
-        ongo_val: 'Y',
-        reference_lines: null,
-
-        //Listing settings
-        details: null,
-        details_config: null,
-
-        /**-------------------------------------------------------------------------------------------\
-      Standard webcharts settings
-    \-------------------------------------------------------------------------------------------**/
-
-        x: {
-            type: null, // set in syncSettings()
-            column: 'wc_value',
-            label: null, // set in syncSettings()
-            format: null // set in syncSettings()
-        },
-        y: {
-            type: 'ordinal', // set in syncSettings()
-            column: null,
-            label: null,
-            sort: 'earliest',
-            behavior: 'flex',
-            grouping: null
-        },
-        marks: [
-            {
-                type: 'line',
-                per: null, // set in syncSettings()
-                tooltip: null, // set in syncSettings()
-                attributes: {
-                    'clip-path': 'url(#1)',
-                    'stroke-width': 6
+    if (!Array.prototype.find) {
+        Object.defineProperty(Array.prototype, 'find', {
+            value: function value(predicate) {
+                // 1. Let O be ? ToObject(this value).
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
                 }
-            },
-            {
-                type: 'circle',
-                per: null, // set in syncSettings()
-                tooltip: null, // set in syncSettings()
-                radius: 6,
-                attributes: {
-                    'clip-path': 'url(#1)',
-                    'stroke-width': 3
+
+                var o = Object(this);
+
+                // 2. Let len be ? ToLength(? Get(O, "length")).
+                var len = o.length >>> 0;
+
+                // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
                 }
+
+                // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+                var thisArg = arguments[1];
+
+                // 5. Let k be 0.
+                var k = 0;
+
+                // 6. Repeat, while k < len
+                while (k < len) {
+                    // a. Let Pk be ! ToString(k).
+                    // b. Let kValue be ? Get(O, Pk).
+                    // c. Let testResult be ToBoolean(? Call(predicate, T, � kValue, k, O �)).
+                    // d. If testResult is true, return kValue.
+                    var kValue = o[k];
+                    if (predicate.call(thisArg, kValue, k, o)) {
+                        return kValue;
+                    }
+                    // e. Increase k by 1.
+                    k++;
+                }
+
+                // 7. Return undefined.
+                return undefined;
             }
-        ],
-        colors: [
-            '#1b9e77',
-            '#d95f02',
-            '#7570b3',
-            '#a6cee3',
-            '#1f78b4',
-            '#b2df8a',
-            '#66c2a5',
-            '#fc8d62',
-            '#8da0cb'
-        ],
-        color_dom: null, // set in syncSettings()
-        legend: {
-            location: 'top',
-            label: 'Event Type',
-            order: null, // set in syncSettings()
-            mark: 'circle'
-        },
-        range_band: 30,
-        margin: {
-            top: 60,
-            right: 40
-        }, // for second x-axis
-        resizable: false // can't be resizable so the multiples aren't overlapped by their titles
-    };
+        });
+    }
 
     var _typeof =
         typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
@@ -320,6 +255,117 @@
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
+    var rendererSpecificSettings = {
+        //ID settings
+        id_col: 'USUBJID',
+        id_unit: 'participant',
+        id_characteristics: null,
+
+        //Event settings
+        event_col: 'DOMAIN',
+        event_types: null,
+        event_highlighted: null,
+        event_highlight_color: 'black',
+
+        //Filter settings
+        filters: null,
+
+        //Grouping settings
+        groupings: null,
+        grouping_initial: null,
+        grouping_direction: 'horizontal',
+
+        //Timing settings
+        time_scale: 'date',
+
+        //Date settings
+        stdt_col: 'STDT',
+        endt_col: 'ENDT',
+        date_range: null,
+        date_format: '%Y-%m-%d',
+        date_display_format: '%b %y', // sync in syncSettings()
+
+        //Day settings
+        stdy_col: 'STDY',
+        endy_col: 'ENDY',
+        day_range: null,
+
+        //Miscellaneous settings
+        seq_col: 'SEQ',
+        tooltip_col: 'TOOLTIP',
+        ongo_col: 'ONGO',
+        ongo_val: 'Y',
+        reference_lines: null,
+
+        //Listing settings
+        details: null,
+        details_config: null
+    };
+
+    var webchartsSettings = {
+        x: {
+            type: null, // set in syncSettings()
+            column: 'wc_value',
+            label: null, // set in syncSettings()
+            format: null // set in syncSettings()
+        },
+        y: {
+            type: 'ordinal',
+            column: null, // set in syncSettings()
+            label: null, // set in syncSettings()
+            sort: 'earliest',
+            behavior: 'flex',
+            grouping: null // set in syncSettings()
+        },
+        marks: [
+            {
+                type: 'line',
+                per: null, // set in syncSettings()
+                tooltip: null, // set in syncSettings()
+                attributes: {
+                    'clip-path': 'url(#1)',
+                    'stroke-width': 4
+                }
+            },
+            {
+                type: 'circle',
+                per: null, // set in syncSettings()
+                tooltip: null, // set in syncSettings()
+                radius: 5,
+                attributes: {
+                    'clip-path': 'url(#1)',
+                    'stroke-width': 2
+                }
+            }
+        ],
+        colors: [
+            '#1b9e77',
+            '#d95f02',
+            '#7570b3',
+            '#a6cee3',
+            '#1f78b4',
+            '#b2df8a',
+            '#66c2a5',
+            '#fc8d62',
+            '#8da0cb'
+        ],
+        color_dom: null, // set in syncSettings()
+        legend: {
+            location: 'top',
+            label: 'Event Type',
+            order: null, // set in syncSettings()
+            mark: 'circle'
+        },
+        range_band: 35,
+        margin: {
+            top: 60,
+            right: 40
+        }, // for second x-axis
+        resizable: false // can't be resizable so the multiples aren't overlapped by their titles
+    };
+
+    var settings = Object.assign({}, rendererSpecificSettings, webchartsSettings);
+
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
             userDefinedVariables instanceof Array && userDefinedVariables.length
@@ -355,12 +401,6 @@
 
         return validSetting;
     }
-
-    Number.isInteger =
-        Number.isInteger ||
-        function(value) {
-            return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
-        };
 
     function syncRendererSpecificSettings(settings) {
         //ID settings
@@ -665,7 +705,7 @@
         return syncedControls;
     }
 
-    var defaults = {
+    var defaults$1 = {
         settings: settings,
         syncSettings: syncSettings,
         controls: controls,
@@ -673,319 +713,308 @@
     };
 
     function defineSettings() {
-        this.settings.merged = Object.assign({}, defaults.settings, clone(this.settings.user));
-        this.settings.synced = defaults.syncSettings(clone(this.settings.merged));
+        this.settings.merged = Object.assign({}, defaults$1.settings, clone(this.settings.user));
+        this.settings.synced = defaults$1.syncSettings(clone(this.settings.merged));
         this.settings.IDtimeline = this.settings.synced.IDtimelineSettings;
         this.settings.listing = this.settings.synced.details_config;
-        this.settings.controls = defaults.syncControls(
-            defaults.controls,
+        this.settings.controls = defaults$1.syncControls(
+            defaults$1.controls,
             clone(this.settings.synced)
         );
     }
 
     function defineStyles() {
+        //Define styles.
         var styles = [
-                /***--------------------------------------------------------------------------------------\
+            /***--------------------------------------------------------------------------------------\
       Global styles
     \--------------------------------------------------------------------------------------***/
 
-                'html {' +
-                    '    overflow: -moz-scrollbars-vertical;' +
-                    '    overflow-y: scroll;' +
-                    '}',
-                '#clinical-timelines {' + '    display: inline-block;' + '    width: 100%;' + '}',
-                '#clinical-timelines .ct-hidden {' + '    display: none !important;' + '}',
-                '#clinical-timelines .ct-button {' +
-                    '    cursor: pointer !important;' +
-                    '    border-radius: 4px !important;' +
-                    '    padding: 5px !important;' +
-                    '}',
-                '#clinical-timelines .ct-button.ct-highlighted {' +
-                    '    border: 2px solid black !important;' +
-                    '}',
-                '#clinical-timelines .ct-button.ct-selected {' + '    background: lightgray;' + '}',
+            'html {' + '    overflow: -moz-scrollbars-vertical;' + '    overflow-y: scroll;' + '}',
+            '#clinical-timelines {' + '    display: inline-block;' + '    width: 100%;' + '}',
+            '#clinical-timelines .ct-hidden {' + '    display: none !important;' + '}',
+            '#clinical-timelines .ct-button {' +
+                '    cursor: pointer !important;' +
+                '    border-radius: 4px !important;' +
+                '    padding: 5px !important;' +
+                '}',
+            '#clinical-timelines .ct-button.ct-highlighted {' +
+                '    border: 2px solid black !important;' +
+                '}',
+            '#clinical-timelines .ct-button.ct-selected {' + '    background: lightgray;' + '}',
 
-                /***--------------------------------------------------------------------------------------\
+            /***--------------------------------------------------------------------------------------\
       Left and right columns
     \--------------------------------------------------------------------------------------***/
 
-                '#clinical-timelines .ct-column {' + '    display: inline-block;' + '}',
-                '#clinical-timelines #ct-left-column {' +
-                    '    width: 20%;' +
-                    '    float: left;' +
-                    '}',
-                '#clinical-timelines #ct-right-column {' +
-                    '    width: 79%;' +
-                    '    float: right;' +
-                    '}',
-                '#clinical-timelines .ct-column > * {' +
-                    '    width: 100%;' +
-                    '    vertical-align: top;' +
-                    '    display: inline-block;' +
-                    '    margin-bottom: 10px;' +
-                    '    border: 1px solid #eee;' +
-                    '}',
-                '#clinical-timelines .ct-column > * > * {' + '    margin: 10px;' + '}',
+            '#clinical-timelines .ct-column {' + '    display: inline-block;' + '}',
+            '#clinical-timelines #ct-left-column {' + '    width: 20%;' + '    float: left;' + '}',
+            '#clinical-timelines #ct-right-column {' +
+                '    width: 79%;' +
+                '    float: right;' +
+                '}',
+            '#clinical-timelines .ct-column > * {' +
+                '    width: 100%;' +
+                '    vertical-align: top;' +
+                '    display: inline-block;' +
+                '    margin-bottom: 10px;' +
+                '    border: 1px solid #eee;' +
+                '}',
+            '#clinical-timelines .ct-column > * > * {' + '    margin: 10px;' + '}',
 
-                /***--------------------------------------------------------------------------------------\
+            /***--------------------------------------------------------------------------------------\
       Left column elements
     \--------------------------------------------------------------------------------------***/
 
-                '#clinical-timelines #ct-left-column > * {' + '}',
+            '#clinical-timelines #ct-left-column > * {' + '}',
 
-                //Annotations
-                '#clinical-timelines #ct-left-column .ct-annotation {' +
-                    '    font-size: 90%;' +
-                    '    text-align: right;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-annotation .ct-stats,' +
-                    '#clinical-timelines #ct-left-column .ct-annotation .ct-characteristic span {' +
-                    '    font-weight: bold;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample {' +
-                    '    color: green;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample-inside-time-range {' +
-                    '    color: blue;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample-outside-time-range {' +
-                    '    color: red;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-annotation .ct-info-icon {' +
-                    '    font-weight: bold;' +
-                    '    color: blue;' +
-                    '    cursor: help;' +
-                    '}',
+            //Annotations
+            '#clinical-timelines #ct-left-column .ct-annotation {' +
+                '    font-size: 90%;' +
+                '    text-align: right;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-annotation .ct-stats,' +
+                '#clinical-timelines #ct-left-column .ct-annotation .ct-characteristic span {' +
+                '    font-weight: bold;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample {' +
+                '    color: green;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample-inside-time-range {' +
+                '    color: blue;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-annotation .ct-stats.ct-sample-outside-time-range {' +
+                '    color: red;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-annotation .ct-info-icon {' +
+                '    font-weight: bold;' +
+                '    color: blue;' +
+                '    cursor: help;' +
+                '}',
 
-                //Controls
-                '#clinical-timelines #ct-left-column .wc-controls {' +
-                    '    margin-bottom: 0;' +
-                    '    clear: left;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .wc-controls .control-group {' +
-                    '    margin: 0 0 5px 0;' +
-                    '    display: block;' +
-                    '    float: right;' +
-                    '    clear: both;' +
-                    '    width: 100%;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .wc-controls .ct-horizontal-rule {' +
-                    '    width: 100%;' +
-                    '    display: inline-block;' +
-                    '    margin-bottom: 5px;' +
-                    '    font-size: 150%;' +
-                    '    border-bottom: 1px solid black;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .wc-controls .control-group.ct-ID {' +
-                    '    display: inline-block;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .wc-controls .control-group > * {' +
-                    '    display: inline-block;' +
-                    '    vertical-align: top;' +
-                    '    float: right;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .wc-controls .control-group .span-description {' +
-                    '    font-size: 90%;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .wc-controls .control-group .changer {' +
-                    '    margin-left: 5px;' +
-                    '    width: 50%;' +
-                    '    clear: right;' +
-                    '    box-sizing: border-box;' +
-                    '}',
-                '#clinical-timelines #ct-left-column #ct-ID-details #ct-back-button {' +
-                    '    display: inline-block;' +
-                    '    float: left;' +
-                    '}',
-                '#clinical-timelines #ct-left-column #ct-ID-details #ct-back-button button {' +
-                    '    padding: 0 5px;' +
-                    '    font-size: 110%;' +
-                    '}',
+            //Controls
+            '#clinical-timelines #ct-left-column .wc-controls {' +
+                '    margin-bottom: 0;' +
+                '    clear: left;' +
+                '}',
+            '#clinical-timelines #ct-left-column .wc-controls .control-group {' +
+                '    margin: 0 0 5px 0;' +
+                '    display: block;' +
+                '    float: right;' +
+                '    clear: both;' +
+                '    width: 100%;' +
+                '}',
+            '#clinical-timelines #ct-left-column .wc-controls .ct-horizontal-rule {' +
+                '    width: 100%;' +
+                '    display: inline-block;' +
+                '    margin-bottom: 5px;' +
+                '    font-size: 150%;' +
+                '    border-bottom: 1px solid black;' +
+                '}',
+            '#clinical-timelines #ct-left-column .wc-controls .control-group.ct-ID {' +
+                '    display: inline-block;' +
+                '}',
+            '#clinical-timelines #ct-left-column .wc-controls .control-group > * {' +
+                '    display: inline-block;' +
+                '    vertical-align: top;' +
+                '    float: right;' +
+                '}',
+            '#clinical-timelines #ct-left-column .wc-controls .control-group .span-description {' +
+                '    font-size: 90%;' +
+                '}',
+            '#clinical-timelines #ct-left-column .wc-controls .control-group .changer {' +
+                '    margin-left: 5px;' +
+                '    width: 50%;' +
+                '    clear: right;' +
+                '    box-sizing: border-box;' +
+                '}',
+            '#clinical-timelines #ct-left-column #ct-ID-details #ct-back-button {' +
+                '    display: inline-block;' +
+                '    float: left;' +
+                '}',
+            '#clinical-timelines #ct-left-column #ct-ID-details #ct-back-button button {' +
+                '    padding: 0 5px;' +
+                '    font-size: 110%;' +
+                '}',
 
-                //Reference Tables
-                '#clinical-timelines #ct-left-column .ct-reference-line-header {' +
-                    '    text-align: center;' +
-                    '    border-bottom: 1px solid black;' +
-                    '    padding-bottom: 5px;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-reference-line-table {' +
-                    '    width: 100%;' +
-                    '    display: table;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-reference-line-table th,' +
-                    '#clinical-timelines #ct-left-column .ct-reference-line-table td {' +
-                    '    text-align: left;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-higher-level {' +
-                    '    border-bottom: 1px dotted lightgray;' +
-                    '    font-weight: bold;' +
-                    '    font-size: 14px;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-lower-level {' +
-                    '    font-size: 12px;' +
-                    '}',
-                '#clinical-timelines #ct-left-column .ct-lower-level.ct-indent {' +
-                    '    padding-left: 5%;' +
-                    '}',
+            //Reference Tables
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-header {' +
+                '    text-align: center;' +
+                '    border-bottom: 1px solid black;' +
+                '    padding-bottom: 5px;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-body table {' +
+                '    width: 100%;' +
+                '    display: table;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-reference-line-table-body th,' +
+                '#clinical-timelines #ct-left-column .ct-reference-line-table-body td {' +
+                '    text-align: left;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-higher-level {' +
+                '    border-bottom: 1px dotted lightgray;' +
+                '    font-weight: bold;' +
+                '    font-size: 14px;' +
+                '}',
+            '#clinical-timelines #ct-left-column .ct-lower-level {' + '    font-size: 12px;' + '}',
+            '#clinical-timelines #ct-left-column .ct-lower-level.ct-indent {' +
+                '    padding-left: 5%;' +
+                '}',
 
-                /***--------------------------------------------------------------------------------------\
+            /***--------------------------------------------------------------------------------------\
       Right column elements
     \--------------------------------------------------------------------------------------***/
 
-                '#clinical-timelines #ct-right-column > * {' + '}',
+            '#clinical-timelines #ct-right-column > * {' + '}',
 
-                //Legend
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend {' +
-                    '    display: flex !important;' +
-                    '    justify-content: center;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend .legend-title {' +
-                    '    border-radius: 4px;' +
-                    '    padding: 5px 7px 3px 4px;' +
-                    '    border: 2px solid white;' +
-                    '    margin-right: .25em !important;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend .legend-item {' +
-                    '    cursor: pointer;' +
-                    '    float: left;' +
-                    '    border-radius: 4px;' +
-                    '    padding: 4px 7px 3px 4px;' +
-                    '    border: 2px solid white;' +
-                    '    margin-right: .25em !important;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend .legend-item .legend-color-block circle {' +
-                    '    cx: .55em !important;' +
-                    '    cy: .55em !important;' +
-                    '    r: .4em !important;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend .legend-item:hover {' +
-                    '    border: 2px solid black;' +
-                    '}',
+            //Legend
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend {' +
+                '    display: flex !important;' +
+                '    justify-content: center;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend .legend-title {' +
+                '    border-radius: 4px;' +
+                '    padding: 5px 7px 3px 4px;' +
+                '    border: 2px solid white;' +
+                '    margin-right: .25em !important;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend .legend-item {' +
+                '    cursor: pointer;' +
+                '    float: left;' +
+                '    border-radius: 4px;' +
+                '    padding: 4px 7px 3px 4px;' +
+                '    border: 2px solid white;' +
+                '    margin-right: .25em !important;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend .legend-item .legend-color-block circle {' +
+                '    cx: .55em !important;' +
+                '    cy: .55em !important;' +
+                '    r: .4em !important;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .legend .legend-item:hover {' +
+                '    border: 2px solid black;' +
+                '}',
 
-                //Y-axis
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick {' +
-                    '    cursor: pointer;' +
-                    '    fill: blue;' +
-                    '    text-decoration: none;' +
-                    '    font-weight: bolder;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick:hover {' +
-                    '    text-decoration: underline;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
-                    '    stroke: #aaa;' +
-                    '    stroke-width: 1;' +
-                    '    fill: none;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick:nth-child(even) rect.ct-stripe {' +
-                    '    fill: #eee;' +
-                    '}',
+            //Y-axis
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick {' +
+                '    cursor: pointer;' +
+                '    fill: blue;' +
+                '    text-decoration: none;' +
+                '    font-weight: bolder;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick:hover {' +
+                '    text-decoration: underline;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick rect.ct-stripe {' +
+                '    stroke: #aaa;' +
+                '    stroke-width: 1;' +
+                '    fill: none;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick:nth-child(even) rect.ct-stripe {' +
+                '    fill: #eee;' +
+                '}',
 
-                //Grouping
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping .ct-boundary {' +
-                    '    stroke: black;' +
-                    '    stroke-width: 2;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping .ct-annotation {' +
-                    '    font-size: 150%;' +
-                    '    font-weight: normal;' +
-                    '    text-anchor: start;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping.ct-vertical .ct-annotation {' +
-                    '    writing-mode: tb-rl;' +
-                    '}',
+            //Grouping
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping .ct-boundary {' +
+                '    stroke: black;' +
+                '    stroke-width: 2;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping .ct-annotation {' +
+                '    font-size: 150%;' +
+                '    font-weight: normal;' +
+                '    text-anchor: start;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .ct-grouping.ct-vertical .ct-annotation {' +
+                '    writing-mode: tb-rl;' +
+                '}',
 
-                //Lines
-                '#clinical-timelines path.wc-data-mark {' +
-                    '    stroke-width: 6;' +
-                    '    stroke-opacity: 1;' +
-                    '}',
-                '#clinical-timelines path.wc-data-mark.ct-highlighted {' +
-                    '    stroke-width: 9;' +
-                    '}',
-                '#clinical-timelines line.ct-highlight-overlay {' +
-                    '    clip-path: url(#1);' +
-                    '    stroke-width: 3;' +
-                    '    stroke-linecap: round;' +
-                    '}',
+            //Lines
+            '#clinical-timelines path.wc-data-mark {' +
+                '    stroke-width: 4;' +
+                '    stroke-opacity: 1;' +
+                '}',
+            '#clinical-timelines path.wc-data-mark.ct-highlighted {' + '    stroke-width: 9;' + '}',
+            '#clinical-timelines line.ct-highlight-overlay {' +
+                '    clip-path: url(#1);' +
+                '    stroke-width: 3;' +
+                '    stroke-linecap: round;' +
+                '}',
 
-                //Circles
-                '#clinical-timelines circle.wc-data-mark {' +
-                    '    stroke-width: 0;' +
-                    '    fill-opacity: 1;' +
-                    '}',
-                '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +
-                    '    stroke-opacity: 1;' +
-                    '    stroke-width: 3;' +
-                    '}',
+            //Circles
+            '#clinical-timelines circle.wc-data-mark {' +
+                '    stroke-width: 0;' +
+                '    fill-opacity: 1;' +
+                '}',
+            '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +
+                '    stroke-opacity: 1;' +
+                '    stroke-width: 2;' +
+                '}',
 
-                //Arrows
-                '#clinical-timelines polygon.ct-ongoing-event {' + '    clip-path: url(#1);' + '}',
-                '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
-                    '    stroke-width: 3;' +
-                    '}',
+            //Arrows
+            '#clinical-timelines polygon.ct-ongoing-event {' + '    clip-path: url(#1);' + '}',
+            '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
+                '    stroke-width: 3;' +
+                '}',
 
-                //Reference lines
-                '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line {' +
-                    '    stroke: black;' +
-                    '    stroke-width: 1;' +
-                    '    stroke-dasharray: 2,2;' +
-                    '}',
-                '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line.ct-hover {' +
-                    '    stroke-dasharray: none;' +
-                    '}',
-                '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-invisible-reference-line {' +
-                    '    cursor: pointer;' +
-                    '    stroke: black;' +
-                    '    stroke-width: 20;' +
-                    '    stroke-opacity: 0;' +
-                    '}',
-                '#clinical-timelines #ct-right-column .wc-chart .wc-svg .reference-line-text {' +
-                    '    font-weight: bold;' +
-                    '    font-size: 24px;' +
-                    '}',
+            //Reference lines
+            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line {' +
+                '    stroke: black;' +
+                '    stroke-width: 1;' +
+                '    stroke-dasharray: 2,2;' +
+                '}',
+            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line.ct-hover {' +
+                '    stroke-dasharray: none;' +
+                '}',
+            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-invisible-reference-line {' +
+                '    cursor: pointer;' +
+                '    stroke: black;' +
+                '    stroke-width: 20;' +
+                '    stroke-opacity: 0;' +
+                '}',
+            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .reference-line-text {' +
+                '    font-weight: bold;' +
+                '    font-size: 24px;' +
+                '}',
 
-                //ID timeline
-                '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-chart .wc-svg title {' +
-                    '    white-space: pre;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart {' +
-                    '    width: 100%;' +
-                    '    padding: 0;' +
-                    '    border-top: 1px solid black;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart > * {' +
-                    '    display: inline-block;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart .wc-svg {' +
-                    '    float: left;' +
-                    '    width: 75%;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart .wc-chart-title {' +
-                    '    float: right;' +
-                    '    text-align: left;' +
-                    '    font-size: 150%;' +
-                    '    font-weight: normal;' +
-                    '    width: 24%;' +
-                    '}',
-                '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart .wc-svg .ct-time-range {' +
-                    '    opacity: .1;' +
-                    '}',
+            //ID timeline
+            '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-chart .wc-svg title {' +
+                '    white-space: pre;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart {' +
+                '    width: 100%;' +
+                '    padding: 0;' +
+                '    border-top: 1px solid black;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart > * {' +
+                '    display: inline-block;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart .wc-svg {' +
+                '    float: left;' +
+                '    width: 75%;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart .wc-chart-title {' +
+                '    float: right;' +
+                '    text-align: left;' +
+                '    font-size: 150%;' +
+                '    font-weight: normal;' +
+                '    width: 24%;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-ID-timeline .wc-small-multiples .wc-chart .wc-svg .ct-time-range {' +
+                '    opacity: .1;' +
+                '}',
 
-                //Listing
-                '#clinical-timelines #ct-right-column #ct-listing .wc-chart.wc-table table {' +
-                    '    display: table;' +
-                    '    width: 100%;' +
-                    '}'
-            ],
-            style = this.test
-                ? this.dom.window.document.createElement('style')
-                : document.createElement('style');
+            //Listing
+            '#clinical-timelines #ct-right-column #ct-listing .wc-chart.wc-table table {' +
+                '    display: table;' +
+                '    width: 100%;' +
+                '}'
+        ];
+
+        //Attach styles to DOM.
+        var style = this.document.createElement('style');
         style.type = 'text/css';
         style.innerHTML = styles.join('\n');
-
-        if (this.test) this.dom.window.document.getElementsByTagName('head')[0].appendChild(style);
-        else document.getElementsByTagName('head')[0].appendChild(style);
+        this.document.getElementsByTagName('head')[0].appendChild(style);
     }
 
     function defineLayout() {
@@ -998,13 +1027,13 @@
       Left column
     \-------------------------------------------------------------------------------------------**/
 
-        (this.containers.leftColumn = this.containers.main
+        this.containers.leftColumn = this.containers.main
             .append('div')
             .classed('ct-column', true)
-            .attr('id', 'ct-left-column')),
-            (this.containers.details = this.containers.leftColumn
-                .append('div')
-                .attr('id', 'ct-details'));
+            .attr('id', 'ct-left-column');
+
+        //Details container
+        this.containers.details = this.containers.leftColumn.append('div').attr('id', 'ct-details');
 
         //Add container for population details.
         this.containers.populationDetails = this.containers.details
@@ -1054,6 +1083,15 @@
             .append('div')
             .classed('ct-hidden', true)
             .attr('id', 'ct-listing');
+    }
+
+    function recurse() {
+        this.timelines.IDtimeline = this.IDtimeline;
+        this.timelines.listing = this.listing;
+        this.IDtimeline.timelines = this.timelines;
+        this.IDtimeline.listing = this.listing;
+        this.listing.timelines = this.timelines;
+        this.listing.IDtimeline = this.IDtimeline;
     }
 
     function controls$1() {
@@ -1234,6 +1272,9 @@
             .values()
             .sort();
         this.currentEventTypes = this.config.event_types || this.allEventTypes;
+        this.controls.config.inputs.find(function(input) {
+            return input.description === 'Event Type';
+        }).start = this.currentEventTypes;
         this.config.color_dom = this.currentEventTypes.concat(
             this.allEventTypes
                 .filter(function(eventType) {
@@ -1956,13 +1997,20 @@
     function updateTimeRangeControls() {
         var _this = this;
 
-        this.controls.wrap.selectAll('.ct-time-range input').property({
-            type: this.config.time_scale === 'date' ? 'date' : 'number',
-            value: function value(d) {
-                return _this.config.time_scale === 'date'
-                    ? d3$1.time.format('%Y-%m-%d')(_this.time_range[d.index])
-                    : +_this.time_range[d.index];
-            }
+        var timeRangeControls = this.controls.wrap.selectAll('.ct-time-range input');
+
+        //Internet Explorer does not support input date type.
+        timeRangeControls.property(
+            'type',
+            !this.clinicalTimelines.document.documentMode
+                ? this.config.time_scale === 'date' ? 'date' : 'number'
+                : 'text'
+        );
+
+        timeRangeControls.property('value', function(d) {
+            return _this.config.time_scale === 'date'
+                ? d3$1.time.format('%Y-%m-%d')(_this.time_range[d.index])
+                : +_this.time_range[d.index];
         });
     }
 
@@ -2343,7 +2391,7 @@
         //Define data inside time range.
         defineDataInsideTimeRange.call(this);
 
-        //Insert groupings into data to draw empty rows in which to draw groupings.
+        //Insert dummy grouping data into data array to draw empty rows in which to annotate groupings.
         defineGroupingData.call(this);
 
         //Sort y-axis based on `Sort IDs` control selection.
@@ -2626,15 +2674,11 @@
             //For each overlapping point...
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
-                var className = di + ' point',
-                    g = _this.clinicalTimelines.test
-                        ? d3$1.select(
-                              _this.clinicalTimelines.dom.window.document.getElementsByClassName(
-                                  className
-                              )[0]
-                          )
-                        : d3$1.select(document.getElementsByClassName(className)[0]),
-                    point = g.select('circle');
+                var className = di + ' point';
+                var g = d3$1.select(
+                    _this.clinicalTimelines.document.getElementsByClassName(className)[0]
+                );
+                var point = g.select('circle');
                 g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
             });
         });
@@ -2771,35 +2815,19 @@
                         }
                     }
 
-                    //Offset lines.
-                    if (currentLine.offset > 0) {
-                        //Capture line via its class name and offset vertically.
-                        var className = currentLine.key + ' line',
-                            g = _this.clinicalTimelines.test
-                                ? d3$1.select(
-                                      _this.clinicalTimelines.dom.window.document.getElementsByClassName(
-                                          className
-                                      )[0]
-                                  )
-                                : d3$1.select(document.getElementsByClassName(className)[0]);
-                        g.attr(
-                            'transform',
-                            'translate(0,' +
-                                currentLine.offset * +mark.attributes['stroke-width'] * 1.5 +
-                                ')'
-                        );
-                    } else {
-                        //Capture line via its class name and offset vertically.
-                        var _className = currentLine.key + ' line',
-                            _g = _this.clinicalTimelines.test
-                                ? d3$1.select(
-                                      _this.clinicalTimelines.dom.window.document.getElementsByClassName(
-                                          _className
-                                      )[0]
-                                  )
-                                : d3$1.select(document.getElementsByClassName(_className)[0]);
-                        _g.attr('transform', 'translate(0,0)');
-                    }
+                    //Offset lines vertically.
+                    var className = currentLine.key + ' line';
+                    var g = d3$1.select(
+                        _this.clinicalTimelines.document.getElementsByClassName(className)[0]
+                    );
+                    g.attr(
+                        'transform',
+                        currentLine.offset > 0
+                            ? 'translate(0,' +
+                              currentLine.offset * +mark.attributes['stroke-width'] * 1.5 +
+                              ')'
+                            : 'translate(0,0)'
+                    );
                 });
             }
         });
@@ -3232,8 +3260,9 @@
 
         //Add reference line table.
         reference_line.table = reference_line.tableContainer
+            .append('div')
+            .classed('ct-reference-line-table-body', true)
             .append('table')
-            .classed('ct-reference-line-table', true)
             .append('tbody');
 
         //Add table data.
@@ -3244,6 +3273,13 @@
         var _this = this;
 
         if (this.config.reference_lines) {
+            //Remove previously reference lines and tables.
+            this.svg.select('.ct-reference-lines').remove();
+            this.clinicalTimelines.containers.leftColumn
+                .selectAll('.ct-reference-line-label-container')
+                .remove();
+
+            //Add group for reference lines.
             this.svg.select('.ct-reference-lines').remove();
             if (!this.parent)
                 this.clinicalTimelines.containers.leftColumn
@@ -3258,6 +3294,12 @@
                 .filter(function(reference_line) {
                     return reference_line.time_scale === _this.config.time_scale;
                 })
+                .filter(function(reference_line) {
+                    return (
+                        _this.x_dom[0] <= _this.config.time_function(reference_line.timepoint) &&
+                        _this.x_dom[1] >= _this.config.time_function(reference_line.timepoint)
+                    );
+                })
                 .forEach(function(reference_line, i) {
                     //Draw reference line.
                     drawReferenceLine.call(_this, reference_line, i);
@@ -3269,12 +3311,12 @@
     }
 
     function IEsucks() {
-        var inIE = this.clinicalTimelines.test ? false : !!document.documentMode;
+        var inIE = !!this.clinicalTimelines.document.documentMode;
         if (inIE)
             this.svg.selectAll('.line,.point').each(function(d) {
-                var mark = d3$1.select(this),
-                    tooltip = mark.select('title'),
-                    text = tooltip.text().split('\n');
+                var mark = d3$1.select(this);
+                var tooltip = mark.select('title');
+                var text = tooltip.text().split('\n');
                 tooltip.text(text.join('--|--'));
             });
     }
@@ -3500,15 +3542,6 @@
         this.listing.clinicalTimelines = this;
     }
 
-    function recurse() {
-        this.timelines.IDtimeline = this.IDtimeline;
-        this.timelines.listing = this.listing;
-        this.IDtimeline.timelines = this.timelines;
-        this.IDtimeline.listing = this.listing;
-        this.listing.timelines = this.timelines;
-        this.listing.IDtimeline = this.IDtimeline;
-    }
-
     function init(data) {
         this.data = {
             raw: data
@@ -3516,6 +3549,10 @@
         this.timelines.init(data, this.test);
     }
 
+    //polyfills and utility functions
+    //setup functions
+    //components
+    //initialization method
     function clinicalTimelines$1() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -3529,7 +3566,7 @@
             containers: {},
             init: init,
             test: !!dom,
-            dom: dom
+            document: dom ? dom.window.document : document
         };
 
         //Merge and sync settings.

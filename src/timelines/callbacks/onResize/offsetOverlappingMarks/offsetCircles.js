@@ -21,15 +21,9 @@ export default function offsetCircles(mark, markData) {
         //For each overlapping point...
         d.values.keys.forEach((di, i) => {
             //Capture point via its class name and offset vertically.
-            const className = `${di} point`,
-                g = this.clinicalTimelines.test
-                    ? select(
-                          this.clinicalTimelines.dom.window.document.getElementsByClassName(
-                              className
-                          )[0]
-                      )
-                    : select(document.getElementsByClassName(className)[0]),
-                point = g.select('circle');
+            const className = `${di} point`;
+            const g = select(this.clinicalTimelines.document.getElementsByClassName(className)[0]);
+            const point = g.select('circle');
             g.attr('transform', `translate(0,${i * +mark.radius * 2})`);
         });
     });

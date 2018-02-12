@@ -15,8 +15,9 @@ export default function drawReferenceTable(reference_line, i) {
 
     //Add reference line table.
     reference_line.table = reference_line.tableContainer
+        .append('div')
+        .classed('ct-reference-line-table-body', true)
         .append('table')
-        .classed('ct-reference-line-table', true)
         .append('tbody');
 
     //Add table data.

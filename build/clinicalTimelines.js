@@ -324,7 +324,7 @@
                 tooltip: null, // set in syncSettings()
                 attributes: {
                     'clip-path': 'url(#1)',
-                    'stroke-width': 4
+                    'stroke-width': 6
                 }
             },
             {
@@ -334,7 +334,7 @@
                 radius: 5,
                 attributes: {
                     'clip-path': 'url(#1)',
-                    'stroke-width': 2
+                    'stroke-width': 4
                 }
             }
         ],
@@ -725,6 +725,12 @@
 
     function defineStyles() {
         //Define styles.
+        var line = this.settings.synced.marks.find(function(mark) {
+            return mark.type === 'line';
+        });
+        var circle = this.settings.synced.marks.find(function(mark) {
+            return mark.type === 'circle';
+        });
         var styles = [
             /***--------------------------------------------------------------------------------------\
       Global styles
@@ -930,13 +936,15 @@
 
             //Lines
             '#clinical-timelines path.wc-data-mark {' +
-                '    stroke-width: 4;' +
+                ('    stroke-width: ' + line.attributes['stroke-width'] + ';') +
                 '    stroke-opacity: 1;' +
                 '}',
-            '#clinical-timelines path.wc-data-mark.ct-highlighted {' + '    stroke-width: 9;' + '}',
+            '#clinical-timelines path.wc-data-mark.ct-highlighted {' +
+                ('    stroke-width: ' + line.attributes['stroke-width'] * 1.5 + ';') +
+                '}',
             '#clinical-timelines line.ct-highlight-overlay {' +
                 '    clip-path: url(#1);' +
-                '    stroke-width: 3;' +
+                ('    stroke-width: ' + line.attributes['stroke-width'] / 2 + ';') +
                 '    stroke-linecap: round;' +
                 '}',
 
@@ -947,13 +955,13 @@
                 '}',
             '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +
                 '    stroke-opacity: 1;' +
-                '    stroke-width: 2;' +
+                ('    stroke-width: ' + circle.attributes['stroke-width'] + ';') +
                 '}',
 
             //Arrows
             '#clinical-timelines polygon.ct-ongoing-event {' + '    clip-path: url(#1);' + '}',
             '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
-                '    stroke-width: 3;' +
+                ('    stroke-width: ' + line.attributes['stroke-width'] / 3 + ';') +
                 '}',
 
             //Reference lines
@@ -2881,46 +2889,36 @@
             );
         });
         paths.each(function(d, i) {
-            var g = d3$1.select(this.parentNode),
-                x1 = context.x(context.config.time_function(d.values[0].key)),
-                x2 = context.x(context.config.time_function(d.values[1].key)),
-                y =
-                    context.y(
-                        d.values[0].values.raw[0][
-                            context.config.y.column === context.config.id_col
-                                ? context.config.id_col
-                                : context.config.seq_col
-                        ]
-                    ) +
-                    context.y.rangeBand() / 2,
-                color = context.config.event_highlight_color,
-                line = g
-                    .append('line')
-                    .classed('ct-highlight-overlay', true)
-                    .attr({
-                        x1: x1,
-                        x2: x2,
-                        y1: y,
-                        y2: y,
-                        stroke: color,
-                        'clip-path': 'url(#' + context.id + ')'
-                    });
-
-            if (d.ongoing === context.config.ongo_val) {
-                var arrow = [[x2 + 7, y], [x2, y - 2.5], [x2, y + 2.5]],
-                    polygon = g
-                        .append('polygon')
-                        .datum(d)
-                        .classed('ct-highlighted ct-ongoing-event', true)
-                        .attr({
-                            points: arrow
-                                .map(function(coordinate) {
-                                    return coordinate.join(',');
-                                })
-                                .join(' '),
-                            fill: color
-                        });
-            }
+            var g = d3$1.select(this.parentNode);
+            var x1 = context.x(context.config.time_function(d.values[0].key));
+            var x2 =
+                context.x(context.config.time_function(d.values[1].key)) +
+                (d.ongoing === 'Y'
+                    ? context.config.marks.find(function(mark) {
+                          return mark.type === 'line';
+                      }).attributes['stroke-width'] / 2
+                    : 0);
+            var y =
+                context.y(
+                    d.values[0].values.raw[0][
+                        context.config.y.column === context.config.id_col
+                            ? context.config.id_col
+                            : context.config.seq_col
+                    ]
+                ) +
+                context.y.rangeBand() / 2;
+            var color = context.config.event_highlight_color;
+            var line = g
+                .append('line')
+                .classed('ct-highlight-overlay', true)
+                .attr({
+                    x1: x1,
+                    x2: x2,
+                    y1: y,
+                    y2: y,
+                    stroke: color,
+                    'clip-path': 'url(#' + context.id + ')'
+                });
         });
 
         //Highlight circles.
@@ -2944,6 +2942,9 @@
 
         if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
             var context = this;
+            var lineSettings = this.config.marks.find(function(mark) {
+                return mark.type === 'line';
+            });
 
             this.svg.selectAll('.ct-ongoing-event').remove();
             this.svg
@@ -2952,27 +2953,40 @@
                     return d.ongoing === _this.config.ongo_val;
                 })
                 .each(function(d) {
-                    var g = d3$1.select(this),
-                        endpoint = d.values[1],
-                        x = context.x(context.config.time_function(endpoint.key)),
-                        y = context.y(endpoint.values.y) + context.y.rangeBand() / 2,
-                        color = context.colorScale(
-                            endpoint.values.raw[0][context.config.event_col]
-                        ),
-                        arrow = [[x + 8, y], [x, y - 3], [x, y + 3]];
+                    var g = d3$1.select(this);
+                    var endpoint = d.values[1];
+                    var x = context.x(context.config.time_function(endpoint.key));
+                    var y = context.y(endpoint.values.y) + context.y.rangeBand() / 2;
+                    var highlight = d.key.indexOf(context.config.event_highlighted) > -1;
+                    var length =
+                        x +
+                        (highlight
+                            ? lineSettings.attributes['stroke-width'] * 1.5
+                            : lineSettings.attributes['stroke-width'] * 1.5);
+                    var heightOffset = highlight
+                        ? lineSettings.attributes['stroke-width'] * 2 / 3
+                        : lineSettings.attributes['stroke-width'] * 2 / 3;
+                    var arrow = [[length, y], [x, y - heightOffset], [x, y + heightOffset]];
 
                     g
-                        .append('polygon')
+                        .insert('polygon', 'line')
                         .datum(d)
                         .classed('ct-ongoing-event', true)
+                        .classed('ct-highlighted', highlight)
                         .attr({
                             points: arrow
                                 .map(function(coordinate) {
                                     return coordinate.join(',');
                                 })
                                 .join(' '),
-                            fill: color,
-                            stroke: color,
+                            fill: highlight
+                                ? context.config.event_highlight_color
+                                : context.colorScale(
+                                      endpoint.values.raw[0][context.config.event_col]
+                                  ),
+                            stroke: context.colorScale(
+                                endpoint.values.raw[0][context.config.event_col]
+                            ),
                             'clip-path': 'url(#' + context.id + ')'
                         });
                 });

@@ -20,7 +20,10 @@ export default function controlGroupLayout() {
                 .insert('div', ':first-child')
                 .classed('ct-controls ct-horizontal-rule', true)
                 .text('Controls');
-        else if (d.option === 'y.grouping') {
+        else if (
+            (context.config.groupings.length && d.option === 'y.grouping') ||
+            (!context.config.groupings.length && d.option === 'y.sort')
+        ) {
             const filterRule = context.controls.wrap
                 .append('div')
                 .classed('ct-filters ct-horizontal-rule', true)

@@ -714,16 +714,25 @@
                 filter.description = filter.label;
                 filter.label = '';
 
-                if (filter.value_col === settings.id_col) {
-                    filter.label = '';
+                //Update ID filter.
+                if (filter.value_col === settings.id_col)
                     filter.description = settings.id_unitPropCased + ' view';
-                }
 
+                //Update event type filter.
                 if (filter.value_col === settings.event_col) {
                     filter.multiple = true;
                     filter.start = settings.event_types;
                 }
             });
+
+        //Remove groupings control if no groupings are specified.
+        if (settings.groupings.length === 0)
+            controls.splice(
+                controls.findIndex(function(control) {
+                    return control.option === 'y.grouping';
+                }),
+                1
+            );
 
         var syncedControls = d3.merge([
             [settings.filters[0]], // ID dropdown first
@@ -1826,7 +1835,10 @@
                     .insert('div', ':first-child')
                     .classed('ct-controls ct-horizontal-rule', true)
                     .text('Controls');
-            else if (d.option === 'y.grouping') {
+            else if (
+                (context.config.groupings.length && d.option === 'y.grouping') ||
+                (!context.config.groupings.length && d.option === 'y.sort')
+            ) {
                 var filterRule = context.controls.wrap
                     .append('div')
                     .classed('ct-filters ct-horizontal-rule', true)

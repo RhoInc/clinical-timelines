@@ -1,11 +1,23 @@
+//polyfills and utility functions
+import './util/number-isinteger';
+import './util/object-assign';
+import './util/array-find';
+import merge from './util/merge';
+import clone from './util/clone';
+
+//setup functions
 import defineSettings from './defineSettings';
 import defineStyles from './defineStyles';
 import defineLayout from './defineLayout';
+import recurse from './recurse';
+
+//components
 import controls from './controls';
 import timelines from './timelines/index';
 import IDtimeline from './IDtimeline/index';
 import listing from './listing/index';
-import recurse from './recurse';
+
+//initialization method
 import init from './init';
 
 export default function clinicalTimelines(element = 'body', settings = {}, dom) {
@@ -17,7 +29,7 @@ export default function clinicalTimelines(element = 'body', settings = {}, dom) 
         containers: {},
         init: init,
         test: !!dom,
-        dom: dom
+        document: dom ? dom.window.document : document
     };
 
     //Merge and sync settings.

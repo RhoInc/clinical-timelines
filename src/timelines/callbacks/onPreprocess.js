@@ -21,7 +21,7 @@ export default function onPreprocess() {
     //Define data inside time range.
     defineDataInsideTimeRange.call(this);
 
-    //Insert groupings into data to draw empty rows in which to draw groupings.
+    //Insert dummy grouping data into data array to draw empty rows in which to annotate groupings.
     defineGroupingData.call(this);
 
     //Sort y-axis based on `Sort IDs` control selection.

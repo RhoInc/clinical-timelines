@@ -5,6 +5,9 @@ export default function handleEventTypes() {
         .values()
         .sort();
     this.currentEventTypes = this.config.event_types || this.allEventTypes;
+    this.controls.config.inputs.find(
+        input => input.description === 'Event Type'
+    ).start = this.currentEventTypes;
     this.config.color_dom = this.currentEventTypes.concat(
         this.allEventTypes
             .filter(eventType => this.currentEventTypes.indexOf(eventType) === -1)

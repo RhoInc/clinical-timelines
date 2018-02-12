@@ -33,7 +33,7 @@ describe('clinical-timelines object creation', () => {
                     properties = [
                         'element',
                         'settings',
-                        'dom',
+                        'document',
                         'containers',
                         'init',
                         'controls',
@@ -139,10 +139,20 @@ describe('clinical-timelines object creation', () => {
                             expect(dom.window.document.querySelector('#clinical-timelines #ct-left-column #ct-details #ct-population-details')).toBeTruthy();
                         });
 
+                          //Export button
+                            it('        - contains an export button', () => {
+                                expect(dom.window.document.querySelector('#clinical-timelines #ct-left-column #ct-details #ct-population-details #ct-export-button')).toBeTruthy();
+                            });
+
                       //ID details
                         it('      - contains a div in which to print ID details', () => {
                             expect(dom.window.document.querySelector('#clinical-timelines #ct-left-column #ct-details #ct-ID-details')).toBeTruthy();
                         });
+
+                          //Back button
+                            it('        - contains a back button', () => {
+                                expect(dom.window.document.querySelector('#clinical-timelines #ct-left-column #ct-details #ct-ID-details #ct-back-button')).toBeTruthy();
+                            });
 
                   //controls
                     it('    - contains a div in which to place the controls', () => {

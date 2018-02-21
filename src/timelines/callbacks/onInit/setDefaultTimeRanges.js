@@ -22,7 +22,7 @@ export default function setDefaultTimeRanges() {
                   date =>
                       date instanceof Date ? date : time.format(this.config.date_format).parse(date)
               )
-            : this.full_date_range;
+            : this.full_date_range.slice();
 
     //Day range
     this.full_day_range = [
@@ -35,5 +35,5 @@ export default function setDefaultTimeRanges() {
         this.config.day_range[0].toString() !== this.config.day_range[1].toString() &&
         this.config.day_range.every(day => Number.isInteger(+day))
             ? this.config.day_range.map(day => +day)
-            : this.full_day_range;
+            : this.full_day_range.slice();
 }

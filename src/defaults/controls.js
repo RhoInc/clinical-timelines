@@ -17,6 +17,15 @@ export default [
     },
     {
         type: 'dropdown',
+        option: 'time_range',
+        values: ['full', 'custom'],
+        relabels: ['Full', 'Custom'],
+        label: '',
+        description: 'Time range',
+        require: true
+    },
+    {
+        type: 'dropdown',
         option: 'y.sort',
         label: '',
         description: 'Y-axis sort',

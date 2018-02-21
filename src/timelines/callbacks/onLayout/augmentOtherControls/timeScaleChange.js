@@ -11,6 +11,7 @@ export default function timeScaleChange(dropdown, d) {
         .text();
     syncTimeScaleSettings(this.config);
     this.time_range = this.config.time_scale === 'day' ? this.day_range : this.date_range;
+    this.full_time_range = this.config.time_scale === 'day' ? this.full_day_range : this.full_date_range;
 
     //Update ID timeline time scale settings
     this.IDtimeline.config.time_scale = this.config.time_scale;

@@ -6,13 +6,29 @@ import defineData from '../../functions/defineData';
 import drawIDtimeline from '../../functions/drawIDtimeline';
 
 export default function timeScale(dropdown, d) {
+    const context = this;
+
     //Update clinical timelines time scale settings
     this.config.time_scale = select(dropdown)
         .select('option:checked')
         .text();
     syncTimeScaleSettings(this.config);
-    this.time_range = this.config.time_scale === 'date' ? this.date_range : this.day_range;
-    this.full_time_range = this.config.time_scale === 'date' ? this.full_date_range : this.full_day_range;
+
+    //Update time range settings.
+    this.config.time_range = this[this.config.time_scale + '_time_range'];
+    if (
+        this.controls.config.inputs
+            .find(input => input.option === 'time_range')
+            .values.indexOf(this.config.time_range) < 0
+    )
+        this.config.time_range = 'custom';
+    this[this.time_scale + '_time_range'] = this.config.time_range;
+    this.time_range = this[this.config.time_scale + '_range'];
+    this.full_time_range = this['full_' + this.config.time_scale + '_range'];
+
+    this.controls.wrap.selectAll('#control-time_range option').property('selected', function() {
+        return context.config.time_range === this.value;
+    });
 
     //Hide time ranges that represent the other time scale.
     hideInvalidTimeRangeOptions.call(this);

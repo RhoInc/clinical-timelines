@@ -2,7 +2,13 @@ import { set } from 'd3';
 import manipulateData from './onInit/manipulateData';
 import cleanData from './functions/cleanData';
 import defineData from './functions/defineData';
-import setDefaultTimeRanges from './onInit/setDefaultTimeRanges';
+
+//time range functions
+import defineFullTimeRanges from './onInit/defineFullTimeRanges';
+import defineInitialTimeRanges from './onInit/defineInitialTimeRanges';
+import syncTimeRanges from './onInit/syncTimeRanges';
+import updateTimeRangeControl from './onInit/updateTimeRangeControl';
+
 import handleEventTypes from './onInit/handleEventTypes';
 import checkOtherControls from './onInit/checkOtherControls';
 import checkFilters from './onInit/checkFilters';
@@ -47,8 +53,17 @@ export default function onInit() {
     //Check filters for non-existent or single-value variables.
     checkFilters.call(this);
 
-    //Set default time ranges.
-    setDefaultTimeRanges.call(this);
+    //Calculate extent of each time scale.
+    defineFullTimeRanges.call(this);
+
+    //Set initial range of each time scale.
+    defineInitialTimeRanges.call(this);
+
+    //Sync time range variables given initial time scale.
+    syncTimeRanges.call(this);
+
+    //Add time ranges to time range control.
+    updateTimeRangeControl.call(this);
 
     //Add data-driven tooltips.
     addDataDrivenTooltips.call(this);

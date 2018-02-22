@@ -9,19 +9,17 @@ export default [
     {
         type: 'dropdown',
         option: 'time_scale',
-        values: ['date', 'day'],
-        relabels: ['Date', 'Day'],
         label: '',
         description: 'X-axis scale',
+        values: ['date', 'day'],
         require: true
     },
     {
         type: 'dropdown',
         option: 'time_range',
-        values: ['full', 'custom'],
-        relabels: ['Full', 'Custom'],
         label: '',
         description: 'Time range',
+        values: ['custom'], // set in onInit() callback
         require: true
     },
     {

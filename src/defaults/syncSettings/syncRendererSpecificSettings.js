@@ -1,9 +1,13 @@
 import arrayOfVariablesCheck from './arrayOfVariablesCheck';
-import '../../util/number-isinteger';
 import { time } from 'd3';
 
 export default function syncRendererSpecificSettings(settings) {
-    //ID settings
+
+    /**-------------------------------------------------------------------------------------------\
+      ID settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //id_unit
     settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
     settings.id_unitPropCased =
         settings.id_unit.substring(0, 1).toUpperCase() +
@@ -11,6 +15,8 @@ export default function syncRendererSpecificSettings(settings) {
     settings.id_unitPlural = /y$/.test(settings.id_unit)
         ? settings.id_unit.substring(0, settings.id_unit.length - 1) + 'ies'
         : settings.id_unit + 's';
+
+    //id_characteristics
     const defaultID_characteristics = [
         { value_col: settings.id_col, label: settings.id_unitPropCased }
     ];
@@ -19,11 +25,19 @@ export default function syncRendererSpecificSettings(settings) {
         settings.id_characteristics
     );
 
-    //Event settings
+    /**-------------------------------------------------------------------------------------------\
+      Event settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //event_types
     if (!(settings.event_types instanceof Array && settings.event_types.length))
         delete settings.event_types;
 
-    //Filter settings
+    /**-------------------------------------------------------------------------------------------\
+      Filter settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //filters
     const defaultFilters = [
         { value_col: settings.id_col, label: settings.id_unitPropCased },
         { value_col: settings.event_col, label: 'Event Type' }
@@ -32,16 +46,79 @@ export default function syncRendererSpecificSettings(settings) {
         defaultFilters.splice(2, 0, { value_col: settings.ongo_col, label: 'Ongoing?' });
     settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
-    //Grouping settings
+    /**-------------------------------------------------------------------------------------------\
+      Grouping settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //groupings
     const defaultGroupings = [];
     settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
+
+    //grouping direction
     if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
         settings.grouping_direction = 'horizontal';
 
-    //Time settings
+    /**-------------------------------------------------------------------------------------------\
+      Timing settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //time_scale
+    settings.time_scale =
+        ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
+            ? settings.time_scale.toLowerCase()
+            : 'date';
+
+    //date_display_format
     settings.date_display_format = settings.date_display_format || settings.date_format;
 
-    //Reference line settings
+    //date_ranges
+    if (settings.date_range && settings.date_ranges === null)
+        settings.date_ranges = [settings.date_range];
+    settings.date_ranges = settings.date_ranges
+        .filter(date_range => (
+            date_range instanceof Array &&
+            date_range.length === 2 &&
+            date_range[0].toString() !== date_range[1].toString() &&
+            date_range.every(
+                date => date instanceof Date || time.format(settings.date_format).parse(date)
+            )
+        ))
+        .map(date_range => {
+            return {
+                time_scale: 'date',
+                domain: date_range
+                    .map(date => (
+                        date instanceof Date
+                            ? date
+                            : time.format(settings.date_format).parse(date)
+                    )),
+                time_range: date_range.join(' - ')
+            };
+        });
+
+    //day_ranges
+    if (settings.day_range && settings.day_ranges === null)
+        settings.day_ranges = [settings.day_range];
+    settings.day_ranges = settings.day_ranges
+        .filter(day_range => (
+            day_range instanceof Array &&
+            day_range.length === 2 &&
+            day_range[0].toString() !== day_range[1].toString() &&
+            day_range.every(day => Number.isInteger(+day))
+        ))
+        .map(day_range => {
+            return {
+                time_scale: 'day',
+                domain: day_range,
+                time_range: day_range.join(' - ')
+            };
+        });
+
+    /**-------------------------------------------------------------------------------------------\
+      Miscellaneous settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //reference_lines
     if (settings.reference_lines) {
         if (!(settings.reference_lines instanceof Array))
             settings.reference_lines = [settings.reference_lines];
@@ -82,10 +159,10 @@ export default function syncRendererSpecificSettings(settings) {
     }
 
     /**-------------------------------------------------------------------------------------------\
-      Define listing columns.
+      Listing settings
     \-------------------------------------------------------------------------------------------**/
 
-    //defaults
+    //details
     const defaultDetails = [
         { value_col: settings.event_col, label: 'Event Type' },
         { value_col: 'stdtdy', label: `Start Date (Day)` },

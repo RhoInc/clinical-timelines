@@ -1,11 +1,6 @@
 import { format, time } from 'd3';
 
 export default function syncTimeScaleSettings(settings) {
-    //Coerce invalid time scale arguments.
-    settings.time_scale =
-        ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
-            ? settings.time_scale.toLowerCase()
-            : 'date';
     settings.time_scalePropCased =
         settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
 

@@ -1,6 +1,7 @@
 import { select } from 'd3';
-import eventHighlightingChange from './augmentOtherControls/eventHighlightingChange';
-import timeScaleChange from './augmentOtherControls/timeScaleChange';
+import eventHighlighting from './augmentOtherControls/eventHighlighting';
+import timeScale from './augmentOtherControls/timeScale';
+import timeRange from './augmentOtherControls/timeRange';
 import yAxisGrouping from './augmentOtherControls/yAxisGrouping';
 
 export default function augmentOtherControls() {
@@ -42,7 +43,7 @@ export default function augmentOtherControls() {
         .filter(d => d.option === 'event_highlighted')
         .select('select')
         .on('change', function(d) {
-            eventHighlightingChange.call(context, this, d);
+            eventHighlighting.call(context, this, d);
         });
 
     //Redefine time scale event listener.
@@ -50,7 +51,15 @@ export default function augmentOtherControls() {
         .filter(d => d.option === 'time_scale')
         .select('select')
         .on('change', function(d) {
-            timeScaleChange.call(context, this, d);
+            timeScale.call(context, this, d);
+        });
+
+    //Redefine time range event listener.
+    otherControls
+        .filter(d => d.option === 'time_range')
+        .select('select')
+        .on('change', function(d) {
+            timeRange.call(context, this, d);
         });
 
     //Redefine y-axis grouping event listener.

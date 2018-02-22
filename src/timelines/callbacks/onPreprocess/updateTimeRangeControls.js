@@ -15,7 +15,7 @@ export default function updateTimeRangeControls() {
         'value',
         d =>
             this.config.time_scale === 'date'
-                ? time.format('%Y-%m-%d')(this.time_range[d.index])
+                ? time.format(this.config.date_format)(this.time_range[d.index])
                 : +this.time_range[d.index]
     );
 }

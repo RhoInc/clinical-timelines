@@ -9,8 +9,8 @@ export default [
     {
         type: 'dropdown',
         option: 'time_scale',
-        values: ['day', 'date'],
-        relabels: ['Day', 'Date'],
+        values: ['date', 'day'],
+        relabels: ['Date', 'Day'],
         label: '',
         description: 'X-axis scale',
         require: true

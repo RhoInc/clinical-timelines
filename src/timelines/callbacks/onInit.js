@@ -49,8 +49,6 @@ export default function onInit() {
 
     //Set default time ranges.
     setDefaultTimeRanges.call(this);
-    this.time_range = this.config.time_scale === 'day' ? this.day_range.slice() : this.date_range.slice();
-    this.full_time_range = this.config.time_scale === 'day' ? this.full_day_range.slice() : this.full_date_range.slice();
 
     //Add data-driven tooltips.
     addDataDrivenTooltips.call(this);

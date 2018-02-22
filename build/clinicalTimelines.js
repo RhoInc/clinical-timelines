@@ -562,8 +562,8 @@ var controls = [{
 }, {
     type: 'dropdown',
     option: 'time_scale',
-    values: ['day', 'date'],
-    relabels: ['Day', 'Date'],
+    values: ['date', 'day'],
+    relabels: ['Date', 'Day'],
     label: '',
     description: 'X-axis scale',
     require: true
@@ -1075,11 +1075,17 @@ function setDefaultTimeRanges() {
     }), d3.max(this.initial_data, function (d) {
         return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
     })];
-    this.date_range = this.config.date_range instanceof Array && this.config.date_range.length === 2 && this.config.date_range[0].toString() !== this.config.date_range[1].toString() && this.config.date_range.every(function (date) {
+    if (this.config.date_range instanceof Array && this.config.date_range.length === 2 && this.config.date_range[0].toString() !== this.config.date_range[1].toString() && this.config.date_range.every(function (date) {
         return date instanceof Date || d3.time.format(_this.config.date_format).parse(date);
-    }) ? this.config.date_range.map(function (date) {
-        return date instanceof Date ? date : d3.time.format(_this.config.date_format).parse(date);
-    }) : this.full_date_range.slice();
+    })) {
+        this.date_range = this.config.date_range.map(function (date) {
+            return date instanceof Date ? date : d3.time.format(_this.config.date_format).parse(date);
+        });
+        this.date_time_range = this.config.date_range.join(' - ');
+        this.controls.config.inputs.find(function (input) {
+            return input.option === 'time_range';
+        }).values.push(this.date_time_range);
+    } else this.date_range = this.full_date_range.slice();
 
     //Day range
     this.full_day_range = [d3.min(this.initial_data, function (d) {
@@ -1087,11 +1093,28 @@ function setDefaultTimeRanges() {
     }), d3.max(this.initial_data, function (d) {
         return +d[_this.config.endy_col];
     })];
-    this.day_range = this.config.day_range instanceof Array && this.config.day_range.length === 2 && this.config.day_range[0].toString() !== this.config.day_range[1].toString() && this.config.day_range.every(function (day) {
+    if (this.config.day_range instanceof Array && this.config.day_range.length === 2 && this.config.day_range[0].toString() !== this.config.day_range[1].toString() && this.config.day_range.every(function (day) {
         return Number.isInteger(+day);
-    }) ? this.config.day_range.map(function (day) {
-        return +day;
-    }) : this.full_day_range.slice();
+    })) {
+        this.day_range = this.config.day_range.map(function (day) {
+            return +day;
+        });
+        this.day_time_range = this.config.day_range.join(' - ');
+        this.controls.config.inputs.find(function (input) {
+            return input.option === 'time_range';
+        }).values.push(this.day_time_range);
+    } else this.day_range = this.full_day_range.slice();
+
+    //Update time range settings.
+    if (this.config.time_scale === 'date') {
+        this.time_range = this.date_range.slice();
+        this.full_time_range = this.full_date_range.slice();
+        this.config.time_range = this.date_time_range;
+    } else {
+        this.time_range = this.day_range.slice();
+        this.full_time_range = this.full_day_range.slice();
+        this.config.time_range = this.day_time_range;
+    }
 }
 
 function handleEventTypes() {
@@ -1237,8 +1260,6 @@ function onInit() {
 
     //Set default time ranges.
     setDefaultTimeRanges.call(this);
-    this.time_range = this.config.time_scale === 'day' ? this.day_range.slice() : this.date_range.slice();
-    this.full_time_range = this.config.time_scale === 'day' ? this.full_day_range.slice() : this.full_date_range.slice();
 
     //Add data-driven tooltips.
     addDataDrivenTooltips.call(this);
@@ -1324,7 +1345,7 @@ function drawIDtimeline() {
     }), clinicalTimelines.test);
 }
 
-function eventHighlightingChange(select$$1, d) {
+function eventHighlighting(select$$1, d) {
     //Update event highlighting settings.
     this.config.event_highlighted = d3.select(select$$1).select('option:checked').text();
     this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
@@ -1333,16 +1354,55 @@ function eventHighlightingChange(select$$1, d) {
     if (this.selected_id) drawIDtimeline.call(this);else this.draw();
 }
 
-function timeScaleChange(dropdown, d) {
+function hideInvalidTimeRangeOptions() {
+    var context = this;
+
+    this.controls.wrap.selectAll('#control-time_range option').classed('ct-hidden', function () {
+        var split = this.value.split(' - ');
+
+        if (split.length === 2) {
+            return context.config.time_scale === 'date' && /^\d+$/.test(split[0]) || context.config.time_scale === 'day' && d3.time.format(context.config.date_format).parse(split[0]);
+        }
+
+        return false;
+    });
+}
+
+function timeScale(dropdown, d) {
     //Update clinical timelines time scale settings
     this.config.time_scale = d3.select(dropdown).select('option:checked').text();
     syncTimeScaleSettings(this.config);
-    this.time_range = this.config.time_scale === 'day' ? this.day_range : this.date_range;
-    this.full_time_range = this.config.time_scale === 'day' ? this.full_day_range : this.full_date_range;
+    this.time_range = this.config.time_scale === 'date' ? this.date_range : this.day_range;
+    this.full_time_range = this.config.time_scale === 'date' ? this.full_date_range : this.full_day_range;
+
+    //Hide time ranges that represent the other time scale.
+    hideInvalidTimeRangeOptions.call(this);
 
     //Update ID timeline time scale settings
     this.IDtimeline.config.time_scale = this.config.time_scale;
     syncTimeScaleSettings(this.IDtimeline.config);
+
+    //Remove records without time data.
+    cleanData.call(this);
+
+    //Redefine data.
+    defineData.call(this);
+
+    //Redraw.
+    if (this.selected_id) drawIDtimeline.call(this);else this.draw();
+}
+
+function timeRange(dropdown, d) {
+    var _this = this;
+
+    //Update clinical timelines time scale settings
+    this.config.time_range = d3.select(dropdown).select('option:checked').text();
+
+    //Update time_range setting.
+    if (this.config.time_range === 'full') this.time_range = this.full_time_range;else if (this.config.time_range !== 'custom') this.time_range = this.config.time_range.split(' - ').map(function (d) {
+        return _this.config.time_function(d.replace(/^ *| *$/, ''));
+    });
+    this[this.config.time_scale + '_range'] = this.time_range;
 
     //Remove records without time data.
     cleanData.call(this);
@@ -1404,14 +1464,21 @@ function augmentOtherControls() {
     otherControls.filter(function (d) {
         return d.option === 'event_highlighted';
     }).select('select').on('change', function (d) {
-        eventHighlightingChange.call(context, this, d);
+        eventHighlighting.call(context, this, d);
     });
 
     //Redefine time scale event listener.
     otherControls.filter(function (d) {
         return d.option === 'time_scale';
     }).select('select').on('change', function (d) {
-        timeScaleChange.call(context, this, d);
+        timeScale.call(context, this, d);
+    });
+
+    //Redefine time range event listener.
+    otherControls.filter(function (d) {
+        return d.option === 'time_range';
+    }).select('select').on('change', function (d) {
+        timeRange.call(context, this, d);
     });
 
     //Redefine y-axis grouping event listener.
@@ -1431,12 +1498,11 @@ function onChange(input, d) {
 
     this[time_range][d.index] = inputValue;
     this.time_range = this[time_range];
-    console.log(this.full_date_range);
 
     if (+this.time_range[0] === +this.full_time_range[0] && +this.time_range[1] === +this.full_time_range[1]) {
-        console.log('equal');
+        this.config.time_range = 'full';
     } else {
-        console.log('different');
+        this.config.time_range = 'custom';
     }
 
     this.draw();
@@ -1577,6 +1643,9 @@ function onLayout() {
     //Add additional functionality to other control event listeners.
     augmentOtherControls.call(this);
 
+    //Hide time ranges that represent the other time scale.
+    hideInvalidTimeRangeOptions.call(this);
+
     //Add time range functionality.
     addTimeRangeControls.call(this);
 
@@ -1596,7 +1665,7 @@ function updateTimeRangeControls() {
     timeRangeControls.property('type', !this.clinicalTimelines.document.documentMode ? this.config.time_scale === 'date' ? 'date' : 'number' : 'text');
 
     timeRangeControls.property('value', function (d) {
-        return _this.config.time_scale === 'date' ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index]) : +_this.time_range[d.index];
+        return _this.config.time_scale === 'date' ? d3.time.format(_this.config.date_format)(_this.time_range[d.index]) : +_this.time_range[d.index];
     });
 }
 
@@ -2755,9 +2824,6 @@ function init(data) {
 }
 
 //polyfills and utility functions
-//setup functions
-//components
-//initialization method
 function clinicalTimelines$1() {
     var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
     var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};

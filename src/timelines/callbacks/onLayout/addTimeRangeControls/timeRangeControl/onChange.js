@@ -21,12 +21,11 @@ export default function onChange(input, d) {
 
     this[time_range][d.index] = inputValue;
     this.time_range = this[time_range];
-    console.log(this.full_date_range);
 
     if (+this.time_range[0] === +this.full_time_range[0] && +this.time_range[1] === +this.full_time_range[1]) {
-        console.log('equal');
+        this.config.time_range = 'full';
     } else {
-        console.log('different');
+        this.config.time_range = 'custom';
     }
 
     this.draw();

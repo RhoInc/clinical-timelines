@@ -81,16 +81,18 @@ export default function syncRendererSpecificSettings(settings) {
                     date_range.length === 2 &&
                     date_range[0].toString() !== date_range[1].toString() &&
                     date_range.every(
-                        date => date instanceof Date || time.format(settings.date_format).parse(date)
+                        date =>
+                            date instanceof Date || time.format(settings.date_format).parse(date)
                     )
             )
             .map(date_range => {
                 return {
-                    label: date_range.map(
-                        date =>
-                            date instanceof Date
-                                ? time.format(settings.date_display_format)(date)
-                                : date
+                    label: date_range
+                        .map(
+                            date =>
+                                date instanceof Date
+                                    ? time.format(settings.date_display_format)(date)
+                                    : date
                         )
                         .join(' - '),
                     domain: date_range.map(
@@ -98,18 +100,18 @@ export default function syncRendererSpecificSettings(settings) {
                             date instanceof Date
                                 ? date
                                 : time.format(settings.date_format).parse(date)
-                        ),
-                    time_range: date_range.map(
-                        date =>
-                            date instanceof Date
-                                ? time.format(settings.date_format)(date)
-                                : date
+                    ),
+                    time_range: date_range
+                        .map(
+                            date =>
+                                date instanceof Date
+                                    ? time.format(settings.date_format)(date)
+                                    : date
                         )
                         .join(' - ')
                 };
             });
-    else
-        settings.date_ranges = [];
+    else settings.date_ranges = [];
 
     //day_ranges
     if (settings.day_range && settings.day_ranges === null)
@@ -130,8 +132,7 @@ export default function syncRendererSpecificSettings(settings) {
                     time_range: day_range.join(' - ')
                 };
             });
-    else
-        settings.day_ranges = [];
+    else settings.day_ranges = [];
 
     /**-------------------------------------------------------------------------------------------\
       Miscellaneous settings
@@ -159,9 +160,9 @@ export default function syncRendererSpecificSettings(settings) {
                 referenceLineObject.label = reference_line.label
                     ? reference_line.label
                     : `${referenceLineObject.time_scale.substring(0, 1).toUpperCase() +
-                          referenceLineObject.time_scale.substring(
-                              1
-                          )}: ${referenceLineObject.timepoint}`;
+                          referenceLineObject.time_scale.substring(1)}: ${
+                          referenceLineObject.timepoint
+                      }`;
 
                 return referenceLineObject;
             })

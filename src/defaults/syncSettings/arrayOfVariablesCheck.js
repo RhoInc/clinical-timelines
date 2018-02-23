@@ -12,9 +12,8 @@ export default function arrayOfVariablesCheck(defaultVariables, userDefinedVaria
                               -1
                   )
               ]).map(item => {
-                  const itemObject = item instanceof Object
-                    ? Object.assign({}, item)
-                    : {value_col: item};
+                  const itemObject =
+                      item instanceof Object ? Object.assign({}, item) : { value_col: item };
 
                   itemObject.label = itemObject.label || itemObject.value_col;
 

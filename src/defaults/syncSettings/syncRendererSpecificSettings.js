@@ -2,7 +2,6 @@ import arrayOfVariablesCheck from './arrayOfVariablesCheck';
 import { time } from 'd3';
 
 export default function syncRendererSpecificSettings(settings) {
-
     /**-------------------------------------------------------------------------------------------\
       ID settings
     \-------------------------------------------------------------------------------------------**/
@@ -75,23 +74,22 @@ export default function syncRendererSpecificSettings(settings) {
     if (settings.date_range && settings.date_ranges === null)
         settings.date_ranges = [settings.date_range];
     settings.date_ranges = settings.date_ranges
-        .filter(date_range => (
-            date_range instanceof Array &&
-            date_range.length === 2 &&
-            date_range[0].toString() !== date_range[1].toString() &&
-            date_range.every(
-                date => date instanceof Date || time.format(settings.date_format).parse(date)
-            )
-        ))
+        .filter(
+            date_range =>
+                date_range instanceof Array &&
+                date_range.length === 2 &&
+                date_range[0].toString() !== date_range[1].toString() &&
+                date_range.every(
+                    date => date instanceof Date || time.format(settings.date_format).parse(date)
+                )
+        )
         .map(date_range => {
             return {
-                time_scale: 'date',
-                domain: date_range
-                    .map(date => (
-                        date instanceof Date
-                            ? date
-                            : time.format(settings.date_format).parse(date)
-                    )),
+                label: date_range.join(' - '),
+                domain: date_range.map(
+                    date =>
+                        date instanceof Date ? date : time.format(settings.date_format).parse(date)
+                ),
                 time_range: date_range.join(' - ')
             };
         });
@@ -100,15 +98,16 @@ export default function syncRendererSpecificSettings(settings) {
     if (settings.day_range && settings.day_ranges === null)
         settings.day_ranges = [settings.day_range];
     settings.day_ranges = settings.day_ranges
-        .filter(day_range => (
-            day_range instanceof Array &&
-            day_range.length === 2 &&
-            day_range[0].toString() !== day_range[1].toString() &&
-            day_range.every(day => Number.isInteger(+day))
-        ))
+        .filter(
+            day_range =>
+                day_range instanceof Array &&
+                day_range.length === 2 &&
+                day_range[0].toString() !== day_range[1].toString() &&
+                day_range.every(day => Number.isInteger(+day))
+        )
         .map(day_range => {
             return {
-                time_scale: 'day',
+                label: day_range.join(' - '),
                 domain: day_range,
                 time_range: day_range.join(' - ')
             };
@@ -140,9 +139,9 @@ export default function syncRendererSpecificSettings(settings) {
                 referenceLineObject.label = reference_line.label
                     ? reference_line.label
                     : `${referenceLineObject.time_scale.substring(0, 1).toUpperCase() +
-                          referenceLineObject.time_scale.substring(1)}: ${
-                          referenceLineObject.timepoint
-                      }`;
+                          referenceLineObject.time_scale.substring(
+                              1
+                          )}: ${referenceLineObject.timepoint}`;
 
                 return referenceLineObject;
             })

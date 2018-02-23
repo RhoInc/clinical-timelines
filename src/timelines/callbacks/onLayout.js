@@ -1,7 +1,7 @@
 import IDdetails from './onLayout/IDdetails';
 import controlGroupLayout from './onLayout/controlGroupLayout';
 import augmentOtherControls from './onLayout/augmentOtherControls';
-import hideInvalidTimeRangeOptions from './onLayout/hideInvalidTimeRangeOptions';
+import hideTimeRangeControl from './onLayout/hideTimeRangeControl';
 import addTimeRangeControls from './onlayout/addTimeRangeControls';
 import augmentFilters from './onLayout/augmentFilters';
 import topXaxis from './onLayout/topXaxis';
@@ -16,8 +16,8 @@ export default function onLayout() {
     //Add additional functionality to other control event listeners.
     augmentOtherControls.call(this);
 
-    //Hide time ranges that represent the other time scale.
-    hideInvalidTimeRangeOptions.call(this);
+    //Hide other time range dropdown.
+    hideTimeRangeControl.call(this);
 
     //Add time range functionality.
     addTimeRangeControls.call(this);

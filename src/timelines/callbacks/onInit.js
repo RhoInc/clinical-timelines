@@ -1,76 +1,25 @@
-import { set } from 'd3';
-import manipulateData from './onInit/manipulateData';
+import getPopulationDetails from './onInit/getPopulationDetails';
+import removeInvalidData from './onInit/removeInvalidData';
+import attachDataToControls from './onInit/attachDataToControls';
+import standardizeTimeVariables from './onInit/standardizeTimeVariables';
+import handleEventTypes from './onInit/handleEventTypes';
+import handleTimeRanges from './onInit/handleTimeRanges';
+import checkControls from './onInit/checkControls';
+import updateTooltipSettings from './onInit/updateTooltipSettings';
+
 import cleanData from './functions/cleanData';
 import defineData from './functions/defineData';
 
-//time range functions
-import defineFullTimeRanges from './onInit/defineFullTimeRanges';
-import defineInitialTimeRanges from './onInit/defineInitialTimeRanges';
-import syncTimeRanges from './onInit/syncTimeRanges';
-import updateTimeRangeControl from './onInit/updateTimeRangeControl';
-
-import handleEventTypes from './onInit/handleEventTypes';
-import checkOtherControls from './onInit/checkOtherControls';
-import checkFilters from './onInit/checkFilters';
-import addDataDrivenTooltips from './onInit/addDataDrivenTooltips';
-
 export default function onInit() {
-    //Capture and count all IDs in data.
-    this.populationDetails = {
-        population: set(this.raw_data.map(d => d[this.config.id_col])).values()
-    };
-    this.populationDetails.N = this.populationDetails.population.length;
-
-    //Instantiate ID details.
-    this.IDdetails = {};
-
-    //Retain initial data array, removing records with missing key variables.
-    this.initial_data = this.raw_data.filter(
-        d => !/^\s*$/.test(d[this.config.id_col]) && !/^\s*$/.test(d[this.config.event_col])
-    );
-
-    //Manually set controls' data.
-    this.controls.data = this.initial_data;
-    this.controls.ready = true;
-
-    //Warn user of removed records.
-    if (this.initial_data.length < this.raw_data.length)
-        console.warn(
-            `${this.raw_data.length -
-                this.initial_data
-                    .length} records have been removed due to missing identifiers or event types.`
-        );
-
-    //Standardize invalid day and date values.
-    manipulateData.call(this);
-
-    //Default event types to 'All'.
+    getPopulationDetails.call(this);
+    removeInvalidData.call(this);
+    attachDataToControls.call(this);
+    standardizeTimeVariables.call(this);
     handleEventTypes.call(this);
+    handleTimeRanges.call(this);
+    checkControls.call(this);
+    updateTooltipSettings.call(this);
 
-    //Check other control inputs.
-    checkOtherControls.call(this);
-
-    //Check filters for non-existent or single-value variables.
-    checkFilters.call(this);
-
-    //Calculate extent of each time scale.
-    defineFullTimeRanges.call(this);
-
-    //Set initial range of each time scale.
-    defineInitialTimeRanges.call(this);
-
-    //Sync time range variables given initial time scale.
-    syncTimeRanges.call(this);
-
-    //Add time ranges to time range control.
-    updateTimeRangeControl.call(this);
-
-    //Add data-driven tooltips.
-    addDataDrivenTooltips.call(this);
-
-    //Remove unusable data.
     cleanData.call(this);
-
-    //Define a record for each start day and stop day.
     defineData.call(this);
 }

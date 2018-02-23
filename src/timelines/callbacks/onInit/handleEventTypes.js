@@ -1,5 +1,6 @@
 import { set } from 'd3';
 
+//Capture all event types in array and define color domain as well as event type order.
 export default function handleEventTypes() {
     this.allEventTypes = set(this.initial_data.map(d => d[this.config.event_col]))
         .values()

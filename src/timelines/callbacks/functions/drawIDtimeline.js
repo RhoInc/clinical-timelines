@@ -20,18 +20,19 @@ export default function drawIDtimeline() {
         const id_characteristics = this.initial_data.filter(
             d => d[this.config.id_col] === this.selected_id
         )[0];
-        this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(function(
-            d
-        ) {
-            select(this)
-                .select('span')
-                .text(id_characteristics[d.value_col]);
-        });
+        this.clinicalTimelines.containers.IDdetails
+            .selectAll('.ct-characteristic')
+            .each(function(d) {
+                select(this)
+                    .select('span')
+                    .text(id_characteristics[d.value_col]);
+            });
     }
 
     //Draw ID timeline.
     this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-    this.clinicalTimelines.containers.IDtimeline.select('div')
+    this.clinicalTimelines.containers.IDtimeline
+        .select('div')
         .selectAll('*')
         .remove();
     multiply(

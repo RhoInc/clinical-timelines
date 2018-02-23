@@ -1,5 +1,5 @@
+//Remove invalid time data.
 export default function cleanData() {
-    //Remove records with insufficient data (this.wide_data should only be defined on initialization).
     this.wide_data = this.initial_data.filter(d => d[this.config.st_col] !== '');
 
     //Warn user of removed records.
@@ -14,9 +14,8 @@ export default function cleanData() {
             console.warn(
                 `${this.initial_data.length -
                     this.wide_data
-                        .length} records have been removed due to missing or invalid date variable values that do not match settings.date_format (${
-                    this.config.date_format
-                })`
+                        .length} records have been removed due to missing or invalid date variable values that do not match settings.date_format (${this
+                    .config.date_format})`
             );
     }
 }

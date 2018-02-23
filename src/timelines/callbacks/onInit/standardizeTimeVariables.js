@@ -1,6 +1,7 @@
 import { time } from 'd3';
 
-export default function manipulateData() {
+//Standardize invalid date and day values.
+export default function standardizeTimeVariables() {
     this.initial_data.forEach((d, i) => {
         const has_stdt = d.hasOwnProperty(this.config.stdt_col),
             has_endt = d.hasOwnProperty(this.config.endt_col),

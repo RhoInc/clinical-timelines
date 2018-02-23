@@ -16,10 +16,18 @@ export default [
     },
     {
         type: 'dropdown',
-        option: 'time_range',
+        option: 'date_time_range',
         label: '',
         description: 'Time range',
-        values: ['custom'], // set in onInit() callback
+        values: null, // set in onInit() callback
+        require: true
+    },
+    {
+        type: 'dropdown',
+        option: 'day_time_range',
+        label: '',
+        description: 'Time range',
+        values: null, // set in onInit() callback
         require: true
     },
     {

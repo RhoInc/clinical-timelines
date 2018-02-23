@@ -4,13 +4,17 @@ import defineData from '../../functions/defineData';
 import drawIDtimeline from '../../functions/drawIDtimeline';
 
 export default function timeRange(dropdown, d) {
-    //Update time range settings.
-    this.config.time_range = select(dropdown)
-        .select('option:checked')
-        .text();
-    this[this.config.time_scale + '_time_range'] = this.config.time_range;
-    this.time_range = this.config.time_range.split(' - ').map(d => this.config.time_function(d));
-    this[this.config.time_scale + '_range'] = this.time_range;
+    const option = select(dropdown)
+        .selectAll('option')
+        .filter(function() {
+            return this.selected;
+        });
+    const label = option.property('label');
+    const time_range = this.config[this.config.time_scale + '_ranges'].find(
+        di => di.label === label
+    );
+    this[this.config.time_scale + '_range'] = time_range.domain.slice();
+    this.time_range = time_range.domain.slice();
 
     //Remove records without time data.
     cleanData.call(this);

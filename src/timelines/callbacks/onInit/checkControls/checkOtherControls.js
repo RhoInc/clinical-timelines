@@ -1,4 +1,5 @@
 import checkTimeScales from './checkOtherControls/checkTimeScales';
+import updateTimeRangeControls from './checkOtherControls/updateTimeRangeControls';
 
 export default function checkOtherControls() {
     this.controls.config.inputs.filter(input => input.type !== 'subsetter').forEach(input => {
@@ -11,4 +12,5 @@ export default function checkOtherControls() {
     });
 
     checkTimeScales.call(this);
+    updateTimeRangeControls.call(this);
 }

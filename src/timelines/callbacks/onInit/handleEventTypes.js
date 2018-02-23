@@ -14,5 +14,5 @@ export default function handleEventTypes() {
             .filter(eventType => this.currentEventTypes.indexOf(eventType) === -1)
             .sort()
     );
-    this.config.legend.order = this.config.color_dom;
+    this.config.legend.order = this.config.color_dom.slice();
 }

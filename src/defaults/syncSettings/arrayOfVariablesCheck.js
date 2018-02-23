@@ -12,13 +12,11 @@ export default function arrayOfVariablesCheck(defaultVariables, userDefinedVaria
                               -1
                   )
               ]).map(item => {
-                  const itemObject = {};
+                  const itemObject = item instanceof Object
+                    ? Object.assign({}, item)
+                    : {value_col: item};
 
-                  itemObject.value_col = item instanceof Object ? item.value_col : item;
-                  itemObject.label =
-                      item instanceof Object
-                          ? item.label || itemObject.value_col
-                          : itemObject.value_col;
+                  itemObject.label = itemObject.label || itemObject.value_col;
 
                   return itemObject;
               })

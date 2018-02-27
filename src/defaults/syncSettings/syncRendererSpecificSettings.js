@@ -70,66 +70,88 @@ export default function syncRendererSpecificSettings(settings) {
     //date_display_format
     settings.date_display_format = settings.date_display_format || settings.date_format;
 
-    //date_ranges
+    //date_ranges - array of 2-element date ranges or of objects with a label property and a time_range property
+    //  {
+    //      domain: [
+    //          <lower bound>,
+    //          <upper bound>
+    //      ],
+    //      label: '<date range description>'
+    //  }
     if (settings.date_range && settings.date_ranges === null)
-        settings.date_ranges = [settings.date_range];
+        settings.date_ranges = [
+            {
+                domain: settings.date_range,
+                label: 'default'
+            }
+        ];
     if (settings.date_ranges)
         settings.date_ranges = settings.date_ranges
-            .filter(
-                date_range =>
-                    date_range instanceof Array &&
-                    date_range.length === 2 &&
-                    date_range[0].toString() !== date_range[1].toString() &&
-                    date_range.every(
-                        date =>
-                            date instanceof Date || time.format(settings.date_format).parse(date)
+            .filter(date_range => {
+                const domain = date_range.domain || date_range;
+                return (
+                    domain instanceof Array &&
+                    domain.length === 2 &&
+                    domain[0].toString() !== domain[1].toString() &&
+                    domain.every(
+                        d => d instanceof Date || time.format(settings.date_format).parse(d)
                     )
-            )
+                );
+            })
             .map(date_range => {
-                return {
-                    label: date_range
+                const domain = (date_range.domain || date_range).map(
+                    date =>
+                        date instanceof Date ? date : time.format(settings.date_format).parse(date)
+                );
+                const label =
+                    date_range.label ||
+                    domain
                         .map(
                             date =>
                                 date instanceof Date
                                     ? time.format(settings.date_display_format)(date)
                                     : date
                         )
-                        .join(' - '),
-                    domain: date_range.map(
-                        date =>
-                            date instanceof Date
-                                ? date
-                                : time.format(settings.date_format).parse(date)
-                    ),
-                    time_range: date_range
-                        .map(
-                            date =>
-                                date instanceof Date
-                                    ? time.format(settings.date_format)(date)
-                                    : date
-                        )
-                        .join(' - ')
+                        .join(' - ');
+                return {
+                    domain,
+                    label
                 };
             });
     else settings.date_ranges = [];
 
-    //day_ranges
+    //day_ranges - array of 2-element day ranges or of objects with a label property and a time_range property
+    //  {
+    //      domain: [
+    //          <lower bound>,
+    //          <upper bound>
+    //      ],
+    //      label: '<day range description>'
+    //  }
     if (settings.day_range && settings.day_ranges === null)
-        settings.day_ranges = [settings.day_range];
+        settings.day_ranges = [
+            {
+                domain: settings.day_range,
+                label: 'default'
+            }
+        ];
     if (settings.day_ranges)
         settings.day_ranges = settings.day_ranges
-            .filter(
-                day_range =>
-                    day_range instanceof Array &&
-                    day_range.length === 2 &&
-                    day_range[0].toString() !== day_range[1].toString() &&
-                    day_range.every(day => Number.isInteger(+day))
-            )
+            .filter(day_range => {
+                const domain = day_range.domain || day_range;
+                return (
+                    domain instanceof Array &&
+                    domain.length === 2 &&
+                    domain[0].toString() !== domain[1].toString() &&
+                    domain.every(d => Number.isInteger(+d))
+                );
+            })
             .map(day_range => {
+                const domain = day_range.domain || day_range;
+                const label = day_range.label || domain.join(' - ');
                 return {
-                    label: day_range.join(' - '),
-                    domain: day_range,
-                    time_range: day_range.join(' - ')
+                    domain,
+                    label
                 };
             });
     else settings.day_ranges = [];
@@ -160,9 +182,9 @@ export default function syncRendererSpecificSettings(settings) {
                 referenceLineObject.label = reference_line.label
                     ? reference_line.label
                     : `${referenceLineObject.time_scale.substring(0, 1).toUpperCase() +
-                          referenceLineObject.time_scale.substring(1)}: ${
-                          referenceLineObject.timepoint
-                      }`;
+                          referenceLineObject.time_scale.substring(
+                              1
+                          )}: ${referenceLineObject.timepoint}`;
 
                 return referenceLineObject;
             })

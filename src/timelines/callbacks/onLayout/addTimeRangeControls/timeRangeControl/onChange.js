@@ -29,12 +29,6 @@ export default function onChange(input, d) {
     //Update custom time range setting.
     const customTimeRange = this.config[time_range + 's'].find(d => d.label === 'user input');
     customTimeRange.domain = this.time_range.slice();
-    customTimeRange.time_range = customTimeRange.domain
-        .map(d => {
-            if (this.config.time_scale === 'date') return time.format(this.config.date_format)(d);
-            else return '' + d;
-        })
-        .join(' - ');
 
     //Update time range control.
     this.controls.wrap
@@ -42,14 +36,12 @@ export default function onChange(input, d) {
         .filter(d => d.option === this.config.time_scale + '_time_range')
         .selectAll('option')
         .property('selected', function() {
-            return this.label === 'user input';
+            return this.value === 'user input';
         })
         .filter(function() {
-            return this.label === 'user input';
+            return this.value === 'user input';
         })
-        .datum(customTimeRange.time_range)
-        .text(d => d)
-        .node();
+        .datum(customTimeRange.time_range);
 
     this.draw();
 }

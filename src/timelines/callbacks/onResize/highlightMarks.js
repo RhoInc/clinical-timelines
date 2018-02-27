@@ -56,7 +56,9 @@ export default function highlightMarks() {
 
     //Highlight circles.
     const circles = highlightedMarks.filter(function() {
-        return this.tagName === 'circle' && this.getAttribute('class').indexOf('highlighted') > -1;
+        return (
+            this.tagName === 'circle' && this.getAttribute('class').indexOf('ct-highlighted') > -1
+        );
     });
     circles.attr({
         stroke: d => this.colorScale(d.values.raw[0][this.config.event_col]),

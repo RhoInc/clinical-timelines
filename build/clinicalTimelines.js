@@ -3965,6 +3965,7 @@
         this.config.marks.forEach(function(mark) {
             mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
         });
+        this.config.range_band = this.config.mark_thickness * 2;
     }
 
     function onLayout$1() {}

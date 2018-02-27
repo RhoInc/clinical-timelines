@@ -293,13 +293,14 @@
         day_ranges: null,
 
         //Miscellaneous settings
+        mark_thickness: 6,
+        reference_lines: null,
+        offset_col: 'OFFSET',
         seq_col: 'SEQ',
         tooltip_col: 'TOOLTIP',
         ongo_col: 'ONGO',
         ongo_val: 'Y',
-        reference_lines: null,
         transpose_data: false,
-        mark_thickness: 6,
 
         //Listing settings
         details: null,
@@ -753,7 +754,7 @@
         settings.marks[0].per = [settings.event_col, settings.seq_col];
         settings.marks[1].per = [settings.event_col, settings.seq_col, 'wc_value'];
         settings.gridlines = 'y';
-        settings.range_band = settings.range_band / 2;
+        settings.range_band = settings.mark_thickness * 2;
         settings.margin = { left: 25 };
     }
 
@@ -3208,191 +3209,221 @@
     function offsetCircles(mark, markData) {
         var _this = this;
 
-        //Nest data by timepoint and filter on any nested object with more than one datum.
-        var overlapping = d3
-            .nest()
-            .key(function(d) {
-                return d.total + '|' + d.values.raw[0][_this.config.id_col];
-            })
-            .rollup(function(d) {
-                return {
-                    n: d.length,
-                    keys: d.map(function(di) {
-                        return di.key;
-                    })
-                };
-            })
-            .entries(markData)
-            .filter(function(d) {
-                return d.values.n > 1;
-            });
+        var context = this;
 
-        //For each timepoint with more than one event...
-        overlapping.forEach(function(d) {
-            var x = d.key.split('|')[0],
-                // timepoint
-                y = d.key.split('|')[1]; // ID
-
-            //For each overlapping point...
-            d.values.keys.forEach(function(di, i) {
-                //Capture point via its class name and offset vertically.
-                var className = di + ' point';
-                var g = d3.select(
-                    _this.clinicalTimelines.document.getElementsByClassName(className)[0]
-                );
-                var point = g.select('circle');
-                g.attr('transform', 'translate(0,' + i * +_this.config.mark_thickness * 2 + ')');
+        if (this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
+            this.svg.selectAll('g.point').each(function(d) {
+                d3
+                    .select(this)
+                    .attr(
+                        'transform',
+                        'translate(0,' + d.offset * context.config.mark_thickness * 2 + ')'
+                    );
             });
-        });
+        } else {
+            //Nest data by timepoint and filter on any nested object with more than one datum.
+            var overlapping = d3
+                .nest()
+                .key(function(d) {
+                    return d.total + '|' + d.values.raw[0][_this.config.id_col];
+                })
+                .rollup(function(d) {
+                    return {
+                        n: d.length,
+                        keys: d.map(function(di) {
+                            return di.key;
+                        })
+                    };
+                })
+                .entries(markData)
+                .filter(function(d) {
+                    return d.values.n > 1;
+                });
+
+            //For each timepoint with more than one event...
+            overlapping.forEach(function(d) {
+                var x = d.key.split('|')[0],
+                    // timepoint
+                    y = d.key.split('|')[1]; // ID
+
+                //For each overlapping point...
+                d.values.keys.forEach(function(di, i) {
+                    //Capture point via its class name and offset vertically.
+                    var className = di + ' point';
+                    var g = d3.select(
+                        _this.clinicalTimelines.document.getElementsByClassName(className)[0]
+                    );
+                    var point = g.select('circle');
+                    g.attr('transform', 'translate(0,' + i * _this.config.mark_thickness * 2 + ')');
+                });
+            });
+        }
     }
 
     function offsetLines(mark, markData) {
         var _this = this;
 
-        //Nest data by time interval and filter on any nested object with more than one datum.
-        var IDdata = d3
-            .nest()
-            .key(function(d) {
-                return d.values[0].values.raw[0][_this.config.id_col];
-            })
-            .key(function(d) {
-                return d.key;
-            })
-            .rollup(function(d) {
-                //Expose start and end point of line.
-                return _this.config.time_scale === 'day'
-                    ? {
-                          x1: +d[0].values[0].key,
-                          x2: +d[0].values[1].key
-                      }
-                    : {
-                          x1: new Date(d[0].values[0].key),
-                          x2: new Date(d[0].values[1].key)
-                      };
-            })
-            .entries(
-                markData.filter(function(d) {
-                    return d.values.length > 1;
-                })
-            );
+        var context = this;
 
-        //For each ID...
-        IDdata.forEach(function(IDdatum) {
-            var lineData = IDdatum.values;
-
-            //Attach line x-coordinates to line object.
-            lineData.forEach(function(lineDatum) {
-                lineDatum.x1 = lineDatum.values.x1;
-                lineDatum.x2 = lineDatum.values.x2;
-                delete lineDatum.values;
+        if (this.config.offset_col && this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
+            this.svg.selectAll('g.line').each(function(d) {
+                d3
+                    .select(this)
+                    .attr(
+                        'transform',
+                        'translate(0,' + d.offset * context.config.mark_thickness * 2 + ')'
+                    );
             });
-
-            //Capture all line x-coordinates in an array.
-            var lineCoordinates = lineData.map(function(di) {
-                    return [di.x1, di.x2];
-                }),
-                overlappingLines = lineData
-                    .filter(function(lineDatum) {
-                        var overlap = lineCoordinates.filter(function(lineCoordinate) {
-                            return (
-                                (lineCoordinate[0] <= lineDatum.x1 &&
-                                    lineCoordinate[1] >= lineDatum.x1) ||
-                                (lineDatum.x1 <= lineCoordinate[0] &&
-                                    lineDatum.x2 >= lineCoordinate[0]) ||
-                                (lineCoordinate[0] <= lineDatum.x2 &&
-                                    lineCoordinate[1] >= lineDatum.x2) ||
-                                (lineDatum.x1 <= lineCoordinate[1] &&
-                                    lineDatum.x2 >= lineCoordinate[1])
-                            );
-                        });
-
-                        return overlap.length > 1;
+        } else {
+            //Nest data by time interval and filter on any nested object with more than one datum.
+            var IDdata = d3
+                .nest()
+                .key(function(d) {
+                    return d.values[0].values.raw[0][_this.config.id_col];
+                })
+                .key(function(d) {
+                    return d.key;
+                })
+                .rollup(function(d) {
+                    //Expose start and end point of line.
+                    return _this.config.time_scale === 'day'
+                        ? {
+                              x1: +d[0].values[0].key,
+                              x2: +d[0].values[1].key
+                          }
+                        : {
+                              x1: new Date(d[0].values[0].key),
+                              x2: new Date(d[0].values[1].key)
+                          };
+                })
+                .entries(
+                    markData.filter(function(d) {
+                        return d.values.length > 1;
                     })
-                    .sort(function(a, b) {
-                        var x1diff = a.x1 - b.x1,
-                            x2diff = b.x2 - a.x2;
-                        return x1diff !== 0
-                            ? x1diff
-                            : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
-                    });
+                );
 
-            if (overlappingLines.length) {
-                var currentlyOverlappingLines = [];
+            //For each ID...
+            IDdata.forEach(function(IDdatum) {
+                var lineData = IDdatum.values;
 
-                //For each overlapping line...
-                overlappingLines.forEach(function(currentLine, i) {
-                    if (i === 0) {
-                        currentLine.offset = 0;
-                        currentlyOverlappingLines.push(currentLine);
-                    } else {
-                        currentlyOverlappingLines.forEach(function(d) {
-                            var currLapsPrevX1 = currentLine.x1 <= d.x1 && currentLine.x2 >= d.x1,
-                                currLapsPrevX2 = currentLine.x1 <= d.x2 && currentLine.x2 >= d.x2,
-                                currLapsPrev = currentLine.x1 <= d.x1 && currentLine.x2 >= d.x2,
-                                prevLapsCurrX1 = d.x1 <= currentLine.x1 && d.x2 >= currentLine.x1,
-                                prevLapsCurrX2 = d.x1 <= currentLine.x2 && d.x2 >= currentLine.x2,
-                                prevLapsCurr = d.x1 <= currentLine.x1 && d.x2 >= currentLine.x2;
+                //Attach line x-coordinates to line object.
+                lineData.forEach(function(lineDatum) {
+                    lineDatum.x1 = lineDatum.values.x1;
+                    lineDatum.x2 = lineDatum.values.x2;
+                    delete lineDatum.values;
+                });
 
-                            d.overlapping =
-                                currLapsPrevX1 ||
-                                currLapsPrevX2 ||
-                                currLapsPrev ||
-                                prevLapsCurrX1 ||
-                                prevLapsCurrX2 ||
-                                prevLapsCurr;
+                //Capture all line x-coordinates in an array.
+                var lineCoordinates = lineData.map(function(di) {
+                        return [di.x1, di.x2];
+                    }),
+                    overlappingLines = lineData
+                        .filter(function(lineDatum) {
+                            var overlap = lineCoordinates.filter(function(lineCoordinate) {
+                                return (
+                                    (lineCoordinate[0] <= lineDatum.x1 &&
+                                        lineCoordinate[1] >= lineDatum.x1) ||
+                                    (lineDatum.x1 <= lineCoordinate[0] &&
+                                        lineDatum.x2 >= lineCoordinate[0]) ||
+                                    (lineCoordinate[0] <= lineDatum.x2 &&
+                                        lineCoordinate[1] >= lineDatum.x2) ||
+                                    (lineDatum.x1 <= lineCoordinate[1] &&
+                                        lineDatum.x2 >= lineCoordinate[1])
+                                );
+                            });
+
+                            return overlap.length > 1;
+                        })
+                        .sort(function(a, b) {
+                            var x1diff = a.x1 - b.x1,
+                                x2diff = b.x2 - a.x2;
+                            return x1diff !== 0
+                                ? x1diff
+                                : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
                         });
-                        var nOverlapping = currentlyOverlappingLines.filter(function(d) {
-                            return d.overlapping;
-                        }).length;
 
-                        //if no lines are currently overlapping reset currently overlapping lines
-                        if (nOverlapping === 0) {
+                if (overlappingLines.length) {
+                    var currentlyOverlappingLines = [];
+
+                    //For each overlapping line...
+                    overlappingLines.forEach(function(currentLine, i) {
+                        if (i === 0) {
                             currentLine.offset = 0;
-                            currentlyOverlappingLines = [currentLine];
-                        } else if (nOverlapping === currentlyOverlappingLines.length) {
-                            //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
-                            currentLine.offset =
-                                d3.max(currentlyOverlappingLines, function(d) {
-                                    return d.offset;
-                                }) + 1;
                             currentlyOverlappingLines.push(currentLine);
                         } else {
-                            //otherwise replace non-overlapping line with the smallest offset with current line
-                            currentlyOverlappingLines.forEach(function(d, i) {
-                                d.index = i;
-                            });
-                            var minOffset = d3.min(
-                                    currentlyOverlappingLines.filter(function(d) {
-                                        return !d.overlapping;
-                                    }),
-                                    function(d) {
-                                        return d.offset;
-                                    }
-                                ),
-                                minIndex = currentlyOverlappingLines.filter(function(d) {
-                                    return d.offset === minOffset;
-                                })[0].index;
-                            currentLine.offset = minOffset;
-                            currentlyOverlappingLines.splice(minIndex, 1, currentLine);
-                        }
-                    }
+                            currentlyOverlappingLines.forEach(function(d) {
+                                var currLapsPrevX1 =
+                                        currentLine.x1 <= d.x1 && currentLine.x2 >= d.x1,
+                                    currLapsPrevX2 =
+                                        currentLine.x1 <= d.x2 && currentLine.x2 >= d.x2,
+                                    currLapsPrev = currentLine.x1 <= d.x1 && currentLine.x2 >= d.x2,
+                                    prevLapsCurrX1 =
+                                        d.x1 <= currentLine.x1 && d.x2 >= currentLine.x1,
+                                    prevLapsCurrX2 =
+                                        d.x1 <= currentLine.x2 && d.x2 >= currentLine.x2,
+                                    prevLapsCurr = d.x1 <= currentLine.x1 && d.x2 >= currentLine.x2;
 
-                    //Offset lines vertically.
-                    var className = currentLine.key + ' line';
-                    var g = d3.select(
-                        _this.clinicalTimelines.document.getElementsByClassName(className)[0]
-                    );
-                    g.attr(
-                        'transform',
-                        currentLine.offset > 0
-                            ? 'translate(0,' +
-                              currentLine.offset * _this.config.mark_thickness * 2 +
-                              ')'
-                            : 'translate(0,0)'
-                    );
-                });
-            }
-        });
+                                d.overlapping =
+                                    currLapsPrevX1 ||
+                                    currLapsPrevX2 ||
+                                    currLapsPrev ||
+                                    prevLapsCurrX1 ||
+                                    prevLapsCurrX2 ||
+                                    prevLapsCurr;
+                            });
+                            var nOverlapping = currentlyOverlappingLines.filter(function(d) {
+                                return d.overlapping;
+                            }).length;
+
+                            //if no lines are currently overlapping reset currently overlapping lines
+                            if (nOverlapping === 0) {
+                                currentLine.offset = 0;
+                                currentlyOverlappingLines = [currentLine];
+                            } else if (nOverlapping === currentlyOverlappingLines.length) {
+                                //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
+                                currentLine.offset =
+                                    d3.max(currentlyOverlappingLines, function(d) {
+                                        return d.offset;
+                                    }) + 1;
+                                currentlyOverlappingLines.push(currentLine);
+                            } else {
+                                //otherwise replace non-overlapping line with the smallest offset with current line
+                                currentlyOverlappingLines.forEach(function(d, i) {
+                                    d.index = i;
+                                });
+                                var minOffset = d3.min(
+                                        currentlyOverlappingLines.filter(function(d) {
+                                            return !d.overlapping;
+                                        }),
+                                        function(d) {
+                                            return d.offset;
+                                        }
+                                    ),
+                                    minIndex = currentlyOverlappingLines.filter(function(d) {
+                                        return d.offset === minOffset;
+                                    })[0].index;
+                                currentLine.offset = minOffset;
+                                currentlyOverlappingLines.splice(minIndex, 1, currentLine);
+                            }
+                        }
+
+                        //Offset lines vertically.
+                        var className = currentLine.key + ' line';
+                        var g = d3.select(
+                            _this.clinicalTimelines.document.getElementsByClassName(className)[0]
+                        );
+                        g.attr(
+                            'transform',
+                            currentLine.offset > 0
+                                ? 'translate(0,' +
+                                  currentLine.offset * _this.config.mark_thickness * 2 +
+                                  ')'
+                                : 'translate(0,0)'
+                        );
+                    });
+                }
+            });
+        }
     }
 
     function offsetOverlappingMarks() {
@@ -3400,16 +3431,30 @@
 
         this.config.marks.forEach(function(mark, i) {
             var markData = _this.marks[i].data;
-            if (mark.type === 'line') {
-                //Identify marks which represent ongoing events.
-                if (_this.config.ongo_col)
-                    markData.forEach(function(d) {
-                        d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
-                    });
-                offsetLines.call(_this, mark, markData);
-            } else if (mark.type === 'circle') {
-                offsetCircles.call(_this, mark, markData);
-            }
+
+            //Identify marks which represent ongoing events.
+            if (_this.config.ongo_col && _this.raw_data[0].hasOwnProperty(_this.config.ongo_col))
+                markData.forEach(function(d) {
+                    d.ongoing =
+                        mark.type === 'line'
+                            ? d.values[0].values.raw[0][_this.config.ongo_col]
+                            : d.values.raw[0][_this.config.ongo_col];
+                });
+
+            //Attach offset value to each mark datum.
+            if (
+                _this.config.offset_col &&
+                _this.raw_data[0].hasOwnProperty(_this.config.offset_col)
+            )
+                markData.forEach(function(d) {
+                    d.offset =
+                        mark.type === 'line'
+                            ? d.values[0].values.raw[0][_this.config.offset_col]
+                            : d.values.raw[0][_this.config.offset_col];
+                });
+
+            if (mark.type === 'line') offsetLines.call(_this, mark, markData);
+            else if (mark.type === 'circle') offsetCircles.call(_this, mark, markData);
         });
     }
 
@@ -3965,7 +4010,6 @@
         this.config.marks.forEach(function(mark) {
             mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
         });
-        this.config.range_band = this.config.mark_thickness * 2;
     }
 
     function onLayout$1() {}

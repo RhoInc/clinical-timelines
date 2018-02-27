@@ -153,6 +153,27 @@
         ,"items":
             {"type": "string"}
         }
+    ,"date_ranges":
+        {"title": "Date Ranges"
+        ,"description": "an array of start and stop dates with which to define the x-axis domain"
+        ,"type": "object"
+        ,"properties":
+            {"domain":
+                {"title": "Date Range"
+                ,"description": "start and stop dates with which to define the x-axis domain"
+                ,"type": "array"
+                ,"minItems": 2
+                ,"maxItems": 2
+                ,"items":
+                    {"type": "string"}
+                }
+            ,"label":
+                {"title": "Label"
+                ,"description": "date range label"
+                ,"type": "string"
+                }
+            }
+        }
     ,"date_format":
         {"title": "Input Date Format"
         ,"description": "date format of start and stop date variables"
@@ -186,9 +207,42 @@
         ,"items":
             {"type": "number"}
         }
+    ,"day_ranges":
+        {"title": "Day Ranges"
+        ,"description": "an array of start and stop days with which to define the x-axis domain"
+        ,"type": "object"
+        ,"properties":
+            {"domain":
+                {"title": "Day Range"
+                ,"description": "start and stop days with which to define the x-axis domain"
+                ,"type": "array"
+                ,"minItems": 2
+                ,"maxItems": 2
+                ,"items":
+                    {"type": "number"}
+                }
+            ,"label":
+                {"title": "Label"
+                ,"description": "day range label"
+                ,"type": "string"
+                }
+            }
+        }
 
 
 
+    ,"mark_thickness":
+        {"title": "Mark Thickness"
+        ,"description": "controls the stroke width of lines, the radius of circles, the distance between offset marks, and the range band of the ID timeline"
+        ,"default": 6
+        ,"type": "number"
+        }
+    ,"offset_col":
+        {"title": "Offset Factor"
+        ,"description": "the name of the variable that contains a ranking of vertical position at which to draw a mark"
+        ,"default": "OFFSET"
+        ,"type": "string"
+        }
     ,"seq_col":
         {"title": "Sequence Number"
         ,"description": "event type sequence variable name"
@@ -212,6 +266,12 @@
         ,"description": "ongoing event indicator value"
         ,"default": "Y"
         ,"type": "string"
+        }
+    ,"transpose_data":
+        {"title": "Transpose Data?"
+        ,"description": "controls data structure: one record per ID per event event or one record per ID"
+        ,"default": false
+        ,"type": "boolean"
         }
     ,"reference_lines":
         {"title": "Reference Timepoints"

@@ -8,5 +8,4 @@ export default function onInit() {
     this.config.marks.forEach(mark => {
         mark.attributes['clip-path'] = `url(#${this.id})`;
     });
-    this.config.range_band = this.config.mark_thickness * 2;
 }

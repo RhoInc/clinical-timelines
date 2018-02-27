@@ -182,6 +182,27 @@ start and stop dates with which to define the x-axis domain and which match sett
 
 
 
+## settings.date_ranges
+`object`
+
+an array of start and stop dates with which to define the x-axis domain
+
+### settings.date_ranges.domain
+`array`
+
+start and stop dates with which to define the x-axis domain
+
+**default:** none
+
+### settings.date_ranges.label
+`string`
+
+date range label
+
+**default:** none
+
+
+
 ## settings.date_format
 `string`
 
@@ -227,6 +248,45 @@ start and stop days with which to define the x-axis domain
 
 
 
+## settings.day_ranges
+`object`
+
+an array of start and stop days with which to define the x-axis domain
+
+### settings.day_ranges.domain
+`array`
+
+start and stop days with which to define the x-axis domain
+
+**default:** none
+
+### settings.day_ranges.label
+`string`
+
+day range label
+
+**default:** none
+
+
+
+## settings.mark_thickness
+`number`
+
+controls the stroke width of lines, the radius of circles, the distance between offset marks, and the range band of the ID timeline
+
+**default:** `6`
+
+
+
+## settings.offset_col
+`string`
+
+the name of the variable that contains a ranking of vertical position at which to draw a mark
+
+**default:** `"OFFSET"`
+
+
+
 ## settings.seq_col
 `string`
 
@@ -260,6 +320,15 @@ ongoing event indicator variable name
 ongoing event indicator value
 
 **default:** `"Y"`
+
+
+
+## settings.transpose_data
+`boolean`
+
+controls data structure: one record per ID per event event or one record per ID
+
+**default:** `false`
 
 
 

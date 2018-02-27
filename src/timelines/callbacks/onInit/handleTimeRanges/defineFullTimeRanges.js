@@ -22,16 +22,14 @@ export default function defineFullTimeRanges() {
 
     //add full domain to date ranges
     this.config.date_ranges.push({
-        label: 'full',
         domain: this.full_date_range,
-        time_range: this.full_date_time_range
+        label: 'full'
     });
 
     //add custom domain to date ranges
     this.config.date_ranges.push({
-        label: 'user input',
         domain: this.full_date_range.slice(),
-        time_range: this.full_date_time_range
+        label: 'user input'
     });
 
     /**-------------------------------------------------------------------------------------------\
@@ -49,15 +47,13 @@ export default function defineFullTimeRanges() {
 
     //add full domain to day ranges
     this.config.day_ranges.push({
-        label: 'full',
         domain: this.full_day_range,
-        time_range: this.full_day_time_range
+        label: 'full'
     });
 
     //add custom domain to day ranges
     this.config.day_ranges.push({
-        label: 'user input',
         domain: this.full_day_range.slice(),
-        time_range: this.full_day_time_range
+        label: 'user input'
     });
 }

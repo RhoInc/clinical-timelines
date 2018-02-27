@@ -4,12 +4,12 @@ import defineData from '../../functions/defineData';
 import drawIDtimeline from '../../functions/drawIDtimeline';
 
 export default function timeRange(dropdown, d) {
-    const option = select(dropdown)
+    const label = select(dropdown)
         .selectAll('option')
         .filter(function() {
             return this.selected;
-        });
-    const label = option.property('label');
+        })
+        .text();
     const time_range = this.config[this.config.time_scale + '_ranges'].find(
         di => di.label === label
     );

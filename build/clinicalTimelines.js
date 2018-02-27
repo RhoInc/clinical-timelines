@@ -473,69 +473,93 @@
         //date_display_format
         settings.date_display_format = settings.date_display_format || settings.date_format;
 
-        //date_ranges
+        //date_ranges - array of 2-element date ranges or of objects with a label property and a time_range property
+        //  {
+        //      domain: [
+        //          <lower bound>,
+        //          <upper bound>
+        //      ],
+        //      label: '<date range description>'
+        //  }
         if (settings.date_range && settings.date_ranges === null)
-            settings.date_ranges = [settings.date_range];
+            settings.date_ranges = [
+                {
+                    domain: settings.date_range,
+                    label: 'default'
+                }
+            ];
         if (settings.date_ranges)
             settings.date_ranges = settings.date_ranges
                 .filter(function(date_range) {
+                    var domain = date_range.domain || date_range;
                     return (
-                        date_range instanceof Array &&
-                        date_range.length === 2 &&
-                        date_range[0].toString() !== date_range[1].toString() &&
-                        date_range.every(function(date) {
+                        domain instanceof Array &&
+                        domain.length === 2 &&
+                        domain[0].toString() !== domain[1].toString() &&
+                        domain.every(function(d) {
                             return (
-                                date instanceof Date ||
-                                d3.time.format(settings.date_format).parse(date)
+                                d instanceof Date || d3.time.format(settings.date_format).parse(d)
                             );
                         })
                     );
                 })
                 .map(function(date_range) {
-                    return {
-                        label: date_range
+                    var domain = (date_range.domain || date_range).map(function(date) {
+                        return date instanceof Date
+                            ? date
+                            : d3.time.format(settings.date_format).parse(date);
+                    });
+                    var label =
+                        date_range.label ||
+                        domain
                             .map(function(date) {
                                 return date instanceof Date
                                     ? d3.time.format(settings.date_display_format)(date)
                                     : date;
                             })
-                            .join(' - '),
-                        domain: date_range.map(function(date) {
-                            return date instanceof Date
-                                ? date
-                                : d3.time.format(settings.date_format).parse(date);
-                        }),
-                        time_range: date_range
-                            .map(function(date) {
-                                return date instanceof Date
-                                    ? d3.time.format(settings.date_format)(date)
-                                    : date;
-                            })
-                            .join(' - ')
+                            .join(' - ');
+                    return {
+                        domain: domain,
+                        label: label
                     };
                 });
         else settings.date_ranges = [];
+        console.log(settings.date_ranges);
 
-        //day_ranges
+        //day_ranges - array of 2-element day ranges or of objects with a label property and a time_range property
+        //  {
+        //      domain: [
+        //          <lower bound>,
+        //          <upper bound>
+        //      ],
+        //      label: '<day range description>'
+        //  }
         if (settings.day_range && settings.day_ranges === null)
-            settings.day_ranges = [settings.day_range];
+            settings.day_ranges = [
+                {
+                    domain: settings.day_range,
+                    label: 'default'
+                }
+            ];
         if (settings.day_ranges)
             settings.day_ranges = settings.day_ranges
                 .filter(function(day_range) {
+                    var domain = day_range.domain || day_range;
                     return (
-                        day_range instanceof Array &&
-                        day_range.length === 2 &&
-                        day_range[0].toString() !== day_range[1].toString() &&
-                        day_range.every(function(day) {
-                            return Number.isInteger(+day);
+                        domain instanceof Array &&
+                        domain.length === 2 &&
+                        domain[0].toString() !== domain[1].toString() &&
+                        domain.every(function(d) {
+                            return Number.isInteger(+d);
                         })
                     );
                 })
                 .map(function(day_range) {
+                    var domain = day_range.domain || day_range;
+                    var label = day_range.label || domain.join(' - ');
                     return {
-                        label: day_range.join(' - '),
-                        domain: day_range,
-                        time_range: day_range.join(' - ')
+                        domain: domain,
+                        label: label
                     };
                 });
         else settings.day_ranges = [];
@@ -1466,7 +1490,8 @@
             .attr('id', 'ct-ID-details');
 
         //Add button to return from ID timeline to timelines.
-        this.containers.backButton = this.containers.IDdetails.append('div')
+        this.containers.backButton = this.containers.IDdetails
+            .append('div')
             .classed('ct-button', true)
             .attr('id', 'ct-back-button')
             .append('a')
@@ -1671,16 +1696,14 @@
 
         //add full domain to date ranges
         this.config.date_ranges.push({
-            label: 'full',
             domain: this.full_date_range,
-            time_range: this.full_date_time_range
+            label: 'full'
         });
 
         //add custom domain to date ranges
         this.config.date_ranges.push({
-            label: 'user input',
             domain: this.full_date_range.slice(),
-            time_range: this.full_date_time_range
+            label: 'user input'
         });
 
         /**-------------------------------------------------------------------------------------------\
@@ -1702,16 +1725,14 @@
 
         //add full domain to day ranges
         this.config.day_ranges.push({
-            label: 'full',
             domain: this.full_day_range,
-            time_range: this.full_day_time_range
+            label: 'full'
         });
 
         //add custom domain to day ranges
         this.config.day_ranges.push({
-            label: 'user input',
             domain: this.full_day_range.slice(),
-            time_range: this.full_day_time_range
+            label: 'user input'
         });
     }
 
@@ -1808,17 +1829,17 @@
         this.controls.config.inputs.find(function(input) {
             return input.option === 'date_time_range';
         }).values = this.config.date_ranges.map(function(date_time_range) {
-            return date_time_range.time_range;
+            return date_time_range.label;
         });
-        this.config.date_time_range = this.config.date_ranges[0].time_range;
+        this.config.date_time_range = this.config.date_ranges[0].label;
 
         //Update day time range dropdown.
         this.controls.config.inputs.find(function(input) {
             return input.option === 'day_time_range';
         }).values = this.config.day_ranges.map(function(day_time_range) {
-            return day_time_range.time_range;
+            return day_time_range.label;
         });
-        this.config.day_time_range = this.config.day_ranges[0].time_range;
+        this.config.day_time_range = this.config.day_ranges[0].label;
     }
 
     function checkOtherControls() {
@@ -1986,7 +2007,8 @@
 
     function IDdetails() {
         //Add ID characteristics.
-        this.clinicalTimelines.containers.IDdetails.selectAll('div.characteristic')
+        this.clinicalTimelines.containers.IDdetails
+            .selectAll('div.characteristic')
             .data(this.config.id_characteristics)
             .enter()
             .append('div')
@@ -2001,7 +2023,7 @@
 
         this.controls.wrap.selectAll('.control-group').each(function(d) {
             var controlGroup = d3.select(this),
-                label = controlGroup.select('.control-label'),
+                label = controlGroup.select('.wc-control-label'),
                 description = controlGroup.select('.span-description'),
                 container = controlGroup.append('div').classed('ct-label-description', true);
 
@@ -2054,19 +2076,20 @@
             var id_characteristics = this.initial_data.filter(function(d) {
                 return d[_this.config.id_col] === _this.selected_id;
             })[0];
-            this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(
-                function(d) {
+            this.clinicalTimelines.containers.IDdetails
+                .selectAll('.ct-characteristic')
+                .each(function(d) {
                     d3
                         .select(this)
                         .select('span')
                         .text(id_characteristics[d.value_col]);
-                }
-            );
+                });
         }
 
         //Draw ID timeline.
         this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-        this.clinicalTimelines.containers.IDtimeline.select('div')
+        this.clinicalTimelines.containers.IDtimeline
+            .select('div')
             .selectAll('*')
             .remove();
         webcharts.multiply(
@@ -2151,13 +2174,13 @@
     }
 
     function timeRange(dropdown, d) {
-        var option = d3
+        var label = d3
             .select(dropdown)
             .selectAll('option')
             .filter(function() {
                 return this.selected;
-            });
-        var label = option.property('label');
+            })
+            .text();
         var time_range = this.config[this.config.time_scale + '_ranges'].find(function(di) {
             return di.label === label;
         });
@@ -2269,21 +2292,6 @@
                 d3.select(this).on('change', function(d) {
                     timeRange.call(context, this, d);
                 });
-
-                //add option labels
-                var time_ranges = context.config[d.option.split('_')[0] + '_ranges'].slice();
-                d3
-                    .select(this)
-                    .selectAll('option')
-                    .property('label', function(di) {
-                        var time_range = time_ranges.splice(
-                            time_ranges.findIndex(function(dii) {
-                                return dii.time_range === di;
-                            }),
-                            1
-                        )[0];
-                        return time_range.label;
-                    });
             });
 
         //Redefine y-axis grouping event listener.
@@ -2330,13 +2338,6 @@
             return d.label === 'user input';
         });
         customTimeRange.domain = this.time_range.slice();
-        customTimeRange.time_range = customTimeRange.domain
-            .map(function(d) {
-                if (_this.config.time_scale === 'date')
-                    return d3.time.format(_this.config.date_format)(d);
-                else return '' + d;
-            })
-            .join(' - ');
 
         //Update time range control.
         this.controls.wrap
@@ -2346,16 +2347,12 @@
             })
             .selectAll('option')
             .property('selected', function() {
-                return this.label === 'user input';
+                return this.value === 'user input';
             })
             .filter(function() {
-                return this.label === 'user input';
+                return this.value === 'user input';
             })
-            .datum(customTimeRange.time_range)
-            .text(function(d) {
-                return d;
-            })
-            .node();
+            .datum(customTimeRange.time_range);
 
         this.draw();
     }
@@ -2435,7 +2432,8 @@
             this.draw();
 
             //Hide ID timeline.
-            this.clinicalTimelines.containers.IDtimeline.select('div')
+            this.clinicalTimelines.containers.IDtimeline
+                .select('div')
                 .selectAll('*')
                 .remove();
             this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', true);

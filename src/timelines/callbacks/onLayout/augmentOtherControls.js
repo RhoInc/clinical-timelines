@@ -63,18 +63,6 @@ export default function augmentOtherControls() {
             select(this).on('change', function(d) {
                 timeRange.call(context, this, d);
             });
-
-            //add option labels
-            const time_ranges = context.config[d.option.split('_')[0] + '_ranges'].slice();
-            select(this)
-                .selectAll('option')
-                .property('label', di => {
-                    const time_range = time_ranges.splice(
-                        time_ranges.findIndex(dii => dii.time_range === di),
-                        1
-                    )[0];
-                    return time_range.label;
-                });
         });
 
     //Redefine y-axis grouping event listener.

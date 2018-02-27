@@ -13,7 +13,7 @@ export default function timeRangeControl(datum) {
             .classed('label-description', true);
 
     //Add control label and span description nodes.
-    timeRangeLabelDescription.append('span').classed('control-label', true);
+    timeRangeLabelDescription.append('span').classed('wc-control-label', true);
     timeRangeLabelDescription
         .append('span')
         .classed('span-description', true)

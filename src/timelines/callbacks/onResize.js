@@ -7,6 +7,7 @@ import addStriping from './onResize/addStriping';
 import offsetOverlappingMarks from './onResize/offsetOverlappingMarks';
 import highlightMarks from './onResize/highlightMarks';
 import drawOngoingMarks from './onResize/drawOngoingMarks';
+import addStartStopCircles from './onResize/addStartStopCircles';
 import addSymbols from './onResize/addSymbols';
 import offsetBottomXaxis from './onResize/offsetBottomXaxis';
 import drawReferenceLines from './onResize/drawReferenceLines';
@@ -42,6 +43,9 @@ export default function onResize() {
 
     //Draw ongoing marks.
     drawOngoingMarks.call(this);
+
+    //Draw circles at beginning and end of each line.
+    addStartStopCircles.call(this);
 
     //Add symbols.
     addSymbols.call(this);

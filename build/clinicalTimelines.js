@@ -1377,12 +1377,17 @@
     function hideTimeRangeControl() {
         var _this = this;
 
-        this.controls.wrap.selectAll('.control-group').classed('ct-hidden', function(d) {
-            return (
-                (_this.config.time_scale === 'date' && d.option === 'day_time_range') ||
-                (_this.config.time_scale === 'day' && d.option === 'date_time_range')
-            );
-        });
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(d) {
+                return d.option && d.option.indexOf('_time_range') > -1;
+            })
+            .classed('ct-hidden', function(d) {
+                return (
+                    (_this.config.time_scale === 'date' && d.option === 'day_time_range') ||
+                    (_this.config.time_scale === 'day' && d.option === 'date_time_range')
+                );
+            });
     }
 
     function enableDisableControls() {
@@ -2178,7 +2183,7 @@
         syncTimeScaleSettings(this.config);
 
         //Hide other time range dropdown.
-        hideTimeRangeControl.call(this);
+        if (!this.selected_id) hideTimeRangeControl.call(this);
 
         //Update time range settings.
         this.time_range = this[this.config.time_scale + '_range'];
@@ -3612,6 +3617,35 @@
         }
     }
 
+    function addStartStopCircles() {
+        var context = this;
+
+        this.svg.selectAll('.ct-start-stop-circle').remove();
+        this.svg.selectAll('g.line').each(function(d) {
+            var g = d3$1.select(this);
+            d.values
+                .filter(function(di, i) {
+                    return !(
+                        i === 1 &&
+                        di.values.raw[0][context.config.ongo_col] === context.config.ongo_val
+                    );
+                })
+                .forEach(function(di) {
+                    g
+                        .append('circle')
+                        .classed('ct-start-stop-circle', true)
+                        .attr({
+                            cx: context.x(di.values.x),
+                            cy: context.y(di.values.y) + context.y.rangeBand() / 2,
+                            r: context.config.mark_thickness * 2 / 5,
+                            fill: 'white',
+                            stroke: 'lightgray',
+                            'clip-path': 'url(#' + context.id + ')'
+                        });
+                });
+        });
+    }
+
     function drawPolygon(marks, event_symbol) {
         var context = this;
 
@@ -4090,6 +4124,9 @@
         //Draw ongoing marks.
         drawOngoingMarks.call(this);
 
+        //Draw circles at beginning and end of each line.
+        addStartStopCircles.call(this);
+
         //Add symbols.
         addSymbols.call(this);
 
@@ -4226,6 +4263,9 @@
 
         //Draw reference lines.
         drawReferenceLines.call(this);
+
+        //Add circles to beginning and end of lines.
+        addStartStopCircles.call(this);
 
         //Add symbols.
         addSymbols.call(this);

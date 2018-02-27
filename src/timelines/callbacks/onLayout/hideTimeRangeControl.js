@@ -3,6 +3,7 @@ import { time } from 'd3';
 export default function hideTimeRangeControl() {
     this.controls.wrap
         .selectAll('.control-group')
+        .filter(d => d.option && d.option.indexOf('_time_range') > -1)
         .classed(
             'ct-hidden',
             d =>

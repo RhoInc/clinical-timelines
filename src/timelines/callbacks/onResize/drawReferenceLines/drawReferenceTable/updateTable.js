@@ -2,7 +2,7 @@ import { nest, select, sum } from 'd3';
 
 export default function updateTable(reference_line) {
     //Update reference table header.
-    reference_line.tableHeader.text(reference_line.label);
+    reference_line.tableHeader.text('Events Overlapping ' + reference_line.label);
 
     //Filter data on events that overlap reference line.
     reference_line.wide_data = this.filtered_wide_data.filter(

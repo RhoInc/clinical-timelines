@@ -44,7 +44,7 @@ export default function drawIDtimeline() {
                     : true
         ),
         this.config.event_col,
-        null,
+        this.config.color_dom,
         clinicalTimelines.test
     );
 

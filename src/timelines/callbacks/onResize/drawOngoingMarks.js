@@ -1,11 +1,11 @@
 import { select } from 'd3';
 
 export default function drawOngoingMarks() {
+    this.svg.selectAll('.ct-ongoing-event').remove();
     if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
         const context = this;
         const lineSettings = this.config.marks.find(mark => mark.type === 'line');
 
-        this.svg.selectAll('.ct-ongoing-event').remove();
         this.svg
             .selectAll('.line-supergroup .line')
             .filter(d => d.ongoing === this.config.ongo_val)

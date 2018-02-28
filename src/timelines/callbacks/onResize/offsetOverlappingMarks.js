@@ -6,7 +6,11 @@ export default function offsetOverlappingMarks() {
         const markData = this.marks[i].data;
 
         //Identify marks which represent ongoing events.
-        if (this.config.ongo_col && this.raw_data[0].hasOwnProperty(this.config.ongo_col))
+        if (
+            this.config.ongo_col &&
+            this.raw_data.length &&
+            this.raw_data[0].hasOwnProperty(this.config.ongo_col)
+        )
             markData.forEach(d => {
                 d.ongoing =
                     mark.type === 'line'
@@ -15,7 +19,11 @@ export default function offsetOverlappingMarks() {
             });
 
         //Attach offset value to each mark datum.
-        if (this.config.offset_col && this.raw_data[0].hasOwnProperty(this.config.offset_col))
+        if (
+            this.config.offset_col &&
+            this.raw_data.length &&
+            this.raw_data[0].hasOwnProperty(this.config.offset_col)
+        )
             markData.forEach(d => {
                 d.offset =
                     mark.type === 'line'

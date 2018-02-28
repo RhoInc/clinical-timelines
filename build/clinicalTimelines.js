@@ -1697,7 +1697,7 @@
             )
             .values()
             .sort();
-        this.currentEventTypes = this.config.event_types || this.allEventTypes;
+        this.currentEventTypes = this.config.event_types || this.allEventTypes.slice();
         this.controls.config.inputs.find(function(input) {
             return input.description === 'Event Type';
         }).start = this.currentEventTypes;
@@ -2064,7 +2064,7 @@
 
         this.controls.wrap.selectAll('.control-group').each(function(d) {
             var controlGroup = d3$1.select(this),
-                label = controlGroup.select('.wc-control-label'),
+                label = controlGroup.selectAll('.wc-control-label, .control-label'),
                 description = controlGroup.select('.span-description'),
                 container = controlGroup.append('div').classed('ct-label-description', true);
 
@@ -2141,7 +2141,7 @@
                     : true;
             }),
             this.config.event_col,
-            null,
+            this.config.color_dom,
             clinicalTimelines.test
         );
 
@@ -3235,7 +3235,7 @@
 
         var context = this;
 
-        if (this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
+        if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
             this.svg.selectAll('g.point').each(function(d) {
                 d3$1
                     .select(this)
@@ -3289,7 +3289,11 @@
 
         var context = this;
 
-        if (this.config.offset_col && this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
+        if (
+            this.config.offset_col &&
+            this.raw_data.length &&
+            this.raw_data[0].hasOwnProperty(this.config.offset_col)
+        ) {
             this.svg.selectAll('g.line').each(function(d) {
                 d3$1
                     .select(this)
@@ -3457,7 +3461,11 @@
             var markData = _this.marks[i].data;
 
             //Identify marks which represent ongoing events.
-            if (_this.config.ongo_col && _this.raw_data[0].hasOwnProperty(_this.config.ongo_col))
+            if (
+                _this.config.ongo_col &&
+                _this.raw_data.length &&
+                _this.raw_data[0].hasOwnProperty(_this.config.ongo_col)
+            )
                 markData.forEach(function(d) {
                     d.ongoing =
                         mark.type === 'line'
@@ -3468,6 +3476,7 @@
             //Attach offset value to each mark datum.
             if (
                 _this.config.offset_col &&
+                _this.raw_data.length &&
                 _this.raw_data[0].hasOwnProperty(_this.config.offset_col)
             )
                 markData.forEach(function(d) {
@@ -3564,13 +3573,13 @@
     function drawOngoingMarks() {
         var _this = this;
 
+        this.svg.selectAll('.ct-ongoing-event').remove();
         if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
             var context = this;
             var lineSettings = this.config.marks.find(function(mark) {
                 return mark.type === 'line';
             });
 
-            this.svg.selectAll('.ct-ongoing-event').remove();
             this.svg
                 .selectAll('.line-supergroup .line')
                 .filter(function(d) {
@@ -3653,8 +3662,7 @@
             var g = d3.select(this);
 
             //clear out g
-            g.select('rect.ct-custom-mark').remove();
-            g.select('circle.wc-data-mark').classed('ct-hidden', true);
+            g.select('circle').classed('ct-hidden', true);
 
             //define vertices
             var vertices = void 0;
@@ -3676,26 +3684,26 @@
                 if (event_symbol.direction === 'right')
                     vertices = [
                         [d.symbolCoordinates.x1, d.symbolCoordinates.y1],
-                        [d.symbolCoordinates.x2, d.symbolCoordinates.y3],
-                        [d.symbolCoordinates.x3, d.symbolCoordinates.y1]
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y2],
+                        [d.symbolCoordinates.x1, d.symbolCoordinates.y3]
                     ];
                 else if (event_symbol.direction === 'down')
                     vertices = [
                         [d.symbolCoordinates.x1, d.symbolCoordinates.y1],
-                        [d.symbolCoordinates.x1, d.symbolCoordinates.y3],
-                        [d.symbolCoordinates.x3, d.symbolCoordinates.y2]
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y1],
+                        [d.symbolCoordinates.x2, d.symbolCoordinates.y3]
                     ];
                 else if (event_symbol.direction === 'left')
                     vertices = [
-                        [d.symbolCoordinates.x1, d.symbolCoordinates.y3],
-                        [d.symbolCoordinates.x3, d.symbolCoordinates.y3],
-                        [d.symbolCoordinates.x2, d.symbolCoordinates.y1]
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y1],
+                        [d.symbolCoordinates.x1, d.symbolCoordinates.y2],
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y3]
                     ];
                 else
                     vertices = [
-                        [d.symbolCoordinates.x1, d.symbolCoordinates.y2],
+                        [d.symbolCoordinates.x2, d.symbolCoordinates.y1],
                         [d.symbolCoordinates.x3, d.symbolCoordinates.y3],
-                        [d.symbolCoordinates.x3, d.symbolCoordinates.y1]
+                        [d.symbolCoordinates.x1, d.symbolCoordinates.y3]
                     ];
             }
 
@@ -3709,8 +3717,8 @@
                             return vertex.join(',');
                         })
                         .join(' '),
-                    fill: context.colorScale(d.values.raw[0][context.config.event_col]),
-                    'clip-path': 'url(#' + context.id + ')'
+                    fill: d.color,
+                    'clip-path': d.key && d.values ? 'url(#' + context.id + ')' : null
                 });
         });
     }
@@ -3718,14 +3726,13 @@
     function addSymbols() {
         var _this = this;
 
+        this.svg.selectAll('.ct-custom-mark').remove();
         if (this.config.event_symbols && this.config.event_symbols.length) {
-            this.svg.selectAll('.ct-custom-mark').remove();
             this.config.event_symbols.forEach(function(event_symbol) {
                 var marks = _this.svg
                     .selectAll('g.point')
                     .filter(function(d) {
                         var event$$1 = d.values.raw[0][_this.config.event_col];
-                        //return event_symbol.event === event || event_symbol.events.indexOf(event) > -1;
                         return (
                             (event_symbol.event === event$$1 ||
                                 event_symbol.events.indexOf(event$$1) > -1) &&
@@ -3745,6 +3752,43 @@
                             y2: y,
                             y3: y + _this.config.mark_thickness * sizeFactor / 2
                         };
+                        d.color = _this.colorScale(d.values.raw[0][_this.config.event_col]);
+                    });
+
+                drawPolygon.call(_this, marks, event_symbol);
+            });
+        }
+    }
+
+    function addSymbolsToLegend() {
+        var _this = this;
+
+        var context = this;
+
+        if (this.config.event_symbols && this.config.event_symbols.length) {
+            this.config.event_symbols.forEach(function(event_symbol) {
+                var marks = _this.wrap
+                    .selectAll('.legend .legend-color-block')
+                    .filter(function(d) {
+                        var event$$1 = d.label;
+                        return (
+                            event_symbol.event === event$$1 ||
+                            event_symbol.events.indexOf(event$$1) > -1
+                        );
+                    })
+                    .each(function(d) {
+                        var dimensions = this.getBBox();
+                        var x = dimensions.x + dimensions.width / 2;
+                        var y = dimensions.y + dimensions.height / 2;
+                        d.symbolCoordinates = {
+                            x1: x - dimensions.width / 2,
+                            x2: x,
+                            x3: x + dimensions.width / 2,
+                            y1: y - dimensions.height / 2,
+                            y2: y,
+                            y3: y + dimensions.height / 2
+                        };
+                        d.color = context.colorScale(d.label);
                     });
 
                 drawPolygon.call(_this, marks, event_symbol);
@@ -4129,6 +4173,9 @@
 
         //Add symbols.
         addSymbols.call(this);
+
+        //Add symbols to legend.
+        addSymbolsToLegend.call(this);
 
         //Offset bottom x-axis to prevent overlap with final ID.
         offsetBottomXaxis.call(this);

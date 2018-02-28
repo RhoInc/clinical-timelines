@@ -9,6 +9,7 @@ import highlightMarks from './onResize/highlightMarks';
 import drawOngoingMarks from './onResize/drawOngoingMarks';
 import addStartStopCircles from './onResize/addStartStopCircles';
 import addSymbols from './onResize/addSymbols';
+import addSymbolsToLegend from './onResize/addSymbolsToLegend';
 import offsetBottomXaxis from './onResize/offsetBottomXaxis';
 import drawReferenceLines from './onResize/drawReferenceLines';
 import IEsucks from './onResize/IEsucks';
@@ -49,6 +50,9 @@ export default function onResize() {
 
     //Add symbols.
     addSymbols.call(this);
+
+    //Add symbols to legend.
+    addSymbolsToLegend.call(this);
 
     //Offset bottom x-axis to prevent overlap with final ID.
     offsetBottomXaxis.call(this);

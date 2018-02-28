@@ -8,6 +8,7 @@ export default function drawPolygon(marks, event_symbol) {
 
         //clear out g
         g.select('circle').classed('ct-hidden', true);
+        g.select('polygon.ct-custom-mark').remove();
 
         //define vertices
         let vertices;

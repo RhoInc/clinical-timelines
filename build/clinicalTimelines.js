@@ -3663,6 +3663,7 @@
 
             //clear out g
             g.select('circle').classed('ct-hidden', true);
+            g.select('polygon.ct-custom-mark').remove();
 
             //define vertices
             var vertices = void 0;

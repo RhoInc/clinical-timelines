@@ -4,7 +4,7 @@ export default function drawPolygon(marks, event_symbol) {
     const context = this;
 
     marks.each(function(d) {
-        const g = d3.select(this);
+        const g = select(this);
 
         //clear out g
         g.select('circle').classed('ct-hidden', true);

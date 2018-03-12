@@ -1235,6 +1235,171 @@
         this.document.getElementsByTagName('head')[0].appendChild(style);
     }
 
+    function csv(data, headers, columns) {
+        //const CSVarray = [];
+
+        //data.forEach((d, i) => {
+        //    //add headers to CSV array
+        //    if (i === 0) {
+        //        const headers = this.config.headers.map(header => `"${header.replace(/"/g, '""')}"`);
+        //        CSVarray.push(headers);
+        //    }
+
+        //    //add rows to CSV array
+        //    const row = this.config.cols.map(col => {
+        //        let value = d[col];
+
+        //        if (typeof value === 'string') value = value.replace(/"/g, '""');
+
+        //        return `"${value}"`;
+        //    });
+
+        //    CSVarray.push(row);
+        //});
+
+        ////transform CSV array into CSV string
+        //const CSV = new Blob([CSVarray.join('\n')], { type: 'text/csv;charset=utf-8;' }),
+        //    fileName = `webchartsTableExport_${time.format('%Y-%m-%dT%H-%M-%S')(new Date())}.csv`,
+        //    link = this.wrap.select('.export#csv');
+
+        //if (navigator.msSaveBlob) {
+        //    // IE 10+
+        //    link.style({
+        //        cursor: 'pointer',
+        //        'text-decoration': 'underline',
+        //        color: 'blue'
+        //    });
+        //    link.on('click', () => {
+        //        navigator.msSaveBlob(CSV, fileName);
+        //    });
+        //} else {
+        //    // Browsers that support HTML5 download attribute
+        //    if (link.node().download !== undefined) {
+        //        var url = URL.createObjectURL(CSV);
+        //        link.node().setAttribute('href', url);
+        //        link.node().setAttribute('download', fileName);
+        //    }
+        //}
+
+        //Add headers and rows to CSV array.
+        var CSVarray = [];
+        data.forEach(function(d, i) {
+            //Add headers to CSV array.
+            if (i === 0)
+                CSVarray.push(
+                    headers.map(function(header) {
+                        return '"' + header.replace(/"/g, '""') + '"';
+                    })
+                );
+
+            //add rows to CSV array
+            var row = columns.map(function(col) {
+                var value = d[col] || '';
+
+                if (typeof value === 'string') value = value.replace(/"/g, '""');
+
+                return '"' + value + '"';
+            });
+
+            CSVarray.push(row);
+        });
+
+        //transform CSV array into CSV string
+        var CSV = new Blob([CSVarray.join('\n')], { type: 'text/csv;charset=utf-8;' }),
+            fileName =
+                'ClinicalTimelinesData_' + d3.time.format('%Y-%m-%dT%H-%M-%S')(new Date()) + '.csv',
+            link = this.containers.exportButton;
+
+        if (navigator.msSaveBlob) {
+            // IE 10+
+            link.style({
+                cursor: 'pointer',
+                'text-decoration': 'underline',
+                color: 'blue'
+            });
+            link.on('click', function() {
+                navigator.msSaveBlob(CSV, fileName);
+            });
+        } else {
+            // Browsers that support HTML5 download attribute
+            if (link.node().download !== undefined) {
+                var url = URL.createObjectURL(CSV);
+                link.node().setAttribute('href', url);
+                link.node().setAttribute('download', fileName);
+            }
+        }
+    }
+
+    function xlsx(data, headers, columns) {
+        var sheetName = 'Selected Data',
+            options = {
+                bookType: 'xlsx',
+                bookSST: true,
+                type: 'binary'
+            },
+            arrayOfArrays = data.map(function(d) {
+                return columns.map(function(column) {
+                    return d[column];
+                });
+            }),
+            // convert data from array of objects to array of arrays.
+            workbook = {
+                SheetNames: [sheetName],
+                Sheets: {}
+            };
+
+        //Convert headers and data from array of arrays to sheet.
+        workbook.Sheets[sheetName] = XLSX.utils.aoa_to_sheet([headers].concat(arrayOfArrays));
+
+        //Add filters to spreadsheet.
+        workbook.Sheets[sheetName]['!autofilter'] = {
+            ref: 'A1:' + String.fromCharCode(64 + columns.length) + (data.length + 1)
+        };
+
+        //Define column widths in spreadsheet.
+        workbook.Sheets[sheetName]['!cols'] = headers.map(function(header) {
+            return {
+                wpx: header.length * 7
+            };
+        });
+
+        var xlsx = XLSX.write(workbook, options),
+            s2ab = function s2ab(s) {
+                var buffer = new ArrayBuffer(s.length),
+                    view = new Uint8Array(buffer);
+
+                for (var i = 0; i !== s.length; ++i) {
+                    view[i] = s.charCodeAt(i) & 0xff;
+                }
+                return buffer;
+            }; // convert spreadsheet to binary or something, i don't know
+
+        //transform CSV array into CSV string
+        var blob = new Blob([s2ab(xlsx)], { type: 'application/octet-stream;' }),
+            fileName =
+                'webchartsTableExport_' + d3.time.format('%Y-%m-%dT%H-%M-%S')(new Date()) + '.xlsx',
+            link = this.containers.exportButton;
+
+        if (navigator.msSaveBlob) {
+            // IE 10+
+            link.style({
+                cursor: 'pointer',
+                'text-decoration': 'underline',
+                color: 'blue'
+            });
+            link.on('click', function() {
+                navigator.msSaveBlob(blob, fileName);
+            });
+        } else {
+            // Browsers that support HTML5 download attribute
+            if (link.node().download !== undefined) {
+                var url = URL.createObjectURL(blob);
+                link.node().setAttribute('href', url);
+                link.node().setAttribute('download', fileName);
+            }
+        }
+    }
+
     function exportData() {
         var _this = this;
 
@@ -1324,53 +1489,8 @@
             });
         }
 
-        //Add headers and rows to CSV array.
-        var CSVarray = [];
-        data.forEach(function(d, i) {
-            //Add headers to CSV array.
-            if (i === 0)
-                CSVarray.push(
-                    headers.map(function(header) {
-                        return '"' + header.replace(/"/g, '""') + '"';
-                    })
-                );
-
-            //add rows to CSV array
-            var row = columns.map(function(col) {
-                var value = d[col] || '';
-
-                if (typeof value === 'string') value = value.replace(/"/g, '""');
-
-                return '"' + value + '"';
-            });
-
-            CSVarray.push(row);
-        });
-
-        //transform CSV array into CSV string
-        var CSV = new Blob([CSVarray.join('\n')], { type: 'text/csv;charset=utf-8;' }),
-            fileName =
-                'ClinicalTimelinesData_' + d3.time.format('%Y-%m-%dT%H-%M-%S')(new Date()) + '.csv',
-            link = this.containers.exportButton;
-
-        if (navigator.msSaveBlob) {
-            // IE 10+
-            link.style({
-                cursor: 'pointer',
-                'text-decoration': 'underline',
-                color: 'blue'
-            });
-            link.on('click', function() {
-                navigator.msSaveBlob(CSV, fileName);
-            });
-        } else {
-            // Browsers that support HTML5 download attribute
-            if (link.node().download !== undefined) {
-                var url = URL.createObjectURL(CSV);
-                link.node().setAttribute('href', url);
-                link.node().setAttribute('download', fileName);
-            }
-        }
+        if (typeof XLSX === 'undefined') csv.call(this, data, headers, columns);
+        else xlsx.call(this, data, headers, columns);
     }
 
     function hideTimeRangeControl() {

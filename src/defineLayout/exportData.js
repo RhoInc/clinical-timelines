@@ -1,4 +1,6 @@
 import { nest, time } from 'd3';
+import csv from './exportData/csv';
+import xlsx from './exportData/xlsx';
 
 export default function exportData() {
     //Filter data on events overlapping current time range.
@@ -71,45 +73,6 @@ export default function exportData() {
         headers = variables.map(variable => variable.label);
     }
 
-    //Add headers and rows to CSV array.
-    const CSVarray = [];
-    data.forEach((d, i) => {
-        //Add headers to CSV array.
-        if (i === 0) CSVarray.push(headers.map(header => `"${header.replace(/"/g, '""')}"`));
-
-        //add rows to CSV array
-        const row = columns.map(col => {
-            let value = d[col] || '';
-
-            if (typeof value === 'string') value = value.replace(/"/g, '""');
-
-            return `"${value}"`;
-        });
-
-        CSVarray.push(row);
-    });
-
-    //transform CSV array into CSV string
-    const CSV = new Blob([CSVarray.join('\n')], { type: 'text/csv;charset=utf-8;' }),
-        fileName = `ClinicalTimelinesData_${time.format('%Y-%m-%dT%H-%M-%S')(new Date())}.csv`,
-        link = this.containers.exportButton;
-
-    if (navigator.msSaveBlob) {
-        // IE 10+
-        link.style({
-            cursor: 'pointer',
-            'text-decoration': 'underline',
-            color: 'blue'
-        });
-        link.on('click', () => {
-            navigator.msSaveBlob(CSV, fileName);
-        });
-    } else {
-        // Browsers that support HTML5 download attribute
-        if (link.node().download !== undefined) {
-            var url = URL.createObjectURL(CSV);
-            link.node().setAttribute('href', url);
-            link.node().setAttribute('download', fileName);
-        }
-    }
+    if (typeof XLSX === 'undefined') csv.call(this, data, headers, columns);
+    else xlsx.call(this, data, headers, columns);
 }

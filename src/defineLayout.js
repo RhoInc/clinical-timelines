@@ -38,7 +38,8 @@ export default function defineLayout() {
                     .classed('ct-button', true)
                     .attr('id', 'ct-export-button')
                         .append('a')
-                        .html('&dArr; Data')
+                        .html('&dArr; Export Data')
+                        .attr('title', 'Save current data as an Excel spreadsheet.')
                         .on('click', () => {
                             exportData.call(this);
                         });
@@ -75,7 +76,7 @@ export default function defineLayout() {
                     .classed('ct-button', true)
                     .attr('id', 'ct-back-button')
                         .append('a')
-                        .html('&lArr; Back')
+                        .html('&lArr; Back to Timelines')
                         .on('click', () => {
                             goBackToTimelines.call(this);
                         });

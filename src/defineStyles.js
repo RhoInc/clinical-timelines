@@ -48,11 +48,11 @@ export default function defineStyles() {
                 '    display: inline-block;' +
                 '}',
             '#clinical-timelines #ct-left-column {' +
-                '    width: 20%;' +
+                '    width: 24%;' +
                 '    float: left;' +
                 '}',
             '#clinical-timelines #ct-right-column {' +
-                '    width: 79%;' +
+                '    width: 75%;' +
                 '    float: right;' +
                 '}',
             '#clinical-timelines .ct-column > * {' +

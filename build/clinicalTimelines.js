@@ -3271,27 +3271,28 @@
             ticks.each(function(d, i) {
                 var tick = d3.select(this);
 
-                context.config.id_urls.forEach(function(id_url, j) {
-                    var url = context.initial_data.find(function(di) {
-                        return di[context.config.id_col] === d;
-                    })[id_url.value_col];
-                    var link = tick
-                        .append('text')
-                        .classed('ct-url', true)
-                        .classed('ct-hidden', !url)
-                        .attr({
-                            dx: -20,
-                            dy: 15 * (j + 1) + 5,
-                            fill: 'blue',
-                            cursor: 'pointer',
-                            'font-size': '12px'
-                        })
-                        .text(id_url.text)
-                        .on('click', function() {
-                            window.open(url);
-                        });
-                    link.append('title').text('Open ' + id_url.label);
-                });
+                if (!/^-g\d+-/.test(d)) {
+                    context.config.id_urls.forEach(function(id_url, j) {
+                        var url = context.initial_data.find(function(di) {
+                            return di[context.config.id_col] === d;
+                        })[id_url.value_col];
+                        var link = tick
+                            .append('text')
+                            .classed('ct-url', true)
+                            .classed('ct-hidden', !url)
+                            .attr({
+                                dx: -((j + 1) * 21),
+                                dy: context.y.rangeBand() - 7,
+                                fill: 'blue',
+                                cursor: 'pointer'
+                            })
+                            .text(id_url.text)
+                            .on('click', function() {
+                                window.open(url);
+                            });
+                        link.append('title').text('Open ' + id_url.label);
+                    });
+                }
             });
         }
     }
@@ -3416,30 +3417,36 @@
     function addStriping() {
         var context = this;
         this.svg.selectAll('.ct-stripe').remove();
-        var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
-            //Offset tick label.
-            d3
-                .select(this)
-                .select('text')
-                .attr({
-                    dx: 2,
-                    dy: 7 //context.y.rangeBand() / 3
-                });
+        var yAxisGridLines = this.svg
+            .selectAll('.y.axis .tick')
+            .filter(function(d) {
+                return !/-g\d+-/.test(d);
+            })
+            .each(function(d, i) {
+                //Offset tick label.
+                d3
+                    .select(this)
+                    .select('text')
+                    .attr({
+                        dx: 2,
+                        dy: 7 //context.y.rangeBand() / 3
+                    });
 
-            //Insert a rectangle with which to visually group each ID's events.
-            d3
-                .select(this)
-                .insert('rect', ':first-child')
-                .classed('ct-stripe', true)
-                .attr({
-                    id: d,
-                    x: -context.margin.left + 1,
-                    y: -context.config.marks[0].attributes['stroke-width'],
-                    width: context.plot_width + context.margin.left,
-                    height:
-                        context.y.rangeBand() + context.config.marks[0].attributes['stroke-width']
-                });
-        });
+                //Insert a rectangle with which to visually group each ID's events.
+                d3
+                    .select(this)
+                    .insert('rect', ':first-child')
+                    .classed('ct-stripe', true)
+                    .attr({
+                        id: d,
+                        x: -context.margin.left + 1,
+                        y: -context.config.marks[0].attributes['stroke-width'],
+                        width: context.plot_width + context.margin.left,
+                        height:
+                            context.y.rangeBand() +
+                            context.config.marks[0].attributes['stroke-width']
+                    });
+            });
     }
 
     function offsetCircles(mark, markData) {

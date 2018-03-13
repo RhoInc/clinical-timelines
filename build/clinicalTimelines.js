@@ -1783,7 +1783,7 @@
 
         this.controls.wrap.selectAll('.control-group').each(function(d) {
             var controlGroup = d3.select(this),
-                label = controlGroup.select('.control-label'),
+                label = controlGroup.select('.wc-control-label'),
                 description = controlGroup.select('.span-description'),
                 container = controlGroup.append('div').classed('ct-label-description', true);
 
@@ -2022,7 +2022,7 @@
                 .classed('ct-label-description', true);
 
         //Add control label and span description nodes.
-        timeRangeLabelDescription.append('span').classed('control-label', true);
+        timeRangeLabelDescription.append('span').classed('wc-control-label', true);
         timeRangeLabelDescription
             .append('span')
             .classed('span-description', true)

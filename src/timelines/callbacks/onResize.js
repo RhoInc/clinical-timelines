@@ -2,6 +2,7 @@ import legendFilter from './onResize/legendFilter';
 import drawTopXaxis from './onResize/drawTopXaxis';
 import addTooltip from './onResize/addTooltip';
 import tickClick from './onResize/tickClick';
+import addURLs from './onResize/addURLs';
 import annotateGrouping from './onResize/annotateGrouping';
 import addStriping from './onResize/addStriping';
 import offsetOverlappingMarks from './onResize/offsetOverlappingMarks';
@@ -26,6 +27,9 @@ export default function onResize() {
 
     //Draw second chart when y-axis tick label is clicked.
     tickClick.call(this);
+
+    //Add URLs beneath y-axis tick labels.
+    addURLs.call(this);
 
     //Annotate grouping.
     annotateGrouping.call(this);

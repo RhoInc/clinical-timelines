@@ -261,6 +261,7 @@
         id_unit: 'participant',
         id_characteristics: null,
         id_tooltip_col: null,
+        id_urls: null,
 
         //Event settings
         event_col: 'DOMAIN',
@@ -430,6 +431,10 @@
             defaultID_characteristics,
             settings.id_characteristics
         );
+
+        //id_characteristics
+        var defaultID_urls = [];
+        settings.id_urls = arrayOfVariablesCheck(defaultID_urls, settings.id_urls);
 
         /**-------------------------------------------------------------------------------------------\
       Event settings
@@ -926,7 +931,6 @@
             //buttons
             '#clinical-timelines .ct-button {' +
                 '    display: inline-block;' +
-                '    padding: 3px 5px !important;' +
                 '    border: 2px solid black !important;' +
                 '    border-radius: 4px !important;' +
                 '    color: #333;' +
@@ -972,6 +976,7 @@
                 '    float: left;' +
                 '    font-size: 110%;' +
                 '    font-weight: bold;' +
+                '    padding: 1px 5px !important;' +
                 '}',
             '#clinical-timelines #ct-left-column .ct-details .ct-button a {' +
                 '    color: blue;' +
@@ -2169,14 +2174,27 @@
     function IDdetails() {
         //Add ID characteristics.
         this.clinicalTimelines.containers.IDdetails
-            .selectAll('div.characteristic')
+            .selectAll('div.ct-characteristic.ct-ID-detail')
             .data(this.config.id_characteristics)
             .enter()
             .append('div')
-            .classed('ct-characteristic', true)
+            .classed('ct-characteristic ct-ID-detail', true)
             .html(function(d) {
                 return d.label + ": <span id = '" + d.value_col + "'></span>";
             });
+
+        //Add ID characteristics.
+        if (Array.isArray(this.config.id_urls) && this.config.id_urls.length) {
+            this.clinicalTimelines.containers.IDdetails
+                .selectAll('div.ct-characteristic.ct-ID-URL')
+                .data(this.config.id_urls)
+                .enter()
+                .append('div')
+                .classed('ct-characteristic ct-ID-URL', true)
+                .html(function(d) {
+                    return "<span id = '" + d.value_col + "'><a>" + d.label + '</a></span>';
+                });
+        }
     }
 
     function controlGroupLayout() {
@@ -2238,13 +2256,30 @@
                 return d[_this.config.id_col] === _this.selected_id;
             })[0];
             this.clinicalTimelines.containers.IDdetails
-                .selectAll('.ct-characteristic')
+                .selectAll('.ct-ID-detail')
                 .each(function(d) {
                     d3
                         .select(this)
                         .select('span')
                         .text(id_characteristics[d.value_col]);
                 });
+        }
+
+        //Draw ID URLs.
+        if (this.config.id_urls) {
+            var id_urls = this.initial_data.filter(function(d) {
+                return d[_this.config.id_col] === _this.selected_id;
+            })[0];
+            this.clinicalTimelines.containers.IDdetails.selectAll('.ct-ID-URL').each(function(d) {
+                d3
+                    .select(this)
+                    .classed('ct-hidden', !id_urls[d.value_col])
+                    .select('a')
+                    .attr({
+                        href: id_urls[d.value_col],
+                        target: '_blank'
+                    });
+            });
         }
 
         //Draw ID timeline.
@@ -3200,18 +3235,20 @@
         var context = this;
 
         this.svg
-            .selectAll('.y.axis .tick')
+            .selectAll('.y.axis .tick text')
             .each(function(d) {
-                if (/^-g\d+-/.test(d)) d3.select(this).remove();
+                var tick = d3.select(this);
+                tick.select('.ct-y-tooltip').remove();
+                if (/^-g\d+-/.test(d)) tick.remove();
                 else {
                     var tooltip = context.config.id_tooltip_col
                         ? context.initial_data.find(function(di) {
                               return di[context.config.id_col] === d;
                           })[context.config.id_tooltip_col]
                         : context.config.id_unitPropCased + ': ' + d;
-                    d3
-                        .select(this)
+                    tick
                         .append('title')
+                        .classed('ct-y-tooltip', true)
                         .text(tooltip);
                 }
             })
@@ -3222,6 +3259,41 @@
                 enableDisableControls.call(_this);
                 updateIDfilter.call(_this);
             });
+    }
+
+    function addURLs() {
+        this.svg.selectAll('.ct-url').remove();
+
+        if (Array.isArray(this.config.id_urls) && this.config.id_urls.length) {
+            var context = this;
+            var ticks = this.svg.selectAll('.y.axis .tick');
+
+            ticks.each(function(d, i) {
+                var tick = d3.select(this);
+
+                context.config.id_urls.forEach(function(id_url, j) {
+                    var url = context.initial_data.find(function(di) {
+                        return di[context.config.id_col] === d;
+                    })[id_url.value_col];
+                    var link = tick
+                        .append('text')
+                        .classed('ct-url', true)
+                        .classed('ct-hidden', !url)
+                        .attr({
+                            dx: -20,
+                            dy: 15 * (j + 1) + 5,
+                            fill: 'blue',
+                            cursor: 'pointer',
+                            'font-size': '12px'
+                        })
+                        .text(id_url.text)
+                        .on('click', function() {
+                            window.open(url);
+                        });
+                    link.append('title').text('Open ' + id_url.label);
+                });
+            });
+        }
     }
 
     function horizontally() {
@@ -3349,7 +3421,10 @@
             d3
                 .select(this)
                 .select('text')
-                .attr('dy', context.y.rangeBand() / 3);
+                .attr({
+                    dx: 2,
+                    dy: 7 //context.y.rangeBand() / 3
+                });
 
             //Insert a rectangle with which to visually group each ID's events.
             d3
@@ -4287,6 +4362,9 @@
 
         //Draw second chart when y-axis tick label is clicked.
         tickClick.call(this);
+
+        //Add URLs beneath y-axis tick labels.
+        addURLs.call(this);
 
         //Annotate grouping.
         annotateGrouping.call(this);

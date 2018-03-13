@@ -20,13 +20,27 @@ export default function drawIDtimeline() {
         const id_characteristics = this.initial_data.filter(
             d => d[this.config.id_col] === this.selected_id
         )[0];
-        this.clinicalTimelines.containers.IDdetails
-            .selectAll('.ct-characteristic')
-            .each(function(d) {
-                select(this)
-                    .select('span')
-                    .text(id_characteristics[d.value_col]);
-            });
+        this.clinicalTimelines.containers.IDdetails.selectAll('.ct-ID-detail').each(function(d) {
+            select(this)
+                .select('span')
+                .text(id_characteristics[d.value_col]);
+        });
+    }
+
+    //Draw ID URLs.
+    if (this.config.id_urls) {
+        const id_urls = this.initial_data.filter(
+            d => d[this.config.id_col] === this.selected_id
+        )[0];
+        this.clinicalTimelines.containers.IDdetails.selectAll('.ct-ID-URL').each(function(d) {
+            select(this)
+                .classed('ct-hidden', !id_urls[d.value_col])
+                .select('a')
+                .attr({
+                    href: id_urls[d.value_col],
+                    target: '_blank'
+                });
+        });
     }
 
     //Draw ID timeline.

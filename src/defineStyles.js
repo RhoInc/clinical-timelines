@@ -28,7 +28,6 @@ export default function defineStyles() {
             //buttons
             '#clinical-timelines .ct-button {' +
                 '    display: inline-block;' +
-                '    padding: 3px 5px !important;' +
                 '    border: 2px solid black !important;' +
                 '    border-radius: 4px !important;' +
                 '    color: #333;' +
@@ -82,6 +81,7 @@ export default function defineStyles() {
                 '    float: left;' +
                 '    font-size: 110%;' +
                 '    font-weight: bold;' +
+                '    padding: 1px 5px !important;' +
                 '}',
             '#clinical-timelines #ct-left-column .ct-details .ct-button a {' +
                 '    color: blue;' +

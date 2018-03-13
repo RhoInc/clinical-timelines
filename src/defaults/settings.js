@@ -4,6 +4,7 @@ export const rendererSpecificSettings = {
     id_unit: 'participant',
     id_characteristics: null,
     id_tooltip_col: null,
+    id_urls: null,
 
   //Event settings
     event_col: 'DOMAIN',

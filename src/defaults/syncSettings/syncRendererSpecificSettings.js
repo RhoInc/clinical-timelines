@@ -24,6 +24,10 @@ export default function syncRendererSpecificSettings(settings) {
         settings.id_characteristics
     );
 
+    //id_characteristics
+    const defaultID_urls = [];
+    settings.id_urls = arrayOfVariablesCheck(defaultID_urls, settings.id_urls);
+
     /**-------------------------------------------------------------------------------------------\
       Event settings
     \-------------------------------------------------------------------------------------------**/

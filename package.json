@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "d3": "^3",
-    "webcharts": "^1.8"
+    "webcharts": "^1.10"
   },
   "scripts": {
     "build": "npm run bundle && npm run format && npm run build-md",

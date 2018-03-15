@@ -11,8 +11,8 @@ export default function addStriping() {
             select(this)
                 .select('text')
                 .attr({
-                    dx: 2,
-                    dy: 7 //context.y.rangeBand() / 3
+                    dx: 5,
+                    dy: 5 //context.y.rangeBand() / 3
                 });
 
             //Insert a rectangle with which to visually group each ID's events.

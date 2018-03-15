@@ -45,8 +45,7 @@ export default function drawIDtimeline() {
 
     //Draw ID timeline.
     this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-    this.clinicalTimelines.containers.IDtimeline
-        .select('div')
+    this.clinicalTimelines.containers.IDtimeline.select('div')
         .selectAll('*')
         .remove();
     multiply(

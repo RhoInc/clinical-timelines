@@ -1,7 +1,6 @@
 export default function IDdetails() {
     //Add ID characteristics.
-    this.clinicalTimelines.containers.IDdetails
-        .selectAll('div.ct-characteristic.ct-ID-detail')
+    this.clinicalTimelines.containers.IDdetails.selectAll('div.ct-characteristic.ct-ID-detail')
         .data(this.config.id_characteristics)
         .enter()
         .append('div')
@@ -10,8 +9,7 @@ export default function IDdetails() {
 
     //Add ID characteristics.
     if (Array.isArray(this.config.id_urls) && this.config.id_urls.length) {
-        this.clinicalTimelines.containers.IDdetails
-            .selectAll('div.ct-characteristic.ct-ID-URL')
+        this.clinicalTimelines.containers.IDdetails.selectAll('div.ct-characteristic.ct-ID-URL')
             .data(this.config.id_urls)
             .enter()
             .append('div')

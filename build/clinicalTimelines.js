@@ -1322,9 +1322,7 @@
                 'text-decoration': 'underline',
                 color: 'blue'
             });
-            link.on('click', function() {
-                navigator.msSaveBlob(CSV, fileName);
-            });
+            navigator.msSaveBlob(CSV, fileName);
         } else {
             // Browsers that support HTML5 download attribute
             if (link.node().download !== undefined) {
@@ -1392,9 +1390,7 @@
                 'text-decoration': 'underline',
                 color: 'blue'
             });
-            link.on('click', function() {
-                navigator.msSaveBlob(blob, fileName);
-            });
+            navigator.msSaveBlob(blob, fileName);
         } else {
             // Browsers that support HTML5 download attribute
             if (link.node().download !== undefined) {

@@ -76,9 +76,7 @@ export default function csv(data, headers, columns) {
             'text-decoration': 'underline',
             color: 'blue'
         });
-        link.on('click', () => {
-            navigator.msSaveBlob(CSV, fileName);
-        });
+        navigator.msSaveBlob(CSV, fileName);
     } else {
         // Browsers that support HTML5 download attribute
         if (link.node().download !== undefined) {

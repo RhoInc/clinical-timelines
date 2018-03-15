@@ -51,9 +51,7 @@ export default function xlsx(data, headers, columns) {
             'text-decoration': 'underline',
             color: 'blue'
         });
-        link.on('click', () => {
-            navigator.msSaveBlob(blob, fileName);
-        });
+        navigator.msSaveBlob(blob, fileName);
     } else {
         // Browsers that support HTML5 download attribute
         if (link.node().download !== undefined) {

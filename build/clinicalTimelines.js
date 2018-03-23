@@ -857,7 +857,9 @@
     function syncControls(controls, settings) {
         settings.filters
             .sort(function(a, b) {
-                return a.value_col === settings.event_col ? 1 : 0;
+                return a.value_col === settings.event_col
+                    ? 2
+                    : a.value_col === settings.ongo_col ? 1 : 0;
             })
             .forEach(function(filter) {
                 filter.type = 'subsetter';
@@ -947,6 +949,14 @@
                 '    background: #333 !important;' +
                 '}',
 
+            //info icons
+            '#clinical-timelines .ct-info-icon {' +
+                '    font-size: 16px;' +
+                '    font-weight: bold;' +
+                '    color: blue;' +
+                '    cursor: help;' +
+                '}',
+
             /***--------------------------------------------------------------------------------------\
       Left and right columns
     \--------------------------------------------------------------------------------------***/
@@ -1002,11 +1012,6 @@
                 '}',
             '#clinical-timelines #ct-left-column .ct-details .ct-stats.ct-sample-outside-time-range {' +
                 '    color: red;' +
-                '}',
-            '#clinical-timelines #ct-left-column .ct-details .ct-info-icon {' +
-                '    font-weight: bold;' +
-                '    color: blue;' +
-                '    cursor: help;' +
                 '}',
 
             //Controls
@@ -2370,6 +2375,7 @@
 
     function controlGroupLayout() {
         var context = this;
+        console.log(context.config.filters);
 
         this.controls.wrap.selectAll('.control-group').each(function(d) {
             var controlGroup = d3.select(this),
@@ -2389,14 +2395,48 @@
                     .classed('ct-controls ct-horizontal-rule', true)
                     .text('Controls');
             else if (
-                (context.config.groupings.length && d.option === 'y.grouping') ||
+                (context.config.filters.some(function(filter) {
+                    return (
+                        [
+                            context.config.id_col,
+                            context.config.event_col,
+                            context.config.ongo_col
+                        ].indexOf(filter.value_col) < 0
+                    );
+                }) &&
+                    context.config.groupings.length &&
+                    d.option === 'y.grouping') ||
                 (!context.config.groupings.length && d.option === 'y.sort')
             ) {
                 var filterRule = context.controls.wrap
                     .append('div')
                     .classed('ct-filters ct-horizontal-rule', true)
-                    .text('Filters');
+                    .text(context.config.id_unitPropCased + ' Filters ');
+                filterRule
+                    .append('span')
+                    .classed('ct-info-icon', true)
+                    .html('&#x24d8;')
+                    .attr(
+                        'title',
+                        'These filters control the set of ' +
+                            context.config.id_unitPlural +
+                            ' displayed on the y-axis.'
+                    );
                 context.controls.wrap.node().insertBefore(filterRule.node(), this.nextSibling);
+            } else if (
+                d.value_col === context.config.ongo_col ||
+                (d.value_col === context.config.event_col && !context.config.ongo_col)
+            ) {
+                var _filterRule = context.controls.wrap
+                    .append('div')
+                    .classed('ct-filters ct-horizontal-rule', true)
+                    .text('Event Filters ');
+                _filterRule
+                    .append('span')
+                    .classed('ct-info-icon', true)
+                    .html('&#x24d8;')
+                    .attr('title', 'These filters control the set of events visible in the chart.');
+                context.controls.wrap.node().insertBefore(_filterRule.node(), this);
             }
         });
     }
@@ -4226,6 +4266,9 @@
     function updateTable(reference_line) {
         var _this = this;
 
+        var context = this;
+        console.log(context);
+
         //Update reference table header.
         reference_line.tableHeader.text('Events Overlapping ' + reference_line.label);
 
@@ -4308,12 +4351,20 @@
                     .text(d.key)
                     .attr('class', function(d) {
                         return d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : '');
+                    })
+                    .style('font-weight', 'bold')
+                    .style('color', function(d) {
+                        return d.class === 'ct-lower-level' ? context.colorScale(d.key) : 'black';
                     });
                 row
                     .append('td')
                     .text(d.n)
                     .attr('class', function(d) {
                         return d.class;
+                    })
+                    .style('font-weight', 'bold')
+                    .style('color', function(d) {
+                        return d.class === 'ct-lower-level' ? context.colorScale(d.key) : 'black';
                     });
             });
     }

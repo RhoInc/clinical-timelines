@@ -1,6 +1,9 @@
 import { nest, select, sum } from 'd3';
 
 export default function updateTable(reference_line) {
+    const context = this;
+    console.log(context);
+
     //Update reference table header.
     reference_line.tableHeader.text('Events Overlapping ' + reference_line.label);
 
@@ -66,10 +69,20 @@ export default function updateTable(reference_line) {
             row
                 .append('td')
                 .text(d.key)
-                .attr('class', d => d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : ''));
+                .attr('class', d => d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : ''))
+                .style('font-weight', 'bold')
+                .style(
+                    'color',
+                    d => (d.class === 'ct-lower-level' ? context.colorScale(d.key) : 'black')
+                );
             row
                 .append('td')
                 .text(d.n)
-                .attr('class', d => d.class);
+                .attr('class', d => d.class)
+                .style('font-weight', 'bold')
+                .style(
+                    'color',
+                    d => (d.class === 'ct-lower-level' ? context.colorScale(d.key) : 'black')
+                );
         });
 }

@@ -2,6 +2,7 @@ import { select } from 'd3';
 
 export default function controlGroupLayout() {
     const context = this;
+    console.log(context.config.filters);
 
     this.controls.wrap.selectAll('.control-group').each(function(d) {
         const controlGroup = select(this),
@@ -21,14 +22,46 @@ export default function controlGroupLayout() {
                 .classed('ct-controls ct-horizontal-rule', true)
                 .text('Controls');
         else if (
-            (context.config.groupings.length && d.option === 'y.grouping') ||
+            (context.config.filters.some(
+                filter =>
+                    [
+                        context.config.id_col,
+                        context.config.event_col,
+                        context.config.ongo_col
+                    ].indexOf(filter.value_col) < 0
+            ) &&
+                (context.config.groupings.length && d.option === 'y.grouping')) ||
             (!context.config.groupings.length && d.option === 'y.sort')
         ) {
             const filterRule = context.controls.wrap
                 .append('div')
                 .classed('ct-filters ct-horizontal-rule', true)
-                .text('Filters');
+                .text(`${context.config.id_unitPropCased} Filters `);
+            filterRule
+                .append('span')
+                .classed('ct-info-icon', true)
+                .html('&#x24d8;')
+                .attr(
+                    'title',
+                    `These filters control the set of ${
+                        context.config.id_unitPlural
+                    } displayed on the y-axis.`
+                );
             context.controls.wrap.node().insertBefore(filterRule.node(), this.nextSibling);
+        } else if (
+            d.value_col === context.config.ongo_col ||
+            (d.value_col === context.config.event_col && !context.config.ongo_col)
+        ) {
+            const filterRule = context.controls.wrap
+                .append('div')
+                .classed('ct-filters ct-horizontal-rule', true)
+                .text(`Event Filters `);
+            filterRule
+                .append('span')
+                .classed('ct-info-icon', true)
+                .html('&#x24d8;')
+                .attr('title', 'These filters control the set of events visible in the chart.');
+            context.controls.wrap.node().insertBefore(filterRule.node(), this);
         }
     });
 }

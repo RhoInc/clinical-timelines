@@ -43,6 +43,14 @@ export default function defineStyles() {
                 '    background: #333 !important;' +
                 '}',
 
+            //info icons
+            '#clinical-timelines .ct-info-icon {' +
+                '    font-size: 16px;' +
+                '    font-weight: bold;' +
+                '    color: blue;' +
+                '    cursor: help;' +
+                '}',
+
         /***--------------------------------------------------------------------------------------\
           Left and right columns
         \--------------------------------------------------------------------------------------***/
@@ -106,11 +114,6 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines #ct-left-column .ct-details .ct-stats.ct-sample-outside-time-range {' +
                 '    color: red;' +
-                '}',
-            '#clinical-timelines #ct-left-column .ct-details .ct-info-icon {' +
-                '    font-weight: bold;' +
-                '    color: blue;' +
-                '    cursor: help;' +
                 '}',
 
           //Controls

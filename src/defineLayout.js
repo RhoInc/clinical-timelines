@@ -79,6 +79,7 @@ export default function defineLayout() {
                     .attr('id', 'ct-back-button')
                         .append('a')
                         .html('&lArr; Back to Timelines')
+                        .attr('title', `Return to the view of all ${this.settings.id_unitPlural}.`)
                         .on('click', () => {
                             goBackToTimelines.call(this);
                         });
@@ -96,6 +97,7 @@ export default function defineLayout() {
                 .append('div')
                 .classed('ct-button ct-reset', true)
                 .text('Reset Controls')
+                .attr('title', 'Reset controls to initial settings.')
                 .on('click', () => {
                     resetControls.call(this);
                 });
@@ -122,10 +124,21 @@ export default function defineLayout() {
             this.containers.timelines
                 .append('div')
                 .classed('ct-button ct-select-all', true)
-                .text('Select All Event Types')
+                .html('&#10003;')
+                .attr('title', 'Select all event types.')
                 .on('click', () => {
                     selectAllEventTypes.call(this);
-                });
+                })
+                .on('mouseover', () => {
+                    this.timelines.legend
+                        .selectAll('.legend-item')
+                        .classed('ct-hover', true);
+                })
+                .on('mouseout', () => {
+                    this.timelines.legend
+                        .selectAll('.legend-item')
+                        .classed('ct-hover', false);
+                })
 
         /***--------------------------------------------------------------------------------------\
           ID timeline

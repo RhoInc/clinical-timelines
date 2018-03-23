@@ -38,6 +38,10 @@ export default function defineStyles() {
                 '    color: #ccc;' +
                 '    background: #333 !important;' +
                 '}',
+            '#clinical-timelines .ct-button.ct-hover {' +
+                '    color: #ccc;' +
+                '    background: #333 !important;' +
+                '}',
 
         /***--------------------------------------------------------------------------------------\
           Left and right columns
@@ -195,7 +199,7 @@ export default function defineStyles() {
                 '    position: relative;' +
                 '    z-index: 2;' +
                 '    float: right;' +
-                '    font-size: 110%;' +
+                '    font-size: .9em;' +
                 '    font-weight: bold;' +
                 '    padding: 2px 5px !important;' +
                 '    color: blue;' +

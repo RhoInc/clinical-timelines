@@ -942,6 +942,10 @@
                 '    color: #ccc;' +
                 '    background: #333 !important;' +
                 '}',
+            '#clinical-timelines .ct-button.ct-hover {' +
+                '    color: #ccc;' +
+                '    background: #333 !important;' +
+                '}',
 
             /***--------------------------------------------------------------------------------------\
       Left and right columns
@@ -1088,7 +1092,7 @@
                 '    position: relative;' +
                 '    z-index: 2;' +
                 '    float: right;' +
-                '    font-size: 110%;' +
+                '    font-size: .9em;' +
                 '    font-weight: bold;' +
                 '    padding: 2px 5px !important;' +
                 '    color: blue;' +
@@ -1804,6 +1808,7 @@
             .attr('id', 'ct-back-button')
             .append('a')
             .html('&lArr; Back to Timelines')
+            .attr('title', 'Return to the view of all ' + this.settings.id_unitPlural + '.')
             .on('click', function() {
                 goBackToTimelines.call(_this);
             });
@@ -1821,6 +1826,7 @@
             .append('div')
             .classed('ct-button ct-reset', true)
             .text('Reset Controls')
+            .attr('title', 'Reset controls to initial settings.')
             .on('click', function() {
                 resetControls.call(_this);
             });
@@ -1846,9 +1852,16 @@
         this.containers.timelines
             .append('div')
             .classed('ct-button ct-select-all', true)
-            .text('Select All Event Types')
+            .html('&#10003;')
+            .attr('title', 'Select all event types.')
             .on('click', function() {
                 selectAllEventTypes.call(_this);
+            })
+            .on('mouseover', function() {
+                _this.timelines.legend.selectAll('.legend-item').classed('ct-hover', true);
+            })
+            .on('mouseout', function() {
+                _this.timelines.legend.selectAll('.legend-item').classed('ct-hover', false);
             });
 
         /***--------------------------------------------------------------------------------------\

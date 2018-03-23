@@ -16,9 +16,7 @@ export default function selectAllEventTypes() {
     )[0].val = this.timelines.currentEventTypes;
 
     //Update legend items.
-    this.timelines.wrap
-        .selectAll('.legend-item')
-        .classed('ct-selected', true);
+    this.timelines.wrap.selectAll('.legend-item').classed('ct-selected', true);
 
     //Draw chart.
     if (this.selected_id) drawIDtimeline.call(this.timelines);

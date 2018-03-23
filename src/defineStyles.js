@@ -110,6 +110,17 @@ export default function defineStyles() {
                 '}',
 
           //Controls
+            '#clinical-timelines #ct-left-column #ct-controls .ct-button {' +
+                '    float: right;' +
+                '    font-size: 110%;' +
+                '    font-weight: bold;' +
+                '    padding: 1px 5px !important;' +
+                '    color: blue;' +
+                '    text-decoration: none;' +
+                '}',
+            '#clinical-timelines #ct-left-column #ct-controls .ct-button:hover {' +
+                '    color: #ccc;' +
+                '}',
             '#clinical-timelines #ct-left-column .wc-controls {' +
                 '    margin-bottom: 0;' +
                 '    clear: left;' +
@@ -177,6 +188,25 @@ export default function defineStyles() {
         \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines #ct-right-column > * {' +
+                '}',
+
+          //Select All button
+            '#clinical-timelines #ct-right-column #ct-timelines .ct-select-all {' +
+                '    position: relative;' +
+                '    z-index: 2;' +
+                '    float: right;' +
+                '    font-size: 110%;' +
+                '    font-weight: bold;' +
+                '    padding: 2px 5px !important;' +
+                '    color: blue;' +
+                '    text-decoration: none;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .ct-select-all:hover {' +
+                '    color: #ccc;' +
+                '}',
+            '#clinical-timelines #ct-right-column #ct-timelines .wc-chart {' +
+                '    position: relative;' +
+                '    z-index: 1;' +
                 '}',
 
           //Legend

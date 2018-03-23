@@ -22,17 +22,41 @@ export default function updateTable(reference_line) {
     reference_line.flattened_data = [];
     reference_line.nested_data.forEach(d => {
         reference_line.flattened_data.push({
+            group: d.key,
+            group_n: sum(d.values, di => di.values),
             class: 'ct-higher-level',
             key: d.key,
             n: sum(d.values, di => di.values)
         });
         d.values.forEach(di => {
             reference_line.flattened_data.push({
+                group: d.key,
+                group_n: sum(d.values, di => di.values),
                 class: 'ct-lower-level',
                 key: di.key,
                 n: di.values
             });
         });
+    });
+    reference_line.flattened_data.sort((a,b) => {
+        const groupOrder = this.config.reference_table_sort === 'frequency'
+            ? b.group_n - a.group_n
+            : a.group < b.group
+                ? -1
+                : a.group > b.group
+                    ? 1
+                    : 0;
+        const classOrder = a.class === 'ct-higher-level'
+            ? -1
+            : b.class === 'ct-higher-level'
+                ? 1
+                : 0;
+        const lowerOrder = this.config.reference_table_sort === 'frequency'
+            ? b.n - a.n
+            : this.config.reference_table_sort === 'event'
+                ? this.config.color_dom.indexOf(a.key) - this.config.color_dom.indexOf(b.key)
+                : (a.key < b.key ? -1 : 1);
+        return groupOrder || classOrder || lowerOrder;
     });
 
     //Update table.

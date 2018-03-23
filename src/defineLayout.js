@@ -1,6 +1,8 @@
 import { select } from 'd3';
 import exportData from './defineLayout/exportData';
 import goBackToTimelines from './defineLayout/goBackToTimelines';
+import resetControls from './defineLayout/resetControls';
+import selectAllEventTypes from './defineLayout/selectAllEventTypes';
 
 export default function defineLayout() {
     this.containers.main = select(this.element)
@@ -85,7 +87,18 @@ export default function defineLayout() {
           Controls
         \--------------------------------------------------------------------------------------***/
 
-            this.containers.controls = this.containers.leftColumn.append('div').attr('id', 'ct-controls');
+            this.containers.controls = this.containers.leftColumn
+                .append('div')
+                .attr('id', 'ct-controls');
+
+            //Add button that selects all event types.
+            this.containers.controls
+                .append('div')
+                .classed('ct-button ct-reset', true)
+                .text('Reset Controls')
+                .on('click', () => {
+                    resetControls.call(this);
+                });
 
     /**-------------------------------------------------------------------------------------------\
       Right column
@@ -96,6 +109,7 @@ export default function defineLayout() {
             .classed('ct-column', true)
             .attr('id', 'ct-right-column');
 
+
         /***--------------------------------------------------------------------------------------\
           Timelines
         \--------------------------------------------------------------------------------------***/
@@ -103,6 +117,15 @@ export default function defineLayout() {
             this.containers.timelines = this.containers.rightColumn
                 .append('div')
                 .attr('id', 'ct-timelines');
+
+            //Add button that selects all event types.
+            this.containers.timelines
+                .append('div')
+                .classed('ct-button ct-select-all', true)
+                .text('Select All Event Types')
+                .on('click', () => {
+                    selectAllEventTypes.call(this);
+                });
 
         /***--------------------------------------------------------------------------------------\
           ID timeline

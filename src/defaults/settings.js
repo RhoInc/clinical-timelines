@@ -41,6 +41,7 @@ export const rendererSpecificSettings = {
   //Miscellaneous settings
     mark_thickness: 6,
     reference_lines: null,
+    reference_table_sort: 'event', // ['event','frequency','alphanumeric']
     offset_col: 'OFFSET',
     seq_col: 'SEQ',
     tooltip_col: 'TOOLTIP',

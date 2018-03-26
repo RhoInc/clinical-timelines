@@ -2,7 +2,6 @@ import { nest, select, sum } from 'd3';
 
 export default function updateTable(reference_line) {
     const context = this;
-    console.log(context);
 
     //Update reference table header.
     reference_line.tableHeader.text('Events Overlapping ' + reference_line.label);

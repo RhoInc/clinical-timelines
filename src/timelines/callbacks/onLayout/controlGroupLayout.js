@@ -2,7 +2,6 @@ import { select } from 'd3';
 
 export default function controlGroupLayout() {
     const context = this;
-    console.log(context.config.filters);
 
     this.controls.wrap.selectAll('.control-group').each(function(d) {
         const controlGroup = select(this),
@@ -35,7 +34,7 @@ export default function controlGroupLayout() {
         ) {
             const filterRule = context.controls.wrap
                 .append('div')
-                .classed('ct-filters ct-horizontal-rule', true)
+                .classed('ct-horizontal-rule ct-filters ct-ID-filters', true)
                 .text(`${context.config.id_unitPropCased} Filters `);
             filterRule
                 .append('span')
@@ -54,7 +53,7 @@ export default function controlGroupLayout() {
         ) {
             const filterRule = context.controls.wrap
                 .append('div')
-                .classed('ct-filters ct-horizontal-rule', true)
+                .classed('ct-horizontal-rule ct-filters ct-event-filters', true)
                 .text(`Event Filters `);
             filterRule
                 .append('span')

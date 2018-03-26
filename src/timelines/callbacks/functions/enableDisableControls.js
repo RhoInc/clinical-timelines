@@ -13,5 +13,15 @@ export default function enableDisableControls() {
         )
         .classed('ct-hidden', !!this.selected_id);
 
+    //Hide/unhide ID filter horizontal rule.
+    this.controls.wrap
+        .select('.ct-filters.ct-ID-filters')
+        .classed('ct-hidden', !!this.selected_id);
+
+    //Hide/unhide reference line tables.
+    this.clinicalTimelines.containers.leftColumn
+        .selectAll('.ct-reference-line-table-container')
+        .classed('ct-hidden', !!this.selected_id);
+
     if (!this.selected_id) hideTimeRangeControl.call(this);
 }

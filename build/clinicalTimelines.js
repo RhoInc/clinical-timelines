@@ -1354,8 +1354,7 @@
             .attr('id', 'ct-ID-details');
 
         //Add button to return from ID timeline to timelines.
-        this.containers.backButton = this.containers.IDdetails
-            .append('div')
+        this.containers.backButton = this.containers.IDdetails.append('div')
             .classed('ct-button', true)
             .attr('id', 'ct-back-button')
             .append('a')
@@ -1806,8 +1805,7 @@
 
     function IDdetails() {
         //Add ID characteristics.
-        this.clinicalTimelines.containers.IDdetails
-            .selectAll('div.characteristic')
+        this.clinicalTimelines.containers.IDdetails.selectAll('div.characteristic')
             .data(this.config.id_characteristics)
             .enter()
             .append('div')
@@ -1875,20 +1873,19 @@
             var id_characteristics = this.initial_data.filter(function(d) {
                 return d[_this.config.id_col] === _this.selected_id;
             })[0];
-            this.clinicalTimelines.containers.IDdetails
-                .selectAll('.ct-characteristic')
-                .each(function(d) {
+            this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(
+                function(d) {
                     d3
                         .select(this)
                         .select('span')
                         .text(id_characteristics[d.value_col]);
-                });
+                }
+            );
         }
 
         //Draw ID timeline.
         this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-        this.clinicalTimelines.containers.IDtimeline
-            .select('div')
+        this.clinicalTimelines.containers.IDtimeline.select('div')
             .selectAll('*')
             .remove();
         webcharts.multiply(
@@ -2142,8 +2139,7 @@
             this.draw();
 
             //Hide ID timeline.
-            this.clinicalTimelines.containers.IDtimeline
-                .select('div')
+            this.clinicalTimelines.containers.IDtimeline.select('div')
                 .selectAll('*')
                 .remove();
             this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', true);

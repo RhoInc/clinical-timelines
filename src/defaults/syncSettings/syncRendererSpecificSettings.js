@@ -63,9 +63,9 @@ export default function syncRendererSpecificSettings(settings) {
                 referenceLineObject.label = reference_line.label
                     ? reference_line.label
                     : `${referenceLineObject.time_scale.substring(0, 1).toUpperCase() +
-                          referenceLineObject.time_scale.substring(
-                              1
-                          )}: ${referenceLineObject.timepoint}`;
+                          referenceLineObject.time_scale.substring(1)}: ${
+                          referenceLineObject.timepoint
+                      }`;
 
                 return referenceLineObject;
             })

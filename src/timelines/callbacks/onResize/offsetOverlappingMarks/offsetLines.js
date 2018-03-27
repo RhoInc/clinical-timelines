@@ -108,10 +108,16 @@ export default function offsetLines(mark, markData) {
 
                 //Offset lines vertically.
                 const className = `${currentLine.key} line`;
-                const g = select(this.clinicalTimelines.document.getElementsByClassName(className)[0]);
-                g.attr('transform', currentLine.offset > 0
-                    ? `translate(0,${currentLine.offset * +mark.attributes['stroke-width'] * 1.5})`
-                    : 'translate(0,0)'
+                const g = select(
+                    this.clinicalTimelines.document.getElementsByClassName(className)[0]
+                );
+                g.attr(
+                    'transform',
+                    currentLine.offset > 0
+                        ? `translate(0,${currentLine.offset *
+                              +mark.attributes['stroke-width'] *
+                              1.5})`
+                        : 'translate(0,0)'
                 );
             });
         }

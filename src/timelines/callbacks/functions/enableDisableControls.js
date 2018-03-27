@@ -14,9 +14,7 @@ export default function enableDisableControls() {
         .classed('ct-hidden', !!this.selected_id);
 
     //Hide/unhide ID filter horizontal rule.
-    this.controls.wrap
-        .select('.ct-filters.ct-ID-filters')
-        .classed('ct-hidden', !!this.selected_id);
+    this.controls.wrap.select('.ct-filters.ct-ID-filters').classed('ct-hidden', !!this.selected_id);
 
     //Hide/unhide reference line tables.
     this.clinicalTimelines.containers.leftColumn

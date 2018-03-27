@@ -5,7 +5,13 @@ export default function syncControls(controls, settings) {
     settings.filters
         .sort(
             (a, b) =>
-                a.value_col === settings.event_col ? 2 : a.value_col === settings.ongo_col ? 1 : 0
+                a.value_col === settings.event_col
+                    ? 2
+                    : b.value_col === settings.event_col
+                      ? -2
+                      : a.value_col === settings.ongo_col
+                        ? 1
+                        : b.value_col === settings.ongo_col ? -1 : 0
         )
         .forEach(filter => {
             filter.type = 'subsetter';

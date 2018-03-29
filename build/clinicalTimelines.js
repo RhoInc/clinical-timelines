@@ -421,7 +421,6 @@ function syncRendererSpecificSettings(settings) {
     //Grouping settings
     var defaultGroupings = [];
     settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
-    console.log(settings.groupings);
     if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1) settings.grouping_direction = 'horizontal';
 
     //Time settings
@@ -644,12 +643,9 @@ function syncControls(controls, settings) {
     });
 
     //Remove groupings control if no groupings are specified.
-    console.log(clone(settings.groupings));
-    console.log(clone(controls));
     if (settings.groupings.length === 0) controls.splice(controls.findIndex(function (control) {
         return control.option === 'y.grouping';
     }), 1);
-    console.log(clone(controls));
 
     var syncedControls = d3.merge([[settings.filters[0]], // ID dropdown first
     clone(controls), // Non-filters second
@@ -667,7 +663,7 @@ var defaults$1 = {
 };
 
 function defineSettings() {
-    this.settings.merged = Object.assign({}, defaults$1.settings, clone(this.settings.user));
+    this.settings.merged = Object.assign({}, clone(defaults$1.settings), clone(this.settings.user));
     this.settings.synced = defaults$1.syncSettings(clone(this.settings.merged));
     Object.assign(this.settings, this.settings.synced);
     this.settings.IDtimeline = this.settings.IDtimelineSettings;

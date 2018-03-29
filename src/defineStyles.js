@@ -1,7 +1,10 @@
 export default function defineStyles() {
     //Define styles.
-    const
-        styles = [
+    const line = this.settings.synced.marks
+        .find(mark => mark.type === 'line');
+    const circle = this.settings.synced.marks
+        .find(mark => mark.type === 'circle');
+    const styles = [
 
         /***--------------------------------------------------------------------------------------\
           Global styles
@@ -228,15 +231,15 @@ export default function defineStyles() {
 
           //Lines
             '#clinical-timelines path.wc-data-mark {' +
-                '    stroke-width: 4;' +
+                `    stroke-width: ${line.attributes['stroke-width']};` +
                 '    stroke-opacity: 1;' +
                 '}',
             '#clinical-timelines path.wc-data-mark.ct-highlighted {' +
-                '    stroke-width: 7;' +
+                `    stroke-width: ${line.attributes['stroke-width'] * 1.5};` +
                 '}',
             '#clinical-timelines line.ct-highlight-overlay {' +
                 '    clip-path: url(#1);' +
-                '    stroke-width: 3;' +
+                `    stroke-width: ${line.attributes['stroke-width'] / 2};` +
                 '    stroke-linecap: round;' +
                 '}',
 
@@ -247,7 +250,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +
                 '    stroke-opacity: 1;' +
-                '    stroke-width: 2;' +
+                `    stroke-width: ${circle.attributes['stroke-width']};` +
                 '}',
 
           //Arrows
@@ -255,27 +258,27 @@ export default function defineStyles() {
                 '    clip-path: url(#1);' +
                 '}',
             '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
-                '    stroke-width: 2;' +
+                `    stroke-width: ${line.attributes['stroke-width'] / 3};` +
                 '}',
 
           //Reference lines
             '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line {' +
                 '    stroke: black;' +
-                '    stroke-width: 2;' +
+                '    stroke-width: 1;' +
                 '    stroke-dasharray: 2,2;' +
                 '}',
             '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-visible-reference-line.ct-hover {' +
                 '    stroke-dasharray: none;' +
                 '}',
             '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-invisible-reference-line {' +
+                '    cursor: pointer;' +
                 '    stroke: black;' +
                 '    stroke-width: 20;' +
                 '    stroke-opacity: 0;' +
                 '}',
-            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .ct-reference-line-label-box {' +
-                '    fill: white;' +
-                '    stroke: black;' +
-                '    stroke-width: black;' +
+            '#clinical-timelines #ct-right-column .wc-chart .wc-svg .reference-line-text {' +
+                '    font-weight: bold;' +
+                '    font-size: 24px;' +
                 '}',
 
           //ID timeline

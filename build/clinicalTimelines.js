@@ -665,10 +665,10 @@ var defaults$1 = {
 function defineSettings() {
     this.settings.merged = Object.assign({}, clone(defaults$1.settings), clone(this.settings.user));
     this.settings.synced = defaults$1.syncSettings(clone(this.settings.merged));
-    Object.assign(this.settings, this.settings.synced);
-    this.settings.IDtimeline = this.settings.IDtimelineSettings;
-    this.settings.listing = this.settings.details_config;
-    this.settings.controls = defaults$1.syncControls(defaults$1.controls, clone(this.settings));
+    Object.assign(this.settings, clone(this.settings.synced));
+    this.settings.IDtimeline = clone(this.settings.IDtimelineSettings);
+    this.settings.listing = clone(this.settings.details_config);
+    this.settings.controls = defaults$1.syncControls(clone(defaults$1.controls), clone(this.settings));
 }
 
 function defineStyles() {

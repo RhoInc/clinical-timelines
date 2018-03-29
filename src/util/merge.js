@@ -17,12 +17,12 @@ function isObj(x) {
 function assignKey(to, from, key) {
     var val = from[key];
 
-    if (val === undefined || val === null) {
+    if (val === undefined) {
         return;
     }
 
     if (hasOwnProperty.call(to, key)) {
-        if (to[key] === undefined || to[key] === null) {
+        if (to[key] === undefined) {
             throw new TypeError('Cannot convert undefined or null to object (' + key + ')');
         }
     }

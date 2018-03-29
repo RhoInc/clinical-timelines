@@ -1,3 +1,1 @@
-export default function onPreprocess() {
-    const context = this;
-}
+export default function onPreprocess() {}

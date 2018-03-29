@@ -1,3 +1,1 @@
-export default function onInit() {
-    const context = this;
-}
+export default function onInit() {}

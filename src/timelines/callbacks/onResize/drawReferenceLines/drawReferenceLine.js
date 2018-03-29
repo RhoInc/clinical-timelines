@@ -1,5 +1,5 @@
 import addVisibleLine from './drawReferenceLine/addVisibleLine';
-import addInvisibleLine from './drawReferenceLine/addInvisibleLine';
+import addHoverLine from './drawReferenceLine/addHoverLine';
 import addText from './drawReferenceLine/addText';
 import addHover from './drawReferenceLine/addHover';
 import addDrag from './drawReferenceLine/addDrag';
@@ -23,7 +23,7 @@ export default function drawReferenceLine(reference_line, i) {
     addVisibleLine.call(this, reference_line);
 
     //Invisible reference line, without a dasharray and much thicker to make hovering easier
-    addInvisibleLine.call(this, reference_line);
+    addHoverLine.call(this, reference_line);
 
     //Reference line text label
     addText.call(this, reference_line);

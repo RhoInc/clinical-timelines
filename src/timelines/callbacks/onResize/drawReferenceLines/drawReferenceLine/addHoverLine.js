@@ -1,8 +1,8 @@
-export default function addInvisibleLine(reference_line) {
-    reference_line.invisibleLine = reference_line.g
+export default function addHoverLine(reference_line) {
+    reference_line.hoverLine = reference_line.g
         .append('line')
         .datum(reference_line.lineDatum)
-        .classed('ct-invisible-reference-line', true)
+        .classed('ct-hover-line', true)
         .attr({
             x1: d => d.x1,
             x2: d => d.x2,

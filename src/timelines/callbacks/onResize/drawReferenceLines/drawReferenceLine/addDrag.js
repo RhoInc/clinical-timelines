@@ -16,7 +16,7 @@ export default function addDrag(reference_line) {
                 const dx = event.dx;
 
                 //Calculate x-coordinate of drag line.
-                let x = parseInt(reference_line.invisibleLine.attr('x1')) + dx;
+                let x = parseInt(reference_line.hoverLine.attr('x1')) + dx;
                 if (x < 0) x = 0;
                 if (x > context.plot_width) x = context.plot_width;
 
@@ -29,7 +29,7 @@ export default function addDrag(reference_line) {
                 reference_line.lineDatum.x1 = x;
                 reference_line.lineDatum.x2 = x;
                 reference_line.visibleLine.attr({ x1: x, x2: x });
-                reference_line.invisibleLine.attr({ x1: x, x2: x });
+                reference_line.hoverLine.attr({ x1: x, x2: x });
 
                 //Update reference line text label and table.
                 updateText.call(context, reference_line);
@@ -39,5 +39,5 @@ export default function addDrag(reference_line) {
                 select(this).classed('ct-active', false);
             });
 
-    reference_line.invisibleLine.call(drag);
+    reference_line.hoverLine.call(drag);
 }

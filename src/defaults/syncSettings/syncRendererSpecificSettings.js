@@ -35,6 +35,7 @@ export default function syncRendererSpecificSettings(settings) {
     //Grouping settings
     const defaultGroupings = [];
     settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
+    console.log(settings.groupings);
     if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
         settings.grouping_direction = 'horizontal';
 

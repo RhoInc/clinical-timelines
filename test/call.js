@@ -53,6 +53,7 @@ describe('clinical-timelines object creation', () => {
                         'clinicalTimelines',
                         'IDtimeline',
                         'listing',
+                        'settings',
 
                       //webcharts properties
                         'config',
@@ -77,6 +78,7 @@ describe('clinical-timelines object creation', () => {
                         'clinicalTimelines',
                         'timelines',
                         'listing',
+                        'settings',
 
                       //webcharts properties
                         'config',
@@ -101,6 +103,7 @@ describe('clinical-timelines object creation', () => {
                         'clinicalTimelines',
                         'timelines',
                         'IDtimeline',
+                        'settings',
 
                       //webcharts properties
                         'config',

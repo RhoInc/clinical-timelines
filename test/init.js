@@ -6,7 +6,15 @@ import { select } from 'd3';
 describe('clinical-timelines initialization', () => {
     const
         { JSDOM } = jsdom,
-        settings = {details_config: {exportable: false}},
+        settings = {
+            groupings: [
+                'ARM',
+                'SITEID'
+            ],
+            details_config: {
+                exportable: false
+            }
+        },
         data = require('./data/ADTIMELINES.json');
     let dom,
         container,

@@ -2,6 +2,7 @@
 import './util/number-isinteger';
 import './util/object-assign';
 import './util/array-find';
+import './util/array-findIndex';
 import merge from './util/merge';
 import clone from './util/clone';
 

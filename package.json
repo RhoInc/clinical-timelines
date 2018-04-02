@@ -19,7 +19,7 @@
     "webcharts": "^1.10"
   },
   "scripts": {
-    "build": "npm run bundle && npm run format && npm run build-md && npm run test-page",
+    "build": "npm run bundle && npm run format && npm run build-md && npm run test && npm run test-page",
     "build-md": "node ./scripts/configuration-markdown.js",
     "bundle": "rollup -c",
     "format": "npm run format-src && npm run format-build",

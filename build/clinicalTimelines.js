@@ -4,7 +4,7 @@
         : typeof define === 'function' && define.amd
           ? define(['d3', 'webcharts'], factory)
           : (global.clinicalTimelines = factory(global.d3, global.webCharts));
-})(this, function(d3$1, webcharts) {
+})(this, function(d3, webcharts) {
     'use strict';
 
     Number.isInteger =
@@ -82,6 +82,50 @@
 
                 // 7. Return undefined.
                 return undefined;
+            }
+        });
+    }
+
+    if (!Array.prototype.findIndex) {
+        Object.defineProperty(Array.prototype, 'findIndex', {
+            value: function value(predicate) {
+                // 1. Let O be ? ToObject(this value).
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
+                }
+
+                var o = Object(this);
+
+                // 2. Let len be ? ToLength(? Get(O, "length")).
+                var len = o.length >>> 0;
+
+                // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+
+                // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+                var thisArg = arguments[1];
+
+                // 5. Let k be 0.
+                var k = 0;
+
+                // 6. Repeat, while k < len
+                while (k < len) {
+                    // a. Let Pk be ! ToString(k).
+                    // b. Let kValue be ? Get(O, Pk).
+                    // c. Let testResult be ToBoolean(? Call(predicate, T, � kValue, k, O �)).
+                    // d. If testResult is true, return k.
+                    var kValue = o[k];
+                    if (predicate.call(thisArg, kValue, k, o)) {
+                        return k;
+                    }
+                    // e. Increase k by 1.
+                    k++;
+                }
+
+                // 7. Return -1.
+                return -1;
             }
         });
     }
@@ -370,7 +414,7 @@
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
             userDefinedVariables instanceof Array && userDefinedVariables.length
-                ? d3$1
+                ? d3
                       .merge([
                           defaultVariables,
                           userDefinedVariables.filter(function(item) {
@@ -479,7 +523,7 @@
                         (reference_line.time_scale === 'day' &&
                             Number.isInteger(reference_line.timepoint)) ||
                         (reference_line.time_scale === 'date' &&
-                            d3$1.time
+                            d3.time
                                 .format(settings.date_format)
                                 .parse(reference_line.timepoint) instanceof Date)
                     );
@@ -488,24 +532,52 @@
             if (!settings.reference_lines.length) delete settings.reference_lines;
         }
 
-        //Details
+        /**-------------------------------------------------------------------------------------------\
+      Define listing columns.
+    \-------------------------------------------------------------------------------------------**/
+
+        //defaults
         var defaultDetails = [
             { value_col: settings.event_col, label: 'Event Type' },
             { value_col: 'stdtdy', label: 'Start Date (Day)' },
             { value_col: 'endtdy', label: 'Stop Date (Day)' },
             { value_col: settings.seq_col, label: 'Sequence Number' }
         ];
+
+        //add ongo_col if specified
+        if (settings.ongo_col)
+            defaultDetails.push({ value_col: settings.ongo_col, label: 'Ongoing?' });
+
+        //add tooltip_col if specified
+        if (settings.tooltip_col)
+            defaultDetails.push({ value_col: settings.tooltip_col, label: 'Details' });
+
         settings.details = arrayOfVariablesCheck(defaultDetails, settings.details);
-        settings.filters.forEach(function(filter) {
-            if (
-                settings.details
-                    .map(function(detail) {
-                        return detail.value_col;
-                    })
-                    .indexOf(filter.value_col) === -1
-            )
-                settings.details.push(filter);
-        });
+
+        //add filters
+        settings.filters
+            .filter(function(filter) {
+                return filter.value_col !== settings.id_col;
+            }) // remove id_col
+            .filter(function(filter) {
+                return (
+                    settings.id_characteristics
+                        .map(function(id_characteristic) {
+                            return id_characteristic.value_col;
+                        })
+                        .indexOf(filter.value_col) < 0
+                );
+            }) // remove id_characteristics
+            .forEach(function(filter) {
+                if (
+                    settings.details
+                        .map(function(detail) {
+                            return detail.value_col;
+                        })
+                        .indexOf(filter.value_col) === -1
+                )
+                    settings.details.push(filter);
+            });
     }
 
     function syncWebchartsSettings(settings) {
@@ -553,8 +625,8 @@
             settings.x.format = settings.date_display_format;
             settings.time_unit = 'DT';
 
-            settings.x_parseFormat = d3$1.time.format(settings.date_format);
-            settings.x_displayFormat = d3$1.time.format(settings.date_display_format);
+            settings.x_parseFormat = d3.time.format(settings.date_format);
+            settings.x_displayFormat = d3.time.format(settings.date_display_format);
             settings.time_function = function(dt) {
                 return settings.x_parseFormat.parse(dt)
                     ? settings.x_parseFormat.parse(dt)
@@ -567,7 +639,7 @@
             settings.x.format = '1f';
             settings.time_unit = 'DY';
 
-            settings.x_parseFormat = d3$1.format(settings.x.format);
+            settings.x_parseFormat = d3.format(settings.x.format);
             settings.x_displayFormat = settings.x_parseFormat;
             settings.time_function = function(dy) {
                 return +settings.x_displayFormat(+dy);
@@ -686,18 +758,27 @@
                 filter.description = filter.label;
                 filter.label = '';
 
-                if (filter.value_col === settings.id_col) {
-                    filter.label = '';
+                //Update ID filter.
+                if (filter.value_col === settings.id_col)
                     filter.description = settings.id_unitPropCased + ' view';
-                }
 
+                //Update event type filter.
                 if (filter.value_col === settings.event_col) {
                     filter.multiple = true;
                     filter.start = settings.event_types;
                 }
             });
 
-        var syncedControls = d3$1.merge([
+        //Remove groupings control if no groupings are specified.
+        if (settings.groupings.length === 0)
+            controls.splice(
+                controls.findIndex(function(control) {
+                    return control.option === 'y.grouping';
+                }),
+                1
+            );
+
+        var syncedControls = d3.merge([
             [settings.filters[0]], // ID dropdown first
             clone(controls), // Non-filters second
             settings.filters.slice(1) // Filters last
@@ -714,12 +795,19 @@
     };
 
     function defineSettings() {
-        this.settings.merged = Object.assign({}, defaults$1.settings, clone(this.settings.user));
+        this.settings.merged = Object.assign(
+            {},
+            clone(defaults$1.settings),
+            clone(this.settings.user)
+        );
         this.settings.synced = defaults$1.syncSettings(clone(this.settings.merged));
-        Object.assign(this.settings, this.settings.synced);
-        this.settings.IDtimeline = this.settings.IDtimelineSettings;
-        this.settings.listing = this.settings.details_config;
-        this.settings.controls = defaults$1.syncControls(defaults$1.controls, clone(this.settings));
+        Object.assign(this.settings, clone(this.settings.synced));
+        this.settings.IDtimeline = clone(this.settings.IDtimelineSettings);
+        this.settings.listing = clone(this.settings.details_config);
+        this.settings.controls = defaults$1.syncControls(
+            clone(defaults$1.controls),
+            clone(this.settings)
+        );
     }
 
     function defineStyles() {
@@ -1066,7 +1154,7 @@
 
         //If specified, transpose data to one record per ID per sequence number.
         if (this.settings.transpose_data) {
-            var nested = d3$1
+            var nested = d3
                     .nest()
                     .key(function(d) {
                         return d[_this.settings.id_col] + '|' + d[_this.settings.seq_col];
@@ -1155,9 +1243,7 @@
         //transform CSV array into CSV string
         var CSV = new Blob([CSVarray.join('\n')], { type: 'text/csv;charset=utf-8;' }),
             fileName =
-                'ClinicalTimelinesData_' +
-                d3$1.time.format('%Y-%m-%dT%H-%M-%S')(new Date()) +
-                '.csv',
+                'ClinicalTimelinesData_' + d3.time.format('%Y-%m-%dT%H-%M-%S')(new Date()) + '.csv',
             link = this.containers.exportButton;
 
         if (navigator.msSaveBlob) {
@@ -1249,7 +1335,7 @@
     function defineLayout() {
         var _this = this;
 
-        this.containers.main = d3$1
+        this.containers.main = d3
             .select(this.element)
             .append('div')
             .attr('id', 'clinical-timelines');
@@ -1317,8 +1403,7 @@
             .attr('id', 'ct-ID-details');
 
         //Add button to return from ID timeline to timelines.
-        this.containers.backButton = this.containers.IDdetails
-            .append('div')
+        this.containers.backButton = this.containers.IDdetails.append('div')
             .classed('ct-button', true)
             .attr('id', 'ct-back-button')
             .append('a')
@@ -1401,11 +1486,11 @@
 
             //Set to an empty string invalid date and day values.
             if (has_stdt) {
-                if (!d3$1.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]))
+                if (!d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]))
                     d[_this.config.stdt_col] = '';
             }
             if (has_endt) {
-                if (!d3$1.time.format(_this.config.date_format).parse(d[_this.config.endt_col]))
+                if (!d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]))
                     d[_this.config.endt_col] = d[_this.config.stdt_col];
             }
             if (has_stdy) {
@@ -1495,7 +1580,7 @@
                 [this.config.st_col, this.config.en_col]
             );
 
-        this.long_data = d3$1.merge([timepoints, timeIntervals]);
+        this.long_data = d3.merge([timepoints, timeIntervals]);
         this.raw_data = this.long_data;
     }
 
@@ -1504,11 +1589,11 @@
 
         //Date range
         this.full_date_range = [
-            d3$1.min(this.initial_data, function(d) {
-                return d3$1.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
+            d3.min(this.initial_data, function(d) {
+                return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
             }),
-            d3$1.max(this.initial_data, function(d) {
-                return d3$1.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
+            d3.max(this.initial_data, function(d) {
+                return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
             })
         ];
         this.date_range =
@@ -1516,23 +1601,21 @@
             this.config.date_range.length === 2 &&
             this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
             this.config.date_range.every(function(date) {
-                return (
-                    date instanceof Date || d3$1.time.format(_this.config.date_format).parse(date)
-                );
+                return date instanceof Date || d3.time.format(_this.config.date_format).parse(date);
             })
                 ? this.config.date_range.map(function(date) {
                       return date instanceof Date
                           ? date
-                          : d3$1.time.format(_this.config.date_format).parse(date);
+                          : d3.time.format(_this.config.date_format).parse(date);
                   })
                 : this.full_date_range;
 
         //Day range
         this.full_day_range = [
-            d3$1.min(this.initial_data, function(d) {
+            d3.min(this.initial_data, function(d) {
                 return +d[_this.config.stdy_col];
             }),
-            d3$1.max(this.initial_data, function(d) {
+            d3.max(this.initial_data, function(d) {
                 return +d[_this.config.endy_col];
             })
         ];
@@ -1552,7 +1635,7 @@
     function handleEventTypes() {
         var _this = this;
 
-        this.allEventTypes = d3$1
+        this.allEventTypes = d3
             .set(
                 this.initial_data.map(function(d) {
                     return d[_this.config.event_col];
@@ -1674,7 +1757,7 @@
 
                 return false;
             } else {
-                var levels = d3$1
+                var levels = d3
                     .set(
                         _this.raw_data.map(function(d) {
                             return d[input.value_col];
@@ -1711,7 +1794,7 @@
 
         //Capture and count all IDs in data.
         this.populationDetails = {
-            population: d3$1
+            population: d3
                 .set(
                     this.raw_data.map(function(d) {
                         return d[_this.config.id_col];
@@ -1771,8 +1854,7 @@
 
     function IDdetails() {
         //Add ID characteristics.
-        this.clinicalTimelines.containers.IDdetails
-            .selectAll('div.characteristic')
+        this.clinicalTimelines.containers.IDdetails.selectAll('div.characteristic')
             .data(this.config.id_characteristics)
             .enter()
             .append('div')
@@ -1786,7 +1868,7 @@
         var context = this;
 
         this.controls.wrap.selectAll('.control-group').each(function(d) {
-            var controlGroup = d3$1.select(this),
+            var controlGroup = d3.select(this),
                 label = controlGroup.select('.wc-control-label'),
                 description = controlGroup.select('.span-description'),
                 container = controlGroup.append('div').classed('ct-label-description', true);
@@ -1802,7 +1884,10 @@
                     .insert('div', ':first-child')
                     .classed('ct-controls ct-horizontal-rule', true)
                     .text('Controls');
-            else if (d.option === 'y.grouping') {
+            else if (
+                (context.config.groupings.length && d.option === 'y.grouping') ||
+                (!context.config.groupings.length && d.option === 'y.sort')
+            ) {
                 var filterRule = context.controls.wrap
                     .append('div')
                     .classed('ct-filters ct-horizontal-rule', true)
@@ -1837,20 +1922,19 @@
             var id_characteristics = this.initial_data.filter(function(d) {
                 return d[_this.config.id_col] === _this.selected_id;
             })[0];
-            this.clinicalTimelines.containers.IDdetails
-                .selectAll('.ct-characteristic')
-                .each(function(d) {
-                    d3$1
+            this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(
+                function(d) {
+                    d3
                         .select(this)
                         .select('span')
                         .text(id_characteristics[d.value_col]);
-                });
+                }
+            );
         }
 
         //Draw ID timeline.
         this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-        this.clinicalTimelines.containers.IDtimeline
-            .select('div')
+        this.clinicalTimelines.containers.IDtimeline.select('div')
             .selectAll('*')
             .remove();
         webcharts.multiply(
@@ -1883,7 +1967,7 @@
 
     function eventHighlightingChange(select$$1, d) {
         //Update event highlighting settings.
-        this.config.event_highlighted = d3$1
+        this.config.event_highlighted = d3
             .select(select$$1)
             .select('option:checked')
             .text();
@@ -1896,7 +1980,7 @@
 
     function timeScaleChange(dropdown, d) {
         //Update clinical timelines time scale settings
-        this.config.time_scale = d3$1
+        this.config.time_scale = d3
             .select(dropdown)
             .select('option:checked')
             .text();
@@ -1919,7 +2003,7 @@
     }
 
     function yAxisGrouping(select$$1, d) {
-        var selected = d3$1.select(select$$1).select('option:checked');
+        var selected = d3.select(select$$1).select('option:checked');
 
         //Update grouping settings.
         if (selected.text() !== 'None') {
@@ -1953,7 +2037,7 @@
             })
             .each(function(d) {
                 // Y-axis controls
-                var options = d3$1.select(this).selectAll('option');
+                var options = d3.select(this).selectAll('option');
 
                 if (d.description === 'Y-axis sort')
                     // Add labels to Y-axis sort.
@@ -2041,7 +2125,7 @@
                 increment = context.config.time_scale === 'date' ? 24 * 60 * 60 * 1000 : 1;
             var input =
                 context.config.time_scale === 'date'
-                    ? d3$1.time.format('%Y-%m-%d').parse(this.value)
+                    ? d3.time.format('%Y-%m-%d').parse(this.value)
                     : +this.value;
 
             if (d.index === 0 && input >= context[time_range][1])
@@ -2079,7 +2163,7 @@
     function IDchange(select$$1) {
         var _this = this;
 
-        this.selected_id = d3$1
+        this.selected_id = d3
             .select(select$$1)
             .select('option:checked')
             .text();
@@ -2104,8 +2188,7 @@
             this.draw();
 
             //Hide ID timeline.
-            this.clinicalTimelines.containers.IDtimeline
-                .select('div')
+            this.clinicalTimelines.containers.IDtimeline.select('div')
                 .selectAll('*')
                 .remove();
             this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', true);
@@ -2125,7 +2208,7 @@
     function eventTypeChange(select$$1) {
         var _this = this;
 
-        this.currentEventTypes = d3$1
+        this.currentEventTypes = d3
             .select(select$$1)
             .selectAll('select option:checked')
             .pop()
@@ -2223,7 +2306,7 @@
 
         timeRangeControls.property('value', function(d) {
             return _this.config.time_scale === 'date'
-                ? d3$1.time.format('%Y-%m-%d')(_this.time_range[d.index])
+                ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
                 : +_this.time_range[d.index];
         });
     }
@@ -2275,7 +2358,7 @@
                 '</span> ' +
                 (this.populationDetails.N > 1 ? this.config.id_unitPlural : this.config.id_unit) +
                 " (<span class = 'ct-stats'>" +
-                d3$1.format('%')(this.populationDetails.rate) +
+                d3.format('%')(this.populationDetails.rate) +
                 "</span>) <span class = 'ct-info-icon' title = 'These " +
                 this.config.id_unitPlural +
                 " have data that meet the current filter criteria.'>&#9432;</span>"
@@ -2287,7 +2370,7 @@
                   "</span> of <span class = 'ct-stats ct-sample'>" +
                   this.populationDetails.n +
                   "</span> displayed (<span class = 'ct-stats'>" +
-                  d3$1.format('%')(this.populationDetails.rateInsideTimeRange) +
+                  d3.format('%')(this.populationDetails.rateInsideTimeRange) +
                   "</span>) <span class = 'ct-info-icon' title = 'These " +
                   this.config.id_unitPlural +
                   " have events that occur in the current time range.'>&#9432;</span>"
@@ -2300,7 +2383,7 @@
                   "</span> of <span class = 'ct-stats ct-sample'>" +
                   this.populationDetails.n +
                   "</span> hidden (<span class = 'ct-stats'>" +
-                  d3$1.format('%')(this.populationDetails.rateOutsideTimeRange) +
+                  d3.format('%')(this.populationDetails.rateOutsideTimeRange) +
                   "</span>) <span class = 'ct-info-icon' title = 'These " +
                   this.config.id_unitPlural +
                   " do not have events that occur in the current time range.'>&#9432;</span>"
@@ -2312,7 +2395,7 @@
         var _this = this;
 
         //Define sample given current filters.
-        this.populationDetails.sample = d3$1
+        this.populationDetails.sample = d3
             .set(
                 this.filtered_wide_data.map(function(d) {
                     return d[_this.config.id_col];
@@ -2396,7 +2479,7 @@
 
         if (this.config.y.grouping) {
             //Capture each grouping and corresponding array of IDs.
-            this.groupings = d3$1
+            this.groupings = d3
                 .set(
                     this.longDataInsideTimeRange.map(function(d) {
                         return d[_this.config.y.grouping];
@@ -2469,13 +2552,13 @@
         if (this.config.y.sort === 'earliest') {
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then earliest event if y-axis is grouped.
-                var nestedData = d3$1
+                var nestedData = d3
                     .nest()
                     .key(function(d) {
                         return d[_this.config.y.grouping] + '|' + d[_this.config.id_col];
                     })
                     .rollup(function(d) {
-                        return d3$1.min(d, function(di) {
+                        return d3.min(d, function(di) {
                             return _this.config.time_function(di[_this.config.st_col]);
                         });
                     })
@@ -2511,13 +2594,13 @@
                 });
             } else {
                 //Otherwise sort IDs by earliest event.
-                this.config.y.domain = d3$1
+                this.config.y.domain = d3
                     .nest()
                     .key(function(d) {
                         return d[_this.config.id_col];
                     })
                     .rollup(function(d) {
-                        return d3$1.min(d, function(di) {
+                        return d3.min(d, function(di) {
                             return _this.config.time_function(di[_this.config.st_col]);
                         });
                     })
@@ -2541,7 +2624,7 @@
 
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then alphanumerically if y-axis is grouped.
-                this.config.y.domain = d3$1
+                this.config.y.domain = d3
                     .set(
                         this.longDataInsideTimeRange.map(function(d) {
                             return d[_this.config.id_col];
@@ -2647,7 +2730,7 @@
 
         //Add event listener to legend items.
         legendItems.on('click', function(d) {
-            var legendItem = d3$1.select(this),
+            var legendItem = d3.select(this),
                 // clicked legend item
                 selected = !legendItem.classed('ct-selected'); // selected boolean
 
@@ -2655,7 +2738,7 @@
 
             var selectedLegendItems = legendItems
                 .filter(function() {
-                    return d3$1.select(this).classed('ct-selected');
+                    return d3.select(this).classed('ct-selected');
                 })
                 .data()
                 .map(function(d) {
@@ -2678,7 +2761,7 @@
     }
 
     function drawTopXaxis() {
-        var topXaxis = d3$1.svg
+        var topXaxis = d3.svg
                 .axis()
                 .scale(this.x)
                 .orient('top')
@@ -2715,7 +2798,7 @@
         this.svg
             .selectAll('.y.axis .tick')
             .each(function(d) {
-                if (/^-g\d+-/.test(d)) d3$1.select(this).remove();
+                if (/^-g\d+-/.test(d)) d3.select(this).remove();
             })
             .on('click', function(d) {
                 _this.selected_id = d;
@@ -2848,13 +2931,13 @@
         this.svg.selectAll('.ct-stripe').remove();
         var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
             //Offset tick label.
-            d3$1
+            d3
                 .select(this)
                 .select('text')
                 .attr('dy', context.y.rangeBand() / 3);
 
             //Insert a rectangle with which to visually group each ID's events.
-            d3$1
+            d3
                 .select(this)
                 .insert('rect', ':first-child')
                 .classed('ct-stripe', true)
@@ -2873,7 +2956,7 @@
         var _this = this;
 
         //Nest data by timepoint and filter on any nested object with more than one datum.
-        var overlapping = d3$1
+        var overlapping = d3
             .nest()
             .key(function(d) {
                 return d.total + '|' + d.values.raw[0][_this.config.id_col];
@@ -2901,7 +2984,7 @@
             d.values.keys.forEach(function(di, i) {
                 //Capture point via its class name and offset vertically.
                 var className = di + ' point';
-                var g = d3$1.select(
+                var g = d3.select(
                     _this.clinicalTimelines.document.getElementsByClassName(className)[0]
                 );
                 var point = g.select('circle');
@@ -2914,7 +2997,7 @@
         var _this = this;
 
         //Nest data by time interval and filter on any nested object with more than one datum.
-        var IDdata = d3$1
+        var IDdata = d3
             .nest()
             .key(function(d) {
                 return d.values[0].values.raw[0][_this.config.id_col];
@@ -3016,7 +3099,7 @@
                         } else if (nOverlapping === currentlyOverlappingLines.length) {
                             //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
                             currentLine.offset =
-                                d3$1.max(currentlyOverlappingLines, function(d) {
+                                d3.max(currentlyOverlappingLines, function(d) {
                                     return d.offset;
                                 }) + 1;
                             currentlyOverlappingLines.push(currentLine);
@@ -3025,7 +3108,7 @@
                             currentlyOverlappingLines.forEach(function(d, i) {
                                 d.index = i;
                             });
-                            var minOffset = d3$1.min(
+                            var minOffset = d3.min(
                                     currentlyOverlappingLines.filter(function(d) {
                                         return !d.overlapping;
                                     }),
@@ -3043,7 +3126,7 @@
 
                     //Offset lines vertically.
                     var className = currentLine.key + ' line';
-                    var g = d3$1.select(
+                    var g = d3.select(
                         _this.clinicalTimelines.document.getElementsByClassName(className)[0]
                     );
                     g.attr(
@@ -3107,7 +3190,7 @@
             );
         });
         paths.each(function(d, i) {
-            var g = d3$1.select(this.parentNode);
+            var g = d3.select(this.parentNode);
             var x1 = context.x(context.config.time_function(d.values[0].key));
             var x2 =
                 context.x(context.config.time_function(d.values[1].key)) +
@@ -3171,7 +3254,7 @@
                     return d.ongoing === _this.config.ongo_val;
                 })
                 .each(function(d) {
-                    var g = d3$1.select(this);
+                    var g = d3.select(this);
                     var endpoint = d.values[1];
                     var x = context.x(context.config.time_function(endpoint.key));
                     var y = context.y(endpoint.values.y) + context.y.rangeBand() / 2;
@@ -3325,7 +3408,7 @@
         reference_line.hoverLine
             .on('mouseover', function() {
                 reference_line.visibleLine.classed('ct-hover', true);
-                reference_line.text.classed('ct-hidden', false).attr('y', d3$1.mouse(this)[1]);
+                reference_line.text.classed('ct-hidden', false).attr('y', d3.mouse(this)[1]);
                 context.svg.node().appendChild(reference_line.text.node());
             })
             .on('mouseout', function() {
@@ -3351,7 +3434,7 @@
         });
 
         //Nest data by grouping and event type.
-        reference_line.nested_data = d3$1
+        reference_line.nested_data = d3
             .nest()
             .key(function(d) {
                 return d[_this.config.y.grouping] || 'All ' + _this.config.id_unitPlural;
@@ -3368,7 +3451,7 @@
             reference_line.flattened_data.push({
                 class: 'ct-higher-level',
                 key: d.key,
-                n: d3$1.sum(d.values, function(di) {
+                n: d3.sum(d.values, function(di) {
                     return di.values;
                 })
             });
@@ -3389,7 +3472,7 @@
             .enter()
             .append('tr')
             .each(function(d) {
-                var row = d3$1.select(this);
+                var row = d3.select(this);
                 row
                     .append('td')
                     .text(d.key)
@@ -3407,16 +3490,16 @@
 
     function addDrag(reference_line) {
         var context = this,
-            drag = d3$1.behavior
+            drag = d3.behavior
                 .drag()
                 .origin(function(d) {
                     return d;
                 })
                 .on('dragstart', function() {
-                    d3$1.select(this).classed('ct-active', true);
+                    d3.select(this).classed('ct-active', true);
                 })
                 .on('drag', function() {
-                    var dx = d3$1.event.dx;
+                    var dx = d3.event.dx;
 
                     //Calculate x-coordinate of drag line.
                     var x = parseInt(reference_line.hoverLine.attr('x1')) + dx;
@@ -3439,7 +3522,7 @@
                     updateTable.call(context, reference_line);
                 })
                 .on('dragend', function() {
-                    d3$1.select(this).classed('ct-active', false);
+                    d3.select(this).classed('ct-active', false);
                 });
 
         reference_line.hoverLine.call(drag);
@@ -3545,7 +3628,7 @@
         var inIE = !!this.clinicalTimelines.document.documentMode;
         if (inIE)
             this.svg.selectAll('.line,.point').each(function(d) {
-                var mark = d3$1.select(this);
+                var mark = d3.select(this);
                 var tooltip = mark.select('title');
                 var text = tooltip.text().split('\n');
                 tooltip.text(text.join('--|--'));
@@ -3663,7 +3746,7 @@
                           return dy.toString();
                       })
                     : this.parent.timelines.date_range.map(function(dt) {
-                          return d3$1.time.format(_this.parent.timelines.config.date_format)(dt);
+                          return d3.time.format(_this.parent.timelines.config.date_format)(dt);
                       }); // update to date_display_format at some point
 
         if (
@@ -3778,7 +3861,8 @@
 
     function init(data) {
         this.data = {
-            raw: data
+            raw: data,
+            variables: Object.keys(data[0])
         };
         this.timelines.init(data, this.test);
     }

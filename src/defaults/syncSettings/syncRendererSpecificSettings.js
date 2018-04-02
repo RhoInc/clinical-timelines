@@ -63,9 +63,9 @@ export default function syncRendererSpecificSettings(settings) {
                 referenceLineObject.label = reference_line.label
                     ? reference_line.label
                     : `${referenceLineObject.time_scale.substring(0, 1).toUpperCase() +
-                          referenceLineObject.time_scale.substring(
-                              1
-                          )}: ${referenceLineObject.timepoint}`;
+                          referenceLineObject.time_scale.substring(1)}: ${
+                          referenceLineObject.timepoint
+                      }`;
 
                 return referenceLineObject;
             })
@@ -81,16 +81,38 @@ export default function syncRendererSpecificSettings(settings) {
         if (!settings.reference_lines.length) delete settings.reference_lines;
     }
 
-    //Details
+    /**-------------------------------------------------------------------------------------------\
+      Define listing columns.
+    \-------------------------------------------------------------------------------------------**/
+
+    //defaults
     const defaultDetails = [
         { value_col: settings.event_col, label: 'Event Type' },
         { value_col: 'stdtdy', label: `Start Date (Day)` },
         { value_col: 'endtdy', label: `Stop Date (Day)` },
         { value_col: settings.seq_col, label: 'Sequence Number' }
     ];
+
+    //add ongo_col if specified
+    if (settings.ongo_col) defaultDetails.push({ value_col: settings.ongo_col, label: 'Ongoing?' });
+
+    //add tooltip_col if specified
+    if (settings.tooltip_col)
+        defaultDetails.push({ value_col: settings.tooltip_col, label: 'Details' });
+
     settings.details = arrayOfVariablesCheck(defaultDetails, settings.details);
-    settings.filters.forEach(filter => {
-        if (settings.details.map(detail => detail.value_col).indexOf(filter.value_col) === -1)
-            settings.details.push(filter);
-    });
+
+    //add filters
+    settings.filters
+        .filter(filter => filter.value_col !== settings.id_col) // remove id_col
+        .filter(
+            filter =>
+                settings.id_characteristics
+                    .map(id_characteristic => id_characteristic.value_col)
+                    .indexOf(filter.value_col) < 0
+        ) // remove id_characteristics
+        .forEach(filter => {
+            if (settings.details.map(detail => detail.value_col).indexOf(filter.value_col) === -1)
+                settings.details.push(filter);
+        });
 }

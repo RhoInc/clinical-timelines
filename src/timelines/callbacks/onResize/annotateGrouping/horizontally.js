@@ -18,6 +18,14 @@ export default function horizontally() {
                         dy: this.y.rangeBand() * 1.25
                     })
                     .text(`${this.config.y.groupingLabel}: ${d.key}`),
+                textArea = annotation.node().getBBox(),
+                background = g.insert('rect', ':first-child').attr({
+                    x: textArea.x,
+                    y: textArea.y,
+                    width: textArea.width,
+                    height: textArea.height,
+                    fill: 'white'
+                }),
                 rule = g
                     .append('line')
                     .classed('ct-boundary ct-horizontal', true)

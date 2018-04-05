@@ -67,7 +67,6 @@ export const webchartsSettings = {
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
             attributes: {
-                'clip-path': 'url(#1)',
                 'stroke-width': 6
             }
         },
@@ -77,7 +76,6 @@ export const webchartsSettings = {
             tooltip: null, // set in syncSettings()
             radius: 5,
             attributes: {
-                'clip-path': 'url(#1)',
                 'stroke-width': 4
             }
         }

@@ -2,8 +2,8 @@
     typeof exports === 'object' && typeof module !== 'undefined'
         ? (module.exports = factory(require('d3'), require('webcharts')))
         : typeof define === 'function' && define.amd
-          ? define(['d3', 'webcharts'], factory)
-          : (global.clinicalTimelines = factory(global.d3, global.webCharts));
+            ? define(['d3', 'webcharts'], factory)
+            : (global.clinicalTimelines = factory(global.d3, global.webCharts));
 })(this, function(d3, webcharts) {
     'use strict';
 
@@ -368,7 +368,6 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
-                    'clip-path': 'url(#1)',
                     'stroke-width': 6
                 }
             },
@@ -378,7 +377,6 @@
                 tooltip: null, // set in syncSettings()
                 radius: 5,
                 attributes: {
-                    'clip-path': 'url(#1)',
                     'stroke-width': 4
                 }
             }
@@ -1046,7 +1044,6 @@
                 ('    stroke-width: ' + line.attributes['stroke-width'] * 1.5 + ';') +
                 '}',
             '#clinical-timelines line.ct-highlight-overlay {' +
-                '    clip-path: url(#1);' +
                 ('    stroke-width: ' + line.attributes['stroke-width'] / 2 + ';') +
                 '    stroke-linecap: round;' +
                 '}',
@@ -1062,7 +1059,7 @@
                 '}',
 
             //Arrows
-            '#clinical-timelines polygon.ct-ongoing-event {' + '    clip-path: url(#1);' + '}',
+            '#clinical-timelines polygon.ct-ongoing-event {' + '}',
             '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
                 ('    stroke-width: ' + line.attributes['stroke-width'] / 3 + ';') +
                 '}',
@@ -3217,8 +3214,7 @@
                     x2: x2,
                     y1: y,
                     y2: y,
-                    stroke: color,
-                    'clip-path': 'url(#' + context.id + ')'
+                    stroke: color
                 });
         });
 
@@ -3287,8 +3283,7 @@
                                   ),
                             stroke: context.colorScale(
                                 endpoint.values.raw[0][context.config.event_col]
-                            ),
-                            'clip-path': 'url(#' + context.id + ')'
+                            )
                         });
                 });
         }
@@ -3635,6 +3630,16 @@
             });
     }
 
+    function setClipPath() {
+        var _this = this;
+
+        this.marks.forEach(function(mark) {
+            mark.groups
+                .selectAll('circle,line,path,polygon,rect,text')
+                .attr('clip-path', 'url(#' + _this.id + ')');
+        });
+    }
+
     function onResize() {
         //Add filter functionality to legend.
         legendFilter.call(this);
@@ -3674,6 +3679,9 @@
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
+
+        //Set clip-path of all svg elements to the ID of the current chart.
+        setClipPath.call(this);
     }
 
     function onDestroy() {}
@@ -3703,15 +3711,10 @@
     }
 
     function onInit$1() {
-        var _this = this;
-
         this.clinicalTimelines = this.parent.clinicalTimelines;
         this.config.color_dom = this.parent.timelines.config.color_dom;
         this.config.legend.order = this.parent.timelines.config.legend.order;
         this.config.x.domain = null;
-        this.config.marks.forEach(function(mark) {
-            mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
-        });
     }
 
     function onLayout$1() {}
@@ -3809,6 +3812,9 @@
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
+
+        //Set clip-path of all svg elements to the ID of the current chart.
+        setClipPath.call(this);
     }
 
     function onDestroy$1() {}

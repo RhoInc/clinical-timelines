@@ -2,8 +2,8 @@
     typeof exports === 'object' && typeof module !== 'undefined'
         ? (module.exports = factory(require('d3'), require('webcharts')))
         : typeof define === 'function' && define.amd
-          ? define(['d3', 'webcharts'], factory)
-          : (global.clinicalTimelines = factory(global.d3, global.webCharts));
+            ? define(['d3', 'webcharts'], factory)
+            : (global.clinicalTimelines = factory(global.d3, global.webCharts));
 })(this, function(d3, webcharts) {
     'use strict';
 
@@ -82,6 +82,50 @@
 
                 // 7. Return undefined.
                 return undefined;
+            }
+        });
+    }
+
+    if (!Array.prototype.findIndex) {
+        Object.defineProperty(Array.prototype, 'findIndex', {
+            value: function value(predicate) {
+                // 1. Let O be ? ToObject(this value).
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
+                }
+
+                var o = Object(this);
+
+                // 2. Let len be ? ToLength(? Get(O, "length")).
+                var len = o.length >>> 0;
+
+                // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+
+                // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+                var thisArg = arguments[1];
+
+                // 5. Let k be 0.
+                var k = 0;
+
+                // 6. Repeat, while k < len
+                while (k < len) {
+                    // a. Let Pk be ! ToString(k).
+                    // b. Let kValue be ? Get(O, Pk).
+                    // c. Let testResult be ToBoolean(? Call(predicate, T, � kValue, k, O �)).
+                    // d. If testResult is true, return k.
+                    var kValue = o[k];
+                    if (predicate.call(thisArg, kValue, k, o)) {
+                        return k;
+                    }
+                    // e. Increase k by 1.
+                    k++;
+                }
+
+                // 7. Return -1.
+                return -1;
             }
         });
     }
@@ -324,7 +368,6 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
-                    'clip-path': 'url(#1)',
                     'stroke-width': 6
                 }
             },
@@ -334,7 +377,6 @@
                 tooltip: null, // set in syncSettings()
                 radius: 5,
                 attributes: {
-                    'clip-path': 'url(#1)',
                     'stroke-width': 4
                 }
             }
@@ -714,16 +756,25 @@
                 filter.description = filter.label;
                 filter.label = '';
 
-                if (filter.value_col === settings.id_col) {
-                    filter.label = '';
+                //Update ID filter.
+                if (filter.value_col === settings.id_col)
                     filter.description = settings.id_unitPropCased + ' view';
-                }
 
+                //Update event type filter.
                 if (filter.value_col === settings.event_col) {
                     filter.multiple = true;
                     filter.start = settings.event_types;
                 }
             });
+
+        //Remove groupings control if no groupings are specified.
+        if (settings.groupings.length === 0)
+            controls.splice(
+                controls.findIndex(function(control) {
+                    return control.option === 'y.grouping';
+                }),
+                1
+            );
 
         var syncedControls = d3.merge([
             [settings.filters[0]], // ID dropdown first
@@ -742,12 +793,19 @@
     };
 
     function defineSettings() {
-        this.settings.merged = Object.assign({}, defaults$1.settings, clone(this.settings.user));
+        this.settings.merged = Object.assign(
+            {},
+            clone(defaults$1.settings),
+            clone(this.settings.user)
+        );
         this.settings.synced = defaults$1.syncSettings(clone(this.settings.merged));
-        Object.assign(this.settings, this.settings.synced);
-        this.settings.IDtimeline = this.settings.IDtimelineSettings;
-        this.settings.listing = this.settings.details_config;
-        this.settings.controls = defaults$1.syncControls(defaults$1.controls, clone(this.settings));
+        Object.assign(this.settings, clone(this.settings.synced));
+        this.settings.IDtimeline = clone(this.settings.IDtimelineSettings);
+        this.settings.listing = clone(this.settings.details_config);
+        this.settings.controls = defaults$1.syncControls(
+            clone(defaults$1.controls),
+            clone(this.settings)
+        );
     }
 
     function defineStyles() {
@@ -986,7 +1044,6 @@
                 ('    stroke-width: ' + line.attributes['stroke-width'] * 1.5 + ';') +
                 '}',
             '#clinical-timelines line.ct-highlight-overlay {' +
-                '    clip-path: url(#1);' +
                 ('    stroke-width: ' + line.attributes['stroke-width'] / 2 + ';') +
                 '    stroke-linecap: round;' +
                 '}',
@@ -1002,7 +1059,7 @@
                 '}',
 
             //Arrows
-            '#clinical-timelines polygon.ct-ongoing-event {' + '    clip-path: url(#1);' + '}',
+            '#clinical-timelines polygon.ct-ongoing-event {' + '}',
             '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
                 ('    stroke-width: ' + line.attributes['stroke-width'] / 3 + ';') +
                 '}',
@@ -1193,9 +1250,7 @@
                 'text-decoration': 'underline',
                 color: 'blue'
             });
-            link.on('click', function() {
-                navigator.msSaveBlob(CSV, fileName);
-            });
+            navigator.msSaveBlob(CSV, fileName);
         } else {
             // Browsers that support HTML5 download attribute
             if (link.node().download !== undefined) {
@@ -1826,7 +1881,10 @@
                     .insert('div', ':first-child')
                     .classed('ct-controls ct-horizontal-rule', true)
                     .text('Controls');
-            else if (d.option === 'y.grouping') {
+            else if (
+                (context.config.groupings.length && d.option === 'y.grouping') ||
+                (!context.config.groupings.length && d.option === 'y.sort')
+            ) {
                 var filterRule = context.controls.wrap
                     .append('div')
                     .classed('ct-filters ct-horizontal-rule', true)
@@ -3156,8 +3214,7 @@
                     x2: x2,
                     y1: y,
                     y2: y,
-                    stroke: color,
-                    'clip-path': 'url(#' + context.id + ')'
+                    stroke: color
                 });
         });
 
@@ -3226,8 +3283,7 @@
                                   ),
                             stroke: context.colorScale(
                                 endpoint.values.raw[0][context.config.event_col]
-                            ),
-                            'clip-path': 'url(#' + context.id + ')'
+                            )
                         });
                 });
         }
@@ -3574,6 +3630,16 @@
             });
     }
 
+    function setClipPath() {
+        var _this = this;
+
+        this.marks.forEach(function(mark) {
+            mark.groups
+                .selectAll('circle,line,path,polygon,rect,text')
+                .attr('clip-path', 'url(#' + _this.id + ')');
+        });
+    }
+
     function onResize() {
         //Add filter functionality to legend.
         legendFilter.call(this);
@@ -3613,6 +3679,9 @@
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
+
+        //Set clip-path of all svg elements to the ID of the current chart.
+        setClipPath.call(this);
     }
 
     function onDestroy() {}
@@ -3642,15 +3711,10 @@
     }
 
     function onInit$1() {
-        var _this = this;
-
         this.clinicalTimelines = this.parent.clinicalTimelines;
         this.config.color_dom = this.parent.timelines.config.color_dom;
         this.config.legend.order = this.parent.timelines.config.legend.order;
         this.config.x.domain = null;
-        this.config.marks.forEach(function(mark) {
-            mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
-        });
     }
 
     function onLayout$1() {}
@@ -3711,8 +3775,8 @@
                 timeRangeTooltip = timeRangeGroup
                     .append('title')
                     .text(
-                        this.parent.timelines.config.x.label +
-                            ' Range: ' +
+                        this.parent.timelines.config.time_scalePropCased +
+                            ' range: ' +
                             timeRangeText.join(' - ')
                     );
         }
@@ -3748,6 +3812,9 @@
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
+
+        //Set clip-path of all svg elements to the ID of the current chart.
+        setClipPath.call(this);
     }
 
     function onDestroy$1() {}

@@ -40,7 +40,9 @@ export default function drawTimeRange() {
             timeRangeTooltip = timeRangeGroup
                 .append('title')
                 .text(
-                    `${this.parent.timelines.config.x.label} Range: ${timeRangeText.join(' - ')}`
+                    `${
+                        this.parent.timelines.config.time_scalePropCased
+                    } range: ${timeRangeText.join(' - ')}`
                 );
     }
 }

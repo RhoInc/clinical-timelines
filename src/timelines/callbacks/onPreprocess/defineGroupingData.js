@@ -6,6 +6,7 @@ export default function defineGroupingData() {
         //Capture each grouping and corresponding array of IDs.
         this.groupings = set(this.longDataInsideTimeRange.map(d => d[this.config.y.grouping]))
             .values()
+            .sort()
             .map((d, i) => {
                 const groupingObject = {
                     key: d,

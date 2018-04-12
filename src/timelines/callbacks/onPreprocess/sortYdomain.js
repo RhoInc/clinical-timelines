@@ -9,12 +9,7 @@ export default function sortYdomain() {
             //Sort IDs by grouping then earliest event if y-axis is grouped.
             const nestedData = nest()
                 .key(d => d[this.config.y.grouping] + '|' + d[this.config.id_col])
-                .rollup(d =>
-                    min(d, di => {
-                        console.log(di.wc_value);
-                        return this.config.time_function(di.wc_value);
-                    })
-                )
+                .rollup(d => min(d, di => this.config.time_function(di.wc_value)))
                 .entries(this.longDataInsideTimeRange)
                 .sort((a, b) => {
                     const aGrouping = a.key.split('|')[0];

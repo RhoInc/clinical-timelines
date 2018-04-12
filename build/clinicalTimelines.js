@@ -2564,7 +2564,6 @@
                     })
                     .rollup(function(d) {
                         return d3.min(d, function(di) {
-                            console.log(di.wc_value);
                             return _this.config.time_function(di.wc_value);
                         });
                     })

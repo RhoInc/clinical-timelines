@@ -1916,11 +1916,11 @@
 
         //Define ID data.
         var longIDdata = this.long_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
-            }),
-            wideIDdata = this.wide_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
-            });
+            return di[_this.config.id_col] === _this.selected_id;
+        });
+        var wideIDdata = this.wide_data.filter(function(di) {
+            return di[_this.config.id_col] === _this.selected_id;
+        });
 
         //Draw ID characteristics.
         if (this.config.id_characteristics) {
@@ -1951,7 +1951,7 @@
             }),
             this.config.event_col,
             null,
-            clinicalTimelines.test
+            this.clinicalTimelines.test
         );
 
         //Draw ID detail listing.
@@ -1966,7 +1966,7 @@
                     ? _this.currentEventTypes.indexOf(d[_this.config.event_col]) > -1
                     : true;
             }),
-            clinicalTimelines.test
+            this.clinicalTimelines.test
         );
     }
 
@@ -3886,7 +3886,7 @@
     //setup functions
     //components
     //initialization method
-    function clinicalTimelines$1() {
+    function clinicalTimelines() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         var dom = arguments[2];
@@ -3929,5 +3929,5 @@
         return clinicalTimelines;
     }
 
-    return clinicalTimelines$1;
+    return clinicalTimelines;
 });

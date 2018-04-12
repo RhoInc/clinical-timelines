@@ -25,7 +25,10 @@
     "format": "npm run format-src && npm run format-build",
     "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write \"src/**/!(*settings|*defineStyles|*defineLayout).js\"",
     "format-build": "prettier --print-width=100 --tab-width=4 --single-quote --write build/clinicalTimelines.js",
-    "test": "mocha --timeout 5000 --require babel-register --recursive ./test/**/*.js",
+    "test": "npm run test-call && npm run test-init && npm run test-interactivity",
+    "test-call": "mocha --timeout 5000 --require babel-register --recursive ./test/call.js",
+    "test-init": "mocha --timeout 5000 --require babel-register --recursive ./test/init.js",
+    "test-interactivity": "mocha --timeout 5000 --require babel-register --recursive ./test/interactivity/viewChange.js",
     "test-page": "start chrome ./build/test-page/index.html && start firefox ./build/test-page/index.html && start iexplore file://%CD%/build/test-page/index.html",
     "unit-test": "mocha --timeout 5000 --require babel-register --recursive ./test/call.js",
     "watch": "rollup -c -w"

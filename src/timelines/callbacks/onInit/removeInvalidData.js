@@ -11,4 +11,12 @@ export default function removeInvalidData() {
                 this.initial_data
                     .length} records have been removed due to missing identifiers or event types.`
         );
+
+    //Check which time scales are present in the data.
+    this.anyDates = this.initial_data.some(
+        d => d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] !== ''
+    );
+    this.anyDays = this.initial_data.some(
+        d => d.hasOwnProperty(this.config.stdy_col) && d[this.config.stdy_col] !== ''
+    );
 }

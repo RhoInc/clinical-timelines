@@ -252,7 +252,6 @@ export default function defineStyles() {
                 `    stroke-width: ${line.attributes['stroke-width'] * 1.5};` +
                 '}',
             '#clinical-timelines line.ct-highlight-overlay {' +
-                '    clip-path: url(#1);' +
                 `    stroke-width: ${line.attributes['stroke-width'] / 2};` +
                 '    stroke-linecap: round;' +
                 '}',
@@ -269,7 +268,6 @@ export default function defineStyles() {
 
           //Arrows
             '#clinical-timelines polygon.ct-ongoing-event {' +
-                '    clip-path: url(#1);' +
                 '}',
             '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
                 `    stroke-width: ${line.attributes['stroke-width'] / 3};` +

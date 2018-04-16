@@ -1,293 +1,344 @@
-{"title": "settings"
-,"description": "JSON schema for the configuration of the clinical-timelines"
-,"overview": "The most straightforward way to customize the Clinical Timelines is by using a configuration object whose properties describe the behavior and appearance of the chart. Since the Clinical Timelines is a Webcharts `chart` object, many default Webcharts settings are set in the [settings.js file](https://github.com/RhoInc/clinical-timelines/blob/master/src/defaults/settings.js) as [described below](#webcharts-settings). Refer to the [Webcharts documentation](https://github.com/RhoInc/Webcharts/wiki/Chart-Configuration) for more details on these settings.\nIn addition to the standard Webcharts settings several custom settings not available in the base Webcharts library have been added to the Clinical Timelines to facilitate data mapping and other custom functionality. These custom settings are described in detail below. All defaults can be overwritten by users."
-,"version": "1.3.0"
-,"type": "object"
-,"properties":
-    {"id_col":
-        {"title": "ID"
-        ,"description": "unique identifier variable name"
-        ,"default": "USUBJID"
-        ,"type": "string"
-        }
-    ,"id_unit":
-        {"title": "ID Unit"
-        ,"description": "unique identifier unit"
-        ,"default": "participant"
-        ,"type": "string"
-        }
-    ,"id_characteristics":
-        {"title": "ID Characteristics"
-        ,"description": "an array of identifier characteristic variables and associated metadata"
-        ,"type": "array"
-        ,"items":
-            {"type": "object"
-            ,"properties":
-                {"value_col":
-                    {"title": "Variable name"
-                    ,"type": "string"
-                    }
-                ,"label":
-                    {"title": "Variable label"
-                    ,"type": "string"
-                    }
-                }
-            }
-        }
-
-
-
-    ,"event_col":
-        {"title": "Event Type"
-        ,"description": "event type variable name"
-        ,"default": "DOMAIN"
-        ,"type": "string"
-        }
-    ,"event_types":
-        {"title": "Initial Event Types"
-        ,"description": "an array of event types displayed initially"
-        ,"type": "array"
-        ,"items":
-            {"type": "string"}
-        }
-    ,"event_highlighted":
-        {"title": "Highlighted Event"
-        ,"description": "initial highlighted event type"
-        ,"default": null
-        ,"type": "string"
-        }
-    ,"event_highlight_color":
-        {"title": "Highlighted Event Color"
-        ,"description": "fill color of highlighted events"
-        ,"default": null
-        ,"type": "string"
-        }
-
-
-
-    ,"filters":
-        {"title": "Filters"
-        ,"description": "an array of filter variables and associated metadata"
-        ,"type": "array"
-        ,"items":
-            {"type": "object"
-            ,"properties":
-                {"value_col":
-                    {"title": "Variable name"
-                    ,"type": "string"
-                    }
-                ,"label":
-                    {"title": "Variable label"
-                    ,"type": "string"
+{
+    "title": "settings",
+    "description": "JSON schema for the configuration of the clinical-timelines",
+    "overview": "The most straightforward way to customize the Clinical Timelines is by using a configuration object whose properties describe the behavior and appearance of the chart. Since the Clinical Timelines is a Webcharts `chart` object, many default Webcharts settings are set in the [settings.js file](https://github.com/RhoInc/clinical-timelines/blob/master/src/defaults/settings.js) as [described below](#webcharts-settings). Refer to the [Webcharts documentation](https://github.com/RhoInc/Webcharts/wiki/Chart-Configuration) for more details on these settings.\nIn addition to the standard Webcharts settings several custom settings not available in the base Webcharts library have been added to the Clinical Timelines to facilitate data mapping and other custom functionality. These custom settings are described in detail below. All defaults can be overwritten by users.",
+    "version": "1.4.0",
+    "type": "object",
+    "properties": {
+        "id_col": {
+            "title": "ID",
+            "description": "unique identifier variable name",
+            "default": "USUBJID",
+            "type": "string"
+        },
+        "id_unit": {
+            "title": "ID Unit",
+            "description": "unique identifier unit",
+            "default": "participant",
+            "type": "string"
+        },
+        "id_characteristics": {
+            "title": "ID Characteristics",
+            "description": "an array of identifier characteristic variables and associated metadata",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "value_col": {
+                        "title": "Variable name",
+                        "type": "string"
+                    },
+                    "label": {
+                        "title": "Variable label",
+                        "type": "string"
                     }
                 }
             }
-        }
-
-
-
-    ,"groupings":
-        {"title": "ID Grouping"
-        ,"description": "an array of categorical ID characteristic variables with which to group IDs"
-        ,"type": "array"
-        ,"items":
-            {"type": "object"
-            ,"properties":
-                {"value_col":
-                    {"title": "Variable name"
-                    ,"type": "string"
-                    }
-                ,"label":
-                    {"title": "Variable label"
-                    ,"type": "string"
+        },
+        "event_col": {
+            "title": "Event Type",
+            "description": "event type variable name",
+            "default": "DOMAIN",
+            "type": "string"
+        },
+        "event_types": {
+            "title": "Initial Event Types",
+            "description": "an array of event types displayed initially",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "event_highlighted": {
+            "title": "Highlighted Event",
+            "description": "initial highlighted event type",
+            "default": null,
+            "type": "string"
+        },
+        "event_highlight_color": {
+            "title": "Highlighted Event Color",
+            "description": "fill color of highlighted events",
+            "default": null,
+            "type": "string"
+        },
+        "filters": {
+            "title": "Filters",
+            "description": "an array of filter variables and associated metadata",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "value_col": {
+                        "title": "Variable name",
+                        "type": "string"
+                    },
+                    "label": {
+                        "title": "Variable label",
+                        "type": "string"
                     }
                 }
             }
-        }
-    ,"grouping_initial":
-        {"title": "Initial ID Grouping"
-        ,"description": "initial ID grouping variable"
-        ,"default": null
-        ,"type": "string"
-        }
-    ,"grouping_direction":
-        {"title": "Grouping Annotation Placement"
-        ,"description": "grouping annotation placement"
-        ,"default": "horizontal"
-        ,"type": "string"
-        ,"enum":
-            ["horizontal"
-            ,"vertical"
+        },
+        "groupings": {
+            "title": "ID Grouping",
+            "description": "an array of categorical ID characteristic variables with which to group IDs",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "value_col": {
+                        "title": "Variable name",
+                        "type": "string"
+                    },
+                    "label": {
+                        "title": "Variable label",
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "grouping_initial": {
+            "title": "Initial ID Grouping",
+            "description": "initial ID grouping variable",
+            "default": null,
+            "type": "string"
+        },
+        "grouping_direction": {
+            "title": "Grouping Annotation Placement",
+            "description": "grouping annotation placement",
+            "default": "horizontal",
+            "type": "string",
+            "enum": [
+                "horizontal",
+                "vertical"
             ]
-        }
-
-
-
-    ,"time_scale":
-        {"title": "Time Scale"
-        ,"description": "the time scale on which to plot events"
-        ,"type": "string"
-        ,"default": "date"
-        ,"enum":
-            ["date"
-            ,"day"]
-        }
-    ,"stdt_col":
-        {"title": "Start Date"
-        ,"description": "start date variable name"
-        ,"default": "STDT"
-        ,"type": "string"
-        }
-    ,"endt_col":
-        {"title": "End Date"
-        ,"description": "end date variable name"
-        ,"default": "ENDT"
-        ,"type": "string"
-        }
-    ,"date_range":
-        {"title": "Date Range"
-        ,"description": "start and stop dates with which to define the x-axis domain and which match settings.date_format"
-        ,"type": "array"
-        ,"minItems": 2
-        ,"maxItems": 2
-        ,"items":
-            {"type": "string"}
-        }
-    ,"date_format":
-        {"title": "Input Date Format"
-        ,"description": "date format of start and stop date variables"
-        ,"default": "%Y-%m-%d"
-        ,"type": "string"
-        }
-    ,"date_display_format":
-        {"title": "Displayed Date Format"
-        ,"description": "date format of x-axis"
-        ,"default": "%Y-%m-%d"
-        ,"type": "string"
-        }
-    ,"stdy_col":
-        {"title": "Start Day"
-        ,"description": "start day variable name"
-        ,"default": "STDY"
-        ,"type": "string"
-        }
-    ,"endy_col":
-        {"title": "End Day"
-        ,"description": "end day variable name"
-        ,"default": "ENDY"
-        ,"type": "string"
-        }
-    ,"day_range":
-        {"title": "Day Range"
-        ,"description": "start and stop days with which to define the x-axis domain"
-        ,"type": "array"
-        ,"minItems": 2
-        ,"maxItems": 2
-        ,"items":
-            {"type": "number"}
-        }
-
-
-
-    ,"seq_col":
-        {"title": "Sequence Number"
-        ,"description": "event type sequence variable name"
-        ,"default": "SEQ"
-        ,"type": "string"
-        }
-    ,"tooltip_col":
-        {"title": "Event Details"
-        ,"description": "hovering over a mark displays a tooltip with the details of the event"
-        ,"default": "TOOLTIP"
-        ,"type": "string"
-        }
-    ,"ongo_col":
-        {"title": "Ongoing?"
-        ,"description": "ongoing event indicator variable name"
-        ,"default": "ONGO"
-        ,"type": "string"
-        }
-    ,"ongo_val":
-        {"title": "Ongoing Value"
-        ,"description": "ongoing event indicator value"
-        ,"default": "Y"
-        ,"type": "string"
-        }
-    ,"reference_lines":
-        {"title": "Reference Timepoints"
-        ,"description": "an array of reference timepoints and associated descriptions"
-        ,"type": "array"
-        ,"items":
-            {"type": "object"
-            ,"properties":
-                {"timepoint":
-                    {"title": "Timepoint"
-                    ,"type": "string"
-                    }
-                ,"label":
-                    {"title": "Reference timepoint description"
-                    ,"type": "string"
+        },
+        "time_scale": {
+            "title": "Time Scale",
+            "description": "the time scale on which to plot events",
+            "type": "string",
+            "default": "date",
+            "enum": [
+                "date",
+                "day"
+            ]
+        },
+        "stdt_col": {
+            "title": "Start Date",
+            "description": "start date variable name",
+            "default": "STDT",
+            "type": "string"
+        },
+        "endt_col": {
+            "title": "End Date",
+            "description": "end date variable name",
+            "default": "ENDT",
+            "type": "string"
+        },
+        "date_range": {
+            "title": "Date Range",
+            "description": "start and stop dates with which to define the x-axis domain and which match settings.date_format",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+                "type": "string"
+            }
+        },
+        "date_ranges": {
+            "title": "Date Ranges",
+            "description": "start and stop date ranges which populate the time range dropdown",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "title": "Date Range",
+                        "description": "start and stop dates with which to define the x-axis domain and which match settings.date_format",
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "label": {
+                        "title": "Date Range Label",
+                        "description": "a description of the date range",
+                        "type": "string"
                     }
                 }
             }
-        }
-
-
-
-    ,"details":
-        {"title": "Details Listing"
-        ,"description": "an array of detail listing variables and associated metadata"
-        ,"type": "array"
-        ,"items":
-            {"type": "object"
-            ,"properties":
-                {"value_col":
-                    {"title": "Variable name"
-                    ,"type": "string"
-                    }
-                ,"label":
-                    {"title": "Variable label"
-                    ,"type": "string"
+        },
+        "date_format": {
+            "title": "Input Date Format",
+            "description": "date format of start and stop date variables",
+            "default": "%Y-%m-%d",
+            "type": "string"
+        },
+        "date_display_format": {
+            "title": "Displayed Date Format",
+            "description": "date format of x-axis",
+            "default": "%Y-%m-%d",
+            "type": "string"
+        },
+        "stdy_col": {
+            "title": "Start Day",
+            "description": "start day variable name",
+            "default": "STDY",
+            "type": "string"
+        },
+        "endy_col": {
+            "title": "End Day",
+            "description": "end day variable name",
+            "default": "ENDY",
+            "type": "string"
+        },
+        "day_range": {
+            "title": "Day Range",
+            "description": "start and stop days with which to define the x-axis domain",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+                "type": "number"
+            }
+        },
+        "day_ranges": {
+            "title": "Day Ranges",
+            "description": "start and stop day ranges which populate the time range dropdown",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "title": "Day Range",
+                        "description": "start and stop days with which to define the x-axis domain",
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "type": "number"
+                        }
+                    },
+                    "label": {
+                        "title": "Day Range Label",
+                        "description": "a description of the day range",
+                        "type": "string"
                     }
                 }
             }
-        }
-    ,"details_config":
-        {"title": "Details Listing Settings"
-        ,"description": "a webcharts table settings object"
-        ,"type": "object"
-        ,"properties":
-            {"cols":
-                {"title": "List of variables"
-                ,"type": "array"
-                ,"items":
-                    {"type": "string"}
+        },
+        "seq_col": {
+            "title": "Sequence Number",
+            "description": "event type sequence variable name",
+            "default": "SEQ",
+            "type": "string"
+        },
+        "tooltip_col": {
+            "title": "Event Details",
+            "description": "hovering over a mark displays a tooltip with the details of the event",
+            "default": "TOOLTIP",
+            "type": "string"
+        },
+        "ongo_col": {
+            "title": "Ongoing?",
+            "description": "ongoing event indicator variable name",
+            "default": "ONGO",
+            "type": "string"
+        },
+        "ongo_val": {
+            "title": "Ongoing Value",
+            "description": "ongoing event indicator value",
+            "default": "Y",
+            "type": "string"
+        },
+        "reference_lines": {
+            "title": "Reference Timepoints",
+            "description": "an array of reference timepoints and associated descriptions",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "timepoint": {
+                        "title": "Timepoint",
+                        "type": "string"
+                    },
+                    "label": {
+                        "title": "Reference timepoint description",
+                        "type": "string"
+                    }
                 }
-            ,"headers":
-                {"title": "List of headers"
-                ,"type": "string"
-                ,"items":
-                    {"type": "string"}
+            }
+        },
+        "transpose_data": {
+            "title": "Transpose Data Export?",
+            "description": "by default data are exported as one record per event; this option transposes the data so each even type has two columns: start and end",
+            "type": "boolean",
+            "default": false
+        },
+        "mark_thickness": {
+            "title": "Mark Thiccness",
+            "description": "a number that controls the the stroke width of lines and the radius of circles",
+            "type": "number",
+            "default": 6
+        },
+        "details": {
+            "title": "Details Listing",
+            "description": "an array of detail listing variables and associated metadata",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "value_col": {
+                        "title": "Variable name",
+                        "type": "string"
+                    },
+                    "label": {
+                        "title": "Variable label",
+                        "type": "string"
+                    }
                 }
-            ,"searchable":
-                {"title": "Searchable?"
-                ,"type": "boolean"
-                ,"default": true
-                }
-            ,"sortable":
-                {"title": "sortable?"
-                ,"type": "boolean"
-                ,"default": true
-                }
-            ,"pagination":
-                {"title": "Paginated?"
-                ,"type": "boolean"
-                ,"default": true
-                }
-            ,"exportable":
-                {"title": "Exportable?"
-                ,"type": "boolean"
-                ,"default": true
+            }
+        },
+        "details_config": {
+            "title": "Details Listing Settings",
+            "description": "a webcharts table settings object",
+            "type": "object",
+            "properties": {
+                "cols": {
+                    "title": "List of variables",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "headers": {
+                    "title": "List of headers",
+                    "type": "string",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "searchable": {
+                    "title": "Searchable?",
+                    "type": "boolean",
+                    "default": true
+                },
+                "sortable": {
+                    "title": "sortable?",
+                    "type": "boolean",
+                    "default": true
+                },
+                "pagination": {
+                    "title": "Paginated?",
+                    "type": "boolean",
+                    "default": true
+                },
+                "exportable": {
+                    "title": "Exportable?",
+                    "type": "boolean",
+                    "default": true
                 }
             }
         }

@@ -7,7 +7,8 @@ export default function addStriping() {
         //Offset tick label.
         select(this)
             .select('text')
-            .attr('dy', context.y.rangeBand() / 3);
+            .attr('dx', 4)
+            .attr('dy', context.y.rangeBand() / 4);
 
         //Insert a rectangle with which to visually group each ID's events.
         select(this)

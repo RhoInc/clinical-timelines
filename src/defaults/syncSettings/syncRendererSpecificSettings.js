@@ -119,7 +119,6 @@ export default function syncRendererSpecificSettings(settings) {
                 };
             });
     else settings.date_ranges = [];
-    console.log(settings.date_ranges);
 
     //day_ranges - array of 2-element day ranges or of objects with a label property and a time_range property
     //  {
@@ -183,9 +182,9 @@ export default function syncRendererSpecificSettings(settings) {
                 referenceLineObject.label = reference_line.label
                     ? reference_line.label
                     : `${referenceLineObject.time_scale.substring(0, 1).toUpperCase() +
-                          referenceLineObject.time_scale.substring(
-                              1
-                          )}: ${referenceLineObject.timepoint}`;
+                          referenceLineObject.time_scale.substring(1)}: ${
+                          referenceLineObject.timepoint
+                      }`;
 
                 return referenceLineObject;
             })

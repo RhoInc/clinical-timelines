@@ -21,7 +21,7 @@ export default function controlGroupLayout() {
                 .classed('ct-controls ct-horizontal-rule', true)
                 .text('Controls');
         else if (
-            (context.config.filters.some(
+            context.config.filters.some(
                 filter =>
                     [
                         context.config.id_col,
@@ -29,8 +29,8 @@ export default function controlGroupLayout() {
                         context.config.ongo_col
                     ].indexOf(filter.value_col) < 0
             ) &&
-                (context.config.groupings.length && d.option === 'y.grouping')) ||
-            (!context.config.groupings.length && d.option === 'y.sort')
+            ((context.config.groupings.length && d.option === 'y.groupingLabel') ||
+                (!context.config.groupings.length && d.option === 'y.sort'))
         ) {
             const filterRule = context.controls.wrap
                 .append('div')

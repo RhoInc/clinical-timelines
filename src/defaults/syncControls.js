@@ -31,7 +31,7 @@ export default function syncControls(controls, settings) {
 
     //Remove groupings control if no groupings are specified.
     if (settings.groupings.length === 0)
-        controls.splice(controls.findIndex(control => control.option === 'y.grouping'), 1);
+        controls.splice(controls.findIndex(control => control.option === 'y.groupingLabel'), 1);
 
     const syncedControls = merge([
         [settings.filters[0]], // ID dropdown first

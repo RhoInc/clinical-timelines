@@ -1,15 +1,19 @@
 import { select as d3select } from 'd3';
 
 export default function yAxisGrouping(select, d) {
-    const selected = d3select(select).select('option:checked');
+    const groupingLabel = d3select(select)
+        .select('option:checked')
+        .text();
 
     //Update grouping settings.
-    if (selected.text() !== 'None') {
-        this.config.y.grouping = selected.text();
-        this.config.y.groupingLabel = selected.property('label');
+    if (groupingLabel !== 'None') {
+        this.config.y.groupingLabel = groupingLabel;
+        this.config.y.grouping = this.config.groupings.find(
+            grouping => grouping.label === groupingLabel
+        ).value_col;
     } else {
-        delete this.config.y.grouping;
         this.config.y.groupingLabel = 'Event Types';
+        delete this.config.y.grouping;
     }
 
     //Redraw.

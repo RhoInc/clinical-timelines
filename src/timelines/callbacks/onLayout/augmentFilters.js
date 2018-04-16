@@ -17,11 +17,15 @@ export default function augmentFilters() {
         IDchange.call(context, this);
     });
 
-    eventTypeFilter.selectAll('select.changer option').property('selected', di => {
-        return context.currentEventTypes instanceof Array
-            ? context.currentEventTypes.indexOf(di) > -1
-            : true;
-    });
+    eventTypeFilter
+        .select('select.changer')
+        .attr('size', this.allEventTypes.length > 7 ? 7 : this.allEventTypes.length)
+        .selectAll('select.changer option')
+        .property('selected', di => {
+            return context.currentEventTypes instanceof Array
+                ? context.currentEventTypes.indexOf(di) > -1
+                : true;
+        });
     eventTypeFilter.select('select').on('change', function(d) {
         eventTypeChange.call(context, this);
     });

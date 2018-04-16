@@ -159,7 +159,7 @@ export default function defineStyles() {
                 '}',
             '#clinical-timelines #ct-left-column .wc-controls .control-group .changer {' +
                 '    margin-left: 5px;' +
-                '    width: 50%;' +
+                '    width: 59%;' +
                 '    clear: right;' +
                 '    box-sizing: border-box;' +
                 '}',
@@ -207,6 +207,8 @@ export default function defineStyles() {
                 '    padding: 2px 5px !important;' +
                 '    color: blue;' +
                 '    text-decoration: none;' +
+                '    margin-right: 5px;' +
+                '    margin-left: 0;' +
                 '}',
             '#clinical-timelines #ct-right-column #ct-timelines .ct-select-all:hover {' +
                 '    color: #ccc;' +

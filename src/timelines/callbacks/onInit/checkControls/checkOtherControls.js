@@ -7,7 +7,7 @@ export default function checkOtherControls() {
         if (input.description === 'Event highlighting')
             input.values = this.config.color_dom.slice();
         else if (input.description === 'Y-axis grouping')
-            input.values = this.config.groupings.map(grouping => grouping.value_col);
+            input.values = this.config.groupings.map(grouping => grouping.label);
 
         return true;
     });

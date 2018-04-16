@@ -1,14 +1,12 @@
 export default function syncWebchartsSettings(settings) {
     //Y-axis
     settings.y.column = settings.id_col;
-    if (settings.grouping_initial) {
+
+    if (settings.groupings.some(grouping => grouping.value_col === settings.grouping_initial)) {
         settings.y.grouping = settings.grouping_initial;
-        settings.y.groupingLabel =
-            settings.groupings[
-                settings.groupings
-                    .map(grouping => grouping.value_col)
-                    .indexOf(settings.grouping_initial)
-            ].label;
+        settings.y.groupingLabel = settings.groupings.find(
+            grouping => grouping.value_col === settings.grouping_initial
+        ).label;
     }
 
     //Lines

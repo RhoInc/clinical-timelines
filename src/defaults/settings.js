@@ -65,7 +65,7 @@ export const webchartsSettings = {
         type: 'ordinal',
         column: null, // set in syncSettings()
         label: null, // set in syncSettings()
-        sort: 'earliest',
+        sort: 'alphabetical-descending',
         behavior: 'flex',
         grouping: null // set in syncSettings()
     },

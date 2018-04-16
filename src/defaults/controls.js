@@ -35,13 +35,12 @@ export default [
         option: 'y.sort',
         label: '',
         description: 'Y-axis sort',
-        values: ['earliest', 'alphabetical-descending'],
-        relabels: ['by earliest event', 'alphanumerically'],
+        values: ['Alphanumerically', 'By Earliest Event'],
         require: true
     },
     {
         type: 'dropdown',
-        option: 'y.grouping',
+        option: 'y.groupingLabel',
         label: '',
         description: 'Y-axis grouping'
     }

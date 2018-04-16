@@ -322,7 +322,7 @@
             type: 'ordinal',
             column: null, // set in syncSettings()
             label: null, // set in syncSettings()
-            sort: 'earliest',
+            sort: 'alphabetical-descending',
             behavior: 'flex',
             grouping: null // set in syncSettings()
         },
@@ -674,16 +674,16 @@
     function syncWebchartsSettings(settings) {
         //Y-axis
         settings.y.column = settings.id_col;
-        if (settings.grouping_initial) {
+
+        if (
+            settings.groupings.some(function(grouping) {
+                return grouping.value_col === settings.grouping_initial;
+            })
+        ) {
             settings.y.grouping = settings.grouping_initial;
-            settings.y.groupingLabel =
-                settings.groupings[
-                    settings.groupings
-                        .map(function(grouping) {
-                            return grouping.value_col;
-                        })
-                        .indexOf(settings.grouping_initial)
-                ].label;
+            settings.y.groupingLabel = settings.groupings.find(function(grouping) {
+                return grouping.value_col === settings.grouping_initial;
+            }).label;
         }
 
         //Lines
@@ -842,13 +842,12 @@
             option: 'y.sort',
             label: '',
             description: 'Y-axis sort',
-            values: ['earliest', 'alphabetical-descending'],
-            relabels: ['by earliest event', 'alphanumerically'],
+            values: ['Alphanumerically', 'By Earliest Event'],
             require: true
         },
         {
             type: 'dropdown',
-            option: 'y.grouping',
+            option: 'y.groupingLabel',
             label: '',
             description: 'Y-axis grouping'
         }
@@ -885,7 +884,7 @@
         if (settings.groupings.length === 0)
             controls.splice(
                 controls.findIndex(function(control) {
-                    return control.option === 'y.grouping';
+                    return control.option === 'y.groupingLabel';
                 }),
                 1
             );
@@ -1061,7 +1060,7 @@
                 '}',
             '#clinical-timelines #ct-left-column .wc-controls .control-group .changer {' +
                 '    margin-left: 5px;' +
-                '    width: 50%;' +
+                '    width: 59%;' +
                 '    clear: right;' +
                 '    box-sizing: border-box;' +
                 '}',
@@ -1106,6 +1105,8 @@
                 '    padding: 2px 5px !important;' +
                 '    color: blue;' +
                 '    text-decoration: none;' +
+                '    margin-right: 5px;' +
+                '    margin-left: 0;' +
                 '}',
             '#clinical-timelines #ct-right-column #ct-timelines .ct-select-all:hover {' +
                 '    color: #ccc;' +
@@ -1726,6 +1727,33 @@
     function selectAllEventTypes() {
         var _this = this;
 
+        this.timelines.currentEventTypes = [];
+
+        //Update event type filter.
+        this.timelines.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(d) {
+                return d.value_col === _this.settings.event_col;
+            })
+            .selectAll('.changer option')
+            .property('selected', false);
+
+        //Update event type filter object.
+        this.timelines.filters.filter(function(filter) {
+            return filter.col === _this.settings.event_col;
+        })[0].val = [];
+
+        //Update legend items.
+        this.timelines.wrap.selectAll('.legend-item').classed('ct-selected', false);
+
+        //Draw chart.
+        if (this.timelines.selected_id) drawIDtimeline.call(this.timelines);
+        else this.timelines.draw();
+    }
+
+    function selectAllEventTypes$1() {
+        var _this = this;
+
         this.timelines.currentEventTypes = this.timelines.config.color_dom;
 
         //Update event type filter.
@@ -1746,7 +1774,7 @@
         this.timelines.wrap.selectAll('.legend-item').classed('ct-selected', true);
 
         //Draw chart.
-        if (this.selected_id) drawIDtimeline.call(this.timelines);
+        if (this.timelines.selected_id) drawIDtimeline.call(this.timelines);
         else this.timelines.draw();
     }
 
@@ -1840,7 +1868,7 @@
             .append('div')
             .attr('id', 'ct-controls');
 
-        //Add button that selects all event types.
+        //Add button that resets the page.
         this.containers.controls
             .append('div')
             .classed('ct-button ct-reset', true)
@@ -1867,14 +1895,32 @@
             .append('div')
             .attr('id', 'ct-timelines');
 
+        //Add button that deselects all event types.
+        this.containers.timelines
+            .append('div')
+            .classed('ct-button ct-select-all', true)
+            .html('&#10005;')
+            .attr('id', 'ct-deselect-all')
+            .attr('title', 'Deselect all event types.')
+            .on('click', function() {
+                selectAllEventTypes.call(_this);
+            })
+            .on('mouseover', function() {
+                _this.timelines.legend.selectAll('.legend-item').classed('ct-hover', true);
+            })
+            .on('mouseout', function() {
+                _this.timelines.legend.selectAll('.legend-item').classed('ct-hover', false);
+            });
+
         //Add button that selects all event types.
         this.containers.timelines
             .append('div')
             .classed('ct-button ct-select-all', true)
             .html('&#10003;')
+            .attr('id', 'ct-select-all')
             .attr('title', 'Select all event types.')
             .on('click', function() {
-                selectAllEventTypes.call(_this);
+                selectAllEventTypes$1.call(_this);
             })
             .on('mouseover', function() {
                 _this.timelines.legend.selectAll('.legend-item').classed('ct-hover', true);
@@ -2055,13 +2101,13 @@
         //add full domain to date ranges
         this.config.date_ranges.push({
             domain: this.full_date_range,
-            label: 'full'
+            label: 'Full'
         });
 
         //add custom domain to date ranges
         this.config.date_ranges.push({
             domain: this.full_date_range.slice(),
-            label: 'user input'
+            label: 'User Input'
         });
 
         /**-------------------------------------------------------------------------------------------\
@@ -2084,13 +2130,13 @@
         //add full domain to day ranges
         this.config.day_ranges.push({
             domain: this.full_day_range,
-            label: 'full'
+            label: 'Full'
         });
 
         //add custom domain to day ranges
         this.config.day_ranges.push({
             domain: this.full_day_range.slice(),
-            label: 'user input'
+            label: 'User Input'
         });
     }
 
@@ -2213,7 +2259,7 @@
                     input.values = _this.config.color_dom.slice();
                 else if (input.description === 'Y-axis grouping')
                     input.values = _this.config.groupings.map(function(grouping) {
-                        return grouping.value_col;
+                        return grouping.label;
                     });
 
                 return true;
@@ -2408,7 +2454,7 @@
                     .classed('ct-controls ct-horizontal-rule', true)
                     .text('Controls');
             else if (
-                (context.config.filters.some(function(filter) {
+                context.config.filters.some(function(filter) {
                     return (
                         [
                             context.config.id_col,
@@ -2417,9 +2463,8 @@
                         ].indexOf(filter.value_col) < 0
                     );
                 }) &&
-                    context.config.groupings.length &&
-                    d.option === 'y.grouping') ||
-                (!context.config.groupings.length && d.option === 'y.sort')
+                ((context.config.groupings.length && d.option === 'y.groupingLabel') ||
+                    (!context.config.groupings.length && d.option === 'y.sort'))
             ) {
                 var filterRule = context.controls.wrap
                     .append('div')
@@ -2521,16 +2566,35 @@
         else this.draw();
     }
 
-    function yAxisGrouping(select$$1, d) {
-        var selected = d3.select(select$$1).select('option:checked');
+    function yAxisSort(select$$1, d) {
+        var sort = d3
+            .select(select$$1)
+            .select('option:checked')
+            .text();
 
         //Update grouping settings.
-        if (selected.text() !== 'None') {
-            this.config.y.grouping = selected.text();
-            this.config.y.groupingLabel = selected.property('label');
+        if (sort === 'By Earliest Event') this.config.y.sort = 'earliest';
+        else if (sort === 'Alphanumerically') this.config.y.sort = 'alphabetical-descending';
+
+        //Redraw.
+        this.draw();
+    }
+
+    function yAxisGrouping(select$$1, d) {
+        var groupingLabel = d3
+            .select(select$$1)
+            .select('option:checked')
+            .text();
+
+        //Update grouping settings.
+        if (groupingLabel !== 'None') {
+            this.config.y.groupingLabel = groupingLabel;
+            this.config.y.grouping = this.config.groupings.find(function(grouping) {
+                return grouping.label === groupingLabel;
+            }).value_col;
         } else {
-            delete this.config.y.grouping;
             this.config.y.groupingLabel = 'Event Types';
+            delete this.config.y.grouping;
         }
 
         //Redraw.
@@ -2547,41 +2611,6 @@
             .classed('ct-control', true)
             .attr('id', function(d) {
                 return 'control-' + d.option.replace('.', '-');
-            });
-
-        //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-        controls
-            .filter(function(d) {
-                return ['Y-axis sort', 'Y-axis grouping'].indexOf(d.description) > -1;
-            })
-            .each(function(d) {
-                // Y-axis controls
-                var options = d3.select(this).selectAll('option');
-
-                if (d.description === 'Y-axis sort')
-                    // Add labels to Y-axis sort.
-                    options.property('label', function(di) {
-                        return d.relabels[
-                            d.values
-                                .filter(function(dii) {
-                                    return dii !== 'None';
-                                })
-                                .indexOf(di)
-                        ];
-                    });
-                else if (d.description === 'Y-axis grouping')
-                    // Add variable labels to Y-axis grouping options.
-                    options.property('label', function(di) {
-                        return di !== 'None'
-                            ? context.config.groupings[
-                                  context.config.groupings
-                                      .map(function(dii) {
-                                          return dii.value_col;
-                                      })
-                                      .indexOf(di)
-                              ].label
-                            : 'None';
-                    });
             });
 
         //Redefine event highlighting event listener.
@@ -2617,10 +2646,20 @@
                 });
             });
 
+        //Redefine y-axis sort event listener.
+        controls
+            .filter(function(d) {
+                return d.option === 'y.sort';
+            })
+            .select('select')
+            .on('change', function(d) {
+                yAxisSort.call(context, this, d);
+            });
+
         //Redefine y-axis grouping event listener.
         controls
             .filter(function(d) {
-                return d.option === 'y.grouping';
+                return d.option === 'y.groupingLabel';
             })
             .select('select')
             .on('change', function(d) {
@@ -2658,7 +2697,7 @@
 
         //Update custom time range setting.
         var customTimeRange = this.config[time_range + 's'].find(function(d) {
-            return d.label === 'user input';
+            return d.label === 'User Input';
         });
         customTimeRange.domain = this.time_range.slice();
 
@@ -2670,10 +2709,10 @@
             })
             .selectAll('option')
             .property('selected', function() {
-                return this.value === 'user input';
+                return this.value === 'User Input';
             })
             .filter(function() {
-                return this.value === 'user input';
+                return this.value === 'User Input';
             })
             .datum(customTimeRange.time_range);
 
@@ -2820,11 +2859,15 @@
             IDchange.call(context, this);
         });
 
-        eventTypeFilter.selectAll('select.changer option').property('selected', function(di) {
-            return context.currentEventTypes instanceof Array
-                ? context.currentEventTypes.indexOf(di) > -1
-                : true;
-        });
+        eventTypeFilter
+            .select('select.changer')
+            .attr('size', this.allEventTypes.length > 7 ? 7 : this.allEventTypes.length)
+            .selectAll('select.changer option')
+            .property('selected', function(di) {
+                return context.currentEventTypes instanceof Array
+                    ? context.currentEventTypes.indexOf(di) > -1
+                    : true;
+            });
         eventTypeFilter.select('select').on('change', function(d) {
             eventTypeChange.call(context, this);
         });

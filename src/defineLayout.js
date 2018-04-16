@@ -2,6 +2,7 @@ import { select } from 'd3';
 import exportData from './defineLayout/exportData';
 import goBackToTimelines from './defineLayout/goBackToTimelines';
 import resetControls from './defineLayout/resetControls';
+import deselectAllEventTypes from './defineLayout/deselectAllEventTypes';
 import selectAllEventTypes from './defineLayout/selectAllEventTypes';
 
 export default function defineLayout() {
@@ -92,7 +93,7 @@ export default function defineLayout() {
                 .append('div')
                 .attr('id', 'ct-controls');
 
-            //Add button that selects all event types.
+            //Add button that resets the page.
             this.containers.controls
                 .append('div')
                 .classed('ct-button ct-reset', true)
@@ -120,11 +121,33 @@ export default function defineLayout() {
                 .append('div')
                 .attr('id', 'ct-timelines');
 
+            //Add button that deselects all event types.
+            this.containers.timelines
+                .append('div')
+                .classed('ct-button ct-select-all', true)
+                .html('&#10005;')
+                .attr('id', 'ct-deselect-all')
+                .attr('title', 'Deselect all event types.')
+                .on('click', () => {
+                    deselectAllEventTypes.call(this);
+                })
+                .on('mouseover', () => {
+                    this.timelines.legend
+                        .selectAll('.legend-item')
+                        .classed('ct-hover', true);
+                })
+                .on('mouseout', () => {
+                    this.timelines.legend
+                        .selectAll('.legend-item')
+                        .classed('ct-hover', false);
+                });
+
             //Add button that selects all event types.
             this.containers.timelines
                 .append('div')
                 .classed('ct-button ct-select-all', true)
                 .html('&#10003;')
+                .attr('id', 'ct-select-all')
                 .attr('title', 'Select all event types.')
                 .on('click', () => {
                     selectAllEventTypes.call(this);
@@ -138,7 +161,7 @@ export default function defineLayout() {
                     this.timelines.legend
                         .selectAll('.legend-item')
                         .classed('ct-hover', false);
-                })
+                });
 
         /***--------------------------------------------------------------------------------------\
           ID timeline

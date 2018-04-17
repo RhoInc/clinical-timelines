@@ -3,7 +3,7 @@ The most straightforward way to customize the Clinical Timelines is by using a c
 In addition to the standard Webcharts settings several custom settings not available in the base Webcharts library have been added to the Clinical Timelines to facilitate data mapping and other custom functionality. These custom settings are described in detail below. All defaults can be overwritten by users.
 
 # Renderer-specific settings
-The sections below describe each clinical-timelines setting as of version 1.3.0.
+The sections below describe each clinical-timelines setting as of version 1.4.0.
 
 ## settings.id_col
 `string`
@@ -183,21 +183,23 @@ start and stop dates with which to define the x-axis domain and which match sett
 
 
 ## settings.date_ranges
-`object`
-
-an array of start and stop dates with which to define the x-axis domain
-
-### settings.date_ranges.domain
 `array`
 
-start and stop dates with which to define the x-axis domain
+start and stop date ranges which populate the time range dropdown
 
 **default:** none
 
-### settings.date_ranges.label
+### settings.date_ranges[].domain
+`array`
+
+start and stop dates with which to define the x-axis domain and which match settings.date_format
+
+**default:** none
+
+### settings.date_ranges[].label
 `string`
 
-date range label
+a description of the date range
 
 **default:** none
 
@@ -249,41 +251,25 @@ start and stop days with which to define the x-axis domain
 
 
 ## settings.day_ranges
-`object`
+`array`
 
-an array of start and stop days with which to define the x-axis domain
+start and stop day ranges which populate the time range dropdown
 
-### settings.day_ranges.domain
+**default:** none
+
+### settings.day_ranges[].domain
 `array`
 
 start and stop days with which to define the x-axis domain
 
 **default:** none
 
-### settings.day_ranges.label
+### settings.day_ranges[].label
 `string`
 
-day range label
+a description of the day range
 
 **default:** none
-
-
-
-## settings.mark_thickness
-`number`
-
-controls the stroke width of lines, the radius of circles, the distance between offset marks, and the range band of the ID timeline
-
-**default:** `6`
-
-
-
-## settings.offset_col
-`string`
-
-the name of the variable that contains a ranking of vertical position at which to draw a mark
-
-**default:** `"OFFSET"`
 
 
 
@@ -323,12 +309,12 @@ ongoing event indicator value
 
 
 
-## settings.transpose_data
-`boolean`
+## settings.offset_col
+`string`
 
-controls data structure: one record per ID per event event or one record per ID
+the name of the variable that contains a ranking of vertical position at which to draw a mark
 
-**default:** `false`
+**default:** none
 
 
 
@@ -352,6 +338,24 @@ undefined
 undefined
 
 **default:** none
+
+
+
+## settings.transpose_data
+`boolean`
+
+by default data are exported as one record per event; this option transposes the data so each even type has two columns: start and end
+
+**default:** `false`
+
+
+
+## settings.mark_thickness
+`number`
+
+a number that controls the the stroke width of lines and the radius of circles
+
+**default:** `6`
 
 
 
@@ -426,7 +430,7 @@ undefined
 **default:** `true`
 
 # Webcharts settings
-The object below contains each Webcharts setting as of version 1.3.0.
+The object below contains each Webcharts setting as of version 1.4.0.
 
 ```
 {    x: {        type: null, // set in syncSettings()        column: 'wc_value',        label: null, // set in syncSettings()        format: null // set in syncSettings()    },    y: {        type: 'ordinal',        column: null, // set in syncSettings()        label: null, // set in syncSettings()        sort: 'earliest',        behavior: 'flex',        grouping: null // set in syncSettings()    },    marks: [        {            type: 'line',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            attributes: {                'clip-path': 'url(#1)',                'stroke-width': null, // set in syncSettings()            }        },        {            type: 'circle',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            radius: null, // set in syncSettings()            attributes: {                'clip-path': 'url(#1)',                'stroke-width': null, // set in syncSettings()            }        }    ],    colors: [        '#1b9e77',        '#d95f02',        '#7570b3',        '#a6cee3',        '#1f78b4',        '#b2df8a',        '#66c2a5',        '#fc8d62',        '#8da0cb'    ],    color_dom: null, // set in syncSettings()    legend: {        location: 'top',        label: 'Event Type',        order: null, // set in syncSettings()        mark: 'circle'    },    range_band: 35,    margin: {        top: 60,        right: 40    }, // for second x-axis    resizable: false // can't be resizable so the multiples aren't overlapped by their titles}

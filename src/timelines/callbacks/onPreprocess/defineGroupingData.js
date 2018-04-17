@@ -6,6 +6,7 @@ export default function defineGroupingData() {
         //Capture each grouping and corresponding array of IDs.
         this.groupings = set(this.longDataInsideTimeRange.map(d => d[this.config.y.grouping]))
             .values()
+            .sort()
             .map((d, i) => {
                 const groupingObject = {
                     key: d,
@@ -38,8 +39,13 @@ export default function defineGroupingData() {
                     const groupingStart = clone(groupingObject),
                         groupingEnd = clone(groupingObject);
 
-                    groupingStart.wc_value = this.config.x.domain[0];
-                    groupingEnd.wc_value = this.config.x.domain[0];
+                    if (this.config.time_scale === 'date') {
+                        groupingStart.wc_value = this.full_date_range[0];
+                        groupingEnd.wc_value = this.full_date_range[0];
+                    } else {
+                        groupingStart.wc_value = this.full_day_range[0];
+                        groupingEnd.wc_value = this.full_day_range[0];
+                    }
 
                     //Push two start and two end data to raw_data to create space to annotate grouping.
                     const groupingStart1 = clone(groupingStart),

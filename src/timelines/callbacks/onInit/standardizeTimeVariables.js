@@ -18,10 +18,10 @@ export default function standardizeTimeVariables() {
                 d[this.config.endt_col] = d[this.config.stdt_col];
         }
         if (has_stdy) {
-            if (!/^ *\d+ *$/.test(d[this.config.stdy_col])) d[this.config.stdy_col] = '';
+            if (!/^ *-?\d+ *$/.test(d[this.config.stdy_col])) d[this.config.stdy_col] = '';
         }
         if (has_endy) {
-            if (!/^ *\d+ *$/.test(d[this.config.endy_col]))
+            if (!/^ *-?\d+ *$/.test(d[this.config.endy_col]))
                 d[this.config.endy_col] = d[this.config.stdy_col];
         }
 

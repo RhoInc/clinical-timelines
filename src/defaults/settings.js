@@ -39,7 +39,7 @@ export const rendererSpecificSettings = {
   //Miscellaneous settings
     mark_thickness: 6,
     reference_lines: null,
-    offset_col: 'OFFSET',
+    offset_col: null,
     seq_col: 'SEQ',
     tooltip_col: 'TOOLTIP',
     ongo_col: 'ONGO',

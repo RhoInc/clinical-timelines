@@ -86,6 +86,50 @@
         });
     }
 
+    if (!Array.prototype.findIndex) {
+        Object.defineProperty(Array.prototype, 'findIndex', {
+            value: function value(predicate) {
+                // 1. Let O be ? ToObject(this value).
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
+                }
+
+                var o = Object(this);
+
+                // 2. Let len be ? ToLength(? Get(O, "length")).
+                var len = o.length >>> 0;
+
+                // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+
+                // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+                var thisArg = arguments[1];
+
+                // 5. Let k be 0.
+                var k = 0;
+
+                // 6. Repeat, while k < len
+                while (k < len) {
+                    // a. Let Pk be ! ToString(k).
+                    // b. Let kValue be ? Get(O, Pk).
+                    // c. Let testResult be ToBoolean(? Call(predicate, T, � kValue, k, O �)).
+                    // d. If testResult is true, return k.
+                    var kValue = o[k];
+                    if (predicate.call(thisArg, kValue, k, o)) {
+                        return k;
+                    }
+                    // e. Increase k by 1.
+                    k++;
+                }
+
+                // 7. Return -1.
+                return -1;
+            }
+        });
+    }
+
     var _typeof =
         typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
             ? function(obj) {
@@ -296,7 +340,7 @@
         //Miscellaneous settings
         mark_thickness: 6,
         reference_lines: null,
-        offset_col: 'OFFSET',
+        offset_col: null,
         seq_col: 'SEQ',
         tooltip_col: 'TOOLTIP',
         ongo_col: 'ONGO',
@@ -712,9 +756,13 @@
             settings.x_parseFormat = d3$1.time.format(settings.date_format);
             settings.x_displayFormat = d3$1.time.format(settings.date_display_format);
             settings.time_function = function(dt) {
-                return settings.x_parseFormat.parse(dt)
-                    ? settings.x_parseFormat.parse(dt)
-                    : new Date(dt);
+                var parsed = void 0;
+                try {
+                    parsed = settings.x_parseFormat.parse(dt);
+                } catch (error) {
+                    parsed = new Date(dt);
+                }
+                return parsed;
             };
         } else if (settings.time_scale === 'day') {
             settings.st_col = settings.stdy_col;
@@ -894,12 +942,19 @@
     };
 
     function defineSettings() {
-        this.settings.merged = Object.assign({}, defaults$1.settings, clone(this.settings.user));
+        this.settings.merged = Object.assign(
+            {},
+            clone(defaults$1.settings),
+            clone(this.settings.user)
+        );
         this.settings.synced = defaults$1.syncSettings(clone(this.settings.merged));
-        Object.assign(this.settings, this.settings.synced);
-        this.settings.IDtimeline = this.settings.IDtimelineSettings;
-        this.settings.listing = this.settings.details_config;
-        this.settings.controls = defaults$1.syncControls(defaults$1.controls, clone(this.settings));
+        Object.assign(this.settings, clone(this.settings.synced));
+        this.settings.IDtimeline = clone(this.settings.IDtimelineSettings);
+        this.settings.listing = clone(this.settings.details_config);
+        this.settings.controls = defaults$1.syncControls(
+            clone(defaults$1.controls),
+            clone(this.settings)
+        );
     }
 
     function defineStyles() {
@@ -1140,7 +1195,6 @@
                 ('    stroke-width: ' + line.attributes['stroke-width'] * 1.5 + ';') +
                 '}',
             '#clinical-timelines line.ct-highlight-overlay {' +
-                '    clip-path: url(#1);' +
                 ('    stroke-width: ' + line.attributes['stroke-width'] / 2 + ';') +
                 '    stroke-linecap: round;' +
                 '}',
@@ -1168,7 +1222,7 @@
                 '}',
 
             //Arrows
-            '#clinical-timelines polygon.ct-ongoing-event {' + '    clip-path: url(#1);' + '}',
+            '#clinical-timelines polygon.ct-ongoing-event {' + '}',
             '#clinical-timelines polygon.ct-ongoing-event.ct-highlighted {' +
                 ('    stroke-width: ' + line.attributes['stroke-width'] / 3 + ';') +
                 '}',
@@ -1361,9 +1415,7 @@
                 'text-decoration': 'underline',
                 color: 'blue'
             });
-            link.on('click', function() {
-                navigator.msSaveBlob(CSV, fileName);
-            });
+            navigator.msSaveBlob(CSV, fileName);
         } else {
             // Browsers that support HTML5 download attribute
             if (link.node().download !== undefined) {
@@ -1526,8 +1578,7 @@
             .attr('id', 'ct-ID-details');
 
         //Add button to return from ID timeline to timelines.
-        this.containers.backButton = this.containers.IDdetails
-            .append('div')
+        this.containers.backButton = this.containers.IDdetails.append('div')
             .classed('ct-button', true)
             .attr('id', 'ct-back-button')
             .append('a')
@@ -1633,6 +1684,14 @@
                     this.initial_data.length +
                     ' records have been removed due to missing identifiers or event types.'
             );
+
+        //Check which time scales are present in the data.
+        this.anyDates = this.initial_data.some(function(d) {
+            return d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] !== '';
+        });
+        this.anyDays = this.initial_data.some(function(d) {
+            return d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] !== '';
+        });
     }
 
     //Attach initial, valid data to controls, bypassing controls.init().
@@ -1661,10 +1720,10 @@
                     d[_this.config.endt_col] = d[_this.config.stdt_col];
             }
             if (has_stdy) {
-                if (!/^ *\d+ *$/.test(d[_this.config.stdy_col])) d[_this.config.stdy_col] = '';
+                if (!/^ *-?\d+ *$/.test(d[_this.config.stdy_col])) d[_this.config.stdy_col] = '';
             }
             if (has_endy) {
-                if (!/^ *\d+ *$/.test(d[_this.config.endy_col]))
+                if (!/^ *-?\d+ *$/.test(d[_this.config.endy_col]))
                     d[_this.config.endy_col] = d[_this.config.stdy_col];
             }
 
@@ -1713,68 +1772,76 @@
       Dates
     \-------------------------------------------------------------------------------------------**/
 
-        //full domain
-        this.full_date_range = [
-            d3$1.min(this.initial_data, function(d) {
-                return d3$1.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
-            }),
-            d3$1.max(this.initial_data, function(d) {
-                return d3$1.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
-            })
-        ];
+        if (this.anyDates) {
+            //full domain
+            this.full_date_range = [
+                d3$1.min(this.initial_data, function(d) {
+                    return d3$1.time
+                        .format(_this.config.date_format)
+                        .parse(d[_this.config.stdt_col]);
+                }),
+                d3$1.max(this.initial_data, function(d) {
+                    return d3$1.time
+                        .format(_this.config.date_format)
+                        .parse(d[_this.config.endt_col]);
+                })
+            ];
 
-        //full domain as a string
-        this.full_date_time_range = this.full_date_range
-            .map(function(d) {
-                return d3$1.time.format(_this.config.date_format)(d);
-            })
-            .join(' - ');
+            //full domain as a string
+            this.full_date_time_range = this.full_date_range
+                .map(function(d) {
+                    return d3$1.time.format(_this.config.date_format)(d);
+                })
+                .join(' - ');
 
-        //add full domain to date ranges
-        this.config.date_ranges.push({
-            domain: this.full_date_range,
-            label: 'full'
-        });
+            //add full domain to date ranges
+            this.config.date_ranges.push({
+                domain: this.full_date_range,
+                label: 'full'
+            });
 
-        //add custom domain to date ranges
-        this.config.date_ranges.push({
-            domain: this.full_date_range.slice(),
-            label: 'user input'
-        });
+            //add custom domain to date ranges
+            this.config.date_ranges.push({
+                domain: this.full_date_range.slice(),
+                label: 'user input'
+            });
+        }
 
         /**-------------------------------------------------------------------------------------------\
       Days
     \-------------------------------------------------------------------------------------------**/
 
-        //full domain
-        this.full_day_range = [
-            d3$1.min(this.initial_data, function(d) {
-                return +d[_this.config.stdy_col];
-            }),
-            d3$1.max(this.initial_data, function(d) {
-                return +d[_this.config.endy_col];
-            })
-        ];
+        if (this.anyDays) {
+            //full domain
+            this.full_day_range = [
+                d3$1.min(this.initial_data, function(d) {
+                    return +d[_this.config.stdy_col];
+                }),
+                d3$1.max(this.initial_data, function(d) {
+                    return +d[_this.config.endy_col];
+                })
+            ];
 
-        //full domain as a string
-        this.full_day_time_range = this.full_day_range.join(' - ');
+            //full domain as a string
+            this.full_day_time_range = this.full_day_range.join(' - ');
 
-        //add full domain to day ranges
-        this.config.day_ranges.push({
-            domain: this.full_day_range,
-            label: 'full'
-        });
+            //add full domain to day ranges
+            this.config.day_ranges.push({
+                domain: this.full_day_range,
+                label: 'full'
+            });
 
-        //add custom domain to day ranges
-        this.config.day_ranges.push({
-            domain: this.full_day_range.slice(),
-            label: 'user input'
-        });
+            //add custom domain to day ranges
+            this.config.day_ranges.push({
+                domain: this.full_day_range.slice(),
+                label: 'user input'
+            });
+        }
     }
 
     function defineInitialTimeRanges() {
-        this.date_range = this.config.date_ranges[0].domain.slice();
-        this.day_range = this.config.day_ranges[0].domain.slice();
+        if (this.anyDates) this.date_range = this.config.date_ranges[0].domain.slice();
+        if (this.anyDays) this.day_range = this.config.day_ranges[0].domain.slice();
     }
 
     function syncTimeRanges() {
@@ -1800,20 +1867,7 @@
         this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
             if (input.description !== 'X-axis scale') return true;
             else {
-                var anyDates = _this.initial_data.some(function(d) {
-                        return (
-                            d.hasOwnProperty(_this.config.stdt_col) &&
-                            d[_this.config.stdt_col] !== ''
-                        );
-                    }),
-                    anyDays = _this.initial_data.some(function(d) {
-                        return (
-                            d.hasOwnProperty(_this.config.stdy_col) &&
-                            d[_this.config.stdy_col] !== ''
-                        );
-                    });
-
-                if (!anyDates && !anyDays) {
+                if (!_this.anyDates && !_this.anyDays) {
                     var errorText =
                         'The data either contain neither ' +
                         _this.config.stdt_col +
@@ -1829,7 +1883,7 @@
                         .style('color', 'red')
                         .html(errorText);
                     throw new Error(errorText);
-                } else if (!anyDates && _this.config.time_scale === 'date') {
+                } else if (!_this.anyDates && _this.config.time_scale === 'date') {
                     console.warn(
                         'The data either do not contain a variable named ' +
                             _this.config.stdt_col +
@@ -1841,7 +1895,7 @@
                     syncTimeScaleSettings(_this.config);
                     _this.IDtimeline.config.time_scale = 'day';
                     syncTimeScaleSettings(_this.IDtimeline.config);
-                } else if (!anyDays && _this.config.time_scale === 'day') {
+                } else if (!_this.anyDays && _this.config.time_scale === 'day') {
                     console.warn(
                         'The data either do not contain a variable named ' +
                             _this.config.stdy_col +
@@ -1855,27 +1909,31 @@
                     syncTimeScaleSettings(_this.IDtimeline.config);
                 }
 
-                return anyDates && anyDays;
+                return _this.anyDates && _this.anyDays;
             }
         });
     }
 
     function updateTimeRangeControls() {
-        //Update date time range dropdown.
-        this.controls.config.inputs.find(function(input) {
-            return input.option === 'date_time_range';
-        }).values = this.config.date_ranges.map(function(date_time_range) {
-            return date_time_range.label;
-        });
-        this.config.date_time_range = this.config.date_ranges[0].label;
+        if (this.anyDates) {
+            //Update date time range dropdown.
+            this.controls.config.inputs.find(function(input) {
+                return input.option === 'date_time_range';
+            }).values = this.config.date_ranges.map(function(date_time_range) {
+                return date_time_range.label;
+            });
+            this.config.date_time_range = this.config.date_ranges[0].label;
+        }
 
-        //Update day time range dropdown.
-        this.controls.config.inputs.find(function(input) {
-            return input.option === 'day_time_range';
-        }).values = this.config.day_ranges.map(function(day_time_range) {
-            return day_time_range.label;
-        });
-        this.config.day_time_range = this.config.day_ranges[0].label;
+        if (this.anyDays) {
+            //Update day time range dropdown.
+            this.controls.config.inputs.find(function(input) {
+                return input.option === 'day_time_range';
+            }).values = this.config.day_ranges.map(function(day_time_range) {
+                return day_time_range.label;
+            });
+            this.config.day_time_range = this.config.day_ranges[0].label;
+        }
     }
 
     function checkOtherControls() {
@@ -2043,8 +2101,7 @@
 
     function IDdetails() {
         //Add ID characteristics.
-        this.clinicalTimelines.containers.IDdetails
-            .selectAll('div.characteristic')
+        this.clinicalTimelines.containers.IDdetails.selectAll('div.characteristic')
             .data(this.config.id_characteristics)
             .enter()
             .append('div')
@@ -2101,31 +2158,30 @@
 
         //Define ID data.
         var longIDdata = this.long_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
-            }),
-            wideIDdata = this.wide_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
-            });
+            return di[_this.config.id_col] === _this.selected_id;
+        });
+        var wideIDdata = this.wide_data.filter(function(di) {
+            return di[_this.config.id_col] === _this.selected_id;
+        });
 
         //Draw ID characteristics.
         if (this.config.id_characteristics) {
             var id_characteristics = this.initial_data.filter(function(d) {
                 return d[_this.config.id_col] === _this.selected_id;
             })[0];
-            this.clinicalTimelines.containers.IDdetails
-                .selectAll('.ct-characteristic')
-                .each(function(d) {
+            this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(
+                function(d) {
                     d3$1
                         .select(this)
                         .select('span')
                         .text(id_characteristics[d.value_col]);
-                });
+                }
+            );
         }
 
         //Draw ID timeline.
         this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-        this.clinicalTimelines.containers.IDtimeline
-            .select('div')
+        this.clinicalTimelines.containers.IDtimeline.select('div')
             .selectAll('*')
             .remove();
         webcharts.multiply(
@@ -2137,7 +2193,7 @@
             }),
             this.config.event_col,
             null,
-            clinicalTimelines.test
+            this.clinicalTimelines.test
         );
 
         //Draw ID detail listing.
@@ -2152,7 +2208,7 @@
                     ? _this.currentEventTypes.indexOf(d[_this.config.event_col]) > -1
                     : true;
             }),
-            clinicalTimelines.test
+            this.clinicalTimelines.test
         );
     }
 
@@ -2397,7 +2453,7 @@
                 .classed('ct-label-description', true);
 
         //Add control label and span description nodes.
-        timeRangeLabelDescription.append('span').classed('control-label', true);
+        timeRangeLabelDescription.append('span').classed('wc-control-label', true);
         timeRangeLabelDescription
             .append('span')
             .classed('span-description', true)
@@ -2457,8 +2513,7 @@
             this.draw();
 
             //Hide ID timeline.
-            this.clinicalTimelines.containers.IDtimeline
-                .select('div')
+            this.clinicalTimelines.containers.IDtimeline.select('div')
                 .selectAll('*')
                 .remove();
             this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', true);
@@ -2759,6 +2814,7 @@
                     })
                 )
                 .values()
+                .sort()
                 .map(function(d, i) {
                     var groupingObject = {
                         key: d,
@@ -2791,8 +2847,13 @@
                         var groupingStart = clone(groupingObject),
                             groupingEnd = clone(groupingObject);
 
-                        groupingStart.wc_value = _this.config.x.domain[0];
-                        groupingEnd.wc_value = _this.config.x.domain[0];
+                        if (_this.config.time_scale === 'date') {
+                            groupingStart.wc_value = _this.full_date_range[0];
+                            groupingEnd.wc_value = _this.full_date_range[0];
+                        } else {
+                            groupingStart.wc_value = _this.full_day_range[0];
+                            groupingEnd.wc_value = _this.full_day_range[0];
+                        }
 
                         //Push two start and two end data to raw_data to create space to annotate grouping.
                         var groupingStart1 = clone(groupingStart),
@@ -2821,7 +2882,6 @@
         /**-------------------------------------------------------------------------------------------\
       Sort y-domain by the earliest event of each ID.
     \-------------------------------------------------------------------------------------------**/
-
         if (this.config.y.sort === 'earliest') {
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then earliest event if y-axis is grouped.
@@ -2832,17 +2892,17 @@
                     })
                     .rollup(function(d) {
                         return d3$1.min(d, function(di) {
-                            return _this.config.time_function(di[_this.config.st_col]);
+                            return _this.config.time_function(di.wc_value);
                         });
                     })
                     .entries(this.longDataInsideTimeRange)
                     .sort(function(a, b) {
-                        var aGrouping = a.key.split('|')[0],
-                            bGrouping = b.key.split('|')[0],
-                            earliestEventSort =
-                                a.values > b.values
-                                    ? -2
-                                    : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
+                        var aGrouping = a.key.split('|')[0];
+                        var bGrouping = b.key.split('|')[0];
+                        var earliestEventSort =
+                            a.values > b.values
+                                ? -2
+                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
 
                         return aGrouping > bGrouping
                             ? -1
@@ -2865,6 +2925,7 @@
                 this.config.y.domain = nestedData.map(function(d) {
                     return d.key.split('|')[1];
                 });
+                console.log(this.config.y.domain);
             } else {
                 //Otherwise sort IDs by earliest event.
                 this.config.y.domain = d3$1
@@ -3207,7 +3268,8 @@
             d3$1
                 .select(this)
                 .select('text')
-                .attr('dy', context.y.rangeBand() / 3);
+                .attr('dx', 4)
+                .attr('dy', context.y.rangeBand() / 4);
 
             //Insert a rectangle with which to visually group each ID's events.
             d3$1
@@ -3534,8 +3596,7 @@
                     x2: x2,
                     y1: y,
                     y2: y,
-                    stroke: color,
-                    'clip-path': 'url(#' + context.id + ')'
+                    stroke: color
                 });
         });
 
@@ -3605,8 +3666,7 @@
                                   ),
                             stroke: context.colorScale(
                                 endpoint.values.raw[0][context.config.event_col]
-                            ),
-                            'clip-path': 'url(#' + context.id + ')'
+                            )
                         });
                 });
         }
@@ -4059,6 +4119,16 @@
             });
     }
 
+    function setClipPath() {
+        var _this = this;
+
+        this.marks.forEach(function(mark) {
+            mark.groups
+                .selectAll('circle,line,path,polygon,rect,text')
+                .attr('clip-path', 'url(#' + _this.id + ')');
+        });
+    }
+
     function onResize() {
         //Add filter functionality to legend.
         legendFilter.call(this);
@@ -4101,6 +4171,9 @@
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
+
+        //Set clip-path of all svg elements to the ID of the current chart.
+        setClipPath.call(this);
     }
 
     function onDestroy() {}
@@ -4235,6 +4308,9 @@
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
+
+        //Set clip-path of all svg elements to the ID of the current chart.
+        setClipPath.call(this);
     }
 
     function onDestroy$1() {}
@@ -4297,7 +4373,7 @@
     //setup functions
     //components
     //initialization method
-    function clinicalTimelines$1() {
+    function clinicalTimelines() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         var dom = arguments[2];
@@ -4340,5 +4416,5 @@
         return clinicalTimelines;
     }
 
-    return clinicalTimelines$1;
+    return clinicalTimelines;
 });

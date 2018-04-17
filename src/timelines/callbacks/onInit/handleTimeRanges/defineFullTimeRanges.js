@@ -5,55 +5,59 @@ export default function defineFullTimeRanges() {
       Dates
     \-------------------------------------------------------------------------------------------**/
 
-    //full domain
-    this.full_date_range = [
-        min(this.initial_data, d =>
-            time.format(this.config.date_format).parse(d[this.config.stdt_col])
-        ),
-        max(this.initial_data, d =>
-            time.format(this.config.date_format).parse(d[this.config.endt_col])
-        )
-    ];
+    if (this.anyDates) {
+        //full domain
+        this.full_date_range = [
+            min(this.initial_data, d =>
+                time.format(this.config.date_format).parse(d[this.config.stdt_col])
+            ),
+            max(this.initial_data, d =>
+                time.format(this.config.date_format).parse(d[this.config.endt_col])
+            )
+        ];
 
-    //full domain as a string
-    this.full_date_time_range = this.full_date_range
-        .map(d => time.format(this.config.date_format)(d))
-        .join(' - ');
+        //full domain as a string
+        this.full_date_time_range = this.full_date_range
+            .map(d => time.format(this.config.date_format)(d))
+            .join(' - ');
 
-    //add full domain to date ranges
-    this.config.date_ranges.push({
-        domain: this.full_date_range,
-        label: 'full'
-    });
+        //add full domain to date ranges
+        this.config.date_ranges.push({
+            domain: this.full_date_range,
+            label: 'full'
+        });
 
-    //add custom domain to date ranges
-    this.config.date_ranges.push({
-        domain: this.full_date_range.slice(),
-        label: 'user input'
-    });
+        //add custom domain to date ranges
+        this.config.date_ranges.push({
+            domain: this.full_date_range.slice(),
+            label: 'user input'
+        });
+    }
 
     /**-------------------------------------------------------------------------------------------\
       Days
     \-------------------------------------------------------------------------------------------**/
 
-    //full domain
-    this.full_day_range = [
-        min(this.initial_data, d => +d[this.config.stdy_col]),
-        max(this.initial_data, d => +d[this.config.endy_col])
-    ];
+    if (this.anyDays) {
+        //full domain
+        this.full_day_range = [
+            min(this.initial_data, d => +d[this.config.stdy_col]),
+            max(this.initial_data, d => +d[this.config.endy_col])
+        ];
 
-    //full domain as a string
-    this.full_day_time_range = this.full_day_range.join(' - ');
+        //full domain as a string
+        this.full_day_time_range = this.full_day_range.join(' - ');
 
-    //add full domain to day ranges
-    this.config.day_ranges.push({
-        domain: this.full_day_range,
-        label: 'full'
-    });
+        //add full domain to day ranges
+        this.config.day_ranges.push({
+            domain: this.full_day_range,
+            label: 'full'
+        });
 
-    //add custom domain to day ranges
-    this.config.day_ranges.push({
-        domain: this.full_day_range.slice(),
-        label: 'user input'
-    });
+        //add custom domain to day ranges
+        this.config.day_ranges.push({
+            domain: this.full_day_range.slice(),
+            label: 'user input'
+        });
+    }
 }

@@ -4,21 +4,18 @@ export default function sortYdomain() {
     /**-------------------------------------------------------------------------------------------\
       Sort y-domain by the earliest event of each ID.
     \-------------------------------------------------------------------------------------------**/
-
     if (this.config.y.sort === 'earliest') {
         if (this.config.y.grouping) {
             //Sort IDs by grouping then earliest event if y-axis is grouped.
             const nestedData = nest()
                 .key(d => d[this.config.y.grouping] + '|' + d[this.config.id_col])
-                .rollup(d => min(d, di => this.config.time_function(di[this.config.st_col])))
+                .rollup(d => min(d, di => this.config.time_function(di.wc_value)))
                 .entries(this.longDataInsideTimeRange)
                 .sort((a, b) => {
-                    const aGrouping = a.key.split('|')[0],
-                        bGrouping = b.key.split('|')[0],
-                        earliestEventSort =
-                            a.values > b.values
-                                ? -2
-                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
+                    const aGrouping = a.key.split('|')[0];
+                    const bGrouping = b.key.split('|')[0];
+                    const earliestEventSort =
+                        a.values > b.values ? -2 : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
 
                     return aGrouping > bGrouping
                         ? -1

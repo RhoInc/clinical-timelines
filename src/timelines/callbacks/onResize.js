@@ -13,6 +13,7 @@ import addSymbolsToLegend from './onResize/addSymbolsToLegend';
 import offsetBottomXaxis from './onResize/offsetBottomXaxis';
 import drawReferenceLines from './onResize/drawReferenceLines';
 import IEsucks from './onResize/IEsucks';
+import setClipPath from './onResize/setClipPath';
 
 export default function onResize() {
     //Add filter functionality to legend.
@@ -62,4 +63,7 @@ export default function onResize() {
 
     //Replace newline characters with html line break entities to cater to Internet Explorer.
     IEsucks.call(this);
+
+    //Set clip-path of all svg elements to the ID of the current chart.
+    setClipPath.call(this);
 }

@@ -49,8 +49,7 @@ export default function highlightMarks() {
                 x2: x2,
                 y1: y,
                 y2: y,
-                stroke: color,
-                'clip-path': `url(#${context.id})`
+                stroke: color
             });
     });
 

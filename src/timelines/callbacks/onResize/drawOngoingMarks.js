@@ -35,10 +35,7 @@ export default function drawOngoingMarks() {
                         fill: highlight
                             ? context.config.event_highlight_color
                             : context.colorScale(endpoint.values.raw[0][context.config.event_col]),
-                        stroke: context.colorScale(
-                            endpoint.values.raw[0][context.config.event_col]
-                        ),
-                        'clip-path': `url(#${context.id})`
+                        stroke: context.colorScale(endpoint.values.raw[0][context.config.event_col])
                     });
             });
     }

@@ -12,27 +12,26 @@ export default function drawIDtimeline() {
     this.wrap.select('svg.wc-svg').classed('ct-hidden', true);
 
     //Define ID data.
-    const longIDdata = this.long_data.filter(di => di[this.config.id_col] === this.selected_id),
-        wideIDdata = this.wide_data.filter(di => di[this.config.id_col] === this.selected_id);
+    const longIDdata = this.long_data.filter(di => di[this.config.id_col] === this.selected_id);
+    const wideIDdata = this.wide_data.filter(di => di[this.config.id_col] === this.selected_id);
 
     //Draw ID characteristics.
     if (this.config.id_characteristics) {
         const id_characteristics = this.initial_data.filter(
             d => d[this.config.id_col] === this.selected_id
         )[0];
-        this.clinicalTimelines.containers.IDdetails
-            .selectAll('.ct-characteristic')
-            .each(function(d) {
-                select(this)
-                    .select('span')
-                    .text(id_characteristics[d.value_col]);
-            });
+        this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(function(
+            d
+        ) {
+            select(this)
+                .select('span')
+                .text(id_characteristics[d.value_col]);
+        });
     }
 
     //Draw ID timeline.
     this.clinicalTimelines.containers.IDtimeline.classed('ct-hidden', false);
-    this.clinicalTimelines.containers.IDtimeline
-        .select('div')
+    this.clinicalTimelines.containers.IDtimeline.select('div')
         .selectAll('*')
         .remove();
     multiply(
@@ -45,7 +44,7 @@ export default function drawIDtimeline() {
         ),
         this.config.event_col,
         this.config.color_dom,
-        clinicalTimelines.test
+        this.clinicalTimelines.test
     );
 
     //Draw ID detail listing.
@@ -61,6 +60,6 @@ export default function drawIDtimeline() {
                     ? this.currentEventTypes.indexOf(d[this.config.event_col]) > -1
                     : true
         ),
-        clinicalTimelines.test
+        this.clinicalTimelines.test
     );
 }

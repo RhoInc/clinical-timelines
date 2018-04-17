@@ -3,6 +3,7 @@ import drawTimeRange from './onResize/drawTimeRange';
 import drawReferenceLines from '../../timelines/callbacks/onResize/drawReferenceLines';
 import highlightMarks from '../../timelines/callbacks/onResize/highlightMarks';
 import IEsucks from '../../timelines/callbacks/onResize/IEsucks';
+import setClipPath from '../../timelines/callbacks/onResize/setClipPath';
 
 export default function onResize() {
     //Hide legend.
@@ -32,4 +33,7 @@ export default function onResize() {
 
     //Replace newline characters with html line break entities to cater to Internet Explorer.
     IEsucks.call(this);
+
+    //Set clip-path of all svg elements to the ID of the current chart.
+    setClipPath.call(this);
 }

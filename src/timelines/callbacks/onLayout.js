@@ -2,7 +2,7 @@ import IDdetails from './onLayout/IDdetails';
 import controlGroupLayout from './onLayout/controlGroupLayout';
 import augmentOtherControls from './onLayout/augmentOtherControls';
 import hideTimeRangeControl from './onLayout/hideTimeRangeControl';
-import addTimeRangeControls from './onlayout/addTimeRangeControls';
+import addTimeRangeControls from './onLayout/addTimeRangeControls';
 import augmentFilters from './onLayout/augmentFilters';
 import topXaxis from './onLayout/topXaxis';
 

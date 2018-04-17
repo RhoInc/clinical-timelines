@@ -34,7 +34,6 @@ export default function sortYdomain() {
 
             //Set y-domain.
             this.config.y.domain = nestedData.map(d => d.key.split('|')[1]);
-            console.log(this.config.y.domain);
         } else {
             //Otherwise sort IDs by earliest event.
             this.config.y.domain = nest()

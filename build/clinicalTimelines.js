@@ -758,7 +758,7 @@
             settings.time_function = function(dt) {
                 var parsed = void 0;
                 try {
-                    parsed = settings.x_parseFormat.parse(dt);
+                    parsed = settings.x_parseFormat.parse(dt) || new Date(dt);
                 } catch (error) {
                     parsed = new Date(dt);
                 }
@@ -2930,7 +2930,6 @@
                 this.config.y.domain = nestedData.map(function(d) {
                     return d.key.split('|')[1];
                 });
-                console.log(this.config.y.domain);
             } else {
                 //Otherwise sort IDs by earliest event.
                 this.config.y.domain = d3$1

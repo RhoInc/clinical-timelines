@@ -82,6 +82,8 @@ export default function defineStyles() {
                 '    float: left;' +
                 '    font-size: 110%;' +
                 '    font-weight: bold;' +
+                '    margin-bottom: 10px;' +
+                '    margin-right: 10px;' +
                 '}',
             '#clinical-timelines #ct-left-column .ct-details .ct-button a {' +
                 '    color: blue;' +

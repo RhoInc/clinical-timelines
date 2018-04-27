@@ -12,7 +12,7 @@ Users can drill down to individual timelines which pulls up a set of small multi
 
 ![alt tag](https://user-images.githubusercontent.com/31038805/32617032-e90cc4aa-c541-11e7-8ec8-c8867de51c94.PNG)
 
-[Click here](https://rhoinc.github.io/viz-library/examples/0022-clinical-timelines/example.html) to see a demo with clinical trial data as the input.
+[Click here](https://rhoinc.github.io/clinical-timelines/build/test-page/) to see a demo with clinical trial data as the input.
 
 ## Usage
 
@@ -44,4 +44,3 @@ More information is available in the project's [wiki](https://github.com/RhoInc/
 * [Data Guidelines](https://github.com/RhoInc/clinical-timelines/wiki/Data-Guidelines)
 * [API Reference](https://github.com/RhoInc/clinical-timelines/wiki/API)
 * [Release Notes](https://github.com/RhoInc/clinical-timelines/releases)
-* [Examples](https://rhoinc.github.io/viz-library/)

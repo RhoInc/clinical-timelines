@@ -19,8 +19,15 @@ export default function syncTimeScaleSettings(settings) {
 
         settings.x_parseFormat = time.format(settings.date_format);
         settings.x_displayFormat = time.format(settings.date_display_format);
-        settings.time_function = dt =>
-            settings.x_parseFormat.parse(dt) ? settings.x_parseFormat.parse(dt) : new Date(dt);
+        settings.time_function = dt => {
+            let parsed;
+            try {
+                parsed = settings.x_parseFormat.parse(dt);
+            } catch (error) {
+                parsed = new Date(dt);
+            }
+            return parsed;
+        };
     } else if (settings.time_scale === 'day') {
         settings.st_col = settings.stdy_col;
         settings.en_col = settings.endy_col;

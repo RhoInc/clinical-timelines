@@ -2,8 +2,8 @@
     typeof exports === 'object' && typeof module !== 'undefined'
         ? (module.exports = factory(require('d3'), require('webcharts')))
         : typeof define === 'function' && define.amd
-            ? define(['d3', 'webcharts'], factory)
-            : (global.clinicalTimelines = factory(global.d3, global.webCharts));
+          ? define(['d3', 'webcharts'], factory)
+          : (global.clinicalTimelines = factory(global.d3, global.webCharts));
 })(this, function(d3, webcharts) {
     'use strict';
 
@@ -626,9 +626,13 @@
             settings.x_parseFormat = d3.time.format(settings.date_format);
             settings.x_displayFormat = d3.time.format(settings.date_display_format);
             settings.time_function = function(dt) {
-                return settings.x_parseFormat.parse(dt)
-                    ? settings.x_parseFormat.parse(dt)
-                    : new Date(dt);
+                var parsed = void 0;
+                try {
+                    parsed = settings.x_parseFormat.parse(dt);
+                } catch (error) {
+                    parsed = new Date(dt);
+                }
+                return parsed;
             };
         } else if (settings.time_scale === 'day') {
             settings.st_col = settings.stdy_col;
@@ -1491,10 +1495,10 @@
                     d[_this.config.endt_col] = d[_this.config.stdt_col];
             }
             if (has_stdy) {
-                if (!/^ *\d+ *$/.test(d[_this.config.stdy_col])) d[_this.config.stdy_col] = '';
+                if (!/^ *-?\d+ *$/.test(d[_this.config.stdy_col])) d[_this.config.stdy_col] = '';
             }
             if (has_endy) {
-                if (!/^ *\d+ *$/.test(d[_this.config.endy_col]))
+                if (!/^ *-?\d+ *$/.test(d[_this.config.endy_col]))
                     d[_this.config.endy_col] = d[_this.config.stdy_col];
             }
 
@@ -1585,48 +1589,54 @@
         var _this = this;
 
         //Date range
-        this.full_date_range = [
-            d3.min(this.initial_data, function(d) {
-                return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
-            }),
-            d3.max(this.initial_data, function(d) {
-                return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
-            })
-        ];
-        this.date_range =
-            this.config.date_range instanceof Array &&
-            this.config.date_range.length === 2 &&
-            this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
-            this.config.date_range.every(function(date) {
-                return date instanceof Date || d3.time.format(_this.config.date_format).parse(date);
-            })
-                ? this.config.date_range.map(function(date) {
-                      return date instanceof Date
-                          ? date
-                          : d3.time.format(_this.config.date_format).parse(date);
-                  })
-                : this.full_date_range;
+        if (this.anyDates) {
+            this.full_date_range = [
+                d3.min(this.initial_data, function(d) {
+                    return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
+                }),
+                d3.max(this.initial_data, function(d) {
+                    return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
+                })
+            ];
+            this.date_range =
+                this.config.date_range instanceof Array &&
+                this.config.date_range.length === 2 &&
+                this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
+                this.config.date_range.every(function(date) {
+                    return (
+                        date instanceof Date || d3.time.format(_this.config.date_format).parse(date)
+                    );
+                })
+                    ? this.config.date_range.map(function(date) {
+                          return date instanceof Date
+                              ? date
+                              : d3.time.format(_this.config.date_format).parse(date);
+                      })
+                    : this.full_date_range;
+        }
 
         //Day range
-        this.full_day_range = [
-            d3.min(this.initial_data, function(d) {
-                return +d[_this.config.stdy_col];
-            }),
-            d3.max(this.initial_data, function(d) {
-                return +d[_this.config.endy_col];
-            })
-        ];
-        this.day_range =
-            this.config.day_range instanceof Array &&
-            this.config.day_range.length === 2 &&
-            this.config.day_range[0].toString() !== this.config.day_range[1].toString() &&
-            this.config.day_range.every(function(day) {
-                return Number.isInteger(+day);
-            })
-                ? this.config.day_range.map(function(day) {
-                      return +day;
-                  })
-                : this.full_day_range;
+        if (this.anyDays) {
+            this.full_day_range = [
+                d3.min(this.initial_data, function(d) {
+                    return +d[_this.config.stdy_col];
+                }),
+                d3.max(this.initial_data, function(d) {
+                    return +d[_this.config.endy_col];
+                })
+            ];
+            this.day_range =
+                this.config.day_range instanceof Array &&
+                this.config.day_range.length === 2 &&
+                this.config.day_range[0].toString() !== this.config.day_range[1].toString() &&
+                this.config.day_range.every(function(day) {
+                    return Number.isInteger(+day);
+                })
+                    ? this.config.day_range.map(function(day) {
+                          return +day;
+                      })
+                    : this.full_day_range;
+        }
     }
 
     function handleEventTypes() {
@@ -1660,20 +1670,18 @@
         this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
             if (input.description !== 'X-axis scale') return true;
             else {
-                var anyDates = _this.initial_data.some(function(d) {
-                        return (
-                            d.hasOwnProperty(_this.config.stdt_col) &&
-                            d[_this.config.stdt_col] !== ''
-                        );
-                    }),
-                    anyDays = _this.initial_data.some(function(d) {
-                        return (
-                            d.hasOwnProperty(_this.config.stdy_col) &&
-                            d[_this.config.stdy_col] !== ''
-                        );
-                    });
+                _this.anyDates = _this.initial_data.some(function(d) {
+                    return (
+                        d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] !== ''
+                    );
+                });
+                _this.anyDays = _this.initial_data.some(function(d) {
+                    return (
+                        d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] !== ''
+                    );
+                });
 
-                if (!anyDates && !anyDays) {
+                if (!_this.anyDates && !_this.anyDays) {
                     var errorText =
                         'The data either contain neither ' +
                         _this.config.stdt_col +
@@ -1689,7 +1697,7 @@
                         .style('color', 'red')
                         .html(errorText);
                     throw new Error(errorText);
-                } else if (!anyDates && _this.config.time_scale === 'date') {
+                } else if (!_this.anyDates && _this.config.time_scale === 'date') {
                     console.warn(
                         'The data either do not contain a variable named ' +
                             _this.config.stdt_col +
@@ -1701,7 +1709,7 @@
                     syncTimeScaleSettings(_this.config);
                     _this.IDtimeline.config.time_scale = 'day';
                     syncTimeScaleSettings(_this.IDtimeline.config);
-                } else if (!anyDays && _this.config.time_scale === 'day') {
+                } else if (!_this.anyDays && _this.config.time_scale === 'day') {
                     console.warn(
                         'The data either do not contain a variable named ' +
                             _this.config.stdy_col +
@@ -1715,7 +1723,7 @@
                     syncTimeScaleSettings(_this.IDtimeline.config);
                 }
 
-                return anyDates && anyDays;
+                return _this.anyDates && _this.anyDays;
             }
         });
     }
@@ -1908,11 +1916,11 @@
 
         //Define ID data.
         var longIDdata = this.long_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
-            }),
-            wideIDdata = this.wide_data.filter(function(di) {
-                return di[_this.config.id_col] === _this.selected_id;
-            });
+            return di[_this.config.id_col] === _this.selected_id;
+        });
+        var wideIDdata = this.wide_data.filter(function(di) {
+            return di[_this.config.id_col] === _this.selected_id;
+        });
 
         //Draw ID characteristics.
         if (this.config.id_characteristics) {
@@ -1943,7 +1951,7 @@
             }),
             this.config.event_col,
             null,
-            clinicalTimelines.test
+            this.clinicalTimelines.test
         );
 
         //Draw ID detail listing.
@@ -1958,7 +1966,7 @@
                     ? _this.currentEventTypes.indexOf(d[_this.config.event_col]) > -1
                     : true;
             }),
-            clinicalTimelines.test
+            this.clinicalTimelines.test
         );
     }
 
@@ -2483,6 +2491,7 @@
                     })
                 )
                 .values()
+                .sort()
                 .map(function(d, i) {
                     var groupingObject = {
                         key: d,
@@ -2545,7 +2554,6 @@
         /**-------------------------------------------------------------------------------------------\
       Sort y-domain by the earliest event of each ID.
     \-------------------------------------------------------------------------------------------**/
-
         if (this.config.y.sort === 'earliest') {
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then earliest event if y-axis is grouped.
@@ -2556,17 +2564,17 @@
                     })
                     .rollup(function(d) {
                         return d3.min(d, function(di) {
-                            return _this.config.time_function(di[_this.config.st_col]);
+                            return _this.config.time_function(di.wc_value);
                         });
                     })
                     .entries(this.longDataInsideTimeRange)
                     .sort(function(a, b) {
-                        var aGrouping = a.key.split('|')[0],
-                            bGrouping = b.key.split('|')[0],
-                            earliestEventSort =
-                                a.values > b.values
-                                    ? -2
-                                    : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
+                        var aGrouping = a.key.split('|')[0];
+                        var bGrouping = b.key.split('|')[0];
+                        var earliestEventSort =
+                            a.values > b.values
+                                ? -2
+                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
 
                         return aGrouping > bGrouping
                             ? -1
@@ -2931,7 +2939,8 @@
             d3
                 .select(this)
                 .select('text')
-                .attr('dy', context.y.rangeBand() / 3);
+                .attr('dx', 4)
+                .attr('dy', context.y.rangeBand() / 4);
 
             //Insert a rectangle with which to visually group each ID's events.
             d3
@@ -3877,7 +3886,7 @@
     //setup functions
     //components
     //initialization method
-    function clinicalTimelines$1() {
+    function clinicalTimelines() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         var dom = arguments[2];
@@ -3920,5 +3929,5 @@
         return clinicalTimelines;
     }
 
-    return clinicalTimelines$1;
+    return clinicalTimelines;
 });

@@ -12,8 +12,8 @@ export default function drawIDtimeline() {
     this.wrap.select('svg.wc-svg').classed('ct-hidden', true);
 
     //Define ID data.
-    const longIDdata = this.long_data.filter(di => di[this.config.id_col] === this.selected_id),
-        wideIDdata = this.wide_data.filter(di => di[this.config.id_col] === this.selected_id);
+    const longIDdata = this.long_data.filter(di => di[this.config.id_col] === this.selected_id);
+    const wideIDdata = this.wide_data.filter(di => di[this.config.id_col] === this.selected_id);
 
     //Draw ID characteristics.
     if (this.config.id_characteristics) {
@@ -44,7 +44,7 @@ export default function drawIDtimeline() {
         ),
         this.config.event_col,
         null,
-        clinicalTimelines.test
+        this.clinicalTimelines.test
     );
 
     //Draw ID detail listing.
@@ -60,6 +60,6 @@ export default function drawIDtimeline() {
                     ? this.currentEventTypes.indexOf(d[this.config.event_col]) > -1
                     : true
         ),
-        clinicalTimelines.test
+        this.clinicalTimelines.test
     );
 }

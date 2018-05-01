@@ -585,6 +585,8 @@
             settings.reference_lines = settings.reference_lines
                 .map(function(reference_line) {
                     var referenceLineObject = {};
+                    if (reference_line instanceof Object)
+                        Object.assign(referenceLineObject, reference_line);
 
                     //either an object or not
                     referenceLineObject.timepoint =
@@ -4325,7 +4327,9 @@
         var context = this;
 
         //Update reference table header.
-        reference_line.tableHeader.text('Events Overlapping ' + reference_line.label);
+        reference_line.tableHeader.text(
+            (reference_line.event_category || 'Events') + ' Overlapping ' + reference_line.label
+        );
 
         //Filter data on events that overlap reference line.
         reference_line.wide_data = this.filtered_wide_data.filter(function(d) {
@@ -4333,7 +4337,10 @@
                 _this.config.time_function(d[_this.config.st_col]) <=
                     _this.config.time_function(reference_line.timepoint) &&
                 _this.config.time_function(d[_this.config.en_col]) >=
-                    _this.config.time_function(reference_line.timepoint)
+                    _this.config.time_function(reference_line.timepoint) &&
+                (reference_line.event_types
+                    ? reference_line.event_types.indexOf(d[_this.config.event_col]) > -1
+                    : true)
             );
         });
 

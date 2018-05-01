@@ -4,7 +4,9 @@ export default function updateTable(reference_line) {
     const context = this;
 
     //Update reference table header.
-    reference_line.tableHeader.text('Events Overlapping ' + reference_line.label);
+    reference_line.tableHeader.text(
+        (reference_line.event_category || 'Events') + ' Overlapping ' + reference_line.label
+    );
 
     //Filter data on events that overlap reference line.
     reference_line.wide_data = this.filtered_wide_data.filter(
@@ -12,7 +14,10 @@ export default function updateTable(reference_line) {
             this.config.time_function(d[this.config.st_col]) <=
                 this.config.time_function(reference_line.timepoint) &&
             this.config.time_function(d[this.config.en_col]) >=
-                this.config.time_function(reference_line.timepoint)
+                this.config.time_function(reference_line.timepoint) &&
+            (reference_line.event_types
+                ? reference_line.event_types.indexOf(d[this.config.event_col]) > -1
+                : true)
     );
 
     //Nest data by grouping and event type.

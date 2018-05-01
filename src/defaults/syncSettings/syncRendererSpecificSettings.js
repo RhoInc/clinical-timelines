@@ -172,6 +172,8 @@ export default function syncRendererSpecificSettings(settings) {
         settings.reference_lines = settings.reference_lines
             .map(reference_line => {
                 const referenceLineObject = {};
+                if (reference_line instanceof Object)
+                    Object.assign(referenceLineObject, reference_line);
 
                 //either an object or not
                 referenceLineObject.timepoint =

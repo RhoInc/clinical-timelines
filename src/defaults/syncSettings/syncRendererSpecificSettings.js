@@ -34,8 +34,9 @@ export default function syncRendererSpecificSettings(settings) {
 
     //event_symbols
     if (settings.event_symbols instanceof Array)
-        settings.event_symbols = settings.event_symbols
-            .filter(event_symbol => ['square', 'diamond', 'triangle'].indexOf(event_symbol.symbol) > -1);
+        settings.event_symbols = settings.event_symbols.filter(
+            event_symbol => ['square', 'diamond', 'triangle'].indexOf(event_symbol.symbol) > -1
+        );
     if (!(settings.event_symbols instanceof Array && settings.event_symbols.length))
         delete settings.event_symbols;
 

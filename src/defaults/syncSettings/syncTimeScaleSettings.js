@@ -17,7 +17,7 @@ export default function syncTimeScaleSettings(settings) {
         settings.time_function = dt => {
             let parsed;
             try {
-                parsed = settings.x_parseFormat.parse(dt);
+                parsed = settings.x_parseFormat.parse(dt) || new Date(dt);
             } catch (error) {
                 parsed = new Date(dt);
             }

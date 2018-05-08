@@ -37,13 +37,13 @@ export const rendererSpecificSettings = {
         day_ranges: null,
 
   //Miscellaneous settings
-    mark_thickness: 6,
-    reference_lines: null,
-    offset_col: null,
     seq_col: 'SEQ',
-    tooltip_col: 'TOOLTIP',
     ongo_col: 'ONGO',
     ongo_val: 'Y',
+    tooltip_col: 'TOOLTIP',
+    offset_col: null,
+    reference_lines: null,
+    mark_thickness: 6,
     transpose_data: false,
 
   //Listing settings

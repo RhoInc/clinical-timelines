@@ -5,7 +5,7 @@ export default function controlGroupLayout() {
 
     this.controls.wrap.selectAll('.control-group').each(function(d) {
         const controlGroup = select(this),
-            label = controlGroup.select('.wc-control-label'),
+            label = controlGroup.selectAll('.wc-control-label, .control-label'),
             description = controlGroup.select('.span-description'),
             container = controlGroup.append('div').classed('ct-label-description', true);
 

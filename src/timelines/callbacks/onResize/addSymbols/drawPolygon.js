@@ -7,8 +7,8 @@ export default function drawPolygon(marks, event_symbol) {
         const g = d3.select(this);
 
         //clear out g
-        g.select('rect.ct-custom-mark').remove();
-        g.select('circle.wc-data-mark').classed('ct-hidden', true);
+        g.select('circle').classed('ct-hidden', true);
+        g.select('polygon.ct-custom-mark').remove();
 
         //define vertices
         let vertices;
@@ -30,26 +30,26 @@ export default function drawPolygon(marks, event_symbol) {
             if (event_symbol.direction === 'right')
                 vertices = [
                     [d.symbolCoordinates.x1, d.symbolCoordinates.y1],
-                    [d.symbolCoordinates.x2, d.symbolCoordinates.y3],
-                    [d.symbolCoordinates.x3, d.symbolCoordinates.y1]
+                    [d.symbolCoordinates.x3, d.symbolCoordinates.y2],
+                    [d.symbolCoordinates.x1, d.symbolCoordinates.y3]
                 ];
             else if (event_symbol.direction === 'down')
                 vertices = [
                     [d.symbolCoordinates.x1, d.symbolCoordinates.y1],
-                    [d.symbolCoordinates.x1, d.symbolCoordinates.y3],
-                    [d.symbolCoordinates.x3, d.symbolCoordinates.y2]
+                    [d.symbolCoordinates.x3, d.symbolCoordinates.y1],
+                    [d.symbolCoordinates.x2, d.symbolCoordinates.y3]
                 ];
             else if (event_symbol.direction === 'left')
                 vertices = [
-                    [d.symbolCoordinates.x1, d.symbolCoordinates.y3],
-                    [d.symbolCoordinates.x3, d.symbolCoordinates.y3],
-                    [d.symbolCoordinates.x2, d.symbolCoordinates.y1]
+                    [d.symbolCoordinates.x3, d.symbolCoordinates.y1],
+                    [d.symbolCoordinates.x1, d.symbolCoordinates.y2],
+                    [d.symbolCoordinates.x3, d.symbolCoordinates.y3]
                 ];
             else
                 vertices = [
-                    [d.symbolCoordinates.x1, d.symbolCoordinates.y2],
+                    [d.symbolCoordinates.x2, d.symbolCoordinates.y1],
                     [d.symbolCoordinates.x3, d.symbolCoordinates.y3],
-                    [d.symbolCoordinates.x3, d.symbolCoordinates.y1]
+                    [d.symbolCoordinates.x1, d.symbolCoordinates.y3]
                 ];
         }
 
@@ -59,8 +59,8 @@ export default function drawPolygon(marks, event_symbol) {
             .classed('ct-custom-mark', true)
             .attr({
                 points: vertices.map(vertex => vertex.join(',')).join(' '),
-                fill: context.colorScale(d.values.raw[0][context.config.event_col]),
-                'clip-path': `url(#${context.id})`
+                fill: d.color,
+                'clip-path': d.key && d.values ? `url(#${context.id})` : null
             });
     });
 }

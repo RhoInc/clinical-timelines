@@ -3,7 +3,11 @@ import { nest, select, time, min, max } from 'd3';
 export default function offsetLines(mark, markData) {
     const context = this;
 
-    if (this.config.offset_col && this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
+    if (
+        this.config.offset_col &&
+        this.raw_data.length &&
+        this.raw_data[0].hasOwnProperty(this.config.offset_col)
+    ) {
         this.svg.selectAll('g.line').each(function(d) {
             select(this).attr(
                 'transform',

@@ -1,14 +1,13 @@
 import drawPolygon from './addSymbols/drawPolygon';
 
 export default function addSymbols() {
+    this.svg.selectAll('.ct-custom-mark').remove();
     if (this.config.event_symbols && this.config.event_symbols.length) {
-        this.svg.selectAll('.ct-custom-mark').remove();
         this.config.event_symbols.forEach(event_symbol => {
             const marks = this.svg
                 .selectAll('g.point')
                 .filter(d => {
                     const event = d.values.raw[0][this.config.event_col];
-                    //return event_symbol.event === event || event_symbol.events.indexOf(event) > -1;
                     return (
                         (event_symbol.event === event || event_symbol.events.indexOf(event) > -1) &&
                         this.x_dom[0] <= d.total &&
@@ -27,6 +26,7 @@ export default function addSymbols() {
                         y2: y,
                         y3: y + this.config.mark_thickness * sizeFactor / 2
                     };
+                    d.color = this.colorScale(d.values.raw[0][this.config.event_col]);
                 });
 
             drawPolygon.call(this, marks, event_symbol);

@@ -145,6 +145,31 @@
                 "type": "string"
             }
         },
+        "date_ranges": {
+            "title": "Date Ranges",
+            "description": "start and stop date ranges which populate the time range dropdown",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "title": "Date Range",
+                        "description": "start and stop dates with which to define the x-axis domain and which match settings.date_format",
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "label": {
+                        "title": "Date Range Label",
+                        "description": "a description of the date range",
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "date_format": {
             "title": "Input Date Format",
             "description": "date format of start and stop date variables",
@@ -177,6 +202,31 @@
             "maxItems": 2,
             "items": {
                 "type": "number"
+            }
+        },
+        "day_ranges": {
+            "title": "Day Ranges",
+            "description": "start and stop day ranges which populate the time range dropdown",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "title": "Day Range",
+                        "description": "start and stop days with which to define the x-axis domain",
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "type": "number"
+                        }
+                    },
+                    "label": {
+                        "title": "Day Range Label",
+                        "description": "a description of the day range",
+                        "type": "string"
+                    }
+                }
             }
         },
         "seq_col": {
@@ -226,6 +276,12 @@
             "description": "by default data are exported as one record per event; this option transposes the data so each even type has two columns: start and end",
             "type": "boolean",
             "default": false
+        },
+        "mark_thickness": {
+            "title": "Mark Thiccness",
+            "description": "a number that controls the the stroke width of lines and the radius of circles",
+            "type": "number",
+            "default": 6
         },
         "details": {
             "title": "Details Listing",

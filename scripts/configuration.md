@@ -182,6 +182,29 @@ start and stop dates with which to define the x-axis domain and which match sett
 
 
 
+## settings.date_ranges
+`array`
+
+start and stop date ranges which populate the time range dropdown
+
+**default:** none
+
+### settings.date_ranges[].domain
+`array`
+
+start and stop dates with which to define the x-axis domain and which match settings.date_format
+
+**default:** none
+
+### settings.date_ranges[].label
+`string`
+
+a description of the date range
+
+**default:** none
+
+
+
 ## settings.date_format
 `string`
 
@@ -222,6 +245,29 @@ end day variable name
 `array`
 
 start and stop days with which to define the x-axis domain
+
+**default:** none
+
+
+
+## settings.day_ranges
+`array`
+
+start and stop day ranges which populate the time range dropdown
+
+**default:** none
+
+### settings.day_ranges[].domain
+`array`
+
+start and stop days with which to define the x-axis domain
+
+**default:** none
+
+### settings.day_ranges[].label
+`string`
+
+a description of the day range
 
 **default:** none
 
@@ -292,6 +338,15 @@ undefined
 by default data are exported as one record per event; this option transposes the data so each even type has two columns: start and end
 
 **default:** `false`
+
+
+
+## settings.mark_thickness
+`number`
+
+a number that controls the the stroke width of lines and the radius of circles
+
+**default:** `6`
 
 
 
@@ -369,5 +424,5 @@ undefined
 The object below contains each Webcharts setting as of version 1.4.0.
 
 ```
-{    x: {        type: null, // set in syncSettings()        column: 'wc_value',        label: null, // set in syncSettings()        format: null // set in syncSettings()    },    y: {        type: 'ordinal',        column: null, // set in syncSettings()        label: null, // set in syncSettings()        sort: 'earliest',        behavior: 'flex',        grouping: null // set in syncSettings()    },    marks: [        {            type: 'line',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            attributes: {                'stroke-width': 6            }        },        {            type: 'circle',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            radius: 5,            attributes: {                'stroke-width': 4            }        }    ],    colors: [        '#1b9e77',        '#d95f02',        '#7570b3',        '#a6cee3',        '#1f78b4',        '#b2df8a',        '#66c2a5',        '#fc8d62',        '#8da0cb'    ],    color_dom: null, // set in syncSettings()    legend: {        location: 'top',        label: 'Event Type',        order: null, // set in syncSettings()        mark: 'circle'    },    range_band: 35,    margin: {        top: 60,        right: 40    }, // for second x-axis    resizable: false // can't be resizable so the multiples aren't overlapped by their titles}
+{    x: {        type: null, // set in syncSettings()        column: 'wc_value',        label: null, // set in syncSettings()        format: null // set in syncSettings()    },    y: {        type: 'ordinal',        column: null, // set in syncSettings()        label: null, // set in syncSettings()        sort: 'earliest',        behavior: 'flex',        grouping: null // set in syncSettings()    },    marks: [        {            type: 'line',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            attributes: {                'clip-path': 'url(#1)',                'stroke-width': null, // set in syncSettings()            }        },        {            type: 'circle',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            radius: null, // set in syncSettings()            attributes: {                'clip-path': 'url(#1)',                'stroke-width': null, // set in syncSettings()            }        }    ],    colors: [        '#1b9e77',        '#d95f02',        '#7570b3',        '#a6cee3',        '#1f78b4',        '#b2df8a',        '#66c2a5',        '#fc8d62',        '#8da0cb'    ],    color_dom: null, // set in syncSettings()    legend: {        location: 'top',        label: 'Event Type',        order: null, // set in syncSettings()        mark: 'circle'    },    range_band: 35,    margin: {        top: 60,        right: 40    }, // for second x-axis    resizable: false // can't be resizable so the multiples aren't overlapped by their titles}
 ```

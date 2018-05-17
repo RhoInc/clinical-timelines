@@ -12,10 +12,15 @@ export default function syncWebchartsSettings(settings) {
     }
 
     //Lines
-    settings.marks[0].per = [settings.id_col, settings.event_col, settings.seq_col];
+    const lines = settings.marks[0];
+    lines.per = [settings.id_col, settings.event_col, settings.seq_col];
+    lines.attributes['stroke-width'] = settings.mark_thickness * 1.25;
 
     //Circles
-    settings.marks[1].per = [settings.id_col, settings.event_col, settings.seq_col, 'wc_value'];
+    const circles = settings.marks[1];
+    circles.per = [settings.id_col, settings.event_col, settings.seq_col, 'wc_value'];
+    circles.radius = settings.mark_thickness;
+    circles.attributes['stroke-width'] = 2 / 3 * settings.mark_thickness;
 
     //Color stratification
     settings.color_by = settings.event_col;

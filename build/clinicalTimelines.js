@@ -343,6 +343,7 @@
         ongo_val: 'Y',
         reference_lines: null,
         transpose_data: false,
+        mark_thickness: 6,
 
         //Listing settings
         details: null,
@@ -370,16 +371,18 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
-                    'stroke-width': 6
+                    'clip-path': 'url(#1)',
+                    'stroke-width': null // set in syncSettings()
                 }
             },
             {
                 type: 'circle',
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
-                radius: 5,
+                radius: null, // set in syncSettings()
                 attributes: {
-                    'stroke-width': 4
+                    'clip-path': 'url(#1)',
+                    'stroke-width': null // set in syncSettings()
                 }
             }
         ],
@@ -734,10 +737,15 @@
         }
 
         //Lines
-        settings.marks[0].per = [settings.id_col, settings.event_col, settings.seq_col];
+        var lines = settings.marks[0];
+        lines.per = [settings.id_col, settings.event_col, settings.seq_col];
+        lines.attributes['stroke-width'] = settings.mark_thickness * 1.25;
 
         //Circles
-        settings.marks[1].per = [settings.id_col, settings.event_col, settings.seq_col, 'wc_value'];
+        var circles = settings.marks[1];
+        circles.per = [settings.id_col, settings.event_col, settings.seq_col, 'wc_value'];
+        circles.radius = settings.mark_thickness;
+        circles.attributes['stroke-width'] = 2 / 3 * settings.mark_thickness;
 
         //Color stratification
         settings.color_by = settings.event_col;
@@ -3306,7 +3314,7 @@
                     _this.clinicalTimelines.document.getElementsByClassName(className)[0]
                 );
                 var point = g.select('circle');
-                g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
+                g.attr('transform', 'translate(0,' + i * +_this.config.mark_thickness * 2 + ')');
             });
         });
     }
@@ -3451,7 +3459,7 @@
                         'transform',
                         currentLine.offset > 0
                             ? 'translate(0,' +
-                              currentLine.offset * +mark.attributes['stroke-width'] * 1.5 +
+                              currentLine.offset * _this.config.mark_thickness * 2 +
                               ')'
                             : 'translate(0,0)'
                     );
@@ -4032,10 +4040,16 @@
     }
 
     function onInit$1() {
+        var _this = this;
+
         this.clinicalTimelines = this.parent.clinicalTimelines;
         this.config.color_dom = this.parent.timelines.config.color_dom;
         this.config.legend.order = this.parent.timelines.config.legend.order;
         this.config.x.domain = null;
+        this.config.marks.forEach(function(mark) {
+            mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
+        });
+        this.config.range_band = this.config.mark_thickness * 2;
     }
 
     function onLayout$1() {}

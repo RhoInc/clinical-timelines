@@ -42,6 +42,7 @@ export const rendererSpecificSettings = {
     ongo_val: 'Y',
     reference_lines: null,
     transpose_data: false,
+    mark_thickness: 6,
 
   //Listing settings
     details: null,
@@ -69,16 +70,18 @@ export const webchartsSettings = {
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
             attributes: {
-                'stroke-width': 6
+                'clip-path': 'url(#1)',
+                'stroke-width': null, // set in syncSettings()
             }
         },
         {
             type: 'circle',
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
-            radius: 5,
+            radius: null, // set in syncSettings()
             attributes: {
-                'stroke-width': 4
+                'clip-path': 'url(#1)',
+                'stroke-width': null, // set in syncSettings()
             }
         }
     ],

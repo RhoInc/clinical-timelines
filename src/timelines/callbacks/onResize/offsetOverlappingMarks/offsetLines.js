@@ -114,9 +114,7 @@ export default function offsetLines(mark, markData) {
                 g.attr(
                     'transform',
                     currentLine.offset > 0
-                        ? `translate(0,${currentLine.offset *
-                              +mark.attributes['stroke-width'] *
-                              1.5})`
+                        ? `translate(0,${currentLine.offset * this.config.mark_thickness * 2})`
                         : 'translate(0,0)'
                 );
             });

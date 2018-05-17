@@ -78,14 +78,18 @@ export default function syncRendererSpecificSettings(settings) {
     //      ],
     //      label: '<date range description>'
     //  }
-    if (settings.date_range && settings.date_ranges === null)
+
+    if (Array.isArray(settings.date_range) && settings.date_ranges === null)
         settings.date_ranges = [
             {
                 domain: settings.date_range,
-                label: 'default'
+                label: 'Initial Date Range'
             }
         ];
-    if (settings.date_ranges)
+    else if (Array.isArray(settings.date_range) && Array.isArray(settings.date_ranges))
+        settings.date_ranges.unshift(settings.date_range);
+
+    if (Array.isArray(settings.date_ranges))
         settings.date_ranges = settings.date_ranges
             .filter(date_range => {
                 const domain = date_range.domain || date_range;
@@ -128,14 +132,25 @@ export default function syncRendererSpecificSettings(settings) {
     //      ],
     //      label: '<day range description>'
     //  }
+
+    if (Array.isArray(settings.day_range) && settings.day_ranges === null)
+        settings.day_ranges = [
+            {
+                domain: settings.day_range,
+                label: 'Initial Day Range'
+            }
+        ];
+    else if (Array.isArray(settings.day_range) && Array.isArray(settings.day_ranges))
+        settings.day_ranges.unshift(settings.day_range);
+
     if (settings.day_range && settings.day_ranges === null)
         settings.day_ranges = [
             {
                 domain: settings.day_range,
-                label: 'default'
+                label: 'Initial Day Range'
             }
         ];
-    if (settings.day_ranges)
+    if (Array.isArray(settings.day_ranges))
         settings.day_ranges = settings.day_ranges
             .filter(day_range => {
                 const domain = day_range.domain || day_range;

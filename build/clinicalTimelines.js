@@ -523,14 +523,18 @@
         //      ],
         //      label: '<date range description>'
         //  }
-        if (settings.date_range && settings.date_ranges === null)
+
+        if (Array.isArray(settings.date_range) && settings.date_ranges === null)
             settings.date_ranges = [
                 {
                     domain: settings.date_range,
-                    label: 'default'
+                    label: 'Initial Date Range'
                 }
             ];
-        if (settings.date_ranges)
+        else if (Array.isArray(settings.date_range) && Array.isArray(settings.date_ranges))
+            settings.date_ranges.unshift(settings.date_range);
+
+        if (Array.isArray(settings.date_ranges))
             settings.date_ranges = settings.date_ranges
                 .filter(function(date_range) {
                     var domain = date_range.domain || date_range;
@@ -575,14 +579,25 @@
         //      ],
         //      label: '<day range description>'
         //  }
+
+        if (Array.isArray(settings.day_range) && settings.day_ranges === null)
+            settings.day_ranges = [
+                {
+                    domain: settings.day_range,
+                    label: 'Initial Day Range'
+                }
+            ];
+        else if (Array.isArray(settings.day_range) && Array.isArray(settings.day_ranges))
+            settings.day_ranges.unshift(settings.day_range);
+
         if (settings.day_range && settings.day_ranges === null)
             settings.day_ranges = [
                 {
                     domain: settings.day_range,
-                    label: 'default'
+                    label: 'Initial Day Range'
                 }
             ];
-        if (settings.day_ranges)
+        if (Array.isArray(settings.day_ranges))
             settings.day_ranges = settings.day_ranges
                 .filter(function(day_range) {
                     var domain = day_range.domain || day_range;
@@ -1754,13 +1769,13 @@
             //add full domain to date ranges
             this.config.date_ranges.push({
                 domain: this.full_date_range,
-                label: 'full'
+                label: 'Full'
             });
 
             //add custom domain to date ranges
             this.config.date_ranges.push({
                 domain: this.full_date_range.slice(),
-                label: 'user input'
+                label: 'User Input'
             });
         }
 
@@ -1785,13 +1800,13 @@
             //add full domain to day ranges
             this.config.day_ranges.push({
                 domain: this.full_day_range,
-                label: 'full'
+                label: 'Full'
             });
 
             //add custom domain to day ranges
             this.config.day_ranges.push({
                 domain: this.full_day_range.slice(),
-                label: 'user input'
+                label: 'User Input'
             });
         }
     }
@@ -2384,7 +2399,7 @@
 
         //Update custom time range setting.
         var customTimeRange = this.config[time_range + 's'].find(function(d) {
-            return d.label === 'user input';
+            return d.label === 'User Input';
         });
         customTimeRange.domain = this.time_range.slice();
 
@@ -2396,10 +2411,10 @@
             })
             .selectAll('option')
             .property('selected', function() {
-                return this.value === 'user input';
+                return this.value === 'User Input';
             })
             .filter(function() {
-                return this.value === 'user input';
+                return this.value === 'User Input';
             })
             .datum(customTimeRange.time_range);
 

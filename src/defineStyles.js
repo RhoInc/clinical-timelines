@@ -82,6 +82,8 @@ export default function defineStyles() {
                 '    float: left;' +
                 '    font-size: 110%;' +
                 '    font-weight: bold;' +
+                '    margin-bottom: 10px;' +
+                '    margin-right: 10px;' +
                 '}',
             '#clinical-timelines #ct-left-column .ct-details .ct-button a {' +
                 '    color: blue;' +
@@ -208,6 +210,8 @@ export default function defineStyles() {
                 '    cx: .55em !important;' +
                 '    cy: .55em !important;' +
                 '    r: .4em !important;' +
+                '    stroke: black;' +
+                '    stroke-width: 1;' +
                 '}',
 
           //Y-axis
@@ -257,13 +261,25 @@ export default function defineStyles() {
                 '}',
 
           //Circles
-            '#clinical-timelines circle.wc-data-mark {' +
-                '    stroke-width: 0;' +
+            '#clinical-timelines circle.wc-data-mark:not(.ct-highlighted) {' +
+                '    stroke-width: 1;' +
+                '    stroke: black;' +
                 '    fill-opacity: 1;' +
                 '}',
             '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +
                 '    stroke-opacity: 1;' +
+                '    fill-opacity: 1;' +
                 `    stroke-width: ${circle.attributes['stroke-width']};` +
+                '}',
+
+          //Symbols
+            '#clinical-timelines .ct-custom-mark {' +
+                '    stroke-width: 1;' +
+                '    stroke: black;' +
+                '}',
+            '#clinical-timelines .ct-custom-mark.ct-highlighted {' +
+                '    stroke-opacity: 1;' +
+                '    stroke-width: 2;' +
                 '}',
 
           //Arrows

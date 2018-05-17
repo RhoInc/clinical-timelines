@@ -58,8 +58,48 @@
         "event_highlight_color": {
             "title": "Highlighted Event Color",
             "description": "fill color of highlighted events",
-            "default": null,
+            "default": "black",
             "type": "string"
+        },
+        "event_symbols": {
+            "title": "Lucky Charms",
+            "description": "an array of event types and the symbols that will represent them",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "events": {
+                        "title": "Event Types",
+                        "description": "an array of event types that will be represented by the specified symbol",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "symbol": {
+                        "title": "Symbol",
+                        "description": "the symbol that will represent the corresponding event types",
+                        "type": "string",
+                        "enum": [
+                            "circle",
+                            "square",
+                            "triangle",
+                            "diamond"
+                        ]
+                    },
+                    "direction": {
+                        "title": "Symbol Direction",
+                        "description": "the direction the symbol points (only applies to triangles)",
+                        "type": "string",
+                        "enum": [
+                            "up",
+                            "right",
+                            "down",
+                            "left"
+                        ]
+                    }
+                }
+            }
         },
         "filters": {
             "title": "Filters",
@@ -179,7 +219,7 @@
         "date_display_format": {
             "title": "Displayed Date Format",
             "description": "date format of x-axis",
-            "default": "%Y-%m-%d",
+            "default": "%b %y",
             "type": "string"
         },
         "stdy_col": {
@@ -251,6 +291,11 @@
             "title": "Ongoing Value",
             "description": "ongoing event indicator value",
             "default": "Y",
+            "type": "string"
+        },
+        "offset_col": {
+            "title": "Offset Factor",
+            "description": "the name of the variable that contains a ranking of vertical position at which to draw a mark",
             "type": "string"
         },
         "reference_lines": {

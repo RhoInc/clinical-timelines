@@ -13,7 +13,7 @@ export default function timeScale(dropdown, d) {
     syncTimeScaleSettings(this.config);
 
     //Hide other time range dropdown.
-    hideTimeRangeControl.call(this);
+    if (!this.selected_id) hideTimeRangeControl.call(this);
 
     //Update time range settings.
     this.time_range = this[this.config.time_scale + '_range'];

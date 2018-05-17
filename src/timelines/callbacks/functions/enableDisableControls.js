@@ -1,3 +1,5 @@
+import hideTimeRangeControl from '../onLayout/hideTimeRangeControl';
+
 export default function enableDisableControls() {
     //Enable/Disable controls other than ID and Event Type filters.
     this.controls.wrap
@@ -10,4 +12,6 @@ export default function enableDisableControls() {
                 control.value_col !== this.config.event_col
         )
         .classed('ct-hidden', !!this.selected_id);
+
+    if (!this.selected_id) hideTimeRangeControl.call(this);
 }

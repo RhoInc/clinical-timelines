@@ -9,6 +9,7 @@ export const rendererSpecificSettings = {
     event_types: null,
     event_highlighted: null,
     event_highlight_color: 'black',
+    event_symbols: null,
 
   //Filter settings
     filters: null,
@@ -37,12 +38,13 @@ export const rendererSpecificSettings = {
 
   //Miscellaneous settings
     seq_col: 'SEQ',
-    tooltip_col: 'TOOLTIP',
     ongo_col: 'ONGO',
     ongo_val: 'Y',
+    tooltip_col: 'TOOLTIP',
+    offset_col: null,
     reference_lines: null,
-    transpose_data: false,
     mark_thickness: 6,
+    transpose_data: false,
 
   //Listing settings
     details: null,

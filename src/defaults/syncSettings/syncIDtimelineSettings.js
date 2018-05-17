@@ -5,6 +5,6 @@ export default function syncIDtimelineSettings(settings) {
     settings.marks[0].per = [settings.event_col, settings.seq_col];
     settings.marks[1].per = [settings.event_col, settings.seq_col, 'wc_value'];
     settings.gridlines = 'y';
-    settings.range_band = settings.range_band / 2;
+    settings.range_band = settings.mark_thickness * 2;
     settings.margin = { left: 25 };
 }

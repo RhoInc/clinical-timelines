@@ -78,7 +78,37 @@ initial highlighted event type
 
 fill color of highlighted events
 
-**default:** `"null"`
+**default:** `"black"`
+
+
+
+## settings.event_symbols
+`array`
+
+an array of event types and the symbols that will represent them
+
+**default:** none
+
+### settings.event_symbols[].events
+`array`
+
+an array of event types that will be represented by the specified symbol
+
+**default:** none
+
+### settings.event_symbols[].symbol
+`string`
+
+the symbol that will represent the corresponding event types
+
+**default:** none
+
+### settings.event_symbols[].direction
+`string`
+
+the direction the symbol points (only applies to triangles)
+
+**default:** none
 
 
 
@@ -219,7 +249,7 @@ date format of start and stop date variables
 
 date format of x-axis
 
-**default:** `"%Y-%m-%d"`
+**default:** `"%b %y"`
 
 
 
@@ -306,6 +336,15 @@ ongoing event indicator variable name
 ongoing event indicator value
 
 **default:** `"Y"`
+
+
+
+## settings.offset_col
+`string`
+
+the name of the variable that contains a ranking of vertical position at which to draw a mark
+
+**default:** none
 
 
 

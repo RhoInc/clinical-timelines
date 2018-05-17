@@ -326,6 +326,7 @@
         stdt_col: 'STDT',
         endt_col: 'ENDT',
         date_range: null,
+        date_ranges: null,
         date_format: '%Y-%m-%d',
         date_display_format: '%b %y', // sync in syncSettings()
 
@@ -333,6 +334,7 @@
         stdy_col: 'STDY',
         endy_col: 'ENDY',
         day_range: null,
+        day_ranges: null,
 
         //Miscellaneous settings
         seq_col: 'SEQ',
@@ -430,13 +432,12 @@
                           })
                       ])
                       .map(function(item) {
-                          var itemObject = {};
-
-                          itemObject.value_col = item instanceof Object ? item.value_col : item;
-                          itemObject.label =
+                          var itemObject =
                               item instanceof Object
-                                  ? item.label || itemObject.value_col
-                                  : itemObject.value_col;
+                                  ? Object.assign({}, item)
+                                  : { value_col: item };
+
+                          itemObject.label = itemObject.label || itemObject.value_col;
 
                           return itemObject;
                       })
@@ -446,7 +447,11 @@
     }
 
     function syncRendererSpecificSettings(settings) {
-        //ID settings
+        /**-------------------------------------------------------------------------------------------\
+      ID settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //id_unit
         settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
         settings.id_unitPropCased =
             settings.id_unit.substring(0, 1).toUpperCase() +
@@ -454,6 +459,8 @@
         settings.id_unitPlural = /y$/.test(settings.id_unit)
             ? settings.id_unit.substring(0, settings.id_unit.length - 1) + 'ies'
             : settings.id_unit + 's';
+
+        //id_characteristics
         var defaultID_characteristics = [
             { value_col: settings.id_col, label: settings.id_unitPropCased }
         ];
@@ -462,11 +469,19 @@
             settings.id_characteristics
         );
 
-        //Event settings
+        /**-------------------------------------------------------------------------------------------\
+      Event settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //event_types
         if (!(settings.event_types instanceof Array && settings.event_types.length))
             delete settings.event_types;
 
-        //Filter settings
+        /**-------------------------------------------------------------------------------------------\
+      Filter settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //filters
         var defaultFilters = [
             { value_col: settings.id_col, label: settings.id_unitPropCased },
             { value_col: settings.event_col, label: 'Event Type' }
@@ -475,16 +490,141 @@
             defaultFilters.splice(2, 0, { value_col: settings.ongo_col, label: 'Ongoing?' });
         settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
-        //Grouping settings
+        /**-------------------------------------------------------------------------------------------\
+      Grouping settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //groupings
         var defaultGroupings = [];
         settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
+
+        //grouping direction
         if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
             settings.grouping_direction = 'horizontal';
 
-        //Time settings
+        /**-------------------------------------------------------------------------------------------\
+      Timing settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //time_scale
+        settings.time_scale =
+            ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
+                ? settings.time_scale.toLowerCase()
+                : 'date';
+
+        //date_display_format
         settings.date_display_format = settings.date_display_format || settings.date_format;
 
-        //Reference line settings
+        //date_ranges - array of 2-element date ranges or of objects with a label property and a time_range property
+        //  {
+        //      domain: [
+        //          <lower bound>,
+        //          <upper bound>
+        //      ],
+        //      label: '<date range description>'
+        //  }
+
+        if (Array.isArray(settings.date_range) && settings.date_ranges === null)
+            settings.date_ranges = [
+                {
+                    domain: settings.date_range,
+                    label: 'Initial Date Range'
+                }
+            ];
+        else if (Array.isArray(settings.date_range) && Array.isArray(settings.date_ranges))
+            settings.date_ranges.unshift(settings.date_range);
+
+        if (Array.isArray(settings.date_ranges))
+            settings.date_ranges = settings.date_ranges
+                .filter(function(date_range) {
+                    var domain = date_range.domain || date_range;
+                    return (
+                        domain instanceof Array &&
+                        domain.length === 2 &&
+                        domain[0].toString() !== domain[1].toString() &&
+                        domain.every(function(d) {
+                            return (
+                                d instanceof Date || d3.time.format(settings.date_format).parse(d)
+                            );
+                        })
+                    );
+                })
+                .map(function(date_range) {
+                    var domain = (date_range.domain || date_range).map(function(date) {
+                        return date instanceof Date
+                            ? date
+                            : d3.time.format(settings.date_format).parse(date);
+                    });
+                    var label =
+                        date_range.label ||
+                        domain
+                            .map(function(date) {
+                                return date instanceof Date
+                                    ? d3.time.format(settings.date_display_format)(date)
+                                    : date;
+                            })
+                            .join(' - ');
+                    return {
+                        domain: domain,
+                        label: label
+                    };
+                });
+        else settings.date_ranges = [];
+
+        //day_ranges - array of 2-element day ranges or of objects with a label property and a time_range property
+        //  {
+        //      domain: [
+        //          <lower bound>,
+        //          <upper bound>
+        //      ],
+        //      label: '<day range description>'
+        //  }
+
+        if (Array.isArray(settings.day_range) && settings.day_ranges === null)
+            settings.day_ranges = [
+                {
+                    domain: settings.day_range,
+                    label: 'Initial Day Range'
+                }
+            ];
+        else if (Array.isArray(settings.day_range) && Array.isArray(settings.day_ranges))
+            settings.day_ranges.unshift(settings.day_range);
+
+        if (settings.day_range && settings.day_ranges === null)
+            settings.day_ranges = [
+                {
+                    domain: settings.day_range,
+                    label: 'Initial Day Range'
+                }
+            ];
+        if (Array.isArray(settings.day_ranges))
+            settings.day_ranges = settings.day_ranges
+                .filter(function(day_range) {
+                    var domain = day_range.domain || day_range;
+                    return (
+                        domain instanceof Array &&
+                        domain.length === 2 &&
+                        domain[0].toString() !== domain[1].toString() &&
+                        domain.every(function(d) {
+                            return Number.isInteger(+d);
+                        })
+                    );
+                })
+                .map(function(day_range) {
+                    var domain = day_range.domain || day_range;
+                    var label = day_range.label || domain.join(' - ');
+                    return {
+                        domain: domain,
+                        label: label
+                    };
+                });
+        else settings.day_ranges = [];
+
+        /**-------------------------------------------------------------------------------------------\
+      Miscellaneous settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //reference_lines
         if (settings.reference_lines) {
             if (!(settings.reference_lines instanceof Array))
                 settings.reference_lines = [settings.reference_lines];
@@ -531,10 +671,10 @@
         }
 
         /**-------------------------------------------------------------------------------------------\
-      Define listing columns.
+      Listing settings
     \-------------------------------------------------------------------------------------------**/
 
-        //defaults
+        //details
         var defaultDetails = [
             { value_col: settings.event_col, label: 'Event Type' },
             { value_col: 'stdtdy', label: 'Start Date (Day)' },
@@ -607,11 +747,6 @@
     }
 
     function syncTimeScaleSettings(settings) {
-        //Coerce invalid time scale arguments.
-        settings.time_scale =
-            ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
-                ? settings.time_scale.toLowerCase()
-                : 'date';
         settings.time_scalePropCased =
             settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
 
@@ -662,7 +797,7 @@
             'Event: [' +
             settings.event_col +
             ']' +
-            ('\n' + settings.x.label + ': [' + settings.st_col + ']');
+            ('\n' + settings.time_scalePropCased + ': [' + settings.st_col + ']');
         settings.marks[1].values = { wc_category: settings.time_unit };
     }
 
@@ -727,10 +862,25 @@
         {
             type: 'dropdown',
             option: 'time_scale',
-            values: ['day', 'date'],
-            relabels: ['Day', 'Date'],
             label: '',
             description: 'X-axis scale',
+            values: ['date', 'day'],
+            require: true
+        },
+        {
+            type: 'dropdown',
+            option: 'date_time_range',
+            label: '',
+            description: 'Time range',
+            values: null, // set in onInit() callback
+            require: true
+        },
+        {
+            type: 'dropdown',
+            option: 'day_time_range',
+            label: '',
+            description: 'Time range',
+            values: null, // set in onInit() callback
             require: true
         },
         {
@@ -1476,7 +1626,58 @@
         });
     }
 
-    function manipulateData() {
+    //Capture and count all IDs in data.
+    function getPopulationDetails() {
+        var _this = this;
+
+        this.populationDetails = {
+            population: d3
+                .set(
+                    this.raw_data.map(function(d) {
+                        return d[_this.config.id_col];
+                    })
+                )
+                .values()
+        };
+        this.populationDetails.N = this.populationDetails.population.length;
+        this.IDdetails = {};
+    }
+
+    //Remove records with missing key variables.
+    function removeInvalidData() {
+        var _this = this;
+
+        this.initial_data = this.raw_data.filter(function(d) {
+            return (
+                !/^\s*$/.test(d[_this.config.id_col]) && !/^\s*$/.test(d[_this.config.event_col])
+            );
+        });
+
+        //Warn user of removed records.
+        if (this.initial_data.length < this.raw_data.length)
+            console.warn(
+                this.raw_data.length -
+                    this.initial_data.length +
+                    ' records have been removed due to missing identifiers or event types.'
+            );
+
+        //Check which time scales are present in the data.
+        this.anyDates = this.initial_data.some(function(d) {
+            return d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] !== '';
+        });
+        this.anyDays = this.initial_data.some(function(d) {
+            return d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] !== '';
+        });
+    }
+
+    //Attach initial, valid data to controls, bypassing controls.init().
+    function attachDataToControls() {
+        this.controls.data = this.initial_data;
+        this.controls.ready = true;
+    }
+
+    //Standardize invalid date and day values.
+    function standardizeTimeVariables() {
         var _this = this;
 
         this.initial_data.forEach(function(d, i) {
@@ -1514,131 +1715,7 @@
         });
     }
 
-    function cleanData() {
-        var _this = this;
-
-        //Remove records with insufficient data (this.wide_data should only be defined on initialization).
-        this.wide_data = this.initial_data.filter(function(d) {
-            return d[_this.config.st_col] !== '';
-        });
-
-        //Warn user of removed records.
-        if (this.wide_data.length < this.initial_data.length) {
-            if (this.config.time_scale === 'day')
-                console.warn(
-                    this.initial_data.length -
-                        this.wide_data.length +
-                        ' records have been removed due to missing or invalid day variable values.'
-                );
-            else if (this.config.time_scale === 'date')
-                console.warn(
-                    this.initial_data.length -
-                        this.wide_data.length +
-                        ' records have been removed due to missing or invalid date variable values that do not match settings.date_format (' +
-                        this.config.date_format +
-                        ')'
-                );
-        }
-    }
-
-    /*------------------------------------------------------------------------------------------------\
-  Expand a data array to one item per original item per specified column.
-\------------------------------------------------------------------------------------------------*/
-
-    function lengthenRaw(data, columns) {
-        var my_data = [];
-
-        data.forEach(function(d) {
-            columns.forEach(function(column) {
-                var obj = Object.assign({}, d);
-                obj.wc_category = column;
-                obj.wc_value = d[column];
-                my_data.push(obj);
-            });
-        });
-
-        return my_data;
-    }
-
-    function defineData() {
-        var _this = this;
-
-        //Separate out timepoints and time intervals.
-        var timepoints = this.wide_data
-                .filter(function(d) {
-                    return d[_this.config.st_col] === d[_this.config.en_col];
-                })
-                .map(function(d) {
-                    d.wc_category = _this.config.time_unit;
-                    d.wc_value = d[_this.config.st_col];
-
-                    return d;
-                }),
-            timeIntervals = lengthenRaw(
-                this.wide_data.filter(function(d) {
-                    return d[_this.config.st_col] !== d[_this.config.en_col];
-                }),
-                [this.config.st_col, this.config.en_col]
-            );
-
-        this.long_data = d3.merge([timepoints, timeIntervals]);
-        this.raw_data = this.long_data;
-    }
-
-    function setDefaultTimeRanges() {
-        var _this = this;
-
-        //Date range
-        if (this.anyDates) {
-            this.full_date_range = [
-                d3.min(this.initial_data, function(d) {
-                    return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
-                }),
-                d3.max(this.initial_data, function(d) {
-                    return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
-                })
-            ];
-            this.date_range =
-                this.config.date_range instanceof Array &&
-                this.config.date_range.length === 2 &&
-                this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
-                this.config.date_range.every(function(date) {
-                    return (
-                        date instanceof Date || d3.time.format(_this.config.date_format).parse(date)
-                    );
-                })
-                    ? this.config.date_range.map(function(date) {
-                          return date instanceof Date
-                              ? date
-                              : d3.time.format(_this.config.date_format).parse(date);
-                      })
-                    : this.full_date_range;
-        }
-
-        //Day range
-        if (this.anyDays) {
-            this.full_day_range = [
-                d3.min(this.initial_data, function(d) {
-                    return +d[_this.config.stdy_col];
-                }),
-                d3.max(this.initial_data, function(d) {
-                    return +d[_this.config.endy_col];
-                })
-            ];
-            this.day_range =
-                this.config.day_range instanceof Array &&
-                this.config.day_range.length === 2 &&
-                this.config.day_range[0].toString() !== this.config.day_range[1].toString() &&
-                this.config.day_range.every(function(day) {
-                    return Number.isInteger(+day);
-                })
-                    ? this.config.day_range.map(function(day) {
-                          return +day;
-                      })
-                    : this.full_day_range;
-        }
-    }
-
+    //Capture all event types in array and define color domain as well as event type order.
     function handleEventTypes() {
         var _this = this;
 
@@ -1661,7 +1738,99 @@
                 })
                 .sort()
         );
-        this.config.legend.order = this.config.color_dom;
+        this.config.legend.order = this.config.color_dom.slice();
+    }
+
+    function defineFullTimeRanges() {
+        var _this = this;
+
+        /**-------------------------------------------------------------------------------------------\
+      Dates
+    \-------------------------------------------------------------------------------------------**/
+
+        if (this.anyDates) {
+            //full domain
+            this.full_date_range = [
+                d3.min(this.initial_data, function(d) {
+                    return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
+                }),
+                d3.max(this.initial_data, function(d) {
+                    return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
+                })
+            ];
+
+            //full domain as a string
+            this.full_date_time_range = this.full_date_range
+                .map(function(d) {
+                    return d3.time.format(_this.config.date_format)(d);
+                })
+                .join(' - ');
+
+            //add full domain to date ranges
+            this.config.date_ranges.push({
+                domain: this.full_date_range,
+                label: 'Full'
+            });
+
+            //add custom domain to date ranges
+            this.config.date_ranges.push({
+                domain: this.full_date_range.slice(),
+                label: 'User Input'
+            });
+        }
+
+        /**-------------------------------------------------------------------------------------------\
+      Days
+    \-------------------------------------------------------------------------------------------**/
+
+        if (this.anyDays) {
+            //full domain
+            this.full_day_range = [
+                d3.min(this.initial_data, function(d) {
+                    return +d[_this.config.stdy_col];
+                }),
+                d3.max(this.initial_data, function(d) {
+                    return +d[_this.config.endy_col];
+                })
+            ];
+
+            //full domain as a string
+            this.full_day_time_range = this.full_day_range.join(' - ');
+
+            //add full domain to day ranges
+            this.config.day_ranges.push({
+                domain: this.full_day_range,
+                label: 'Full'
+            });
+
+            //add custom domain to day ranges
+            this.config.day_ranges.push({
+                domain: this.full_day_range.slice(),
+                label: 'User Input'
+            });
+        }
+    }
+
+    function defineInitialTimeRanges() {
+        if (this.anyDates) this.date_range = this.config.date_ranges[0].domain.slice();
+        if (this.anyDays) this.day_range = this.config.day_ranges[0].domain.slice();
+    }
+
+    function syncTimeRanges() {
+        if (this.config.time_scale === 'date') this.time_range = this.date_range.slice();
+        else this.time_range = this.day_range.slice();
+    }
+
+    //Update time range data and settings.
+    function handleTimeRanges() {
+        //Calculate extent of each time scale.
+        defineFullTimeRanges.call(this);
+
+        //Set initial range of each time scale.
+        defineInitialTimeRanges.call(this);
+
+        //Sync time range variables given initial time scale.
+        syncTimeRanges.call(this);
     }
 
     function checkTimeScales() {
@@ -1670,17 +1839,6 @@
         this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
             if (input.description !== 'X-axis scale') return true;
             else {
-                _this.anyDates = _this.initial_data.some(function(d) {
-                    return (
-                        d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] !== ''
-                    );
-                });
-                _this.anyDays = _this.initial_data.some(function(d) {
-                    return (
-                        d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] !== ''
-                    );
-                });
-
                 if (!_this.anyDates && !_this.anyDays) {
                     var errorText =
                         'The data either contain neither ' +
@@ -1728,6 +1886,28 @@
         });
     }
 
+    function updateTimeRangeControls() {
+        if (this.anyDates) {
+            //Update date time range dropdown.
+            this.controls.config.inputs.find(function(input) {
+                return input.option === 'date_time_range';
+            }).values = this.config.date_ranges.map(function(date_time_range) {
+                return date_time_range.label;
+            });
+            this.config.date_time_range = this.config.date_ranges[0].label;
+        }
+
+        if (this.anyDays) {
+            //Update day time range dropdown.
+            this.controls.config.inputs.find(function(input) {
+                return input.option === 'day_time_range';
+            }).values = this.config.day_ranges.map(function(day_time_range) {
+                return day_time_range.label;
+            });
+            this.config.day_time_range = this.config.day_ranges[0].label;
+        }
+    }
+
     function checkOtherControls() {
         var _this = this;
 
@@ -1738,7 +1918,7 @@
             .forEach(function(input) {
                 //Set values of Event Type highlighting control to event types present in the data.
                 if (input.description === 'Event highlighting')
-                    input.values = _this.config.color_dom;
+                    input.values = _this.config.color_dom.slice();
                 else if (input.description === 'Y-axis grouping')
                     input.values = _this.config.groupings.map(function(grouping) {
                         return grouping.value_col;
@@ -1748,6 +1928,7 @@
             });
 
         checkTimeScales.call(this);
+        updateTimeRangeControls.call(this);
     }
 
     function checkFilters() {
@@ -1755,7 +1936,7 @@
 
         this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
             if (input.type !== 'subsetter') return true;
-            else if (!_this.raw_data[0].hasOwnProperty(input.value_col)) {
+            else if (!_this.initial_data[0].hasOwnProperty(input.value_col)) {
                 console.warn(
                     input.value_col + ' filter removed because the variable does not exist.'
                 );
@@ -1764,7 +1945,7 @@
             } else {
                 var levels = d3
                     .set(
-                        _this.raw_data.map(function(d) {
+                        _this.initial_data.map(function(d) {
                             return d[input.value_col];
                         })
                     )
@@ -1781,7 +1962,14 @@
         });
     }
 
-    function addDataDrivenTooltips() {
+    //Check control inputs for invalid settings.
+    function checkControls() {
+        checkOtherControls.call(this);
+        checkFilters.call(this);
+    }
+
+    //If a tooltip variable is specified and exists, attach it to each mark's existing tooltip specification.
+    function updateTooltipSettings() {
         var _this = this;
 
         if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
@@ -1794,66 +1982,92 @@
         }
     }
 
-    function onInit() {
+    //Remove invalid time data.
+    function cleanData() {
         var _this = this;
 
-        //Capture and count all IDs in data.
-        this.populationDetails = {
-            population: d3
-                .set(
-                    this.raw_data.map(function(d) {
-                        return d[_this.config.id_col];
-                    })
-                )
-                .values()
-        };
-        this.populationDetails.N = this.populationDetails.population.length;
-
-        //Instantiate ID details.
-        this.IDdetails = {};
-
-        //Retain initial data array, removing records with missing key variables.
-        this.initial_data = this.raw_data.filter(function(d) {
-            return (
-                !/^\s*$/.test(d[_this.config.id_col]) && !/^\s*$/.test(d[_this.config.event_col])
-            );
+        this.wide_data = this.initial_data.filter(function(d) {
+            return d[_this.config.st_col] !== '';
         });
 
-        //Manually set controls' data.
-        this.controls.data = this.initial_data;
-        this.controls.ready = true;
-
         //Warn user of removed records.
-        if (this.initial_data.length < this.raw_data.length)
-            console.warn(
-                this.raw_data.length -
-                    this.initial_data.length +
-                    ' records have been removed due to missing identifiers or event types.'
-            );
+        if (this.wide_data.length < this.initial_data.length) {
+            if (this.config.time_scale === 'day')
+                console.warn(
+                    this.initial_data.length -
+                        this.wide_data.length +
+                        ' records have been removed due to missing or invalid day variable values.'
+                );
+            else if (this.config.time_scale === 'date')
+                console.warn(
+                    this.initial_data.length -
+                        this.wide_data.length +
+                        ' records have been removed due to missing or invalid date variable values that do not match settings.date_format (' +
+                        this.config.date_format +
+                        ')'
+                );
+        }
+    }
 
-        //Standardize invalid day and date values.
-        manipulateData.call(this);
+    /*------------------------------------------------------------------------------------------------\
+  Expand a data array to one item per original item per specified column.
+\------------------------------------------------------------------------------------------------*/
 
-        //Default event types to 'All'.
+    function lengthenRaw(data, columns) {
+        var my_data = [];
+
+        data.forEach(function(d) {
+            columns.forEach(function(column) {
+                var obj = Object.assign({}, d);
+                obj.wc_category = column;
+                obj.wc_value = d[column];
+                my_data.push(obj);
+            });
+        });
+
+        return my_data;
+    }
+
+    //Define a record for each timepoint and a record for both the start and end of a time interval.
+    function defineData() {
+        var _this = this;
+
+        //Capture timepoints.
+        var timepoints = this.wide_data
+            .filter(function(d) {
+                return d[_this.config.st_col] === d[_this.config.en_col];
+            })
+            .map(function(d) {
+                d.wc_category = _this.config.time_unit;
+                d.wc_value = d[_this.config.st_col];
+
+                return d;
+            });
+
+        //Capture time intervals, creating two records for each event..
+        var timeIntervals = lengthenRaw(
+            this.wide_data.filter(function(d) {
+                return d[_this.config.st_col] !== d[_this.config.en_col];
+            }),
+            [this.config.st_col, this.config.en_col]
+        );
+
+        //Merge timepoints and time intervals.
+        this.long_data = d3.merge([timepoints, timeIntervals]);
+        this.raw_data = this.long_data;
+    }
+
+    function onInit() {
+        getPopulationDetails.call(this);
+        removeInvalidData.call(this);
+        attachDataToControls.call(this);
+        standardizeTimeVariables.call(this);
         handleEventTypes.call(this);
+        handleTimeRanges.call(this);
+        checkControls.call(this);
+        updateTooltipSettings.call(this);
 
-        //Check other control inputs.
-        checkOtherControls.call(this);
-
-        //Check filters for non-existent or single-value variables.
-        checkFilters.call(this);
-
-        //Set default time ranges.
-        setDefaultTimeRanges.call(this);
-        this.time_range = this.config.time_scale === 'day' ? this.day_range : this.date_range;
-
-        //Add data-driven tooltips.
-        addDataDrivenTooltips.call(this);
-
-        //Remove unusable data.
         cleanData.call(this);
-
-        //Define a record for each start day and stop day.
         defineData.call(this);
     }
 
@@ -1970,7 +2184,7 @@
         );
     }
 
-    function eventHighlightingChange(select$$1, d) {
+    function eventHighlighting(select$$1, d) {
         //Update event highlighting settings.
         this.config.event_highlighted = d3
             .select(select$$1)
@@ -1983,18 +2197,59 @@
         else this.draw();
     }
 
-    function timeScaleChange(dropdown, d) {
+    function hideTimeRangeControl() {
+        var _this = this;
+
+        this.controls.wrap.selectAll('.control-group').classed('ct-hidden', function(d) {
+            return (
+                (_this.config.time_scale === 'date' && d.option === 'day_time_range') ||
+                (_this.config.time_scale === 'day' && d.option === 'date_time_range')
+            );
+        });
+    }
+
+    function timeScale(dropdown, d) {
         //Update clinical timelines time scale settings
         this.config.time_scale = d3
             .select(dropdown)
             .select('option:checked')
             .text();
         syncTimeScaleSettings(this.config);
-        this.time_range = this.config.time_scale === 'day' ? this.day_range : this.date_range;
+
+        //Hide other time range dropdown.
+        hideTimeRangeControl.call(this);
+
+        //Update time range settings.
+        this.time_range = this[this.config.time_scale + '_range'];
 
         //Update ID timeline time scale settings
         this.IDtimeline.config.time_scale = this.config.time_scale;
         syncTimeScaleSettings(this.IDtimeline.config);
+
+        //Remove records without time data.
+        cleanData.call(this);
+
+        //Redefine data.
+        defineData.call(this);
+
+        //Redraw.
+        if (this.selected_id) drawIDtimeline.call(this);
+        else this.draw();
+    }
+
+    function timeRange(dropdown, d) {
+        var label = d3
+            .select(dropdown)
+            .selectAll('option')
+            .filter(function() {
+                return this.selected;
+            })
+            .text();
+        var time_range = this.config[this.config.time_scale + '_ranges'].find(function(di) {
+            return di.label === label;
+        });
+        this[this.config.time_scale + '_range'] = time_range.domain.slice();
+        this.time_range = time_range.domain.slice();
 
         //Remove records without time data.
         cleanData.call(this);
@@ -2024,19 +2279,19 @@
     }
 
     function augmentOtherControls() {
-        var context = this,
-            otherControls = this.controls.wrap
-                .selectAll('.control-group')
-                .filter(function(d) {
-                    return d.type !== 'subsetter';
-                })
-                .classed('ct-control', true)
-                .attr('id', function(d) {
-                    return 'control-' + d.option.replace('.', '-');
-                });
+        var context = this;
+        var controls = this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(d) {
+                return d.type !== 'subsetter';
+            })
+            .classed('ct-control', true)
+            .attr('id', function(d) {
+                return 'control-' + d.option.replace('.', '-');
+            });
 
         //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-        otherControls
+        controls
             .filter(function(d) {
                 return ['Y-axis sort', 'Y-axis grouping'].indexOf(d.description) > -1;
             })
@@ -2071,27 +2326,40 @@
             });
 
         //Redefine event highlighting event listener.
-        otherControls
+        controls
             .filter(function(d) {
                 return d.option === 'event_highlighted';
             })
             .select('select')
             .on('change', function(d) {
-                eventHighlightingChange.call(context, this, d);
+                eventHighlighting.call(context, this, d);
             });
 
         //Redefine time scale event listener.
-        otherControls
+        controls
             .filter(function(d) {
                 return d.option === 'time_scale';
             })
             .select('select')
             .on('change', function(d) {
-                timeScaleChange.call(context, this, d);
+                timeScale.call(context, this, d);
+            });
+
+        //Redefine time range event listener.
+        controls
+            .filter(function(d) {
+                return d.option.indexOf('time_range') > -1;
+            })
+            .selectAll('select')
+            .each(function(d) {
+                //add event listener
+                d3.select(this).on('change', function(d) {
+                    timeRange.call(context, this, d);
+                });
             });
 
         //Redefine y-axis grouping event listener.
-        otherControls
+        controls
             .filter(function(d) {
                 return d.option === 'y.grouping';
             })
@@ -2099,6 +2367,58 @@
             .on('change', function(d) {
                 yAxisGrouping.call(context, this, d);
             });
+    }
+
+    function onChange(input, d) {
+        var _this = this;
+
+        var time_range = this.config.time_scale + '_range';
+        var increment = this.config.time_scale === 'date' ? 24 * 60 * 60 * 1000 : 1;
+
+        //User input.
+        var inputValue =
+            this.config.time_scale === 'date'
+                ? d3.time.format('%Y-%m-%d').parse(input.value)
+                : +input.value;
+
+        //handle invalid inputs
+        if (d.index === 0 && inputValue >= this[time_range][1])
+            inputValue =
+                this.config.time_scale === 'date'
+                    ? new Date(this[time_range][1].getTime() - increment)
+                    : this[time_range][1] - increment;
+        else if (d.index === 1 && inputValue <= this[time_range][0])
+            inputValue =
+                this.config.time_scale === 'date'
+                    ? new Date(this[time_range][0].getTime() + increment)
+                    : (inputValue = this[time_range][0] + increment);
+
+        //Update time range.
+        this[time_range][d.index] = inputValue;
+        this.time_range = this[time_range];
+
+        //Update custom time range setting.
+        var customTimeRange = this.config[time_range + 's'].find(function(d) {
+            return d.label === 'User Input';
+        });
+        customTimeRange.domain = this.time_range.slice();
+
+        //Update time range control.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(d) {
+                return d.option === _this.config.time_scale + '_time_range';
+            })
+            .selectAll('option')
+            .property('selected', function() {
+                return this.value === 'User Input';
+            })
+            .filter(function() {
+                return this.value === 'User Input';
+            })
+            .datum(customTimeRange.time_range);
+
+        this.draw();
     }
 
     function timeRangeControl(datum) {
@@ -2126,37 +2446,20 @@
 
         //Add event listener to input node.
         timeRangeInput.on('change', function(d) {
-            var time_range = context.config.time_scale + '_range',
-                increment = context.config.time_scale === 'date' ? 24 * 60 * 60 * 1000 : 1;
-            var input =
-                context.config.time_scale === 'date'
-                    ? d3.time.format('%Y-%m-%d').parse(this.value)
-                    : +this.value;
-
-            if (d.index === 0 && input >= context[time_range][1])
-                input =
-                    context.config.time_scale === 'date'
-                        ? new Date(context[time_range][1].getTime() - increment)
-                        : context[time_range][1] - increment;
-            else if (d.index === 1 && input <= context[time_range][0])
-                input =
-                    context.config.time_scale === 'date'
-                        ? new Date(context[time_range][0].getTime() + increment)
-                        : (input = context[time_range][0] + increment);
-
-            context[time_range][d.index] = input;
-            context.time_range = context[time_range];
-            context.draw();
+            onChange.call(context, this, d);
         });
     }
 
     function addTimeRangeControls() {
+        //Start
         timeRangeControl.call(this, {
             index: 0,
             option: 'x.domain.0',
             label: '',
             description: 'Start'
         });
+
+        //End
         timeRangeControl.call(this, {
             index: 1,
             option: 'x.domain.1',
@@ -2234,8 +2537,8 @@
     function augmentFilters() {
         var _this = this;
 
-        var context = this,
-            filters = this.controls.wrap
+        var context = this;
+        var controls = this.controls.wrap
                 .selectAll('.control-group')
                 .filter(function(d) {
                     return d.type === 'subsetter';
@@ -2247,10 +2550,10 @@
                 .classed('ct-ID', function(d) {
                     return d.value_col === _this.config.id_col;
                 }),
-            IDfilter = filters.filter(function(filter) {
+            IDfilter = controls.filter(function(filter) {
                 return filter.value_col === _this.config.id_col;
             }),
-            eventTypeFilter = filters.filter(function(filter) {
+            eventTypeFilter = controls.filter(function(filter) {
                 return filter.value_col === _this.config.event_col;
             });
 
@@ -2286,6 +2589,9 @@
         //Add additional functionality to other control event listeners.
         augmentOtherControls.call(this);
 
+        //Hide other time range dropdown.
+        hideTimeRangeControl.call(this);
+
         //Add time range functionality.
         addTimeRangeControls.call(this);
 
@@ -2296,7 +2602,7 @@
         topXaxis.call(this);
     }
 
-    function updateTimeRangeControls() {
+    function updateTimeRangeControls$1() {
         var _this = this;
 
         var timeRangeControls = this.controls.wrap.selectAll('.ct-time-range input');
@@ -2311,7 +2617,7 @@
 
         timeRangeControls.property('value', function(d) {
             return _this.config.time_scale === 'date'
-                ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
+                ? d3.time.format(_this.config.date_format)(_this.time_range[d.index])
                 : +_this.time_range[d.index];
         });
     }
@@ -2524,8 +2830,13 @@
                         var groupingStart = clone(groupingObject),
                             groupingEnd = clone(groupingObject);
 
-                        groupingStart.wc_value = _this.config.x.domain[0];
-                        groupingEnd.wc_value = _this.config.x.domain[0];
+                        if (_this.config.time_scale === 'date') {
+                            groupingStart.wc_value = _this.full_date_range[0];
+                            groupingEnd.wc_value = _this.full_date_range[0];
+                        } else {
+                            groupingStart.wc_value = _this.full_day_range[0];
+                            groupingEnd.wc_value = _this.full_day_range[0];
+                        }
 
                         //Push two start and two end data to raw_data to create space to annotate grouping.
                         var groupingStart1 = clone(groupingStart),
@@ -2597,6 +2908,7 @@
                 this.config.y.domain = nestedData.map(function(d) {
                     return d.key.split('|')[1];
                 });
+                console.log(this.config.y.domain);
             } else {
                 //Otherwise sort IDs by earliest event.
                 this.config.y.domain = d3
@@ -2682,7 +2994,7 @@
         this.config.x.domain = this.time_range;
 
         //Set x-domain.
-        updateTimeRangeControls.call(this);
+        updateTimeRangeControls$1.call(this);
 
         //Define filtered data irrespective of individual mark filtering.
         defineFilteredData.call(this);
@@ -3783,11 +4095,7 @@
                     }),
                 timeRangeTooltip = timeRangeGroup
                     .append('title')
-                    .text(
-                        this.parent.timelines.config.time_scalePropCased +
-                            ' range: ' +
-                            timeRangeText.join(' - ')
-                    );
+                    .text(this.config.time_scalePropCased + ' range: ' + timeRangeText.join(' - '));
         }
     }
 

@@ -1,7 +1,7 @@
 import { select as d3select } from 'd3';
 import drawIDtimeline from '../../functions/drawIDtimeline';
 
-export default function eventHighlightingChange(select, d) {
+export default function eventHighlighting(select, d) {
     //Update event highlighting settings.
     this.config.event_highlighted = d3select(select)
         .select('option:checked')

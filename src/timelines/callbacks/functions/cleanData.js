@@ -1,5 +1,5 @@
+//Remove invalid time data.
 export default function cleanData() {
-    //Remove records with insufficient data (this.wide_data should only be defined on initialization).
     this.wide_data = this.initial_data.filter(d => d[this.config.st_col] !== '');
 
     //Warn user of removed records.

@@ -1,16 +1,9 @@
-import syncTimeScaleSettings from '../../../../defaults/syncSettings/syncTimeScaleSettings';
+import syncTimeScaleSettings from '../../../../../defaults/syncSettings/syncTimeScaleSettings';
 
 export default function checkTimeScales() {
     this.controls.config.inputs = this.controls.config.inputs.filter(input => {
         if (input.description !== 'X-axis scale') return true;
         else {
-            this.anyDates = this.initial_data.some(
-                d => d.hasOwnProperty(this.config.stdt_col) && d[this.config.stdt_col] !== ''
-            );
-            this.anyDays = this.initial_data.some(
-                d => d.hasOwnProperty(this.config.stdy_col) && d[this.config.stdy_col] !== ''
-            );
-
             if (!this.anyDates && !this.anyDays) {
                 const errorText = `The data either contain neither ${this.config.stdt_col} nor ${
                     this.config.stdy_col

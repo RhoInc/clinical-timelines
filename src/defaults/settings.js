@@ -25,6 +25,7 @@ export const rendererSpecificSettings = {
         stdt_col: 'STDT',
         endt_col: 'ENDT',
         date_range: null,
+        date_ranges: null,
         date_format: '%Y-%m-%d',
         date_display_format: '%b %y', // sync in syncSettings()
 
@@ -32,6 +33,7 @@ export const rendererSpecificSettings = {
         stdy_col: 'STDY',
         endy_col: 'ENDY',
         day_range: null,
+        day_ranges: null,
 
   //Miscellaneous settings
     seq_col: 'SEQ',

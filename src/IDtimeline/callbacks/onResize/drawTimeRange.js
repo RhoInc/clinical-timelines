@@ -39,10 +39,6 @@ export default function drawTimeRange() {
                 }),
             timeRangeTooltip = timeRangeGroup
                 .append('title')
-                .text(
-                    `${
-                        this.parent.timelines.config.time_scalePropCased
-                    } range: ${timeRangeText.join(' - ')}`
-                );
+                .text(`${this.config.time_scalePropCased} range: ${timeRangeText.join(' - ')}`);
     }
 }

@@ -338,13 +338,13 @@
         day_ranges: null,
 
         //Miscellaneous settings
+        mark_thickness: 6,
         seq_col: 'SEQ',
         ongo_col: 'ONGO',
         ongo_val: 'Y',
         tooltip_col: 'TOOLTIP',
         offset_col: null,
         reference_lines: null,
-        mark_thickness: 6,
         transpose_data: false,
 
         //Listing settings

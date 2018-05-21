@@ -19,8 +19,8 @@ export default function syncWebchartsSettings(settings) {
     //Circles
     const circles = settings.marks[1];
     circles.per = [settings.id_col, settings.event_col, settings.seq_col, 'wc_value'];
-    circles.radius = settings.mark_thickness;
-    circles.attributes['stroke-width'] = 2 / 3 * settings.mark_thickness;
+    circles.radius = settings.mark_thickness * 3 / 4;
+    circles.attributes['stroke-width'] = settings.mark_thickness * 1 / 2;
 
     //Color stratification
     settings.color_by = settings.event_col;

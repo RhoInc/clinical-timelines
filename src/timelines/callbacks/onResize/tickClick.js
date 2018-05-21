@@ -15,5 +15,7 @@ export default function tickClick() {
             drawIDtimeline.call(this);
             enableDisableControls.call(this);
             updateIDfilter.call(this);
-        });
+        })
+        .append('title')
+        .text(d => `View a profile of ${this.config.id_unit} ${d}.`);
 }

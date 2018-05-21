@@ -27,7 +27,7 @@ export default function onChange(input, d) {
     this.time_range = this[time_range];
 
     //Update custom time range setting.
-    const customTimeRange = this.config[time_range + 's'].find(d => d.label === 'user input');
+    const customTimeRange = this.config[time_range + 's'].find(d => d.label === 'User Input');
     customTimeRange.domain = this.time_range.slice();
 
     //Update time range control.
@@ -36,10 +36,10 @@ export default function onChange(input, d) {
         .filter(d => d.option === this.config.time_scale + '_time_range')
         .selectAll('option')
         .property('selected', function() {
-            return this.value === 'user input';
+            return this.value === 'User Input';
         })
         .filter(function() {
-            return this.value === 'user input';
+            return this.value === 'User Input';
         })
         .datum(customTimeRange.time_range);
 

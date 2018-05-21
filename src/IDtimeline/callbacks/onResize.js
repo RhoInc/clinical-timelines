@@ -1,6 +1,8 @@
 import drawOngoingMarks from '../../timelines/callbacks/onResize/drawOngoingMarks';
 import drawTimeRange from './onResize/drawTimeRange';
 import drawReferenceLines from '../../timelines/callbacks/onResize/drawReferenceLines';
+import addStartStopCircles from '../../timelines/callbacks/onResize/addStartStopCircles';
+import addSymbols from '../../timelines/callbacks/onResize/addSymbols';
 import highlightMarks from '../../timelines/callbacks/onResize/highlightMarks';
 import IEsucks from '../../timelines/callbacks/onResize/IEsucks';
 import setClipPath from '../../timelines/callbacks/onResize/setClipPath';
@@ -27,6 +29,12 @@ export default function onResize() {
 
     //Draw reference lines.
     drawReferenceLines.call(this);
+
+    //Add circles to beginning and end of lines.
+    addStartStopCircles.call(this);
+
+    //Add symbols.
+    addSymbols.call(this);
 
     //Highlight events.
     highlightMarks.call(this);

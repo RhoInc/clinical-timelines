@@ -3,7 +3,7 @@ import { nest, select } from 'd3';
 export default function offsetCircles(mark, markData) {
     const context = this;
 
-    if (this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
+    if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
         this.svg.selectAll('g.point').each(function(d) {
             select(this).attr(
                 'transform',

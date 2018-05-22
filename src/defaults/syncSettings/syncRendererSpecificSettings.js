@@ -69,12 +69,6 @@ export default function syncRendererSpecificSettings(settings) {
       Timing settings
     \-------------------------------------------------------------------------------------------**/
 
-    //time_scale
-    settings.time_scale =
-        ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
-            ? settings.time_scale.toLowerCase()
-            : 'date';
-
     //date_display_format
     settings.date_display_format = settings.date_display_format || settings.date_format;
 
@@ -198,8 +192,8 @@ export default function syncRendererSpecificSettings(settings) {
 
                 //either an integer or not
                 referenceLineObject.time_scale = Number.isInteger(+referenceLineObject.timepoint)
-                    ? 'day'
-                    : 'date';
+                    ? 'Day'
+                    : 'Date';
 
                 //label predefined or not
                 referenceLineObject.label = reference_line.label
@@ -213,9 +207,9 @@ export default function syncRendererSpecificSettings(settings) {
             })
             .filter(
                 reference_line =>
-                    (reference_line.time_scale === 'day' &&
+                    (reference_line.time_scale === 'Day' &&
                         Number.isInteger(reference_line.timepoint)) ||
-                    (reference_line.time_scale === 'date' &&
+                    (reference_line.time_scale === 'Date' &&
                         time.format(settings.date_format).parse(reference_line.timepoint) instanceof
                             Date)
             );

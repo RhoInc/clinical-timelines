@@ -12,32 +12,6 @@ export default function augmentOtherControls() {
         .classed('ct-control', true)
         .attr('id', d => `control-${d.option.replace('.', '-')}`);
 
-    //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-    controls
-        .filter(d => ['Y-axis sort', 'Y-axis grouping'].indexOf(d.description) > -1)
-        .each(function(d) {
-            // Y-axis controls
-            const options = select(this).selectAll('option');
-
-            if (d.description === 'Y-axis sort')
-                // Add labels to Y-axis sort.
-                options.property(
-                    'label',
-                    di => d.relabels[d.values.filter(dii => dii !== 'None').indexOf(di)]
-                );
-            else if (d.description === 'Y-axis grouping')
-                // Add variable labels to Y-axis grouping options.
-                options.property(
-                    'label',
-                    di =>
-                        di !== 'None'
-                            ? context.config.groupings[
-                                  context.config.groupings.map(dii => dii.value_col).indexOf(di)
-                              ].label
-                            : 'None'
-                );
-        });
-
     //Redefine event highlighting event listener.
     controls
         .filter(d => d.option === 'event_highlighted')
@@ -67,7 +41,7 @@ export default function augmentOtherControls() {
 
     //Redefine y-axis grouping event listener.
     controls
-        .filter(d => d.option === 'y.grouping')
+        .filter(d => d.option === 'y.groupingLabel')
         .select('select')
         .on('change', function(d) {
             yAxisGrouping.call(context, this, d);

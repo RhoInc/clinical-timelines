@@ -20,7 +20,7 @@ export const rendererSpecificSettings = {
     grouping_direction: 'horizontal',
 
   //Timing settings
-    time_scale: 'date',
+    time_scale: 'Date',
 
       //Date settings
         stdt_col: 'STDT',

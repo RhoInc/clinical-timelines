@@ -157,10 +157,10 @@
             "title": "Time Scale",
             "description": "the time scale on which to plot events",
             "type": "string",
-            "default": "date",
+            "default": "Date",
             "enum": [
-                "date",
-                "day"
+                "Date",
+                "Day"
             ]
         },
         "stdt_col": {

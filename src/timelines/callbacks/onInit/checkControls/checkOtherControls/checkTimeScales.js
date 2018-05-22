@@ -15,7 +15,7 @@ export default function checkTimeScales() {
                     .style('color', 'red')
                     .html(errorText);
                 throw new Error(errorText);
-            } else if (!this.anyDates && this.config.time_scale === 'date') {
+            } else if (!this.anyDates && this.config.time_scale === 'Date') {
                 console.warn(
                     `The data either do not contain a variable named ${this.config.stdt_col} or ${
                         this.config.stdt_col
@@ -31,9 +31,9 @@ export default function checkTimeScales() {
                         this.config.stdy_col
                     } contains no valid values.  Please update the settings object to match the variable in the data or clean the data.`
                 );
-                this.config.time_scale = 'date';
+                this.config.time_scale = 'Date';
                 syncTimeScaleSettings(this.config);
-                this.IDtimeline.config.time_scale = 'date';
+                this.IDtimeline.config.time_scale = 'Date';
                 syncTimeScaleSettings(this.IDtimeline.config);
             }
 

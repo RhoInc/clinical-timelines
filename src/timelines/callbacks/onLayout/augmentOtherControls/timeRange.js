@@ -10,10 +10,10 @@ export default function timeRange(dropdown, d) {
             return this.selected;
         })
         .text();
-    const time_range = this.config[this.config.time_scale + '_ranges'].find(
+    const time_range = this.config[this.config.time_scale.toLowerCase() + '_ranges'].find(
         di => di.label === label
     );
-    this[this.config.time_scale + '_range'] = time_range.domain.slice();
+    this[this.config.time_scale.toLowerCase() + '_range'] = time_range.domain.slice();
     this.time_range = time_range.domain.slice();
 
     //Remove records without time data.

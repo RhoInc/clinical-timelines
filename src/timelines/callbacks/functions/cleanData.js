@@ -10,7 +10,7 @@ export default function cleanData() {
                     this.wide_data
                         .length} records have been removed due to missing or invalid day variable values.`
             );
-        else if (this.config.time_scale === 'date')
+        else if (this.config.time_scale === 'Date')
             console.warn(
                 `${this.initial_data.length -
                     this.wide_data

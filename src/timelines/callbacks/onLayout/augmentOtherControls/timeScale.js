@@ -16,7 +16,7 @@ export default function timeScale(dropdown, d) {
     if (!this.selected_id) hideTimeRangeControl.call(this);
 
     //Update time range settings.
-    this.time_range = this[this.config.time_scale + '_range'];
+    this.time_range = this[this.config.time_scale.toLowerCase() + '_range'];
 
     //Update ID timeline time scale settings
     this.IDtimeline.config.time_scale = this.config.time_scale;

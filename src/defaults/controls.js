@@ -4,7 +4,7 @@ export default [
         option: 'event_highlighted',
         label: '',
         description: 'Event highlighting',
-        values: null, // set in onInit() callback
+        values: null // set in onInit() callback
     },
     {
         type: 'dropdown',
@@ -12,7 +12,7 @@ export default [
         label: '',
         description: 'X-axis scale',
         values: ['Date', 'Day'],
-        require: true,
+        require: true
     },
     {
         type: 'dropdown',
@@ -20,7 +20,7 @@ export default [
         label: '',
         description: 'Time range',
         values: null, // set in onInit() callback
-        require: true,
+        require: true
     },
     {
         type: 'dropdown',
@@ -28,7 +28,7 @@ export default [
         label: '',
         description: 'Time range',
         values: null, // set in onInit() callback
-        require: true,
+        require: true
     },
     {
         type: 'dropdown',
@@ -36,13 +36,13 @@ export default [
         label: '',
         description: 'Y-axis sort',
         values: ['By Earliest Event', 'Alphanumerically'],
-        require: true,
+        require: true
     },
     {
         type: 'dropdown',
         option: 'y.groupingLabel',
         label: '',
         description: 'Y-axis grouping',
-        values: null, // set in onInit() callback
+        values: null // set in onInit() callback
     }
 ];

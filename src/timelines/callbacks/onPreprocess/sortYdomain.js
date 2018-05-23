@@ -19,7 +19,9 @@ export default function sortYdomain() {
 
                     return aGrouping > bGrouping
                         ? -1
-                        : aGrouping < bGrouping ? 1 : earliestEventSort;
+                        : aGrouping < bGrouping
+                            ? 1
+                            : earliestEventSort;
                 }); // nest data by grouping and ID.
 
             //Capture list of IDs by grouping.
@@ -68,7 +70,9 @@ export default function sortYdomain() {
 
                     return aGrouping > bGrouping
                         ? -1
-                        : aGrouping < bGrouping ? 1 : alphanumericSort;
+                        : aGrouping < bGrouping
+                            ? 1
+                            : alphanumericSort;
                 });
 
             this.config.y.domain.forEach(d => {

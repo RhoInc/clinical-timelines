@@ -7,7 +7,9 @@ export default function updateTimeRangeControls() {
     timeRangeControls.property(
         'type',
         !this.clinicalTimelines.document.documentMode
-            ? this.config.time_scale === 'Date' ? 'date' : 'number'
+            ? this.config.time_scale === 'Date'
+                ? 'date'
+                : 'number'
             : 'text'
     );
 

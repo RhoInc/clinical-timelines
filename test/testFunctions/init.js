@@ -98,7 +98,7 @@ export default function init(settingsObject) {
                 it('adds a y-axis grouping dropdown', () => {
                     const
                         nodeList = dom.window.document
-                            .querySelectorAll('#ct-controls #control-y-grouping');
+                            .querySelectorAll('#ct-controls #control-y-groupingLabel');
                     if (Array.isArray(CT.settings.groupings) && CT.settings.groupings.length)
                         expect(nodeList.length).toEqual(1);
                     else

@@ -17,14 +17,14 @@ export default function addSymbols() {
                 .each(d => {
                     const x = this.x(d.values.x);
                     const y = this.y(d.values.y) + this.y.rangeBand() / 2;
-                    const sizeFactor = 1.5;
+                    const sizeFactor = 1;
                     d.symbolCoordinates = {
-                        x1: x - this.config.mark_thickness * sizeFactor / 2,
+                        x1: x - this.config.mark_thickness * sizeFactor,
                         x2: x,
-                        x3: x + this.config.mark_thickness * sizeFactor / 2,
-                        y1: y - this.config.mark_thickness * sizeFactor / 2,
+                        x3: x + this.config.mark_thickness * sizeFactor,
+                        y1: y - this.config.mark_thickness * sizeFactor,
                         y2: y,
-                        y3: y + this.config.mark_thickness * sizeFactor / 2
+                        y3: y + this.config.mark_thickness * sizeFactor
                     };
                     d.color = this.colorScale(d.values.raw[0][this.config.event_col]);
                 });

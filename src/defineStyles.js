@@ -214,6 +214,17 @@ export default function defineStyles() {
                 '    stroke-width: 1;' +
                 '}',
 
+          //Second legend
+            '#clinical-timelines #ct-legend {' +
+                '    list-style-type: none;' +
+                '    position: absolute;' +
+                '    top: 0;' +
+                '}',
+            '#clinical-timelines .ct-legend-item {' +
+                '    cursor: default;' +
+                '    margin-right: 10px;' +
+                '}',
+
           //Y-axis
             '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick {' +
                 '    cursor: pointer;' +

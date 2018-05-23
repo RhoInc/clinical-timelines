@@ -1175,6 +1175,17 @@
                 '    stroke-width: 1;' +
                 '}',
 
+            //Second legend
+            '#clinical-timelines #ct-legend {' +
+                '    list-style-type: none;' +
+                '    position: absolute;' +
+                '    top: 0;' +
+                '}',
+            '#clinical-timelines .ct-legend-item {' +
+                '    cursor: default;' +
+                '    margin-right: 10px;' +
+                '}',
+
             //Y-axis
             '#clinical-timelines #ct-right-column #ct-timelines .wc-chart .wc-svg .y.axis .tick {' +
                 '    cursor: pointer;' +
@@ -3105,6 +3116,163 @@
         });
     }
 
+    function timepoint(legendMark) {
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark', true)
+            .attr({
+                cx: 4,
+                cy: 7.5,
+                r: 4,
+                fill: 'black'
+            });
+        legendMark
+            .append('rect')
+            .classed('ct-legend-mark', true)
+            .attr({
+                x: 10,
+                y: 3.5,
+                width: 8,
+                height: 8,
+                fill: 'black'
+            })
+            .append('animateTransform')
+            .attr({
+                attributeName: 'transform',
+                type: 'rotate',
+                from: '0 14 7.5',
+                to: '360 14 7.5',
+                dur: '4s',
+                repeatCount: 'indefinite'
+            });
+        legendMark
+            .append('polygon')
+            .classed('ct-legend-mark', true)
+            .attr({
+                points: [[22, 4], [30, 8], [22, 12]]
+                    .map(function(point) {
+                        return point.join(',');
+                    })
+                    .join(','),
+                fill: 'black'
+            })
+            .append('animateTransform')
+            .attr({
+                attributeName: 'transform',
+                type: 'rotate',
+                from: '0 26 8',
+                to: '360 26 8',
+                dur: '4s',
+                repeatCount: 'indefinite'
+            });
+    }
+
+    function timeInterval(legendMark) {
+        legendMark
+            .append('line')
+            .classed('ct-legend-mark', true)
+            .attr({
+                x1: 4,
+                x2: 26,
+                y1: 8,
+                y2: 8
+            })
+            .style({
+                'stroke-width': 8,
+                stroke: 'black',
+                'stroke-linecap': 'round'
+            });
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark ct-start-stop-circle', true)
+            .attr({
+                cx: 5,
+                cy: 8,
+                r: 2.5,
+                fill: 'white',
+                stroke: 'lightgray'
+            });
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark ct-start-stop-circle', true)
+            .attr({
+                cx: 25,
+                cy: 8,
+                r: 2.5,
+                fill: 'white',
+                stroke: 'lightgray'
+            });
+    }
+
+    function ongoingEvent(legendMark) {
+        legendMark
+            .append('line')
+            .classed('ct-legend-mark', true)
+            .attr({
+                x1: 4,
+                x2: 20,
+                y1: 8,
+                y2: 8
+            })
+            .style({
+                'stroke-width': 8,
+                stroke: 'black',
+                'stroke-linecap': 'round'
+            });
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark ct-start-stop-circle', true)
+            .attr({
+                cx: 5,
+                cy: 8,
+                r: 2.5,
+                fill: 'white',
+                stroke: 'lightgray'
+            });
+        legendMark
+            .append('polygon')
+            .classed('ct-legend-mark ct-ongoing-event', true)
+            .attr({
+                points: [[18, 2], [30, 7.5], [18, 13]]
+                    .map(function(point) {
+                        return point.join(',');
+                    })
+                    .join(' '),
+                fill: 'black',
+                stroke: 'black'
+            });
+    }
+
+    function addSecondLegend() {
+        var context = this;
+        var secondLegend = this.wrap.insert('ul', '.wc-svg').attr('id', 'ct-legend');
+        secondLegend
+            .selectAll('li')
+            .data([
+                { label: 'timepoint', function: timepoint },
+                { label: 'time interval', function: timeInterval },
+                { label: 'ongoing event', function: ongoingEvent }
+            ])
+            .enter()
+            .append('li')
+            .classed('ct-legend-item', true)
+            .each(function(d) {
+                var legendItem = d3$1.select(this);
+                var legendMark = legendItem
+                    .append('svg')
+                    .classed('ct-legend-color-block', true)
+                    .attr({
+                        width: 35,
+                        height: 15
+                    });
+                d.function.call(context, legendMark);
+                var legendLabel = legendItem
+                    .append('span')
+                    .classed('ct-legend-label', true)
+                    .text(d.label);
+            });
+    }
+
     function drawTopXaxis() {
         var topXaxis = d3$1.svg
                 .axis()
@@ -4228,6 +4396,9 @@
     function onResize() {
         //Add filter functionality to legend.
         legendFilter.call(this);
+
+        //Add second legend to differentiate timepoints, time intervals, and ongoing events.
+        addSecondLegend.call(this);
 
         //Draw second x-axis at top of chart.
         drawTopXaxis.call(this);

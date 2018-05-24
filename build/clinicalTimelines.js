@@ -373,7 +373,6 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
-                    'clip-path': 'url(#1)',
                     'stroke-width': null // set in syncSettings()
                 }
             },
@@ -383,7 +382,6 @@
                 tooltip: null, // set in syncSettings()
                 radius: null, // set in syncSettings()
                 attributes: {
-                    'clip-path': 'url(#1)',
                     'stroke-width': null // set in syncSettings()
                 }
             }
@@ -1017,9 +1015,9 @@
     \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines .ct-column {' + '    display: inline-block;' + '}',
-            '#clinical-timelines #ct-left-column {' + '    width: 20%;' + '    float: left;' + '}',
+            '#clinical-timelines #ct-left-column {' + '    width: 24%;' + '    float: left;' + '}',
             '#clinical-timelines #ct-right-column {' +
-                '    width: 79%;' +
+                '    width: 75%;' +
                 '    float: right;' +
                 '}',
             '#clinical-timelines .ct-column > * {' +
@@ -1141,6 +1139,7 @@
     \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines #ct-right-column > * {' + '}',
+            '#clinical-timelines #ct-right-column #ct-timelines {' + '    min-height: 80px;' + '}',
 
             //Legend
             '#clinical-timelines #ct-right-column #ct-timelines .legend {' +
@@ -1152,6 +1151,7 @@
                 '    padding: 5px 7px 3px 4px;' +
                 '    border: 2px solid white;' +
                 '    margin-right: .25em !important;' +
+                '    margin-left: 10em;' +
                 '}',
             '#clinical-timelines #ct-right-column #ct-timelines .legend-item {' +
                 '    cursor: pointer;' +
@@ -1931,11 +1931,11 @@
                             _this.config.stdt_col +
                             ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
                     );
-                    _this.config.time_scale = 'day';
+                    _this.config.time_scale = 'Day';
                     syncTimeScaleSettings(_this.config);
-                    _this.IDtimeline.config.time_scale = 'day';
+                    _this.IDtimeline.config.time_scale = 'Day';
                     syncTimeScaleSettings(_this.IDtimeline.config);
-                } else if (!_this.anyDays && _this.config.time_scale === 'day') {
+                } else if (!_this.anyDays && _this.config.time_scale === 'Day') {
                     console.warn(
                         'The data either do not contain a variable named ' +
                             _this.config.stdy_col +
@@ -2060,19 +2060,19 @@
 
         //Warn user of removed records.
         if (this.wide_data.length < this.initial_data.length) {
-            if (this.config.time_scale === 'day')
-                console.warn(
-                    this.initial_data.length -
-                        this.wide_data.length +
-                        ' records have been removed due to missing or invalid day variable values.'
-                );
-            else if (this.config.time_scale === 'Date')
+            if (this.config.time_scale === 'Date')
                 console.warn(
                     this.initial_data.length -
                         this.wide_data.length +
                         ' records have been removed due to missing or invalid date variable values that do not match settings.date_format (' +
                         this.config.date_format +
                         ')'
+                );
+            else if (this.config.time_scale === 'Day')
+                console.warn(
+                    this.initial_data.length -
+                        this.wide_data.length +
+                        ' records have been removed due to missing or invalid day variable values.'
                 );
         }
     }
@@ -2192,6 +2192,12 @@
 
         //Display ID information.
         this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', false);
+
+        //Hide reference line table.
+        if (this.config.reference_lines)
+            this.config.reference_lines.forEach(function(reference_line) {
+                reference_line.tableContainer.remove();
+            });
 
         //Hide clinical timelines.
         this.wrap.select('svg.wc-svg').classed('ct-hidden', true);
@@ -3551,14 +3557,14 @@
                 })
                 .rollup(function(d) {
                     //Expose start and end point of line.
-                    return _this.config.time_scale === 'day'
+                    return _this.config.time_scale === 'Date'
                         ? {
-                              x1: +d[0].values[0].key,
-                              x2: +d[0].values[1].key
-                          }
-                        : {
                               x1: new Date(d[0].values[0].key),
                               x2: new Date(d[0].values[1].key)
+                          }
+                        : {
+                              x1: +d[0].values[0].key,
+                              x2: +d[0].values[1].key
                           };
                 })
                 .entries(
@@ -3885,16 +3891,13 @@
                             cy: context.y(di.values.y) + context.y.rangeBand() / 2,
                             r: context.config.mark_thickness * 2 / 5,
                             fill: 'white',
-                            stroke: 'lightgray',
-                            'clip-path': 'url(#' + context.id + ')'
+                            stroke: 'lightgray'
                         });
                 });
         });
     }
 
     function drawPolygon(marks, event_symbol) {
-        var context = this;
-
         marks.each(function(d) {
             var g = d3.select(this);
 
@@ -3956,8 +3959,7 @@
                             return vertex.join(',');
                         })
                         .join(' '),
-                    fill: d.color,
-                    'clip-path': d.key && d.values ? 'url(#' + context.id + ')' : null
+                    fill: d.color
                 });
         });
     }
@@ -4466,15 +4468,11 @@
     }
 
     function onInit$1() {
-        var _this = this;
-
         this.clinicalTimelines = this.parent.clinicalTimelines;
         this.config.color_dom = this.parent.timelines.config.color_dom;
         this.config.legend.order = this.parent.timelines.config.legend.order;
         this.config.x.domain = null;
-        this.config.marks.forEach(function(mark) {
-            mark.attributes['clip-path'] = 'url(#' + _this.id + ')';
-        });
+        this.config.y.sort = 'alphabetical-ascending';
     }
 
     function onLayout$1() {}
@@ -4495,22 +4493,24 @@
 
         this.svg.select('.time-range').remove();
         var x_dom = this.x_dom.map(function(x) {
-                return x instanceof Date ? x.getTime() : x;
-            }),
-            timeRange =
-                this.parent.timelines.config.time_scale === 'day'
-                    ? this.parent.timelines.day_range
-                    : this.parent.timelines.date_range.map(function(dt) {
-                          return dt.getTime();
-                      }),
-            timeRangeText =
-                this.config.time_scale === 'day'
-                    ? this.parent.timelines.day_range.map(function(dy) {
-                          return dy.toString();
-                      })
-                    : this.parent.timelines.date_range.map(function(dt) {
-                          return d3$1.time.format(_this.parent.timelines.config.date_format)(dt);
-                      }); // update to date_display_format at some point
+            return x instanceof Date ? x.getTime() : x;
+        });
+        var timeRange =
+            this.parent.timelines.config.time_scale === 'Date'
+                ? this.parent.timelines.date_range.map(function(dt) {
+                      return dt.getTime();
+                  })
+                : this.parent.timelines.day_range;
+        var timeRangeText =
+            this.config.time_scale === 'Date'
+                ? this.parent.timelines.date_range.map(function(dt) {
+                      return d3$1.time.format(
+                          _this.parent.timelines.config.date_display_format
+                      )(dt);
+                  })
+                : this.parent.timelines.day_range.map(function(dy) {
+                      return dy.toString();
+                  });
 
         if (
             (x_dom[0] !== timeRange[0] || x_dom[1] !== timeRange[1]) &&
@@ -4534,7 +4534,7 @@
                     }),
                 timeRangeTooltip = timeRangeGroup
                     .append('title')
-                    .text(this.config.time_scalePropCased + ' range: ' + timeRangeText.join(' - '));
+                    .text(this.config.time_scale + ' range: ' + timeRangeText.join(' - '));
         }
     }
 
@@ -4542,7 +4542,7 @@
         var _this = this;
 
         //Hide legend.
-        this.wrap.select('.legend').classed('ct-hidden', true);
+        this.parent.wrap.select('.legend').classed('ct-hidden', true);
 
         //Draw ongoing marks.
         this.config.marks.forEach(function(mark, i) {
@@ -4574,9 +4574,6 @@
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
-
-        //Set clip-path of all svg elements to the ID of the current chart.
-        setClipPath.call(this);
     }
 
     function onDestroy$1() {}

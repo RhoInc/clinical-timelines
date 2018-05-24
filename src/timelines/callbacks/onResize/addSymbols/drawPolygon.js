@@ -60,8 +60,7 @@ export default function drawPolygon(marks, event_symbol) {
             .classed('ct-custom-mark', true)
             .attr({
                 points: vertices.map(vertex => vertex.join(',')).join(' '),
-                fill: d.color,
-                'clip-path': d.key && d.values ? `url(#${context.id})` : null
+                fill: d.color
             });
     });
 }

@@ -21,11 +21,11 @@ export default function checkTimeScales() {
                         this.config.stdt_col
                     } contains no valid values.  Please update the settings object to match the variable in the data or clean the data.`
                 );
-                this.config.time_scale = 'day';
+                this.config.time_scale = 'Day';
                 syncTimeScaleSettings(this.config);
-                this.IDtimeline.config.time_scale = 'day';
+                this.IDtimeline.config.time_scale = 'Day';
                 syncTimeScaleSettings(this.IDtimeline.config);
-            } else if (!this.anyDays && this.config.time_scale === 'day') {
+            } else if (!this.anyDays && this.config.time_scale === 'Day') {
                 console.warn(
                     `The data either do not contain a variable named ${this.config.stdy_col} or ${
                         this.config.stdy_col

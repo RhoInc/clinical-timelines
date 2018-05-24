@@ -21,14 +21,14 @@ export default function offsetLines(mark, markData) {
             .key(d => d.key)
             .rollup(d => {
                 //Expose start and end point of line.
-                return this.config.time_scale === 'day'
+                return this.config.time_scale === 'Date'
                     ? {
-                          x1: +d[0].values[0].key,
-                          x2: +d[0].values[1].key
-                      }
-                    : {
                           x1: new Date(d[0].values[0].key),
                           x2: new Date(d[0].values[1].key)
+                      }
+                    : {
+                          x1: +d[0].values[0].key,
+                          x2: +d[0].values[1].key
                       };
             })
             .entries(markData.filter(d => d.values.length > 1));

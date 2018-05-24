@@ -48,11 +48,11 @@ export default function defineStyles() {
                 '    display: inline-block;' +
                 '}',
             '#clinical-timelines #ct-left-column {' +
-                '    width: 20%;' +
+                '    width: 24%;' +
                 '    float: left;' +
                 '}',
             '#clinical-timelines #ct-right-column {' +
-                '    width: 79%;' +
+                '    width: 75%;' +
                 '    float: right;' +
                 '}',
             '#clinical-timelines .ct-column > * {' +
@@ -180,6 +180,9 @@ export default function defineStyles() {
 
             '#clinical-timelines #ct-right-column > * {' +
                 '}',
+            '#clinical-timelines #ct-right-column #ct-timelines {' +
+                '    min-height: 80px;' +
+                '}',
 
           //Legend
             '#clinical-timelines #ct-right-column #ct-timelines .legend {' +
@@ -191,6 +194,7 @@ export default function defineStyles() {
                 '    padding: 5px 7px 3px 4px;' +
                 '    border: 2px solid white;' +
                 '    margin-right: .25em !important;' +
+                '    margin-left: 10em;' +
                 '}',
             '#clinical-timelines #ct-right-column #ct-timelines .legend-item {' +
                 '    cursor: pointer;' +

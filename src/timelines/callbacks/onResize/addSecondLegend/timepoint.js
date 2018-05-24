@@ -1,46 +1,57 @@
 export default function timepoint(legendMark) {
-    legendMark
-        .append('circle')
-        .classed('ct-legend-mark', true)
-        .attr({
-            cx: 4,
-            cy: 7.5,
-            r: 4,
-            fill: 'black'
-        });
+    const x = 1;
+    const y = 10;
+    const width = 8;
+    const height = 8;
+    const margin = 2;
     legendMark
         .append('rect')
         .classed('ct-legend-mark', true)
         .attr({
-            x: 10,
-            y: 3.5,
-            width: 8,
-            height: 8,
+            x: x + width * 0 + margin * 0,
+            y: y - height / 2,
+            width: width,
+            height: height,
             fill: 'black'
-        })
-        .append('animateTransform')
+        });
+    //.append('animateTransform')
+    //.attr({
+    //    attributeName: 'transform',
+    //    type: 'rotate',
+    //    from: `0 ${x + width/2} ${y}`,
+    //    to: `360 ${x + width/2} ${y}`,
+    //    dur: '4s',
+    //    repeatCount: 'indefinite'
+    //});
+    legendMark
+        .append('circle')
+        .classed('ct-legend-mark', true)
         .attr({
-            attributeName: 'transform',
-            type: 'rotate',
-            from: '0 14 7.5',
-            to: '360 14 7.5',
-            dur: '4s',
-            repeatCount: 'indefinite'
+            cx: x + width * 1 + width / 2 + +margin * 1,
+            cy: y,
+            r: width / 2,
+            fill: 'black'
         });
     legendMark
         .append('polygon')
         .classed('ct-legend-mark', true)
         .attr({
-            points: [[22, 4], [30, 8], [22, 12]].map(point => point.join(',')).join(','),
+            points: [
+                [x + width * 2 + margin * 2, y - height / 2],
+                [x + width * 2 + margin * 2 + width, y],
+                [x + width * 2 + margin * 2, y + height / 2]
+            ]
+                .map(point => point.join(','))
+                .join(','),
             fill: 'black'
-        })
-        .append('animateTransform')
-        .attr({
-            attributeName: 'transform',
-            type: 'rotate',
-            from: '0 26 8',
-            to: '360 26 8',
-            dur: '4s',
-            repeatCount: 'indefinite'
         });
+    //.append('animateTransform')
+    //.attr({
+    //    attributeName: 'transform',
+    //    type: 'rotate',
+    //    from: `0 ${x + width*2 + 2 + width/2} ${y}`,
+    //    to: `360 ${x + width*2 + 2 + width/2} ${y}`,
+    //    dur: '4s',
+    //    repeatCount: 'indefinite'
+    //});
 }

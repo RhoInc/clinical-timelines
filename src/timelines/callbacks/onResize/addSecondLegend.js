@@ -22,8 +22,8 @@ export default function addSecondLegend() {
                 .append('svg')
                 .classed('ct-legend-color-block', true)
                 .attr({
-                    width: 35,
-                    height: 15
+                    width: 36,
+                    height: 16
                 });
             d.function.call(context, legendMark);
             const legendLabel = legendItem

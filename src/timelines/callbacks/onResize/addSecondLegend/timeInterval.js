@@ -1,12 +1,13 @@
 export default function timeInterval(legendMark) {
+    const y = 10;
     legendMark
         .append('line')
         .classed('ct-legend-mark', true)
         .attr({
             x1: 4,
             x2: 26,
-            y1: 8,
-            y2: 8
+            y1: y,
+            y2: y
         })
         .style({
             'stroke-width': 8,
@@ -18,7 +19,7 @@ export default function timeInterval(legendMark) {
         .classed('ct-legend-mark ct-start-stop-circle', true)
         .attr({
             cx: 5,
-            cy: 8,
+            cy: y,
             r: 2.5,
             fill: 'white',
             stroke: 'lightgray'
@@ -28,7 +29,7 @@ export default function timeInterval(legendMark) {
         .classed('ct-legend-mark ct-start-stop-circle', true)
         .attr({
             cx: 25,
-            cy: 8,
+            cy: y,
             r: 2.5,
             fill: 'white',
             stroke: 'lightgray'

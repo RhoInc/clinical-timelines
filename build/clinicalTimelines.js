@@ -2,8 +2,8 @@
     typeof exports === 'object' && typeof module !== 'undefined'
         ? (module.exports = factory(require('d3'), require('webcharts')))
         : typeof define === 'function' && define.amd
-            ? define(['d3', 'webcharts'], factory)
-            : (global.clinicalTimelines = factory(global.d3, global.webCharts));
+          ? define(['d3', 'webcharts'], factory)
+          : (global.clinicalTimelines = factory(global.d3, global.webCharts));
 })(this, function(d3$1, webcharts) {
     'use strict';
 
@@ -2637,9 +2637,7 @@
         timeRangeControls.property(
             'type',
             !this.clinicalTimelines.document.documentMode
-                ? this.config.time_scale === 'Date'
-                    ? 'date'
-                    : 'number'
+                ? this.config.time_scale === 'Date' ? 'date' : 'number'
                 : 'text'
         );
 
@@ -2913,17 +2911,11 @@
                         var earliestEventSort =
                             a.values > b.values
                                 ? -2
-                                : a.values < b.values
-                                    ? 2
-                                    : a.key > b.key
-                                        ? -1
-                                        : 1;
+                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
 
                         return aGrouping > bGrouping
                             ? -1
-                            : aGrouping < bGrouping
-                                ? 1
-                                : earliestEventSort;
+                            : aGrouping < bGrouping ? 1 : earliestEventSort;
                     }); // nest data by grouping and ID.
 
                 //Capture list of IDs by grouping.
@@ -2959,11 +2951,7 @@
                         var earliestEventSort =
                             a.values > b.values
                                 ? -2
-                                : a.values < b.values
-                                    ? 2
-                                    : a.key > b.key
-                                        ? -1
-                                        : 1;
+                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
 
                         return earliestEventSort;
                     })
@@ -2996,9 +2984,7 @@
 
                         return aGrouping > bGrouping
                             ? -1
-                            : aGrouping < bGrouping
-                                ? 1
-                                : alphanumericSort;
+                            : aGrouping < bGrouping ? 1 : alphanumericSort;
                     });
 
                 this.config.y.domain.forEach(function(d) {
@@ -3117,65 +3103,75 @@
     }
 
     function timepoint(legendMark) {
-        legendMark
-            .append('circle')
-            .classed('ct-legend-mark', true)
-            .attr({
-                cx: 4,
-                cy: 7.5,
-                r: 4,
-                fill: 'black'
-            });
+        var x = 1;
+        var y = 10;
+        var width = 8;
+        var height = 8;
+        var margin = 2;
         legendMark
             .append('rect')
             .classed('ct-legend-mark', true)
             .attr({
-                x: 10,
-                y: 3.5,
-                width: 8,
-                height: 8,
+                x: x + width * 0 + margin * 0,
+                y: y - height / 2,
+                width: width,
+                height: height,
                 fill: 'black'
-            })
-            .append('animateTransform')
+            });
+        //.append('animateTransform')
+        //.attr({
+        //    attributeName: 'transform',
+        //    type: 'rotate',
+        //    from: `0 ${x + width/2} ${y}`,
+        //    to: `360 ${x + width/2} ${y}`,
+        //    dur: '4s',
+        //    repeatCount: 'indefinite'
+        //});
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark', true)
             .attr({
-                attributeName: 'transform',
-                type: 'rotate',
-                from: '0 14 7.5',
-                to: '360 14 7.5',
-                dur: '4s',
-                repeatCount: 'indefinite'
+                cx: x + width * 1 + width / 2 + +margin * 1,
+                cy: y,
+                r: width / 2,
+                fill: 'black'
             });
         legendMark
             .append('polygon')
             .classed('ct-legend-mark', true)
             .attr({
-                points: [[22, 4], [30, 8], [22, 12]]
+                points: [
+                    [x + width * 2 + margin * 2, y - height / 2],
+                    [x + width * 2 + margin * 2 + width, y],
+                    [x + width * 2 + margin * 2, y + height / 2]
+                ]
                     .map(function(point) {
                         return point.join(',');
                     })
                     .join(','),
                 fill: 'black'
-            })
-            .append('animateTransform')
-            .attr({
-                attributeName: 'transform',
-                type: 'rotate',
-                from: '0 26 8',
-                to: '360 26 8',
-                dur: '4s',
-                repeatCount: 'indefinite'
             });
+        //.append('animateTransform')
+        //.attr({
+        //    attributeName: 'transform',
+        //    type: 'rotate',
+        //    from: `0 ${x + width*2 + 2 + width/2} ${y}`,
+        //    to: `360 ${x + width*2 + 2 + width/2} ${y}`,
+        //    dur: '4s',
+        //    repeatCount: 'indefinite'
+        //});
     }
 
     function timeInterval(legendMark) {
+        var y = 10;
         legendMark
             .append('line')
             .classed('ct-legend-mark', true)
             .attr({
                 x1: 4,
                 x2: 26,
-                y1: 8,
-                y2: 8
+                y1: y,
+                y2: y
             })
             .style({
                 'stroke-width': 8,
@@ -3187,7 +3183,7 @@
             .classed('ct-legend-mark ct-start-stop-circle', true)
             .attr({
                 cx: 5,
-                cy: 8,
+                cy: y,
                 r: 2.5,
                 fill: 'white',
                 stroke: 'lightgray'
@@ -3197,7 +3193,7 @@
             .classed('ct-legend-mark ct-start-stop-circle', true)
             .attr({
                 cx: 25,
-                cy: 8,
+                cy: y,
                 r: 2.5,
                 fill: 'white',
                 stroke: 'lightgray'
@@ -3205,14 +3201,15 @@
     }
 
     function ongoingEvent(legendMark) {
+        var y = 10;
         legendMark
             .append('line')
             .classed('ct-legend-mark', true)
             .attr({
                 x1: 4,
                 x2: 20,
-                y1: 8,
-                y2: 8
+                y1: y,
+                y2: y
             })
             .style({
                 'stroke-width': 8,
@@ -3224,7 +3221,7 @@
             .classed('ct-legend-mark ct-start-stop-circle', true)
             .attr({
                 cx: 5,
-                cy: 8,
+                cy: y,
                 r: 2.5,
                 fill: 'white',
                 stroke: 'lightgray'
@@ -3233,7 +3230,7 @@
             .append('polygon')
             .classed('ct-legend-mark ct-ongoing-event', true)
             .attr({
-                points: [[18, 2], [30, 7.5], [18, 13]]
+                points: [[18, y - 6], [30, y], [18, y + 6]]
                     .map(function(point) {
                         return point.join(',');
                     })
@@ -3262,8 +3259,8 @@
                     .append('svg')
                     .classed('ct-legend-color-block', true)
                     .attr({
-                        width: 35,
-                        height: 15
+                        width: 36,
+                        height: 16
                     });
                 d.function.call(context, legendMark);
                 var legendLabel = legendItem
@@ -3607,11 +3604,7 @@
                                 x2diff = b.x2 - a.x2;
                             return x1diff !== 0
                                 ? x1diff
-                                : x2diff !== 0
-                                    ? x2diff
-                                    : a.key < b.key
-                                        ? -1
-                                        : 1;
+                                : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
                         });
 
                 if (overlappingLines.length) {

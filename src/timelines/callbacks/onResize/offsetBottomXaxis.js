@@ -30,7 +30,7 @@ export default function offsetBottomXaxis() {
         bottomXaxisTitle.attr(
             'transform',
             `translate(${+bottomXaxisTitleTransformCoordinates[0]},${+bottomXaxisTitleTransformCoordinates[1] -
-                7 * this.margin.bottom / 16})`
+                (7 * this.margin.bottom) / 16})`
         );
     }
 }

@@ -44,12 +44,10 @@ export default function updateTable(reference_line) {
         .append('tr')
         .each(function(d) {
             const row = select(this);
-            row
-                .append('td')
+            row.append('td')
                 .text(d.key)
                 .attr('class', d => d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : ''));
-            row
-                .append('td')
+            row.append('td')
                 .text(d.n)
                 .attr('class', d => d.class);
         });

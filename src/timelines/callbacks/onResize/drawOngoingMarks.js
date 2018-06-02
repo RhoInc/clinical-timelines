@@ -21,12 +21,11 @@ export default function drawOngoingMarks() {
                         ? lineSettings.attributes['stroke-width'] * 1.5
                         : lineSettings.attributes['stroke-width'] * 1.5);
                 const heightOffset = highlight
-                    ? lineSettings.attributes['stroke-width'] * 2 / 3
-                    : lineSettings.attributes['stroke-width'] * 2 / 3;
+                    ? (lineSettings.attributes['stroke-width'] * 2) / 3
+                    : (lineSettings.attributes['stroke-width'] * 2) / 3;
                 const arrow = [[length, y], [x, y - heightOffset], [x, y + heightOffset]];
 
-                g
-                    .insert('polygon', 'line')
+                g.insert('polygon', 'line')
                     .datum(d)
                     .classed('ct-ongoing-event', true)
                     .classed('ct-highlighted', highlight)

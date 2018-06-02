@@ -3,6 +3,8 @@ import { nest, select, time, min, max } from 'd3';
 export default function offsetLines(mark, markData) {
     const context = this;
 
+    this.svg.selectAll('g.line').attr('transform', null);
+
     if (
         this.config.offset_col &&
         this.raw_data.length &&
@@ -67,7 +69,11 @@ export default function offsetLines(mark, markData) {
                             x2diff = b.x2 - a.x2;
                         return x1diff !== 0
                             ? x1diff
-                            : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
+                            : x2diff !== 0
+                                ? x2diff
+                                : a.key < b.key
+                                    ? -1
+                                    : 1;
                     });
 
             if (overlappingLines.length) {

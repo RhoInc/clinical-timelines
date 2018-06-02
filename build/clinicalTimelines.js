@@ -2,8 +2,8 @@
     typeof exports === 'object' && typeof module !== 'undefined'
         ? (module.exports = factory(require('d3'), require('webcharts')))
         : typeof define === 'function' && define.amd
-          ? define(['d3', 'webcharts'], factory)
-          : (global.clinicalTimelines = factory(global.d3, global.webCharts));
+            ? define(['d3', 'webcharts'], factory)
+            : (global.clinicalTimelines = factory(global.d3, global.webCharts));
 })(this, function(d3$1, webcharts) {
     'use strict';
 
@@ -746,8 +746,8 @@
         //Circles
         var circles = settings.marks[1];
         circles.per = [settings.id_col, settings.event_col, settings.seq_col, 'wc_value'];
-        circles.radius = settings.mark_thickness * 3 / 4;
-        circles.attributes['stroke-width'] = settings.mark_thickness * 1 / 2;
+        circles.radius = (settings.mark_thickness * 3) / 4;
+        circles.attributes['stroke-width'] = (settings.mark_thickness * 1) / 2;
 
         //Color stratification
         settings.color_by = settings.event_col;
@@ -1690,7 +1690,6 @@
         });
     }
 
-    //Capture and count all IDs in data.
     function getPopulationDetails() {
         var _this = this;
 
@@ -1740,7 +1739,6 @@
         this.controls.ready = true;
     }
 
-    //Standardize invalid date and day values.
     function standardizeTimeVariables() {
         var _this = this;
 
@@ -1779,7 +1777,6 @@
         });
     }
 
-    //Capture all event types in array and define color domain as well as event type order.
     function handleEventTypes() {
         var _this = this;
 
@@ -1889,7 +1886,6 @@
         else this.time_range = this.day_range.slice();
     }
 
-    //Update time range data and settings.
     function handleTimeRanges() {
         //Calculate extent of each time scale.
         defineFullTimeRanges.call(this);
@@ -2030,7 +2026,6 @@
         });
     }
 
-    //Check control inputs for invalid settings.
     function checkControls() {
         checkOtherControls.call(this);
         checkFilters.call(this);
@@ -2044,7 +2039,7 @@
             this.config.marks.forEach(function(mark) {
                 mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
             });
-            this.config.IDtimelineSettings.marks.forEach(function(mark) {
+            this.clinicalTimelines.settings.IDtimeline.marks.forEach(function(mark) {
                 mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
             });
         }
@@ -2096,7 +2091,6 @@
         return my_data;
     }
 
-    //Define a record for each timepoint and a record for both the start and end of a time interval.
     function defineData() {
         var _this = this;
 
@@ -2217,8 +2211,7 @@
             })[0];
             this.clinicalTimelines.containers.IDdetails.selectAll('.ct-characteristic').each(
                 function(d) {
-                    d3$1
-                        .select(this)
+                    d3$1.select(this)
                         .select('span')
                         .text(id_characteristics[d.value_col]);
                 }
@@ -2643,7 +2636,9 @@
         timeRangeControls.property(
             'type',
             !this.clinicalTimelines.document.documentMode
-                ? this.config.time_scale === 'Date' ? 'date' : 'number'
+                ? this.config.time_scale === 'Date'
+                    ? 'date'
+                    : 'number'
                 : 'text'
         );
 
@@ -2917,11 +2912,17 @@
                         var earliestEventSort =
                             a.values > b.values
                                 ? -2
-                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
+                                : a.values < b.values
+                                    ? 2
+                                    : a.key > b.key
+                                        ? -1
+                                        : 1;
 
                         return aGrouping > bGrouping
                             ? -1
-                            : aGrouping < bGrouping ? 1 : earliestEventSort;
+                            : aGrouping < bGrouping
+                                ? 1
+                                : earliestEventSort;
                     }); // nest data by grouping and ID.
 
                 //Capture list of IDs by grouping.
@@ -2957,7 +2958,11 @@
                         var earliestEventSort =
                             a.values > b.values
                                 ? -2
-                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
+                                : a.values < b.values
+                                    ? 2
+                                    : a.key > b.key
+                                        ? -1
+                                        : 1;
 
                         return earliestEventSort;
                     })
@@ -2990,7 +2995,9 @@
 
                         return aGrouping > bGrouping
                             ? -1
-                            : aGrouping < bGrouping ? 1 : alphanumericSort;
+                            : aGrouping < bGrouping
+                                ? 1
+                                : alphanumericSort;
                     });
 
                 this.config.y.domain.forEach(function(d) {
@@ -3395,8 +3402,8 @@
                         .attr({
                             x1: _this.plot_width,
                             x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y1 + 3 * _this.y.rangeBand() / 4,
-                            y2: y1 + 3 * _this.y.rangeBand() / 4
+                            y1: y1 + (3 * _this.y.rangeBand()) / 4,
+                            y2: y1 + (3 * _this.y.rangeBand()) / 4
                         }),
                     span = g
                         .append('line')
@@ -3404,7 +3411,7 @@
                         .attr({
                             x1: _this.plot_width + _this.margin.right / 8,
                             x2: _this.plot_width + _this.margin.right / 8,
-                            y1: y1 + 3 * _this.y.rangeBand() / 4,
+                            y1: y1 + (3 * _this.y.rangeBand()) / 4,
                             y2: y2 + _this.y.rangeBand()
                         }),
                     bottomBoundary = g
@@ -3421,7 +3428,7 @@
                         .classed('ct-annotation', true)
                         .attr({
                             x: _this.plot_width,
-                            dx: 4 * _this.margin.right / 8,
+                            dx: (4 * _this.margin.right) / 8,
                             y: y1,
                             dy: _this.y.rangeBand()
                         })
@@ -3451,15 +3458,13 @@
         this.svg.selectAll('.ct-stripe').remove();
         var yAxisGridLines = this.svg.selectAll('.y.axis .tick').each(function(d, i) {
             //Offset tick label.
-            d3$1
-                .select(this)
+            d3$1.select(this)
                 .select('text')
                 .attr('dx', 4)
                 .attr('dy', context.y.rangeBand() / 4);
 
             //Insert a rectangle with which to visually group each ID's events.
-            d3$1
-                .select(this)
+            d3$1.select(this)
                 .insert('rect', ':first-child')
                 .classed('ct-stripe', true)
                 .attr({
@@ -3478,14 +3483,14 @@
 
         var context = this;
 
+        this.svg.selectAll('g.point').attr('transform', null);
+
         if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
             this.svg.selectAll('g.point').each(function(d) {
-                d3$1
-                    .select(this)
-                    .attr(
-                        'transform',
-                        'translate(0,' + d.offset * context.config.mark_thickness * 2 + ')'
-                    );
+                d3$1.select(this).attr(
+                    'transform',
+                    'translate(0,' + d.offset * context.config.mark_thickness * 2 + ')'
+                );
             });
         } else {
             //Nest data by timepoint and filter on any nested object with more than one datum.
@@ -3509,9 +3514,8 @@
 
             //For each timepoint with more than one event...
             overlapping.forEach(function(d) {
-                var x = d.key.split('|')[0],
-                    // timepoint
-                    y = d.key.split('|')[1]; // ID
+                var x = d.key.split('|')[0]; // timepoint
+                var y = d.key.split('|')[1]; // ID
 
                 //For each overlapping point...
                 d.values.keys.forEach(function(di, i) {
@@ -3532,18 +3536,18 @@
 
         var context = this;
 
+        this.svg.selectAll('g.line').attr('transform', null);
+
         if (
             this.config.offset_col &&
             this.raw_data.length &&
             this.raw_data[0].hasOwnProperty(this.config.offset_col)
         ) {
             this.svg.selectAll('g.line').each(function(d) {
-                d3$1
-                    .select(this)
-                    .attr(
-                        'transform',
-                        'translate(0,' + d.offset * context.config.mark_thickness * 2 + ')'
-                    );
+                d3$1.select(this).attr(
+                    'transform',
+                    'translate(0,' + d.offset * context.config.mark_thickness * 2 + ')'
+                );
             });
         } else {
             //Nest data by time interval and filter on any nested object with more than one datum.
@@ -3610,7 +3614,11 @@
                                 x2diff = b.x2 - a.x2;
                             return x1diff !== 0
                                 ? x1diff
-                                : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
+                                : x2diff !== 0
+                                    ? x2diff
+                                    : a.key < b.key
+                                        ? -1
+                                        : 1;
                         });
 
                 if (overlappingLines.length) {
@@ -3841,12 +3849,11 @@
                             ? lineSettings.attributes['stroke-width'] * 1.5
                             : lineSettings.attributes['stroke-width'] * 1.5);
                     var heightOffset = highlight
-                        ? lineSettings.attributes['stroke-width'] * 2 / 3
-                        : lineSettings.attributes['stroke-width'] * 2 / 3;
+                        ? (lineSettings.attributes['stroke-width'] * 2) / 3
+                        : (lineSettings.attributes['stroke-width'] * 2) / 3;
                     var arrow = [[length, y], [x, y - heightOffset], [x, y + heightOffset]];
 
-                    g
-                        .insert('polygon', 'line')
+                    g.insert('polygon', 'line')
                         .datum(d)
                         .classed('ct-ongoing-event', true)
                         .classed('ct-highlighted', highlight)
@@ -3883,13 +3890,12 @@
                     );
                 })
                 .forEach(function(di) {
-                    g
-                        .append('circle')
+                    g.append('circle')
                         .classed('ct-start-stop-circle', true)
                         .attr({
                             cx: context.x(di.values.x),
                             cy: context.y(di.values.y) + context.y.rangeBand() / 2,
-                            r: context.config.mark_thickness * 2 / 5,
+                            r: (context.config.mark_thickness * 2) / 5,
                             fill: 'white',
                             stroke: 'lightgray'
                         });
@@ -4074,7 +4080,7 @@
                 'translate(' +
                     +bottomXaxisTitleTransformCoordinates[0] +
                     ',' +
-                    (+bottomXaxisTitleTransformCoordinates[1] - 7 * this.margin.bottom / 16) +
+                    (+bottomXaxisTitleTransformCoordinates[1] - (7 * this.margin.bottom) / 16) +
                     ')'
             );
         }
@@ -4216,14 +4222,12 @@
             .append('tr')
             .each(function(d) {
                 var row = d3$1.select(this);
-                row
-                    .append('td')
+                row.append('td')
                     .text(d.key)
                     .attr('class', function(d) {
                         return d.class + (d.class === 'ct-lower-level' ? ' ct-indent' : '');
                     });
-                row
-                    .append('td')
+                row.append('td')
                     .text(d.n)
                     .attr('class', function(d) {
                         return d.class;
@@ -4633,9 +4637,6 @@
     }
 
     //polyfills and utility functions
-    //setup functions
-    //components
-    //initialization method
     function clinicalTimelines() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};

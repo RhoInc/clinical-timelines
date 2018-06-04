@@ -15,8 +15,8 @@ export default function vertically() {
                     .attr({
                         x1: this.plot_width,
                         x2: this.plot_width + this.margin.right / 8,
-                        y1: y1 + (3 * this.y.rangeBand()) / 4,
-                        y2: y1 + (3 * this.y.rangeBand()) / 4
+                        y1: y1 + 3 * this.y.rangeBand() / 4,
+                        y2: y1 + 3 * this.y.rangeBand() / 4
                     }),
                 span = g
                     .append('line')
@@ -24,7 +24,7 @@ export default function vertically() {
                     .attr({
                         x1: this.plot_width + this.margin.right / 8,
                         x2: this.plot_width + this.margin.right / 8,
-                        y1: y1 + (3 * this.y.rangeBand()) / 4,
+                        y1: y1 + 3 * this.y.rangeBand() / 4,
                         y2: y2 + this.y.rangeBand()
                     }),
                 bottomBoundary = g
@@ -41,7 +41,7 @@ export default function vertically() {
                     .classed('ct-annotation', true)
                     .attr({
                         x: this.plot_width,
-                        dx: (4 * this.margin.right) / 8,
+                        dx: 4 * this.margin.right / 8,
                         y: y1,
                         dy: this.y.rangeBand()
                     })

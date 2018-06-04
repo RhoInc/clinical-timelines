@@ -15,12 +15,13 @@ export default function addStartStopCircles() {
                     )
             )
             .forEach(function(di) {
-                g.append('circle')
+                g
+                    .append('circle')
                     .classed('ct-start-stop-circle', true)
                     .attr({
                         cx: context.x(di.values.x),
                         cy: context.y(di.values.y) + context.y.rangeBand() / 2,
-                        r: (context.config.mark_thickness * 2) / 5,
+                        r: context.config.mark_thickness * 2 / 5,
                         fill: 'white',
                         stroke: 'lightgray'
                     });

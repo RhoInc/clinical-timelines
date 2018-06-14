@@ -5,8 +5,10 @@ export default function yAxisGrouping(select, d) {
 
     //Update grouping settings.
     if (selected.text() !== 'None') {
-        this.config.y.grouping = selected.text();
-        this.config.y.groupingLabel = selected.property('label');
+        this.config.y.grouping = this.config.groupings.find(
+            grouping => grouping.label === selected.text()
+        ).value_col;
+        this.config.y.groupingLabel = selected.text();
     } else {
         delete this.config.y.grouping;
         this.config.y.groupingLabel = 'Event Types';

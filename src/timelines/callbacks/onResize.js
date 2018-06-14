@@ -40,17 +40,14 @@ export default function onResize() {
     //Draw ongoing marks.
     drawOngoingMarks.call(this);
 
+    //Add symbols.
+    addSymbols.call(this);
+
     //Highlight marks.
     highlightMarks.call(this);
 
-    //Draw ongoing marks.
-    drawOngoingMarks.call(this);
-
     //Draw circles at beginning and end of each line.
     addStartStopCircles.call(this);
-
-    //Add symbols.
-    addSymbols.call(this);
 
     //Add symbols to legend.
     addSymbolsToLegend.call(this);

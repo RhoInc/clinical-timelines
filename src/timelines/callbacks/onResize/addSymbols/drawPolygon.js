@@ -56,6 +56,7 @@ export default function drawPolygon(marks, event_symbol) {
         //draw polygon
         const polygon = g
             .append('polygon')
+            .datum(d)
             .classed('ct-custom-mark', true)
             .attr({
                 points: vertices.map(vertex => vertex.join(',')).join(' '),

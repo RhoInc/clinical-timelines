@@ -4,7 +4,7 @@ export default function sortYdomain() {
     /**-------------------------------------------------------------------------------------------\
       Sort y-domain by the earliest event of each ID.
     \-------------------------------------------------------------------------------------------**/
-    if (this.config.y.sort === 'earliest') {
+    if (this.config.y.sort === 'By Earliest Event') {
         if (this.config.y.grouping) {
             //Sort IDs by grouping then earliest event if y-axis is grouped.
             const nestedData = nest()
@@ -19,7 +19,9 @@ export default function sortYdomain() {
 
                     return aGrouping > bGrouping
                         ? -1
-                        : aGrouping < bGrouping ? 1 : earliestEventSort;
+                        : aGrouping < bGrouping
+                            ? 1
+                            : earliestEventSort;
                 }); // nest data by grouping and ID.
 
             //Capture list of IDs by grouping.
@@ -68,7 +70,9 @@ export default function sortYdomain() {
 
                     return aGrouping > bGrouping
                         ? -1
-                        : aGrouping < bGrouping ? 1 : alphanumericSort;
+                        : aGrouping < bGrouping
+                            ? 1
+                            : alphanumericSort;
                 });
 
             this.config.y.domain.forEach(d => {

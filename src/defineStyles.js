@@ -273,13 +273,15 @@ export default function defineStyles() {
                 '}',
 
           //Symbols
-            '#clinical-timelines .ct-custom-mark {' +
+            '#clinical-timelines .ct-custom-mark:not(.ct-highlighted) {' +
                 '    stroke-width: 1;' +
                 '    stroke: black;' +
+                '    fill-opacity: 1;' +
                 '}',
             '#clinical-timelines .ct-custom-mark.ct-highlighted {' +
                 '    stroke-opacity: 1;' +
-                '    stroke-width: 2;' +
+                '    fill-opacity: 1;' +
+                `    stroke-width: ${circle.attributes['stroke-width']};` +
                 '}',
 
           //Arrows

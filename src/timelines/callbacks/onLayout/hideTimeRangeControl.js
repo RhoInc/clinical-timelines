@@ -7,7 +7,7 @@ export default function hideTimeRangeControl() {
         .classed(
             'ct-hidden',
             d =>
-                (this.config.time_scale === 'date' && d.option === 'day_time_range') ||
-                (this.config.time_scale === 'day' && d.option === 'date_time_range')
+                (this.config.time_scale === 'Date' && d.option === 'day_time_range') ||
+                (this.config.time_scale === 'Day' && d.option === 'date_time_range')
         );
 }

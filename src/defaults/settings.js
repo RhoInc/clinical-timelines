@@ -20,7 +20,7 @@ export const rendererSpecificSettings = {
     grouping_direction: 'horizontal',
 
   //Timing settings
-    time_scale: 'date',
+    time_scale: 'Date',
 
       //Date settings
         stdt_col: 'STDT',
@@ -62,7 +62,7 @@ export const webchartsSettings = {
         type: 'ordinal',
         column: null, // set in syncSettings()
         label: null, // set in syncSettings()
-        sort: 'earliest',
+        sort: 'By Earliest Event',
         behavior: 'flex',
         grouping: null // set in syncSettings()
     },

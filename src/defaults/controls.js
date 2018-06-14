@@ -11,7 +11,7 @@ export default [
         option: 'time_scale',
         label: '',
         description: 'X-axis scale',
-        values: ['date', 'day'],
+        values: ['Date', 'Day'],
         require: true
     },
     {
@@ -35,14 +35,14 @@ export default [
         option: 'y.sort',
         label: '',
         description: 'Y-axis sort',
-        values: ['earliest', 'alphabetical-descending'],
-        relabels: ['by earliest event', 'alphanumerically'],
+        values: ['By Earliest Event', 'Alphanumerically'],
         require: true
     },
     {
         type: 'dropdown',
-        option: 'y.grouping',
+        option: 'y.groupingLabel',
         label: '',
-        description: 'Y-axis grouping'
+        description: 'Y-axis grouping',
+        values: null // set in onInit() callback
     }
 ];

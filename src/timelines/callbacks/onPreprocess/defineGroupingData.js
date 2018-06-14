@@ -39,7 +39,7 @@ export default function defineGroupingData() {
                     const groupingStart = clone(groupingObject),
                         groupingEnd = clone(groupingObject);
 
-                    if (this.config.time_scale === 'date') {
+                    if (this.config.time_scale === 'Date') {
                         groupingStart.wc_value = this.full_date_range[0];
                         groupingEnd.wc_value = this.full_date_range[0];
                     } else {

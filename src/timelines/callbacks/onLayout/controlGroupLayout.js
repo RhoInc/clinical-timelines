@@ -21,7 +21,7 @@ export default function controlGroupLayout() {
                 .classed('ct-controls ct-horizontal-rule', true)
                 .text('Controls');
         else if (
-            (context.config.groupings.length && d.option === 'y.grouping') ||
+            (context.config.groupings.length && d.option === 'y.groupingLabel') ||
             (!context.config.groupings.length && d.option === 'y.sort')
         ) {
             const filterRule = context.controls.wrap

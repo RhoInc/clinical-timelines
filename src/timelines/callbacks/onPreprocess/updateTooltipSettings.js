@@ -4,7 +4,7 @@ export default function updateTooltipSettings() {
         this.config.marks.forEach(mark => {
             mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
         });
-        this.config.IDtimelineSettings.marks.forEach(mark => {
+        this.clinicalTimelines.settings.IDtimeline.marks.forEach(mark => {
             mark.tooltip = `${mark.tooltip}\n[${this.config.tooltip_col}]`;
         });
     }

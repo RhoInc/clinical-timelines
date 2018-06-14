@@ -8,6 +8,12 @@ export default function drawIDtimeline() {
     //Display ID information.
     this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', false);
 
+    //Hide reference line table.
+    if (this.config.reference_lines)
+        this.config.reference_lines.forEach(reference_line => {
+            reference_line.tableContainer.remove();
+        });
+
     //Hide clinical timelines.
     this.wrap.select('svg.wc-svg').classed('ct-hidden', true);
 

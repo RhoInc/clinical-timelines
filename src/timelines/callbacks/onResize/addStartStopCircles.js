@@ -23,8 +23,7 @@ export default function addStartStopCircles() {
                         cy: context.y(di.values.y) + context.y.rangeBand() / 2,
                         r: context.config.mark_thickness * 2 / 5,
                         fill: 'white',
-                        stroke: 'lightgray',
-                        'clip-path': 'url(#' + context.id + ')'
+                        stroke: 'lightgray'
                     });
             });
     });

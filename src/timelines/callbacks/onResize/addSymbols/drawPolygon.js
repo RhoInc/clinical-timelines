@@ -4,7 +4,7 @@ export default function drawPolygon(marks, event_symbol) {
     const context = this;
 
     marks.each(function(d) {
-        const g = d3.select(this);
+        const g = select(this);
 
         //clear out g
         g.select('circle').classed('ct-hidden', true);
@@ -60,8 +60,7 @@ export default function drawPolygon(marks, event_symbol) {
             .classed('ct-custom-mark', true)
             .attr({
                 points: vertices.map(vertex => vertex.join(',')).join(' '),
-                fill: d.color,
-                'clip-path': d.key && d.values ? `url(#${context.id})` : null
+                fill: d.color
             });
     });
 }

@@ -5,7 +5,6 @@ import standardizeTimeVariables from './onInit/standardizeTimeVariables';
 import handleEventTypes from './onInit/handleEventTypes';
 import handleTimeRanges from './onInit/handleTimeRanges';
 import checkControls from './onInit/checkControls';
-import updateTooltipSettings from './onInit/updateTooltipSettings';
 
 import cleanData from './functions/cleanData';
 import defineData from './functions/defineData';
@@ -18,7 +17,6 @@ export default function onInit() {
     handleEventTypes.call(this);
     handleTimeRanges.call(this);
     checkControls.call(this);
-    updateTooltipSettings.call(this);
 
     cleanData.call(this);
     defineData.call(this);

@@ -3,6 +3,8 @@ import { nest, select } from 'd3';
 export default function offsetCircles(mark, markData) {
     const context = this;
 
+    this.svg.selectAll('g.point').attr('transform', null);
+
     if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
         this.svg.selectAll('g.point').each(function(d) {
             select(this).attr(
@@ -25,8 +27,8 @@ export default function offsetCircles(mark, markData) {
 
         //For each timepoint with more than one event...
         overlapping.forEach(d => {
-            const x = d.key.split('|')[0], // timepoint
-                y = d.key.split('|')[1]; // ID
+            const x = d.key.split('|')[0]; // timepoint
+            const y = d.key.split('|')[1]; // ID
 
             //For each overlapping point...
             d.values.keys.forEach((di, i) => {

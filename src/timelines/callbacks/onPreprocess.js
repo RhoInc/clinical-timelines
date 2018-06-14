@@ -4,6 +4,7 @@ import definePopulationDetails from './onPreprocess/definePopulationDetails';
 import defineDataInsideTimeRange from './onPreprocess/defineDataInsideTimeRange';
 import defineGroupingData from './onPreprocess/defineGroupingData';
 import sortYdomain from './onPreprocess/sortYdomain';
+import updateTooltipSettings from './onPreprocess/updateTooltipSettings';
 
 export default function onPreprocess() {
     //Set x-domain.
@@ -26,4 +27,7 @@ export default function onPreprocess() {
 
     //Sort y-axis based on `Sort IDs` control selection.
     sortYdomain.call(this);
+
+    //Add tooltip variable to mark tooltips.
+    updateTooltipSettings.call(this);
 }

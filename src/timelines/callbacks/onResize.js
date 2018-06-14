@@ -1,4 +1,5 @@
 import legendFilter from './onResize/legendFilter';
+import addSecondLegend from './onResize/addSecondLegend';
 import drawTopXaxis from './onResize/drawTopXaxis';
 import addTooltip from './onResize/addTooltip';
 import tickClick from './onResize/tickClick';
@@ -18,6 +19,9 @@ import setClipPath from './onResize/setClipPath';
 export default function onResize() {
     //Add filter functionality to legend.
     legendFilter.call(this);
+
+    //Add second legend to differentiate timepoints, time intervals, and ongoing events.
+    addSecondLegend.call(this);
 
     //Draw second x-axis at top of chart.
     drawTopXaxis.call(this);

@@ -1,16 +1,14 @@
 import { format, time } from 'd3';
 
 export default function syncTimeScaleSettings(settings) {
-    //Coerce invalid time scale arguments.
     settings.time_scale =
         ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
-            ? settings.time_scale.toLowerCase()
-            : 'date';
-    settings.time_scalePropCased =
-        settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
+            ? settings.time_scale.substring(0, 1).toUpperCase() +
+              settings.time_scale.substring(1).toLowerCase()
+            : 'Date';
 
     //Define settings variables to handle both date and day time scales.
-    if (settings.time_scale === 'date') {
+    if (settings.time_scale === 'Date') {
         settings.st_col = settings.stdt_col;
         settings.en_col = settings.endt_col;
         settings.x.type = 'time';
@@ -22,13 +20,13 @@ export default function syncTimeScaleSettings(settings) {
         settings.time_function = dt => {
             let parsed;
             try {
-                parsed = settings.x_parseFormat.parse(dt);
+                parsed = settings.x_parseFormat.parse(dt) || new Date(dt);
             } catch (error) {
                 parsed = new Date(dt);
             }
             return parsed;
         };
-    } else if (settings.time_scale === 'day') {
+    } else if (settings.time_scale === 'Day') {
         settings.st_col = settings.stdy_col;
         settings.en_col = settings.endy_col;
         settings.x.type = 'linear';
@@ -43,12 +41,12 @@ export default function syncTimeScaleSettings(settings) {
     //Time intervals (lines)
     settings.marks[0].tooltip =
         `Event: [${settings.event_col}]` +
-        `\nStart ${settings.time_scale}: [${settings.st_col}]` +
-        `\nStop ${settings.time_scale}: [${settings.en_col}]`;
+        `\nStart ${settings.time_scale.toLowerCase()}: [${settings.st_col}]` +
+        `\nStop ${settings.time_scale.toLowerCase()}: [${settings.en_col}]`;
     settings.marks[0].values = { wc_category: [settings.st_col, settings.en_col] };
 
     //Timepoints (circles)
     settings.marks[1].tooltip =
-        `Event: [${settings.event_col}]` + `\n${settings.x.label}: [${settings.st_col}]`;
+        `Event: [${settings.event_col}]` + `\n${settings.time_scale}: [${settings.st_col}]`;
     settings.marks[1].values = { wc_category: settings.time_unit };
 }

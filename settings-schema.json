@@ -58,8 +58,48 @@
         "event_highlight_color": {
             "title": "Highlighted Event Color",
             "description": "fill color of highlighted events",
-            "default": null,
+            "default": "black",
             "type": "string"
+        },
+        "event_symbols": {
+            "title": "Lucky Charms",
+            "description": "an array of event types and the symbols that will represent them",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "events": {
+                        "title": "Event Types",
+                        "description": "an array of event types that will be represented by the specified symbol",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "symbol": {
+                        "title": "Symbol",
+                        "description": "the symbol that will represent the corresponding event types",
+                        "type": "string",
+                        "enum": [
+                            "circle",
+                            "square",
+                            "triangle",
+                            "diamond"
+                        ]
+                    },
+                    "direction": {
+                        "title": "Symbol Direction",
+                        "description": "the direction the symbol points (only applies to triangles)",
+                        "type": "string",
+                        "enum": [
+                            "up",
+                            "right",
+                            "down",
+                            "left"
+                        ]
+                    }
+                }
+            }
         },
         "filters": {
             "title": "Filters",
@@ -117,10 +157,10 @@
             "title": "Time Scale",
             "description": "the time scale on which to plot events",
             "type": "string",
-            "default": "date",
+            "default": "Date",
             "enum": [
-                "date",
-                "day"
+                "Date",
+                "Day"
             ]
         },
         "stdt_col": {
@@ -145,6 +185,31 @@
                 "type": "string"
             }
         },
+        "date_ranges": {
+            "title": "Date Ranges",
+            "description": "start and stop date ranges which populate the time range dropdown",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "title": "Date Range",
+                        "description": "start and stop dates with which to define the x-axis domain and which match settings.date_format",
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "label": {
+                        "title": "Date Range Label",
+                        "description": "a description of the date range",
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "date_format": {
             "title": "Input Date Format",
             "description": "date format of start and stop date variables",
@@ -154,7 +219,7 @@
         "date_display_format": {
             "title": "Displayed Date Format",
             "description": "date format of x-axis",
-            "default": "%Y-%m-%d",
+            "default": "%b %y",
             "type": "string"
         },
         "stdy_col": {
@@ -177,6 +242,31 @@
             "maxItems": 2,
             "items": {
                 "type": "number"
+            }
+        },
+        "day_ranges": {
+            "title": "Day Ranges",
+            "description": "start and stop day ranges which populate the time range dropdown",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "title": "Day Range",
+                        "description": "start and stop days with which to define the x-axis domain",
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "type": "number"
+                        }
+                    },
+                    "label": {
+                        "title": "Day Range Label",
+                        "description": "a description of the day range",
+                        "type": "string"
+                    }
+                }
             }
         },
         "seq_col": {
@@ -203,6 +293,11 @@
             "default": "Y",
             "type": "string"
         },
+        "offset_col": {
+            "title": "Offset Factor",
+            "description": "the name of the variable that contains a ranking of vertical position at which to draw a mark",
+            "type": "string"
+        },
         "reference_lines": {
             "title": "Reference Timepoints",
             "description": "an array of reference timepoints and associated descriptions",
@@ -226,6 +321,12 @@
             "description": "by default data are exported as one record per event; this option transposes the data so each even type has two columns: start and end",
             "type": "boolean",
             "default": false
+        },
+        "mark_thickness": {
+            "title": "Mark Thiccness",
+            "description": "a number that controls the the stroke width of lines and the radius of circles",
+            "type": "number",
+            "default": 6
         },
         "details": {
             "title": "Details Listing",

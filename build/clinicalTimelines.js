@@ -310,6 +310,7 @@
         event_types: null,
         event_highlighted: null,
         event_highlight_color: 'black',
+        event_symbols: null,
 
         //Filter settings
         filters: null,
@@ -320,12 +321,13 @@
         grouping_direction: 'horizontal',
 
         //Timing settings
-        time_scale: 'date',
+        time_scale: 'Date',
 
         //Date settings
         stdt_col: 'STDT',
         endt_col: 'ENDT',
         date_range: null,
+        date_ranges: null,
         date_format: '%Y-%m-%d',
         date_display_format: '%b %y', // sync in syncSettings()
 
@@ -333,13 +335,16 @@
         stdy_col: 'STDY',
         endy_col: 'ENDY',
         day_range: null,
+        day_ranges: null,
 
         //Miscellaneous settings
         seq_col: 'SEQ',
-        tooltip_col: 'TOOLTIP',
         ongo_col: 'ONGO',
         ongo_val: 'Y',
+        tooltip_col: 'TOOLTIP',
+        offset_col: null,
         reference_lines: null,
+        mark_thickness: 6,
         transpose_data: false,
 
         //Listing settings
@@ -358,7 +363,7 @@
             type: 'ordinal',
             column: null, // set in syncSettings()
             label: null, // set in syncSettings()
-            sort: 'earliest',
+            sort: 'By Earliest Event',
             behavior: 'flex',
             grouping: null // set in syncSettings()
         },
@@ -368,16 +373,16 @@
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
                 attributes: {
-                    'stroke-width': 6
+                    'stroke-width': null // set in syncSettings()
                 }
             },
             {
                 type: 'circle',
                 per: null, // set in syncSettings()
                 tooltip: null, // set in syncSettings()
-                radius: 5,
+                radius: null, // set in syncSettings()
                 attributes: {
-                    'stroke-width': 4
+                    'stroke-width': null // set in syncSettings()
                 }
             }
         ],
@@ -430,13 +435,12 @@
                           })
                       ])
                       .map(function(item) {
-                          var itemObject = {};
-
-                          itemObject.value_col = item instanceof Object ? item.value_col : item;
-                          itemObject.label =
+                          var itemObject =
                               item instanceof Object
-                                  ? item.label || itemObject.value_col
-                                  : itemObject.value_col;
+                                  ? Object.assign({}, item)
+                                  : { value_col: item };
+
+                          itemObject.label = itemObject.label || itemObject.value_col;
 
                           return itemObject;
                       })
@@ -446,7 +450,11 @@
     }
 
     function syncRendererSpecificSettings(settings) {
-        //ID settings
+        /**-------------------------------------------------------------------------------------------\
+      ID settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //id_unit
         settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
         settings.id_unitPropCased =
             settings.id_unit.substring(0, 1).toUpperCase() +
@@ -454,6 +462,8 @@
         settings.id_unitPlural = /y$/.test(settings.id_unit)
             ? settings.id_unit.substring(0, settings.id_unit.length - 1) + 'ies'
             : settings.id_unit + 's';
+
+        //id_characteristics
         var defaultID_characteristics = [
             { value_col: settings.id_col, label: settings.id_unitPropCased }
         ];
@@ -462,11 +472,27 @@
             settings.id_characteristics
         );
 
-        //Event settings
+        /**-------------------------------------------------------------------------------------------\
+      Event settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //event_types
         if (!(settings.event_types instanceof Array && settings.event_types.length))
             delete settings.event_types;
 
-        //Filter settings
+        //event_symbols
+        if (settings.event_symbols instanceof Array)
+            settings.event_symbols = settings.event_symbols.filter(function(event_symbol) {
+                return ['square', 'diamond', 'triangle'].indexOf(event_symbol.symbol) > -1;
+            });
+        if (!(settings.event_symbols instanceof Array && settings.event_symbols.length))
+            delete settings.event_symbols;
+
+        /**-------------------------------------------------------------------------------------------\
+      Filter settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //filters
         var defaultFilters = [
             { value_col: settings.id_col, label: settings.id_unitPropCased },
             { value_col: settings.event_col, label: 'Event Type' }
@@ -475,16 +501,135 @@
             defaultFilters.splice(2, 0, { value_col: settings.ongo_col, label: 'Ongoing?' });
         settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
-        //Grouping settings
+        /**-------------------------------------------------------------------------------------------\
+      Grouping settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //groupings
         var defaultGroupings = [];
         settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
+
+        //grouping direction
         if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
             settings.grouping_direction = 'horizontal';
 
-        //Time settings
+        /**-------------------------------------------------------------------------------------------\
+      Timing settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //date_display_format
         settings.date_display_format = settings.date_display_format || settings.date_format;
 
-        //Reference line settings
+        //date_ranges - array of 2-element date ranges or of objects with a label property and a time_range property
+        //  {
+        //      domain: [
+        //          <lower bound>,
+        //          <upper bound>
+        //      ],
+        //      label: '<date range description>'
+        //  }
+
+        if (Array.isArray(settings.date_range) && settings.date_ranges === null)
+            settings.date_ranges = [
+                {
+                    domain: settings.date_range,
+                    label: 'Initial Date Range'
+                }
+            ];
+        else if (Array.isArray(settings.date_range) && Array.isArray(settings.date_ranges))
+            settings.date_ranges.unshift(settings.date_range);
+
+        if (Array.isArray(settings.date_ranges))
+            settings.date_ranges = settings.date_ranges
+                .filter(function(date_range) {
+                    var domain = date_range.domain || date_range;
+                    return (
+                        domain instanceof Array &&
+                        domain.length === 2 &&
+                        domain[0].toString() !== domain[1].toString() &&
+                        domain.every(function(d) {
+                            return (
+                                d instanceof Date || d3.time.format(settings.date_format).parse(d)
+                            );
+                        })
+                    );
+                })
+                .map(function(date_range) {
+                    var domain = (date_range.domain || date_range).map(function(date) {
+                        return date instanceof Date
+                            ? date
+                            : d3.time.format(settings.date_format).parse(date);
+                    });
+                    var label =
+                        date_range.label ||
+                        domain
+                            .map(function(date) {
+                                return date instanceof Date
+                                    ? d3.time.format(settings.date_display_format)(date)
+                                    : date;
+                            })
+                            .join(' - ');
+                    return {
+                        domain: domain,
+                        label: label
+                    };
+                });
+        else settings.date_ranges = [];
+
+        //day_ranges - array of 2-element day ranges or of objects with a label property and a time_range property
+        //  {
+        //      domain: [
+        //          <lower bound>,
+        //          <upper bound>
+        //      ],
+        //      label: '<day range description>'
+        //  }
+
+        if (Array.isArray(settings.day_range) && settings.day_ranges === null)
+            settings.day_ranges = [
+                {
+                    domain: settings.day_range,
+                    label: 'Initial Day Range'
+                }
+            ];
+        else if (Array.isArray(settings.day_range) && Array.isArray(settings.day_ranges))
+            settings.day_ranges.unshift(settings.day_range);
+
+        if (settings.day_range && settings.day_ranges === null)
+            settings.day_ranges = [
+                {
+                    domain: settings.day_range,
+                    label: 'Initial Day Range'
+                }
+            ];
+        if (Array.isArray(settings.day_ranges))
+            settings.day_ranges = settings.day_ranges
+                .filter(function(day_range) {
+                    var domain = day_range.domain || day_range;
+                    return (
+                        domain instanceof Array &&
+                        domain.length === 2 &&
+                        domain[0].toString() !== domain[1].toString() &&
+                        domain.every(function(d) {
+                            return Number.isInteger(+d);
+                        })
+                    );
+                })
+                .map(function(day_range) {
+                    var domain = day_range.domain || day_range;
+                    var label = day_range.label || domain.join(' - ');
+                    return {
+                        domain: domain,
+                        label: label
+                    };
+                });
+        else settings.day_ranges = [];
+
+        /**-------------------------------------------------------------------------------------------\
+      Miscellaneous settings
+    \-------------------------------------------------------------------------------------------**/
+
+        //reference_lines
         if (settings.reference_lines) {
             if (!(settings.reference_lines instanceof Array))
                 settings.reference_lines = [settings.reference_lines];
@@ -503,8 +648,8 @@
                     referenceLineObject.time_scale = Number.isInteger(
                         +referenceLineObject.timepoint
                     )
-                        ? 'day'
-                        : 'date';
+                        ? 'Day'
+                        : 'Date';
 
                     //label predefined or not
                     referenceLineObject.label = reference_line.label
@@ -518,9 +663,9 @@
                 })
                 .filter(function(reference_line) {
                     return (
-                        (reference_line.time_scale === 'day' &&
+                        (reference_line.time_scale === 'Day' &&
                             Number.isInteger(reference_line.timepoint)) ||
-                        (reference_line.time_scale === 'date' &&
+                        (reference_line.time_scale === 'Date' &&
                             d3.time
                                 .format(settings.date_format)
                                 .parse(reference_line.timepoint) instanceof Date)
@@ -531,10 +676,10 @@
         }
 
         /**-------------------------------------------------------------------------------------------\
-      Define listing columns.
+      Listing settings
     \-------------------------------------------------------------------------------------------**/
 
-        //defaults
+        //details
         var defaultDetails = [
             { value_col: settings.event_col, label: 'Event Type' },
             { value_col: 'stdtdy', label: 'Start Date (Day)' },
@@ -594,10 +739,15 @@
         }
 
         //Lines
-        settings.marks[0].per = [settings.id_col, settings.event_col, settings.seq_col];
+        var lines = settings.marks[0];
+        lines.per = [settings.id_col, settings.event_col, settings.seq_col];
+        lines.attributes['stroke-width'] = settings.mark_thickness * 1.25;
 
         //Circles
-        settings.marks[1].per = [settings.id_col, settings.event_col, settings.seq_col, 'wc_value'];
+        var circles = settings.marks[1];
+        circles.per = [settings.id_col, settings.event_col, settings.seq_col, 'wc_value'];
+        circles.radius = settings.mark_thickness * 3 / 4;
+        circles.attributes['stroke-width'] = settings.mark_thickness * 1 / 2;
 
         //Color stratification
         settings.color_by = settings.event_col;
@@ -607,16 +757,14 @@
     }
 
     function syncTimeScaleSettings(settings) {
-        //Coerce invalid time scale arguments.
         settings.time_scale =
             ['date', 'day'].indexOf(settings.time_scale.toLowerCase()) > -1
-                ? settings.time_scale.toLowerCase()
-                : 'date';
-        settings.time_scalePropCased =
-            settings.time_scale.substring(0, 1).toUpperCase() + settings.time_scale.substring(1);
+                ? settings.time_scale.substring(0, 1).toUpperCase() +
+                  settings.time_scale.substring(1).toLowerCase()
+                : 'Date';
 
         //Define settings variables to handle both date and day time scales.
-        if (settings.time_scale === 'date') {
+        if (settings.time_scale === 'Date') {
             settings.st_col = settings.stdt_col;
             settings.en_col = settings.endt_col;
             settings.x.type = 'time';
@@ -628,13 +776,13 @@
             settings.time_function = function(dt) {
                 var parsed = void 0;
                 try {
-                    parsed = settings.x_parseFormat.parse(dt);
+                    parsed = settings.x_parseFormat.parse(dt) || new Date(dt);
                 } catch (error) {
                     parsed = new Date(dt);
                 }
                 return parsed;
             };
-        } else if (settings.time_scale === 'day') {
+        } else if (settings.time_scale === 'Day') {
             settings.st_col = settings.stdy_col;
             settings.en_col = settings.endy_col;
             settings.x.type = 'linear';
@@ -653,8 +801,8 @@
             'Event: [' +
             settings.event_col +
             ']' +
-            ('\nStart ' + settings.time_scale + ': [' + settings.st_col + ']') +
-            ('\nStop ' + settings.time_scale + ': [' + settings.en_col + ']');
+            ('\nStart ' + settings.time_scale.toLowerCase() + ': [' + settings.st_col + ']') +
+            ('\nStop ' + settings.time_scale.toLowerCase() + ': [' + settings.en_col + ']');
         settings.marks[0].values = { wc_category: [settings.st_col, settings.en_col] };
 
         //Timepoints (circles)
@@ -662,7 +810,7 @@
             'Event: [' +
             settings.event_col +
             ']' +
-            ('\n' + settings.x.label + ': [' + settings.st_col + ']');
+            ('\n' + settings.time_scale + ': [' + settings.st_col + ']');
         settings.marks[1].values = { wc_category: settings.time_unit };
     }
 
@@ -673,7 +821,7 @@
         settings.marks[0].per = [settings.event_col, settings.seq_col];
         settings.marks[1].per = [settings.event_col, settings.seq_col, 'wc_value'];
         settings.gridlines = 'y';
-        settings.range_band = settings.range_band / 2;
+        settings.range_band = settings.mark_thickness * 2;
         settings.margin = { left: 25 };
     }
 
@@ -727,10 +875,25 @@
         {
             type: 'dropdown',
             option: 'time_scale',
-            values: ['day', 'date'],
-            relabels: ['Day', 'Date'],
             label: '',
             description: 'X-axis scale',
+            values: ['Date', 'Day'],
+            require: true
+        },
+        {
+            type: 'dropdown',
+            option: 'date_time_range',
+            label: '',
+            description: 'Time range',
+            values: null, // set in onInit() callback
+            require: true
+        },
+        {
+            type: 'dropdown',
+            option: 'day_time_range',
+            label: '',
+            description: 'Time range',
+            values: null, // set in onInit() callback
             require: true
         },
         {
@@ -738,15 +901,15 @@
             option: 'y.sort',
             label: '',
             description: 'Y-axis sort',
-            values: ['earliest', 'alphabetical-descending'],
-            relabels: ['by earliest event', 'alphanumerically'],
+            values: ['By Earliest Event', 'Alphanumerically'],
             require: true
         },
         {
             type: 'dropdown',
-            option: 'y.grouping',
+            option: 'y.groupingLabel',
             label: '',
-            description: 'Y-axis grouping'
+            description: 'Y-axis grouping',
+            values: null // set in onInit() callback
         }
     ];
 
@@ -852,9 +1015,9 @@
     \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines .ct-column {' + '    display: inline-block;' + '}',
-            '#clinical-timelines #ct-left-column {' + '    width: 20%;' + '    float: left;' + '}',
+            '#clinical-timelines #ct-left-column {' + '    width: 24%;' + '    float: left;' + '}',
             '#clinical-timelines #ct-right-column {' +
-                '    width: 79%;' +
+                '    width: 75%;' +
                 '    float: right;' +
                 '}',
             '#clinical-timelines .ct-column > * {' +
@@ -881,6 +1044,8 @@
                 '    float: left;' +
                 '    font-size: 110%;' +
                 '    font-weight: bold;' +
+                '    margin-bottom: 10px;' +
+                '    margin-right: 10px;' +
                 '}',
             '#clinical-timelines #ct-left-column .ct-details .ct-button a {' +
                 '    color: blue;' +
@@ -974,6 +1139,7 @@
     \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines #ct-right-column > * {' + '}',
+            '#clinical-timelines #ct-right-column #ct-timelines {' + '    min-height: 80px;' + '}',
 
             //Legend
             '#clinical-timelines #ct-right-column #ct-timelines .legend {' +
@@ -985,6 +1151,7 @@
                 '    padding: 5px 7px 3px 4px;' +
                 '    border: 2px solid white;' +
                 '    margin-right: .25em !important;' +
+                '    margin-left: 10em;' +
                 '}',
             '#clinical-timelines #ct-right-column #ct-timelines .legend-item {' +
                 '    cursor: pointer;' +
@@ -1004,6 +1171,19 @@
                 '    cx: .55em !important;' +
                 '    cy: .55em !important;' +
                 '    r: .4em !important;' +
+                '    stroke: black;' +
+                '    stroke-width: 1;' +
+                '}',
+
+            //Second legend
+            '#clinical-timelines #ct-legend {' +
+                '    list-style-type: none;' +
+                '    position: absolute;' +
+                '    top: 0;' +
+                '}',
+            '#clinical-timelines .ct-legend-item {' +
+                '    cursor: default;' +
+                '    margin-right: 10px;' +
                 '}',
 
             //Y-axis
@@ -1053,12 +1233,26 @@
                 '}',
 
             //Circles
-            '#clinical-timelines circle.wc-data-mark {' +
-                '    stroke-width: 0;' +
+            '#clinical-timelines circle.wc-data-mark:not(.ct-highlighted) {' +
+                '    stroke-width: 1;' +
+                '    stroke: black;' +
                 '    fill-opacity: 1;' +
                 '}',
             '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +
                 '    stroke-opacity: 1;' +
+                '    fill-opacity: 1;' +
+                ('    stroke-width: ' + circle.attributes['stroke-width'] + ';') +
+                '}',
+
+            //Symbols
+            '#clinical-timelines .ct-custom-mark:not(.ct-highlighted) {' +
+                '    stroke-width: 1;' +
+                '    stroke: black;' +
+                '    fill-opacity: 1;' +
+                '}',
+            '#clinical-timelines .ct-custom-mark.ct-highlighted {' +
+                '    stroke-opacity: 1;' +
+                '    fill-opacity: 1;' +
                 ('    stroke-width: ' + circle.attributes['stroke-width'] + ';') +
                 '}',
 
@@ -1265,6 +1459,22 @@
         }
     }
 
+    function hideTimeRangeControl() {
+        var _this = this;
+
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(d) {
+                return d.option && d.option.indexOf('_time_range') > -1;
+            })
+            .classed('ct-hidden', function(d) {
+                return (
+                    (_this.config.time_scale === 'Date' && d.option === 'day_time_range') ||
+                    (_this.config.time_scale === 'Day' && d.option === 'date_time_range')
+                );
+            });
+    }
+
     function enableDisableControls() {
         var _this = this;
 
@@ -1280,6 +1490,8 @@
                 );
             })
             .classed('ct-hidden', !!this.selected_id);
+
+        if (!this.selected_id) hideTimeRangeControl.call(this);
     }
 
     function updateIDfilter() {
@@ -1476,7 +1688,58 @@
         });
     }
 
-    function manipulateData() {
+    //Capture and count all IDs in data.
+    function getPopulationDetails() {
+        var _this = this;
+
+        this.populationDetails = {
+            population: d3
+                .set(
+                    this.raw_data.map(function(d) {
+                        return d[_this.config.id_col];
+                    })
+                )
+                .values()
+        };
+        this.populationDetails.N = this.populationDetails.population.length;
+        this.IDdetails = {};
+    }
+
+    //Remove records with missing key variables.
+    function removeInvalidData() {
+        var _this = this;
+
+        this.initial_data = this.raw_data.filter(function(d) {
+            return (
+                !/^\s*$/.test(d[_this.config.id_col]) && !/^\s*$/.test(d[_this.config.event_col])
+            );
+        });
+
+        //Warn user of removed records.
+        if (this.initial_data.length < this.raw_data.length)
+            console.warn(
+                this.raw_data.length -
+                    this.initial_data.length +
+                    ' records have been removed due to missing identifiers or event types.'
+            );
+
+        //Check which time scales are present in the data.
+        this.anyDates = this.initial_data.some(function(d) {
+            return d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] !== '';
+        });
+        this.anyDays = this.initial_data.some(function(d) {
+            return d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] !== '';
+        });
+    }
+
+    //Attach initial, valid data to controls, bypassing controls.init().
+    function attachDataToControls() {
+        this.controls.data = this.initial_data;
+        this.controls.ready = true;
+    }
+
+    //Standardize invalid date and day values.
+    function standardizeTimeVariables() {
         var _this = this;
 
         this.initial_data.forEach(function(d, i) {
@@ -1514,29 +1777,282 @@
         });
     }
 
+    //Capture all event types in array and define color domain as well as event type order.
+    function handleEventTypes() {
+        var _this = this;
+
+        this.allEventTypes = d3
+            .set(
+                this.initial_data.map(function(d) {
+                    return d[_this.config.event_col];
+                })
+            )
+            .values()
+            .sort();
+        this.currentEventTypes = this.config.event_types || this.allEventTypes.slice();
+        this.controls.config.inputs.find(function(input) {
+            return input.description === 'Event Type';
+        }).start = this.currentEventTypes;
+        this.config.color_dom = this.currentEventTypes.concat(
+            this.allEventTypes
+                .filter(function(eventType) {
+                    return _this.currentEventTypes.indexOf(eventType) === -1;
+                })
+                .sort()
+        );
+        this.config.legend.order = this.config.color_dom.slice();
+    }
+
+    function defineFullTimeRanges() {
+        var _this = this;
+
+        /**-------------------------------------------------------------------------------------------\
+      Dates
+    \-------------------------------------------------------------------------------------------**/
+
+        if (this.anyDates) {
+            //full domain
+            this.full_date_range = [
+                d3.min(this.initial_data, function(d) {
+                    return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
+                }),
+                d3.max(this.initial_data, function(d) {
+                    return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
+                })
+            ];
+
+            //full domain as a string
+            this.full_date_time_range = this.full_date_range
+                .map(function(d) {
+                    return d3.time.format(_this.config.date_format)(d);
+                })
+                .join(' - ');
+
+            //add full domain to date ranges
+            this.config.date_ranges.push({
+                domain: this.full_date_range,
+                label: 'Full'
+            });
+
+            //add custom domain to date ranges
+            this.config.date_ranges.push({
+                domain: this.full_date_range.slice(),
+                label: 'User Input'
+            });
+        }
+
+        /**-------------------------------------------------------------------------------------------\
+      Days
+    \-------------------------------------------------------------------------------------------**/
+
+        if (this.anyDays) {
+            //full domain
+            this.full_day_range = [
+                d3.min(this.initial_data, function(d) {
+                    return +d[_this.config.stdy_col];
+                }),
+                d3.max(this.initial_data, function(d) {
+                    return +d[_this.config.endy_col];
+                })
+            ];
+
+            //full domain as a string
+            this.full_day_time_range = this.full_day_range.join(' - ');
+
+            //add full domain to day ranges
+            this.config.day_ranges.push({
+                domain: this.full_day_range,
+                label: 'Full'
+            });
+
+            //add custom domain to day ranges
+            this.config.day_ranges.push({
+                domain: this.full_day_range.slice(),
+                label: 'User Input'
+            });
+        }
+    }
+
+    function defineInitialTimeRanges() {
+        if (this.anyDates) this.date_range = this.config.date_ranges[0].domain.slice();
+        if (this.anyDays) this.day_range = this.config.day_ranges[0].domain.slice();
+    }
+
+    function syncTimeRanges() {
+        if (this.config.time_scale === 'Date') this.time_range = this.date_range.slice();
+        else this.time_range = this.day_range.slice();
+    }
+
+    //Update time range data and settings.
+    function handleTimeRanges() {
+        //Calculate extent of each time scale.
+        defineFullTimeRanges.call(this);
+
+        //Set initial range of each time scale.
+        defineInitialTimeRanges.call(this);
+
+        //Sync time range variables given initial time scale.
+        syncTimeRanges.call(this);
+    }
+
+    function checkTimeScales() {
+        var _this = this;
+
+        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
+            if (input.description !== 'X-axis scale') return true;
+            else {
+                if (!_this.anyDates && !_this.anyDays) {
+                    var errorText =
+                        'The data either contain neither ' +
+                        _this.config.stdt_col +
+                        ' nor ' +
+                        _this.config.stdy_col +
+                        ' or both ' +
+                        _this.config.stdt_col +
+                        ' and ' +
+                        _this.config.stdy_col +
+                        ' contain no valid values.  Please update the settings object to match the variables in the data or clean the data.';
+                    _this.wrap
+                        .append('div')
+                        .style('color', 'red')
+                        .html(errorText);
+                    throw new Error(errorText);
+                } else if (!_this.anyDates && _this.config.time_scale === 'Date') {
+                    console.warn(
+                        'The data either do not contain a variable named ' +
+                            _this.config.stdt_col +
+                            ' or ' +
+                            _this.config.stdt_col +
+                            ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
+                    );
+                    _this.config.time_scale = 'Day';
+                    syncTimeScaleSettings(_this.config);
+                    _this.IDtimeline.config.time_scale = 'Day';
+                    syncTimeScaleSettings(_this.IDtimeline.config);
+                } else if (!_this.anyDays && _this.config.time_scale === 'Day') {
+                    console.warn(
+                        'The data either do not contain a variable named ' +
+                            _this.config.stdy_col +
+                            ' or ' +
+                            _this.config.stdy_col +
+                            ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
+                    );
+                    _this.config.time_scale = 'Date';
+                    syncTimeScaleSettings(_this.config);
+                    _this.IDtimeline.config.time_scale = 'Date';
+                    syncTimeScaleSettings(_this.IDtimeline.config);
+                }
+
+                return _this.anyDates && _this.anyDays;
+            }
+        });
+    }
+
+    function updateTimeRangeControls() {
+        if (this.anyDates) {
+            //Update date time range dropdown.
+            this.controls.config.inputs.find(function(input) {
+                return input.option === 'date_time_range';
+            }).values = this.config.date_ranges.map(function(date_time_range) {
+                return date_time_range.label;
+            });
+            this.config.date_time_range = this.config.date_ranges[0].label;
+        }
+
+        if (this.anyDays) {
+            //Update day time range dropdown.
+            this.controls.config.inputs.find(function(input) {
+                return input.option === 'day_time_range';
+            }).values = this.config.day_ranges.map(function(day_time_range) {
+                return day_time_range.label;
+            });
+            this.config.day_time_range = this.config.day_ranges[0].label;
+        }
+    }
+
+    function checkOtherControls() {
+        var _this = this;
+
+        this.controls.config.inputs
+            .filter(function(input) {
+                return input.type !== 'subsetter';
+            })
+            .forEach(function(input) {
+                //Set values of Event Type highlighting control to event types present in the data.
+                if (input.description === 'Event highlighting')
+                    input.values = _this.config.color_dom.slice();
+                else if (input.description === 'Y-axis grouping')
+                    input.values = _this.config.groupings.map(function(grouping) {
+                        return grouping.label;
+                    });
+
+                return true;
+            });
+
+        checkTimeScales.call(this);
+        updateTimeRangeControls.call(this);
+    }
+
+    function checkFilters() {
+        var _this = this;
+
+        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
+            if (input.type !== 'subsetter') return true;
+            else if (!_this.initial_data[0].hasOwnProperty(input.value_col)) {
+                console.warn(
+                    input.value_col + ' filter removed because the variable does not exist.'
+                );
+
+                return false;
+            } else {
+                var levels = d3
+                    .set(
+                        _this.initial_data.map(function(d) {
+                            return d[input.value_col];
+                        })
+                    )
+                    .values();
+
+                if (levels.length < 2) {
+                    console.warn(
+                        input.value_col + ' filter removed because the variable has only one level.'
+                    );
+                }
+
+                return levels.length > 1;
+            }
+        });
+    }
+
+    //Check control inputs for invalid settings.
+    function checkControls() {
+        checkOtherControls.call(this);
+        checkFilters.call(this);
+    }
+
+    //Remove invalid time data.
     function cleanData() {
         var _this = this;
 
-        //Remove records with insufficient data (this.wide_data should only be defined on initialization).
         this.wide_data = this.initial_data.filter(function(d) {
             return d[_this.config.st_col] !== '';
         });
 
         //Warn user of removed records.
         if (this.wide_data.length < this.initial_data.length) {
-            if (this.config.time_scale === 'day')
-                console.warn(
-                    this.initial_data.length -
-                        this.wide_data.length +
-                        ' records have been removed due to missing or invalid day variable values.'
-                );
-            else if (this.config.time_scale === 'date')
+            if (this.config.time_scale === 'Date')
                 console.warn(
                     this.initial_data.length -
                         this.wide_data.length +
                         ' records have been removed due to missing or invalid date variable values that do not match settings.date_format (' +
                         this.config.date_format +
                         ')'
+                );
+            else if (this.config.time_scale === 'Day')
+                console.warn(
+                    this.initial_data.length -
+                        this.wide_data.length +
+                        ' records have been removed due to missing or invalid day variable values.'
                 );
         }
     }
@@ -1560,300 +2076,45 @@
         return my_data;
     }
 
+    //Define a record for each timepoint and a record for both the start and end of a time interval.
     function defineData() {
         var _this = this;
 
-        //Separate out timepoints and time intervals.
+        //Capture timepoints.
         var timepoints = this.wide_data
-                .filter(function(d) {
-                    return d[_this.config.st_col] === d[_this.config.en_col];
-                })
-                .map(function(d) {
-                    d.wc_category = _this.config.time_unit;
-                    d.wc_value = d[_this.config.st_col];
+            .filter(function(d) {
+                return d[_this.config.st_col] === d[_this.config.en_col];
+            })
+            .map(function(d) {
+                d.wc_category = _this.config.time_unit;
+                d.wc_value = d[_this.config.st_col];
 
-                    return d;
-                }),
-            timeIntervals = lengthenRaw(
-                this.wide_data.filter(function(d) {
-                    return d[_this.config.st_col] !== d[_this.config.en_col];
-                }),
-                [this.config.st_col, this.config.en_col]
-            );
+                return d;
+            });
 
+        //Capture time intervals, creating two records for each event..
+        var timeIntervals = lengthenRaw(
+            this.wide_data.filter(function(d) {
+                return d[_this.config.st_col] !== d[_this.config.en_col];
+            }),
+            [this.config.st_col, this.config.en_col]
+        );
+
+        //Merge timepoints and time intervals.
         this.long_data = d3.merge([timepoints, timeIntervals]);
         this.raw_data = this.long_data;
     }
 
-    function setDefaultTimeRanges() {
-        var _this = this;
-
-        //Date range
-        if (this.anyDates) {
-            this.full_date_range = [
-                d3.min(this.initial_data, function(d) {
-                    return d3.time.format(_this.config.date_format).parse(d[_this.config.stdt_col]);
-                }),
-                d3.max(this.initial_data, function(d) {
-                    return d3.time.format(_this.config.date_format).parse(d[_this.config.endt_col]);
-                })
-            ];
-            this.date_range =
-                this.config.date_range instanceof Array &&
-                this.config.date_range.length === 2 &&
-                this.config.date_range[0].toString() !== this.config.date_range[1].toString() &&
-                this.config.date_range.every(function(date) {
-                    return (
-                        date instanceof Date || d3.time.format(_this.config.date_format).parse(date)
-                    );
-                })
-                    ? this.config.date_range.map(function(date) {
-                          return date instanceof Date
-                              ? date
-                              : d3.time.format(_this.config.date_format).parse(date);
-                      })
-                    : this.full_date_range;
-        }
-
-        //Day range
-        if (this.anyDays) {
-            this.full_day_range = [
-                d3.min(this.initial_data, function(d) {
-                    return +d[_this.config.stdy_col];
-                }),
-                d3.max(this.initial_data, function(d) {
-                    return +d[_this.config.endy_col];
-                })
-            ];
-            this.day_range =
-                this.config.day_range instanceof Array &&
-                this.config.day_range.length === 2 &&
-                this.config.day_range[0].toString() !== this.config.day_range[1].toString() &&
-                this.config.day_range.every(function(day) {
-                    return Number.isInteger(+day);
-                })
-                    ? this.config.day_range.map(function(day) {
-                          return +day;
-                      })
-                    : this.full_day_range;
-        }
-    }
-
-    function handleEventTypes() {
-        var _this = this;
-
-        this.allEventTypes = d3
-            .set(
-                this.initial_data.map(function(d) {
-                    return d[_this.config.event_col];
-                })
-            )
-            .values()
-            .sort();
-        this.currentEventTypes = this.config.event_types || this.allEventTypes;
-        this.controls.config.inputs.find(function(input) {
-            return input.description === 'Event Type';
-        }).start = this.currentEventTypes;
-        this.config.color_dom = this.currentEventTypes.concat(
-            this.allEventTypes
-                .filter(function(eventType) {
-                    return _this.currentEventTypes.indexOf(eventType) === -1;
-                })
-                .sort()
-        );
-        this.config.legend.order = this.config.color_dom;
-    }
-
-    function checkTimeScales() {
-        var _this = this;
-
-        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
-            if (input.description !== 'X-axis scale') return true;
-            else {
-                _this.anyDates = _this.initial_data.some(function(d) {
-                    return (
-                        d.hasOwnProperty(_this.config.stdt_col) && d[_this.config.stdt_col] !== ''
-                    );
-                });
-                _this.anyDays = _this.initial_data.some(function(d) {
-                    return (
-                        d.hasOwnProperty(_this.config.stdy_col) && d[_this.config.stdy_col] !== ''
-                    );
-                });
-
-                if (!_this.anyDates && !_this.anyDays) {
-                    var errorText =
-                        'The data either contain neither ' +
-                        _this.config.stdt_col +
-                        ' nor ' +
-                        _this.config.stdy_col +
-                        ' or both ' +
-                        _this.config.stdt_col +
-                        ' and ' +
-                        _this.config.stdy_col +
-                        ' contain no valid values.  Please update the settings object to match the variables in the data or clean the data.';
-                    _this.wrap
-                        .append('div')
-                        .style('color', 'red')
-                        .html(errorText);
-                    throw new Error(errorText);
-                } else if (!_this.anyDates && _this.config.time_scale === 'date') {
-                    console.warn(
-                        'The data either do not contain a variable named ' +
-                            _this.config.stdt_col +
-                            ' or ' +
-                            _this.config.stdt_col +
-                            ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
-                    );
-                    _this.config.time_scale = 'day';
-                    syncTimeScaleSettings(_this.config);
-                    _this.IDtimeline.config.time_scale = 'day';
-                    syncTimeScaleSettings(_this.IDtimeline.config);
-                } else if (!_this.anyDays && _this.config.time_scale === 'day') {
-                    console.warn(
-                        'The data either do not contain a variable named ' +
-                            _this.config.stdy_col +
-                            ' or ' +
-                            _this.config.stdy_col +
-                            ' contains no valid values.  Please update the settings object to match the variable in the data or clean the data.'
-                    );
-                    _this.config.time_scale = 'date';
-                    syncTimeScaleSettings(_this.config);
-                    _this.IDtimeline.config.time_scale = 'date';
-                    syncTimeScaleSettings(_this.IDtimeline.config);
-                }
-
-                return _this.anyDates && _this.anyDays;
-            }
-        });
-    }
-
-    function checkOtherControls() {
-        var _this = this;
-
-        this.controls.config.inputs
-            .filter(function(input) {
-                return input.type !== 'subsetter';
-            })
-            .forEach(function(input) {
-                //Set values of Event Type highlighting control to event types present in the data.
-                if (input.description === 'Event highlighting')
-                    input.values = _this.config.color_dom;
-                else if (input.description === 'Y-axis grouping')
-                    input.values = _this.config.groupings.map(function(grouping) {
-                        return grouping.value_col;
-                    });
-
-                return true;
-            });
-
-        checkTimeScales.call(this);
-    }
-
-    function checkFilters() {
-        var _this = this;
-
-        this.controls.config.inputs = this.controls.config.inputs.filter(function(input) {
-            if (input.type !== 'subsetter') return true;
-            else if (!_this.raw_data[0].hasOwnProperty(input.value_col)) {
-                console.warn(
-                    input.value_col + ' filter removed because the variable does not exist.'
-                );
-
-                return false;
-            } else {
-                var levels = d3
-                    .set(
-                        _this.raw_data.map(function(d) {
-                            return d[input.value_col];
-                        })
-                    )
-                    .values();
-
-                if (levels.length < 2) {
-                    console.warn(
-                        input.value_col + ' filter removed because the variable has only one level.'
-                    );
-                }
-
-                return levels.length > 1;
-            }
-        });
-    }
-
-    function addDataDrivenTooltips() {
-        var _this = this;
-
-        if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
-            this.config.marks.forEach(function(mark) {
-                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
-            });
-            this.config.IDtimelineSettings.marks.forEach(function(mark) {
-                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
-            });
-        }
-    }
-
     function onInit() {
-        var _this = this;
-
-        //Capture and count all IDs in data.
-        this.populationDetails = {
-            population: d3
-                .set(
-                    this.raw_data.map(function(d) {
-                        return d[_this.config.id_col];
-                    })
-                )
-                .values()
-        };
-        this.populationDetails.N = this.populationDetails.population.length;
-
-        //Instantiate ID details.
-        this.IDdetails = {};
-
-        //Retain initial data array, removing records with missing key variables.
-        this.initial_data = this.raw_data.filter(function(d) {
-            return (
-                !/^\s*$/.test(d[_this.config.id_col]) && !/^\s*$/.test(d[_this.config.event_col])
-            );
-        });
-
-        //Manually set controls' data.
-        this.controls.data = this.initial_data;
-        this.controls.ready = true;
-
-        //Warn user of removed records.
-        if (this.initial_data.length < this.raw_data.length)
-            console.warn(
-                this.raw_data.length -
-                    this.initial_data.length +
-                    ' records have been removed due to missing identifiers or event types.'
-            );
-
-        //Standardize invalid day and date values.
-        manipulateData.call(this);
-
-        //Default event types to 'All'.
+        getPopulationDetails.call(this);
+        removeInvalidData.call(this);
+        attachDataToControls.call(this);
+        standardizeTimeVariables.call(this);
         handleEventTypes.call(this);
+        handleTimeRanges.call(this);
+        checkControls.call(this);
 
-        //Check other control inputs.
-        checkOtherControls.call(this);
-
-        //Check filters for non-existent or single-value variables.
-        checkFilters.call(this);
-
-        //Set default time ranges.
-        setDefaultTimeRanges.call(this);
-        this.time_range = this.config.time_scale === 'day' ? this.day_range : this.date_range;
-
-        //Add data-driven tooltips.
-        addDataDrivenTooltips.call(this);
-
-        //Remove unusable data.
         cleanData.call(this);
-
-        //Define a record for each start day and stop day.
         defineData.call(this);
     }
 
@@ -1874,7 +2135,7 @@
 
         this.controls.wrap.selectAll('.control-group').each(function(d) {
             var controlGroup = d3.select(this),
-                label = controlGroup.select('.wc-control-label'),
+                label = controlGroup.selectAll('.wc-control-label, .control-label'),
                 description = controlGroup.select('.span-description'),
                 container = controlGroup.append('div').classed('ct-label-description', true);
 
@@ -1890,7 +2151,7 @@
                     .classed('ct-controls ct-horizontal-rule', true)
                     .text('Controls');
             else if (
-                (context.config.groupings.length && d.option === 'y.grouping') ||
+                (context.config.groupings.length && d.option === 'y.groupingLabel') ||
                 (!context.config.groupings.length && d.option === 'y.sort')
             ) {
                 var filterRule = context.controls.wrap
@@ -1910,6 +2171,12 @@
 
         //Display ID information.
         this.clinicalTimelines.containers.IDdetails.classed('ct-hidden', false);
+
+        //Hide reference line table.
+        if (this.config.reference_lines)
+            this.config.reference_lines.forEach(function(reference_line) {
+                reference_line.tableContainer.remove();
+            });
 
         //Hide clinical timelines.
         this.wrap.select('svg.wc-svg').classed('ct-hidden', true);
@@ -1950,7 +2217,7 @@
                     : true;
             }),
             this.config.event_col,
-            null,
+            this.config.color_dom,
             this.clinicalTimelines.test
         );
 
@@ -1970,7 +2237,7 @@
         );
     }
 
-    function eventHighlightingChange(select$$1, d) {
+    function eventHighlighting(select$$1, d) {
         //Update event highlighting settings.
         this.config.event_highlighted = d3
             .select(select$$1)
@@ -1983,18 +2250,50 @@
         else this.draw();
     }
 
-    function timeScaleChange(dropdown, d) {
+    function timeScale(dropdown, d) {
         //Update clinical timelines time scale settings
         this.config.time_scale = d3
             .select(dropdown)
             .select('option:checked')
             .text();
         syncTimeScaleSettings(this.config);
-        this.time_range = this.config.time_scale === 'day' ? this.day_range : this.date_range;
+
+        //Hide other time range dropdown.
+        if (!this.selected_id) hideTimeRangeControl.call(this);
+
+        //Update time range settings.
+        this.time_range = this[this.config.time_scale.toLowerCase() + '_range'];
 
         //Update ID timeline time scale settings
         this.IDtimeline.config.time_scale = this.config.time_scale;
         syncTimeScaleSettings(this.IDtimeline.config);
+
+        //Remove records without time data.
+        cleanData.call(this);
+
+        //Redefine data.
+        defineData.call(this);
+
+        //Redraw.
+        if (this.selected_id) drawIDtimeline.call(this);
+        else this.draw();
+    }
+
+    function timeRange(dropdown, d) {
+        var label = d3
+            .select(dropdown)
+            .selectAll('option')
+            .filter(function() {
+                return this.selected;
+            })
+            .text();
+        var time_range = this.config[this.config.time_scale.toLowerCase() + '_ranges'].find(
+            function(di) {
+                return di.label === label;
+            }
+        );
+        this[this.config.time_scale.toLowerCase() + '_range'] = time_range.domain.slice();
+        this.time_range = time_range.domain.slice();
 
         //Remove records without time data.
         cleanData.call(this);
@@ -2012,8 +2311,10 @@
 
         //Update grouping settings.
         if (selected.text() !== 'None') {
-            this.config.y.grouping = selected.text();
-            this.config.y.groupingLabel = selected.property('label');
+            this.config.y.grouping = this.config.groupings.find(function(grouping) {
+                return grouping.label === selected.text();
+            }).value_col;
+            this.config.y.groupingLabel = selected.text();
         } else {
             delete this.config.y.grouping;
             this.config.y.groupingLabel = 'Event Types';
@@ -2024,81 +2325,111 @@
     }
 
     function augmentOtherControls() {
-        var context = this,
-            otherControls = this.controls.wrap
-                .selectAll('.control-group')
-                .filter(function(d) {
-                    return d.type !== 'subsetter';
-                })
-                .classed('ct-control', true)
-                .attr('id', function(d) {
-                    return 'control-' + d.option.replace('.', '-');
-                });
-
-        //Relabel Y-axis sort options and remove illogical Y-axis grouping options.
-        otherControls
+        var context = this;
+        var controls = this.controls.wrap
+            .selectAll('.control-group')
             .filter(function(d) {
-                return ['Y-axis sort', 'Y-axis grouping'].indexOf(d.description) > -1;
+                return d.type !== 'subsetter';
             })
-            .each(function(d) {
-                // Y-axis controls
-                var options = d3.select(this).selectAll('option');
-
-                if (d.description === 'Y-axis sort')
-                    // Add labels to Y-axis sort.
-                    options.property('label', function(di) {
-                        return d.relabels[
-                            d.values
-                                .filter(function(dii) {
-                                    return dii !== 'None';
-                                })
-                                .indexOf(di)
-                        ];
-                    });
-                else if (d.description === 'Y-axis grouping')
-                    // Add variable labels to Y-axis grouping options.
-                    options.property('label', function(di) {
-                        return di !== 'None'
-                            ? context.config.groupings[
-                                  context.config.groupings
-                                      .map(function(dii) {
-                                          return dii.value_col;
-                                      })
-                                      .indexOf(di)
-                              ].label
-                            : 'None';
-                    });
+            .classed('ct-control', true)
+            .attr('id', function(d) {
+                return 'control-' + d.option.replace('.', '-');
             });
 
         //Redefine event highlighting event listener.
-        otherControls
+        controls
             .filter(function(d) {
                 return d.option === 'event_highlighted';
             })
             .select('select')
             .on('change', function(d) {
-                eventHighlightingChange.call(context, this, d);
+                eventHighlighting.call(context, this, d);
             });
 
         //Redefine time scale event listener.
-        otherControls
+        controls
             .filter(function(d) {
                 return d.option === 'time_scale';
             })
             .select('select')
             .on('change', function(d) {
-                timeScaleChange.call(context, this, d);
+                timeScale.call(context, this, d);
+            });
+
+        //Redefine time range event listener.
+        controls
+            .filter(function(d) {
+                return d.option.indexOf('time_range') > -1;
+            })
+            .selectAll('select')
+            .each(function(d) {
+                //add event listener
+                d3.select(this).on('change', function(d) {
+                    timeRange.call(context, this, d);
+                });
             });
 
         //Redefine y-axis grouping event listener.
-        otherControls
+        controls
             .filter(function(d) {
-                return d.option === 'y.grouping';
+                return d.option === 'y.groupingLabel';
             })
             .select('select')
             .on('change', function(d) {
                 yAxisGrouping.call(context, this, d);
             });
+    }
+
+    function onChange(input, d) {
+        var _this = this;
+
+        var time_range = this.config.time_scale.toLowerCase() + '_range';
+        var increment = this.config.time_scale === 'Date' ? 24 * 60 * 60 * 1000 : 1;
+
+        //User input.
+        var inputValue =
+            this.config.time_scale === 'Date'
+                ? d3.time.format('%Y-%m-%d').parse(input.value)
+                : +input.value;
+
+        //handle invalid inputs
+        if (d.index === 0 && inputValue >= this[time_range][1])
+            inputValue =
+                this.config.time_scale === 'Date'
+                    ? new Date(this[time_range][1].getTime() - increment)
+                    : this[time_range][1] - increment;
+        else if (d.index === 1 && inputValue <= this[time_range][0])
+            inputValue =
+                this.config.time_scale === 'Date'
+                    ? new Date(this[time_range][0].getTime() + increment)
+                    : (inputValue = this[time_range][0] + increment);
+
+        //Update time range.
+        this[time_range][d.index] = inputValue;
+        this.time_range = this[time_range];
+
+        //Update custom time range setting.
+        var customTimeRange = this.config[time_range + 's'].find(function(d) {
+            return d.label === 'User Input';
+        });
+        customTimeRange.domain = this.time_range.slice();
+
+        //Update time range control.
+        this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(d) {
+                return d.option === _this.config.time_scale.toLowerCase() + '_time_range';
+            })
+            .selectAll('option')
+            .property('selected', function() {
+                return this.value === 'User Input';
+            })
+            .filter(function() {
+                return this.value === 'User Input';
+            })
+            .datum(customTimeRange.time_range);
+
+        this.draw();
     }
 
     function timeRangeControl(datum) {
@@ -2126,37 +2457,20 @@
 
         //Add event listener to input node.
         timeRangeInput.on('change', function(d) {
-            var time_range = context.config.time_scale + '_range',
-                increment = context.config.time_scale === 'date' ? 24 * 60 * 60 * 1000 : 1;
-            var input =
-                context.config.time_scale === 'date'
-                    ? d3.time.format('%Y-%m-%d').parse(this.value)
-                    : +this.value;
-
-            if (d.index === 0 && input >= context[time_range][1])
-                input =
-                    context.config.time_scale === 'date'
-                        ? new Date(context[time_range][1].getTime() - increment)
-                        : context[time_range][1] - increment;
-            else if (d.index === 1 && input <= context[time_range][0])
-                input =
-                    context.config.time_scale === 'date'
-                        ? new Date(context[time_range][0].getTime() + increment)
-                        : (input = context[time_range][0] + increment);
-
-            context[time_range][d.index] = input;
-            context.time_range = context[time_range];
-            context.draw();
+            onChange.call(context, this, d);
         });
     }
 
     function addTimeRangeControls() {
+        //Start
         timeRangeControl.call(this, {
             index: 0,
             option: 'x.domain.0',
             label: '',
             description: 'Start'
         });
+
+        //End
         timeRangeControl.call(this, {
             index: 1,
             option: 'x.domain.1',
@@ -2234,8 +2548,8 @@
     function augmentFilters() {
         var _this = this;
 
-        var context = this,
-            filters = this.controls.wrap
+        var context = this;
+        var controls = this.controls.wrap
                 .selectAll('.control-group')
                 .filter(function(d) {
                     return d.type === 'subsetter';
@@ -2247,10 +2561,10 @@
                 .classed('ct-ID', function(d) {
                     return d.value_col === _this.config.id_col;
                 }),
-            IDfilter = filters.filter(function(filter) {
+            IDfilter = controls.filter(function(filter) {
                 return filter.value_col === _this.config.id_col;
             }),
-            eventTypeFilter = filters.filter(function(filter) {
+            eventTypeFilter = controls.filter(function(filter) {
                 return filter.value_col === _this.config.event_col;
             });
 
@@ -2286,6 +2600,9 @@
         //Add additional functionality to other control event listeners.
         augmentOtherControls.call(this);
 
+        //Hide other time range dropdown.
+        hideTimeRangeControl.call(this);
+
         //Add time range functionality.
         addTimeRangeControls.call(this);
 
@@ -2296,7 +2613,7 @@
         topXaxis.call(this);
     }
 
-    function updateTimeRangeControls() {
+    function updateTimeRangeControls$1() {
         var _this = this;
 
         var timeRangeControls = this.controls.wrap.selectAll('.ct-time-range input');
@@ -2305,13 +2622,13 @@
         timeRangeControls.property(
             'type',
             !this.clinicalTimelines.document.documentMode
-                ? this.config.time_scale === 'date' ? 'date' : 'number'
+                ? this.config.time_scale === 'Date' ? 'date' : 'number'
                 : 'text'
         );
 
         timeRangeControls.property('value', function(d) {
-            return _this.config.time_scale === 'date'
-                ? d3.time.format('%Y-%m-%d')(_this.time_range[d.index])
+            return _this.config.time_scale === 'Date'
+                ? d3.time.format(_this.config.date_format)(_this.time_range[d.index])
                 : +_this.time_range[d.index];
         });
     }
@@ -2524,8 +2841,13 @@
                         var groupingStart = clone(groupingObject),
                             groupingEnd = clone(groupingObject);
 
-                        groupingStart.wc_value = _this.config.x.domain[0];
-                        groupingEnd.wc_value = _this.config.x.domain[0];
+                        if (_this.config.time_scale === 'Date') {
+                            groupingStart.wc_value = _this.full_date_range[0];
+                            groupingEnd.wc_value = _this.full_date_range[0];
+                        } else {
+                            groupingStart.wc_value = _this.full_day_range[0];
+                            groupingEnd.wc_value = _this.full_day_range[0];
+                        }
 
                         //Push two start and two end data to raw_data to create space to annotate grouping.
                         var groupingStart1 = clone(groupingStart),
@@ -2554,7 +2876,7 @@
         /**-------------------------------------------------------------------------------------------\
       Sort y-domain by the earliest event of each ID.
     \-------------------------------------------------------------------------------------------**/
-        if (this.config.y.sort === 'earliest') {
+        if (this.config.y.sort === 'By Earliest Event') {
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then earliest event if y-axis is grouped.
                 var nestedData = d3
@@ -2677,12 +2999,26 @@
         }
     }
 
+    //If a tooltip variable is specified and exists, attach it to each mark's existing tooltip specification.
+    function updateTooltipSettings() {
+        var _this = this;
+
+        if (this.raw_data.length > 0 && this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
+            this.config.marks.forEach(function(mark) {
+                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
+            });
+            this.clinicalTimelines.settings.IDtimeline.marks.forEach(function(mark) {
+                mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
+            });
+        }
+    }
+
     function onPreprocess() {
         //Set x-domain.
         this.config.x.domain = this.time_range;
 
         //Set x-domain.
-        updateTimeRangeControls.call(this);
+        updateTimeRangeControls$1.call(this);
 
         //Define filtered data irrespective of individual mark filtering.
         defineFilteredData.call(this);
@@ -2698,6 +3034,9 @@
 
         //Sort y-axis based on `Sort IDs` control selection.
         sortYdomain.call(this);
+
+        //Add tooltip variable to mark tooltips.
+        updateTooltipSettings.call(this);
     }
 
     function onDatatransform() {}
@@ -2765,6 +3104,174 @@
         });
     }
 
+    function timepoint(legendMark) {
+        var x = 1;
+        var y = 10;
+        var width = 8;
+        var height = 8;
+        var margin = 2;
+        legendMark
+            .append('rect')
+            .classed('ct-legend-mark', true)
+            .attr({
+                x: x + width * 0 + margin * 0,
+                y: y - height / 2,
+                width: width,
+                height: height,
+                fill: 'black'
+            });
+        //.append('animateTransform')
+        //.attr({
+        //    attributeName: 'transform',
+        //    type: 'rotate',
+        //    from: `0 ${x + width/2} ${y}`,
+        //    to: `360 ${x + width/2} ${y}`,
+        //    dur: '4s',
+        //    repeatCount: 'indefinite'
+        //});
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark', true)
+            .attr({
+                cx: x + width * 1 + width / 2 + +margin * 1,
+                cy: y,
+                r: width / 2,
+                fill: 'black'
+            });
+        legendMark
+            .append('polygon')
+            .classed('ct-legend-mark', true)
+            .attr({
+                points: [
+                    [x + width * 2 + margin * 2, y - height / 2],
+                    [x + width * 2 + margin * 2 + width, y],
+                    [x + width * 2 + margin * 2, y + height / 2]
+                ]
+                    .map(function(point) {
+                        return point.join(',');
+                    })
+                    .join(','),
+                fill: 'black'
+            });
+        //.append('animateTransform')
+        //.attr({
+        //    attributeName: 'transform',
+        //    type: 'rotate',
+        //    from: `0 ${x + width*2 + 2 + width/2} ${y}`,
+        //    to: `360 ${x + width*2 + 2 + width/2} ${y}`,
+        //    dur: '4s',
+        //    repeatCount: 'indefinite'
+        //});
+    }
+
+    function timeInterval(legendMark) {
+        var y = 10;
+        legendMark
+            .append('line')
+            .classed('ct-legend-mark', true)
+            .attr({
+                x1: 4,
+                x2: 26,
+                y1: y,
+                y2: y
+            })
+            .style({
+                'stroke-width': 8,
+                stroke: 'black',
+                'stroke-linecap': 'round'
+            });
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark ct-start-stop-circle', true)
+            .attr({
+                cx: 5,
+                cy: y,
+                r: 2.5,
+                fill: 'white',
+                stroke: 'lightgray'
+            });
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark ct-start-stop-circle', true)
+            .attr({
+                cx: 25,
+                cy: y,
+                r: 2.5,
+                fill: 'white',
+                stroke: 'lightgray'
+            });
+    }
+
+    function ongoingEvent(legendMark) {
+        var y = 10;
+        legendMark
+            .append('line')
+            .classed('ct-legend-mark', true)
+            .attr({
+                x1: 4,
+                x2: 20,
+                y1: y,
+                y2: y
+            })
+            .style({
+                'stroke-width': 8,
+                stroke: 'black',
+                'stroke-linecap': 'round'
+            });
+        legendMark
+            .append('circle')
+            .classed('ct-legend-mark ct-start-stop-circle', true)
+            .attr({
+                cx: 5,
+                cy: y,
+                r: 2.5,
+                fill: 'white',
+                stroke: 'lightgray'
+            });
+        legendMark
+            .append('polygon')
+            .classed('ct-legend-mark ct-ongoing-event', true)
+            .attr({
+                points: [[18, y - 6], [30, y], [18, y + 6]]
+                    .map(function(point) {
+                        return point.join(',');
+                    })
+                    .join(' '),
+                fill: 'black',
+                stroke: 'black'
+            });
+    }
+
+    function addSecondLegend() {
+        var context = this;
+        var secondLegend = this.wrap.insert('ul', '.wc-svg').attr('id', 'ct-legend');
+        secondLegend
+            .selectAll('li')
+            .data([
+                { label: 'timepoint', function: timepoint },
+                { label: 'time interval', function: timeInterval },
+                { label: 'ongoing event', function: ongoingEvent }
+            ])
+            .enter()
+            .append('li')
+            .classed('ct-legend-item', true)
+            .each(function(d) {
+                var legendItem = d3.select(this);
+                var legendMark = legendItem
+                    .append('svg')
+                    .classed('ct-legend-color-block', true)
+                    .attr({
+                        width: 36,
+                        height: 16
+                    });
+                d.function.call(context, legendMark);
+                var legendLabel = legendItem
+                    .append('span')
+                    .classed('ct-legend-label', true)
+                    .text(d.label);
+            });
+    }
+
     function drawTopXaxis() {
         var topXaxis = d3.svg
                 .axis()
@@ -2811,6 +3318,10 @@
                 drawIDtimeline.call(_this);
                 enableDisableControls.call(_this);
                 updateIDfilter.call(_this);
+            })
+            .append('title')
+            .text(function(d) {
+                return 'View a profile of ' + _this.config.id_unit + ' ' + d + '.';
             });
     }
 
@@ -2961,191 +3472,228 @@
     function offsetCircles(mark, markData) {
         var _this = this;
 
-        //Nest data by timepoint and filter on any nested object with more than one datum.
-        var overlapping = d3
-            .nest()
-            .key(function(d) {
-                return d.total + '|' + d.values.raw[0][_this.config.id_col];
-            })
-            .rollup(function(d) {
-                return {
-                    n: d.length,
-                    keys: d.map(function(di) {
-                        return di.key;
-                    })
-                };
-            })
-            .entries(markData)
-            .filter(function(d) {
-                return d.values.n > 1;
-            });
+        var context = this;
 
-        //For each timepoint with more than one event...
-        overlapping.forEach(function(d) {
-            var x = d.key.split('|')[0],
-                // timepoint
-                y = d.key.split('|')[1]; // ID
+        this.svg.selectAll('g.point').attr('transform', null);
 
-            //For each overlapping point...
-            d.values.keys.forEach(function(di, i) {
-                //Capture point via its class name and offset vertically.
-                var className = di + ' point';
-                var g = d3.select(
-                    _this.clinicalTimelines.document.getElementsByClassName(className)[0]
-                );
-                var point = g.select('circle');
-                g.attr('transform', 'translate(0,' + i * +mark.radius * 2 + ')');
+        if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.offset_col)) {
+            this.svg.selectAll('g.point').each(function(d) {
+                d3
+                    .select(this)
+                    .attr(
+                        'transform',
+                        'translate(0,' + d.offset * context.config.mark_thickness * 2 + ')'
+                    );
             });
-        });
+        } else {
+            //Nest data by timepoint and filter on any nested object with more than one datum.
+            var overlapping = d3
+                .nest()
+                .key(function(d) {
+                    return d.total + '|' + d.values.raw[0][_this.config.id_col];
+                })
+                .rollup(function(d) {
+                    return {
+                        n: d.length,
+                        keys: d.map(function(di) {
+                            return di.key;
+                        })
+                    };
+                })
+                .entries(markData)
+                .filter(function(d) {
+                    return d.values.n > 1;
+                });
+
+            //For each timepoint with more than one event...
+            overlapping.forEach(function(d) {
+                var x = d.key.split('|')[0]; // timepoint
+                var y = d.key.split('|')[1]; // ID
+
+                //For each overlapping point...
+                d.values.keys.forEach(function(di, i) {
+                    //Capture point via its class name and offset vertically.
+                    var className = di + ' point';
+                    var g = d3.select(
+                        _this.clinicalTimelines.document.getElementsByClassName(className)[0]
+                    );
+                    var point = g.select('circle');
+                    g.attr('transform', 'translate(0,' + i * _this.config.mark_thickness * 2 + ')');
+                });
+            });
+        }
     }
 
     function offsetLines(mark, markData) {
         var _this = this;
 
-        //Nest data by time interval and filter on any nested object with more than one datum.
-        var IDdata = d3
-            .nest()
-            .key(function(d) {
-                return d.values[0].values.raw[0][_this.config.id_col];
-            })
-            .key(function(d) {
-                return d.key;
-            })
-            .rollup(function(d) {
-                //Expose start and end point of line.
-                return _this.config.time_scale === 'day'
-                    ? {
-                          x1: +d[0].values[0].key,
-                          x2: +d[0].values[1].key
-                      }
-                    : {
-                          x1: new Date(d[0].values[0].key),
-                          x2: new Date(d[0].values[1].key)
-                      };
-            })
-            .entries(
-                markData.filter(function(d) {
-                    return d.values.length > 1;
-                })
-            );
+        var context = this;
 
-        //For each ID...
-        IDdata.forEach(function(IDdatum) {
-            var lineData = IDdatum.values;
+        this.svg.selectAll('g.line').attr('transform', null);
 
-            //Attach line x-coordinates to line object.
-            lineData.forEach(function(lineDatum) {
-                lineDatum.x1 = lineDatum.values.x1;
-                lineDatum.x2 = lineDatum.values.x2;
-                delete lineDatum.values;
+        if (
+            this.config.offset_col &&
+            this.raw_data.length &&
+            this.raw_data[0].hasOwnProperty(this.config.offset_col)
+        ) {
+            this.svg.selectAll('g.line').each(function(d) {
+                d3
+                    .select(this)
+                    .attr(
+                        'transform',
+                        'translate(0,' + d.offset * context.config.mark_thickness * 2 + ')'
+                    );
             });
-
-            //Capture all line x-coordinates in an array.
-            var lineCoordinates = lineData.map(function(di) {
-                    return [di.x1, di.x2];
-                }),
-                overlappingLines = lineData
-                    .filter(function(lineDatum) {
-                        var overlap = lineCoordinates.filter(function(lineCoordinate) {
-                            return (
-                                (lineCoordinate[0] <= lineDatum.x1 &&
-                                    lineCoordinate[1] >= lineDatum.x1) ||
-                                (lineDatum.x1 <= lineCoordinate[0] &&
-                                    lineDatum.x2 >= lineCoordinate[0]) ||
-                                (lineCoordinate[0] <= lineDatum.x2 &&
-                                    lineCoordinate[1] >= lineDatum.x2) ||
-                                (lineDatum.x1 <= lineCoordinate[1] &&
-                                    lineDatum.x2 >= lineCoordinate[1])
-                            );
-                        });
-
-                        return overlap.length > 1;
+        } else {
+            //Nest data by time interval and filter on any nested object with more than one datum.
+            var IDdata = d3
+                .nest()
+                .key(function(d) {
+                    return d.values[0].values.raw[0][_this.config.id_col];
+                })
+                .key(function(d) {
+                    return d.key;
+                })
+                .rollup(function(d) {
+                    //Expose start and end point of line.
+                    return _this.config.time_scale === 'Date'
+                        ? {
+                              x1: new Date(d[0].values[0].key),
+                              x2: new Date(d[0].values[1].key)
+                          }
+                        : {
+                              x1: +d[0].values[0].key,
+                              x2: +d[0].values[1].key
+                          };
+                })
+                .entries(
+                    markData.filter(function(d) {
+                        return d.values.length > 1;
                     })
-                    .sort(function(a, b) {
-                        var x1diff = a.x1 - b.x1,
-                            x2diff = b.x2 - a.x2;
-                        return x1diff !== 0
-                            ? x1diff
-                            : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
-                    });
+                );
 
-            if (overlappingLines.length) {
-                var currentlyOverlappingLines = [];
+            //For each ID...
+            IDdata.forEach(function(IDdatum) {
+                var lineData = IDdatum.values;
 
-                //For each overlapping line...
-                overlappingLines.forEach(function(currentLine, i) {
-                    if (i === 0) {
-                        currentLine.offset = 0;
-                        currentlyOverlappingLines.push(currentLine);
-                    } else {
-                        currentlyOverlappingLines.forEach(function(d) {
-                            var currLapsPrevX1 = currentLine.x1 <= d.x1 && currentLine.x2 >= d.x1,
-                                currLapsPrevX2 = currentLine.x1 <= d.x2 && currentLine.x2 >= d.x2,
-                                currLapsPrev = currentLine.x1 <= d.x1 && currentLine.x2 >= d.x2,
-                                prevLapsCurrX1 = d.x1 <= currentLine.x1 && d.x2 >= currentLine.x1,
-                                prevLapsCurrX2 = d.x1 <= currentLine.x2 && d.x2 >= currentLine.x2,
-                                prevLapsCurr = d.x1 <= currentLine.x1 && d.x2 >= currentLine.x2;
+                //Attach line x-coordinates to line object.
+                lineData.forEach(function(lineDatum) {
+                    lineDatum.x1 = lineDatum.values.x1;
+                    lineDatum.x2 = lineDatum.values.x2;
+                    delete lineDatum.values;
+                });
 
-                            d.overlapping =
-                                currLapsPrevX1 ||
-                                currLapsPrevX2 ||
-                                currLapsPrev ||
-                                prevLapsCurrX1 ||
-                                prevLapsCurrX2 ||
-                                prevLapsCurr;
+                //Capture all line x-coordinates in an array.
+                var lineCoordinates = lineData.map(function(di) {
+                        return [di.x1, di.x2];
+                    }),
+                    overlappingLines = lineData
+                        .filter(function(lineDatum) {
+                            var overlap = lineCoordinates.filter(function(lineCoordinate) {
+                                return (
+                                    (lineCoordinate[0] <= lineDatum.x1 &&
+                                        lineCoordinate[1] >= lineDatum.x1) ||
+                                    (lineDatum.x1 <= lineCoordinate[0] &&
+                                        lineDatum.x2 >= lineCoordinate[0]) ||
+                                    (lineCoordinate[0] <= lineDatum.x2 &&
+                                        lineCoordinate[1] >= lineDatum.x2) ||
+                                    (lineDatum.x1 <= lineCoordinate[1] &&
+                                        lineDatum.x2 >= lineCoordinate[1])
+                                );
+                            });
+
+                            return overlap.length > 1;
+                        })
+                        .sort(function(a, b) {
+                            var x1diff = a.x1 - b.x1,
+                                x2diff = b.x2 - a.x2;
+                            return x1diff !== 0
+                                ? x1diff
+                                : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
                         });
-                        var nOverlapping = currentlyOverlappingLines.filter(function(d) {
-                            return d.overlapping;
-                        }).length;
 
-                        //if no lines are currently overlapping reset currently overlapping lines
-                        if (nOverlapping === 0) {
+                if (overlappingLines.length) {
+                    var currentlyOverlappingLines = [];
+
+                    //For each overlapping line...
+                    overlappingLines.forEach(function(currentLine, i) {
+                        if (i === 0) {
                             currentLine.offset = 0;
-                            currentlyOverlappingLines = [currentLine];
-                        } else if (nOverlapping === currentlyOverlappingLines.length) {
-                            //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
-                            currentLine.offset =
-                                d3.max(currentlyOverlappingLines, function(d) {
-                                    return d.offset;
-                                }) + 1;
                             currentlyOverlappingLines.push(currentLine);
                         } else {
-                            //otherwise replace non-overlapping line with the smallest offset with current line
-                            currentlyOverlappingLines.forEach(function(d, i) {
-                                d.index = i;
-                            });
-                            var minOffset = d3.min(
-                                    currentlyOverlappingLines.filter(function(d) {
-                                        return !d.overlapping;
-                                    }),
-                                    function(d) {
-                                        return d.offset;
-                                    }
-                                ),
-                                minIndex = currentlyOverlappingLines.filter(function(d) {
-                                    return d.offset === minOffset;
-                                })[0].index;
-                            currentLine.offset = minOffset;
-                            currentlyOverlappingLines.splice(minIndex, 1, currentLine);
-                        }
-                    }
+                            currentlyOverlappingLines.forEach(function(d) {
+                                var currLapsPrevX1 =
+                                        currentLine.x1 <= d.x1 && currentLine.x2 >= d.x1,
+                                    currLapsPrevX2 =
+                                        currentLine.x1 <= d.x2 && currentLine.x2 >= d.x2,
+                                    currLapsPrev = currentLine.x1 <= d.x1 && currentLine.x2 >= d.x2,
+                                    prevLapsCurrX1 =
+                                        d.x1 <= currentLine.x1 && d.x2 >= currentLine.x1,
+                                    prevLapsCurrX2 =
+                                        d.x1 <= currentLine.x2 && d.x2 >= currentLine.x2,
+                                    prevLapsCurr = d.x1 <= currentLine.x1 && d.x2 >= currentLine.x2;
 
-                    //Offset lines vertically.
-                    var className = currentLine.key + ' line';
-                    var g = d3.select(
-                        _this.clinicalTimelines.document.getElementsByClassName(className)[0]
-                    );
-                    g.attr(
-                        'transform',
-                        currentLine.offset > 0
-                            ? 'translate(0,' +
-                              currentLine.offset * +mark.attributes['stroke-width'] * 1.5 +
-                              ')'
-                            : 'translate(0,0)'
-                    );
-                });
-            }
-        });
+                                d.overlapping =
+                                    currLapsPrevX1 ||
+                                    currLapsPrevX2 ||
+                                    currLapsPrev ||
+                                    prevLapsCurrX1 ||
+                                    prevLapsCurrX2 ||
+                                    prevLapsCurr;
+                            });
+                            var nOverlapping = currentlyOverlappingLines.filter(function(d) {
+                                return d.overlapping;
+                            }).length;
+
+                            //if no lines are currently overlapping reset currently overlapping lines
+                            if (nOverlapping === 0) {
+                                currentLine.offset = 0;
+                                currentlyOverlappingLines = [currentLine];
+                            } else if (nOverlapping === currentlyOverlappingLines.length) {
+                                //else if all lines are currently overlapping increase offset and add current line to currently overlapping lines
+                                currentLine.offset =
+                                    d3.max(currentlyOverlappingLines, function(d) {
+                                        return d.offset;
+                                    }) + 1;
+                                currentlyOverlappingLines.push(currentLine);
+                            } else {
+                                //otherwise replace non-overlapping line with the smallest offset with current line
+                                currentlyOverlappingLines.forEach(function(d, i) {
+                                    d.index = i;
+                                });
+                                var minOffset = d3.min(
+                                        currentlyOverlappingLines.filter(function(d) {
+                                            return !d.overlapping;
+                                        }),
+                                        function(d) {
+                                            return d.offset;
+                                        }
+                                    ),
+                                    minIndex = currentlyOverlappingLines.filter(function(d) {
+                                        return d.offset === minOffset;
+                                    })[0].index;
+                                currentLine.offset = minOffset;
+                                currentlyOverlappingLines.splice(minIndex, 1, currentLine);
+                            }
+                        }
+
+                        //Offset lines vertically.
+                        var className = currentLine.key + ' line';
+                        var g = d3.select(
+                            _this.clinicalTimelines.document.getElementsByClassName(className)[0]
+                        );
+                        g.attr(
+                            'transform',
+                            currentLine.offset > 0
+                                ? 'translate(0,' +
+                                  currentLine.offset * _this.config.mark_thickness * 2 +
+                                  ')'
+                                : 'translate(0,0)'
+                        );
+                    });
+                }
+            });
+        }
     }
 
     function offsetOverlappingMarks() {
@@ -3153,16 +3701,35 @@
 
         this.config.marks.forEach(function(mark, i) {
             var markData = _this.marks[i].data;
-            if (mark.type === 'line') {
-                //Identify marks which represent ongoing events.
-                if (_this.config.ongo_col)
-                    markData.forEach(function(d) {
-                        d.ongoing = d.values[0].values.raw[0][_this.config.ongo_col];
-                    });
-                offsetLines.call(_this, mark, markData);
-            } else if (mark.type === 'circle') {
-                offsetCircles.call(_this, mark, markData);
-            }
+
+            //Identify marks which represent ongoing events.
+            if (
+                _this.config.ongo_col &&
+                _this.raw_data.length &&
+                _this.raw_data[0].hasOwnProperty(_this.config.ongo_col)
+            )
+                markData.forEach(function(d) {
+                    d.ongoing =
+                        mark.type === 'line'
+                            ? d.values[0].values.raw[0][_this.config.ongo_col]
+                            : d.values.raw[0][_this.config.ongo_col];
+                });
+
+            //Attach offset value to each mark datum.
+            if (
+                _this.config.offset_col &&
+                _this.raw_data.length &&
+                _this.raw_data[0].hasOwnProperty(_this.config.offset_col)
+            )
+                markData.forEach(function(d) {
+                    d.offset =
+                        mark.type === 'line'
+                            ? d.values[0].values.raw[0][_this.config.offset_col]
+                            : d.values.raw[0][_this.config.offset_col];
+                });
+
+            if (mark.type === 'line') offsetLines.call(_this, mark, markData);
+            else if (mark.type === 'circle') offsetCircles.call(_this, mark, markData);
         });
     }
 
@@ -3181,7 +3748,7 @@
 
         //Select marks.
         var highlightedMarks = this.svg
-            .selectAll('.wc-data-mark, .ct-ongoing-event')
+            .selectAll('.wc-data-mark, .ct-ongoing-event, .ct-custom-mark')
             .classed('ct-highlighted', function(d) {
                 return d.key.indexOf(_this.config.event_highlighted) > -1;
             })
@@ -3189,13 +3756,13 @@
                 return d.key.indexOf(_this.config.event_highlighted) > -1;
             });
 
-        //Highlight Lines.
-        var paths = highlightedMarks.filter(function() {
+        //Highlight time intervals.
+        var timeIntervals = highlightedMarks.filter(function() {
             return (
                 this.tagName === 'path' && this.getAttribute('class').indexOf('highlighted') > -1
             );
         });
-        paths.each(function(d, i) {
+        timeIntervals.each(function(d, i) {
             var g = d3.select(this.parentNode);
             var x1 = context.x(context.config.time_function(d.values[0].key));
             var x2 =
@@ -3227,13 +3794,16 @@
                 });
         });
 
-        //Highlight circles.
-        var circles = highlightedMarks.filter(function() {
+        //Highlight timepoints.
+        var timepoints = highlightedMarks.filter(function() {
             return (
-                this.tagName === 'circle' && this.getAttribute('class').indexOf('highlighted') > -1
+                ['circle', 'polygon'].indexOf(this.tagName) > -1 &&
+                this.getAttribute('class').indexOf('ct-highlighted') > -1 &&
+                this.getAttribute('class').indexOf('ct-hidden') < 0 &&
+                this.getAttribute('class').indexOf('ct-ongoing-event') < 0
             );
         });
-        circles.attr({
+        timepoints.attr({
             stroke: function stroke(d) {
                 return _this.colorScale(d.values.raw[0][_this.config.event_col]);
             },
@@ -3246,13 +3816,13 @@
     function drawOngoingMarks() {
         var _this = this;
 
+        this.svg.selectAll('.ct-ongoing-event').remove();
         if (this.raw_data.length && this.raw_data[0].hasOwnProperty(this.config.ongo_col)) {
             var context = this;
             var lineSettings = this.config.marks.find(function(mark) {
                 return mark.type === 'line';
             });
 
-            this.svg.selectAll('.ct-ongoing-event').remove();
             this.svg
                 .selectAll('.line-supergroup .line')
                 .filter(function(d) {
@@ -3295,6 +3865,175 @@
                             )
                         });
                 });
+        }
+    }
+
+    function addStartStopCircles() {
+        var context = this;
+
+        this.svg.selectAll('.ct-start-stop-circle').remove();
+        this.svg.selectAll('g.line').each(function(d) {
+            var g = d3.select(this);
+            d.values
+                .filter(function(di, i) {
+                    return !(
+                        i === 1 &&
+                        di.values.raw[0][context.config.ongo_col] === context.config.ongo_val
+                    );
+                })
+                .forEach(function(di) {
+                    g
+                        .append('circle')
+                        .classed('ct-start-stop-circle', true)
+                        .attr({
+                            cx: context.x(di.values.x),
+                            cy: context.y(di.values.y) + context.y.rangeBand() / 2,
+                            r: context.config.mark_thickness * 2 / 5,
+                            fill: 'white',
+                            stroke: 'lightgray'
+                        });
+                });
+        });
+    }
+
+    function drawPolygon(marks, event_symbol) {
+        marks.each(function(d) {
+            var g = d3.select(this);
+
+            //clear out g
+            g.select('circle').classed('ct-hidden', true);
+            g.select('polygon.ct-custom-mark').remove();
+
+            //define vertices
+            var vertices = void 0;
+            if (event_symbol.symbol === 'square')
+                vertices = [
+                    [d.symbolCoordinates.x1, d.symbolCoordinates.y1],
+                    [d.symbolCoordinates.x1, d.symbolCoordinates.y3],
+                    [d.symbolCoordinates.x3, d.symbolCoordinates.y3],
+                    [d.symbolCoordinates.x3, d.symbolCoordinates.y1]
+                ];
+            else if (event_symbol.symbol === 'diamond')
+                vertices = [
+                    [d.symbolCoordinates.x1, d.symbolCoordinates.y2],
+                    [d.symbolCoordinates.x2, d.symbolCoordinates.y3],
+                    [d.symbolCoordinates.x3, d.symbolCoordinates.y2],
+                    [d.symbolCoordinates.x2, d.symbolCoordinates.y1]
+                ];
+            else if (event_symbol.symbol === 'triangle') {
+                if (event_symbol.direction === 'right')
+                    vertices = [
+                        [d.symbolCoordinates.x1, d.symbolCoordinates.y1],
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y2],
+                        [d.symbolCoordinates.x1, d.symbolCoordinates.y3]
+                    ];
+                else if (event_symbol.direction === 'down')
+                    vertices = [
+                        [d.symbolCoordinates.x1, d.symbolCoordinates.y1],
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y1],
+                        [d.symbolCoordinates.x2, d.symbolCoordinates.y3]
+                    ];
+                else if (event_symbol.direction === 'left')
+                    vertices = [
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y1],
+                        [d.symbolCoordinates.x1, d.symbolCoordinates.y2],
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y3]
+                    ];
+                else
+                    vertices = [
+                        [d.symbolCoordinates.x2, d.symbolCoordinates.y1],
+                        [d.symbolCoordinates.x3, d.symbolCoordinates.y3],
+                        [d.symbolCoordinates.x1, d.symbolCoordinates.y3]
+                    ];
+            }
+
+            //draw polygon
+            var polygon = g
+                .append('polygon')
+                .datum(d)
+                .classed('ct-custom-mark', true)
+                .attr({
+                    points: vertices
+                        .map(function(vertex) {
+                            return vertex.join(',');
+                        })
+                        .join(' '),
+                    fill: d.color
+                });
+        });
+    }
+
+    function addSymbols() {
+        var _this = this;
+
+        this.svg.selectAll('.ct-custom-mark').remove();
+        if (this.config.event_symbols && this.config.event_symbols.length) {
+            this.config.event_symbols.forEach(function(event_symbol) {
+                var marks = _this.svg
+                    .selectAll('g.point')
+                    .filter(function(d) {
+                        var event$$1 = d.values.raw[0][_this.config.event_col];
+                        return (
+                            (event_symbol.event === event$$1 ||
+                                event_symbol.events.indexOf(event$$1) > -1) && // point represents an event specified in the event symbol setting
+                            _this.x_dom[0] <= d.total && // point is within current x-domain
+                            d.total <= _this.x_dom[1] && // point is within current x-domain
+                            _this.currentEventTypes.indexOf(event$$1) > -1 // point represents a currently selected event type
+                        );
+                    })
+                    .each(function(d) {
+                        var x = _this.x(d.values.x);
+                        var y = _this.y(d.values.y) + _this.y.rangeBand() / 2;
+                        var sizeFactor = 1;
+                        d.symbolCoordinates = {
+                            x1: x - _this.config.mark_thickness * sizeFactor,
+                            x2: x,
+                            x3: x + _this.config.mark_thickness * sizeFactor,
+                            y1: y - _this.config.mark_thickness * sizeFactor,
+                            y2: y,
+                            y3: y + _this.config.mark_thickness * sizeFactor
+                        };
+                        d.color = _this.colorScale(d.values.raw[0][_this.config.event_col]);
+                    });
+
+                drawPolygon.call(_this, marks, event_symbol);
+            });
+        }
+    }
+
+    function addSymbolsToLegend() {
+        var _this = this;
+
+        var context = this;
+
+        if (this.config.event_symbols && this.config.event_symbols.length) {
+            this.config.event_symbols.forEach(function(event_symbol) {
+                var marks = _this.wrap
+                    .selectAll('.legend .legend-color-block')
+                    .filter(function(d) {
+                        var event$$1 = d.label;
+                        return (
+                            event_symbol.event === event$$1 ||
+                            event_symbol.events.indexOf(event$$1) > -1
+                        );
+                    })
+                    .each(function(d) {
+                        var dimensions = this.getBBox();
+                        var x = dimensions.x + dimensions.width / 2;
+                        var y = dimensions.y + dimensions.height / 2;
+                        d.symbolCoordinates = {
+                            x1: x - dimensions.width / 2,
+                            x2: x,
+                            x3: x + dimensions.width / 2,
+                            y1: y - dimensions.height / 2,
+                            y2: y,
+                            y3: y + dimensions.height / 2
+                        };
+                        d.color = context.colorScale(d.label);
+                    });
+
+                drawPolygon.call(_this, marks, event_symbol);
+            });
         }
     }
 
@@ -3653,6 +4392,9 @@
         //Add filter functionality to legend.
         legendFilter.call(this);
 
+        //Add second legend to differentiate timepoints, time intervals, and ongoing events.
+        addSecondLegend.call(this);
+
         //Draw second x-axis at top of chart.
         drawTopXaxis.call(this);
 
@@ -3674,11 +4416,17 @@
         //Draw ongoing marks.
         drawOngoingMarks.call(this);
 
+        //Add symbols.
+        addSymbols.call(this);
+
         //Highlight marks.
         highlightMarks.call(this);
 
-        //Draw ongoing marks.
-        drawOngoingMarks.call(this);
+        //Draw circles at beginning and end of each line.
+        addStartStopCircles.call(this);
+
+        //Add symbols to legend.
+        addSymbolsToLegend.call(this);
 
         //Offset bottom x-axis to prevent overlap with final ID.
         offsetBottomXaxis.call(this);
@@ -3724,6 +4472,7 @@
         this.config.color_dom = this.parent.timelines.config.color_dom;
         this.config.legend.order = this.parent.timelines.config.legend.order;
         this.config.x.domain = null;
+        this.config.y.sort = 'alphabetical-ascending';
     }
 
     function onLayout$1() {}
@@ -3744,22 +4493,22 @@
 
         this.svg.select('.time-range').remove();
         var x_dom = this.x_dom.map(function(x) {
-                return x instanceof Date ? x.getTime() : x;
-            }),
-            timeRange =
-                this.parent.timelines.config.time_scale === 'day'
-                    ? this.parent.timelines.day_range
-                    : this.parent.timelines.date_range.map(function(dt) {
-                          return dt.getTime();
-                      }),
-            timeRangeText =
-                this.config.time_scale === 'day'
-                    ? this.parent.timelines.day_range.map(function(dy) {
-                          return dy.toString();
-                      })
-                    : this.parent.timelines.date_range.map(function(dt) {
-                          return d3.time.format(_this.parent.timelines.config.date_format)(dt);
-                      }); // update to date_display_format at some point
+            return x instanceof Date ? x.getTime() : x;
+        });
+        var timeRange =
+            this.parent.timelines.config.time_scale === 'Date'
+                ? this.parent.timelines.date_range.map(function(dt) {
+                      return dt.getTime();
+                  })
+                : this.parent.timelines.day_range;
+        var timeRangeText =
+            this.config.time_scale === 'Date'
+                ? this.parent.timelines.date_range.map(function(dt) {
+                      return d3.time.format(_this.parent.timelines.config.date_display_format)(dt);
+                  })
+                : this.parent.timelines.day_range.map(function(dy) {
+                      return dy.toString();
+                  });
 
         if (
             (x_dom[0] !== timeRange[0] || x_dom[1] !== timeRange[1]) &&
@@ -3783,11 +4532,7 @@
                     }),
                 timeRangeTooltip = timeRangeGroup
                     .append('title')
-                    .text(
-                        this.parent.timelines.config.time_scalePropCased +
-                            ' range: ' +
-                            timeRangeText.join(' - ')
-                    );
+                    .text(this.config.time_scale + ' range: ' + timeRangeText.join(' - '));
         }
     }
 
@@ -3795,7 +4540,7 @@
         var _this = this;
 
         //Hide legend.
-        this.wrap.select('.legend').classed('ct-hidden', true);
+        this.parent.wrap.select('.legend').classed('ct-hidden', true);
 
         //Draw ongoing marks.
         this.config.marks.forEach(function(mark, i) {
@@ -3816,14 +4561,17 @@
         //Draw reference lines.
         drawReferenceLines.call(this);
 
+        //Add circles to beginning and end of lines.
+        addStartStopCircles.call(this);
+
+        //Add symbols.
+        addSymbols.call(this);
+
         //Highlight events.
         highlightMarks.call(this);
 
         //Replace newline characters with html line break entities to cater to Internet Explorer.
         IEsucks.call(this);
-
-        //Set clip-path of all svg elements to the ID of the current chart.
-        setClipPath.call(this);
     }
 
     function onDestroy$1() {}

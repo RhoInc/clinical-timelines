@@ -5,17 +5,17 @@ export default function drawTimeRange() {
 
     //Add group for time range.
     this.svg.select('.time-range').remove();
-    const x_dom = this.x_dom.map(x => (x instanceof Date ? x.getTime() : x)),
-        timeRange =
-            this.parent.timelines.config.time_scale === 'day'
-                ? this.parent.timelines.day_range
-                : this.parent.timelines.date_range.map(dt => dt.getTime()),
-        timeRangeText =
-            this.config.time_scale === 'day'
-                ? this.parent.timelines.day_range.map(dy => dy.toString())
-                : this.parent.timelines.date_range.map(dt =>
-                      time.format(this.parent.timelines.config.date_format)(dt)
-                  ); // update to date_display_format at some point
+    const x_dom = this.x_dom.map(x => (x instanceof Date ? x.getTime() : x));
+    const timeRange =
+        this.parent.timelines.config.time_scale === 'Date'
+            ? this.parent.timelines.date_range.map(dt => dt.getTime())
+            : this.parent.timelines.day_range;
+    const timeRangeText =
+        this.config.time_scale === 'Date'
+            ? this.parent.timelines.date_range.map(dt =>
+                  time.format(this.parent.timelines.config.date_display_format)(dt)
+              )
+            : this.parent.timelines.day_range.map(dy => dy.toString());
 
     if (
         (x_dom[0] !== timeRange[0] || x_dom[1] !== timeRange[1]) &&
@@ -39,10 +39,6 @@ export default function drawTimeRange() {
                 }),
             timeRangeTooltip = timeRangeGroup
                 .append('title')
-                .text(
-                    `${
-                        this.parent.timelines.config.time_scalePropCased
-                    } range: ${timeRangeText.join(' - ')}`
-                );
+                .text(`${this.config.time_scale} range: ${timeRangeText.join(' - ')}`);
     }
 }

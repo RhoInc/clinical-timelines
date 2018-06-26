@@ -1,13 +1,14 @@
 import drawOngoingMarks from '../../timelines/callbacks/onResize/drawOngoingMarks';
 import drawTimeRange from './onResize/drawTimeRange';
 import drawReferenceLines from '../../timelines/callbacks/onResize/drawReferenceLines';
+import addStartStopCircles from '../../timelines/callbacks/onResize/addStartStopCircles';
+import addSymbols from '../../timelines/callbacks/onResize/addSymbols';
 import highlightMarks from '../../timelines/callbacks/onResize/highlightMarks';
 import IEsucks from '../../timelines/callbacks/onResize/IEsucks';
-import setClipPath from '../../timelines/callbacks/onResize/setClipPath';
 
 export default function onResize() {
     //Hide legend.
-    this.wrap.select('.legend').classed('ct-hidden', true);
+    this.parent.wrap.select('.legend').classed('ct-hidden', true);
 
     //Draw ongoing marks.
     this.config.marks.forEach((mark, i) => {
@@ -28,12 +29,15 @@ export default function onResize() {
     //Draw reference lines.
     drawReferenceLines.call(this);
 
+    //Add circles to beginning and end of lines.
+    addStartStopCircles.call(this);
+
+    //Add symbols.
+    addSymbols.call(this);
+
     //Highlight events.
     highlightMarks.call(this);
 
     //Replace newline characters with html line break entities to cater to Internet Explorer.
     IEsucks.call(this);
-
-    //Set clip-path of all svg elements to the ID of the current chart.
-    setClipPath.call(this);
 }

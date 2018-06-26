@@ -1,9 +1,12 @@
 import arrayOfVariablesCheck from './arrayOfVariablesCheck';
-import '../../util/number-isinteger';
 import { time } from 'd3';
 
 export default function syncRendererSpecificSettings(settings) {
-    //ID settings
+    /**-------------------------------------------------------------------------------------------\
+      ID settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //id_unit
     settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
     settings.id_unitPropCased =
         settings.id_unit.substring(0, 1).toUpperCase() +
@@ -11,6 +14,8 @@ export default function syncRendererSpecificSettings(settings) {
     settings.id_unitPlural = /y$/.test(settings.id_unit)
         ? settings.id_unit.substring(0, settings.id_unit.length - 1) + 'ies'
         : settings.id_unit + 's';
+
+    //id_characteristics
     const defaultID_characteristics = [
         { value_col: settings.id_col, label: settings.id_unitPropCased }
     ];
@@ -19,11 +24,27 @@ export default function syncRendererSpecificSettings(settings) {
         settings.id_characteristics
     );
 
-    //Event settings
+    /**-------------------------------------------------------------------------------------------\
+      Event settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //event_types
     if (!(settings.event_types instanceof Array && settings.event_types.length))
         delete settings.event_types;
 
-    //Filter settings
+    //event_symbols
+    if (settings.event_symbols instanceof Array)
+        settings.event_symbols = settings.event_symbols.filter(
+            event_symbol => ['square', 'diamond', 'triangle'].indexOf(event_symbol.symbol) > -1
+        );
+    if (!(settings.event_symbols instanceof Array && settings.event_symbols.length))
+        delete settings.event_symbols;
+
+    /**-------------------------------------------------------------------------------------------\
+      Filter settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //filters
     const defaultFilters = [
         { value_col: settings.id_col, label: settings.id_unitPropCased },
         { value_col: settings.event_col, label: 'Event Type' }
@@ -32,16 +53,131 @@ export default function syncRendererSpecificSettings(settings) {
         defaultFilters.splice(2, 0, { value_col: settings.ongo_col, label: 'Ongoing?' });
     settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
-    //Grouping settings
+    /**-------------------------------------------------------------------------------------------\
+      Grouping settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //groupings
     const defaultGroupings = [];
     settings.groupings = arrayOfVariablesCheck(defaultGroupings, settings.groupings);
+
+    //grouping direction
     if (['horizontal', 'vertical'].indexOf(settings.grouping_direction) === -1)
         settings.grouping_direction = 'horizontal';
 
-    //Time settings
+    /**-------------------------------------------------------------------------------------------\
+      Timing settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //date_display_format
     settings.date_display_format = settings.date_display_format || settings.date_format;
 
-    //Reference line settings
+    //date_ranges - array of 2-element date ranges or of objects with a label property and a time_range property
+    //  {
+    //      domain: [
+    //          <lower bound>,
+    //          <upper bound>
+    //      ],
+    //      label: '<date range description>'
+    //  }
+
+    if (Array.isArray(settings.date_range) && settings.date_ranges === null)
+        settings.date_ranges = [
+            {
+                domain: settings.date_range,
+                label: 'Initial Date Range'
+            }
+        ];
+    else if (Array.isArray(settings.date_range) && Array.isArray(settings.date_ranges))
+        settings.date_ranges.unshift(settings.date_range);
+
+    if (Array.isArray(settings.date_ranges))
+        settings.date_ranges = settings.date_ranges
+            .filter(date_range => {
+                const domain = date_range.domain || date_range;
+                return (
+                    domain instanceof Array &&
+                    domain.length === 2 &&
+                    domain[0].toString() !== domain[1].toString() &&
+                    domain.every(
+                        d => d instanceof Date || time.format(settings.date_format).parse(d)
+                    )
+                );
+            })
+            .map(date_range => {
+                const domain = (date_range.domain || date_range).map(
+                    date =>
+                        date instanceof Date ? date : time.format(settings.date_format).parse(date)
+                );
+                const label =
+                    date_range.label ||
+                    domain
+                        .map(
+                            date =>
+                                date instanceof Date
+                                    ? time.format(settings.date_display_format)(date)
+                                    : date
+                        )
+                        .join(' - ');
+                return {
+                    domain,
+                    label
+                };
+            });
+    else settings.date_ranges = [];
+
+    //day_ranges - array of 2-element day ranges or of objects with a label property and a time_range property
+    //  {
+    //      domain: [
+    //          <lower bound>,
+    //          <upper bound>
+    //      ],
+    //      label: '<day range description>'
+    //  }
+
+    if (Array.isArray(settings.day_range) && settings.day_ranges === null)
+        settings.day_ranges = [
+            {
+                domain: settings.day_range,
+                label: 'Initial Day Range'
+            }
+        ];
+    else if (Array.isArray(settings.day_range) && Array.isArray(settings.day_ranges))
+        settings.day_ranges.unshift(settings.day_range);
+
+    if (settings.day_range && settings.day_ranges === null)
+        settings.day_ranges = [
+            {
+                domain: settings.day_range,
+                label: 'Initial Day Range'
+            }
+        ];
+    if (Array.isArray(settings.day_ranges))
+        settings.day_ranges = settings.day_ranges
+            .filter(day_range => {
+                const domain = day_range.domain || day_range;
+                return (
+                    domain instanceof Array &&
+                    domain.length === 2 &&
+                    domain[0].toString() !== domain[1].toString() &&
+                    domain.every(d => Number.isInteger(+d))
+                );
+            })
+            .map(day_range => {
+                const domain = day_range.domain || day_range;
+                const label = day_range.label || domain.join(' - ');
+                return {
+                    domain,
+                    label
+                };
+            });
+    else settings.day_ranges = [];
+
+    /**-------------------------------------------------------------------------------------------\
+      Miscellaneous settings
+    \-------------------------------------------------------------------------------------------**/
+
+    //reference_lines
     if (settings.reference_lines) {
         if (!(settings.reference_lines instanceof Array))
             settings.reference_lines = [settings.reference_lines];
@@ -56,8 +192,8 @@ export default function syncRendererSpecificSettings(settings) {
 
                 //either an integer or not
                 referenceLineObject.time_scale = Number.isInteger(+referenceLineObject.timepoint)
-                    ? 'day'
-                    : 'date';
+                    ? 'Day'
+                    : 'Date';
 
                 //label predefined or not
                 referenceLineObject.label = reference_line.label
@@ -71,9 +207,9 @@ export default function syncRendererSpecificSettings(settings) {
             })
             .filter(
                 reference_line =>
-                    (reference_line.time_scale === 'day' &&
+                    (reference_line.time_scale === 'Day' &&
                         Number.isInteger(reference_line.timepoint)) ||
-                    (reference_line.time_scale === 'date' &&
+                    (reference_line.time_scale === 'Date' &&
                         time.format(settings.date_format).parse(reference_line.timepoint) instanceof
                             Date)
             );
@@ -82,10 +218,10 @@ export default function syncRendererSpecificSettings(settings) {
     }
 
     /**-------------------------------------------------------------------------------------------\
-      Define listing columns.
+      Listing settings
     \-------------------------------------------------------------------------------------------**/
 
-    //defaults
+    //details
     const defaultDetails = [
         { value_col: settings.event_col, label: 'Event Type' },
         { value_col: 'stdtdy', label: `Start Date (Day)` },

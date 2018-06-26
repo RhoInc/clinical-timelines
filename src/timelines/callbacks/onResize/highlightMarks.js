@@ -13,15 +13,15 @@ export default function highlightMarks() {
 
     //Select marks.
     const highlightedMarks = this.svg
-        .selectAll('.wc-data-mark, .ct-ongoing-event')
+        .selectAll('.wc-data-mark, .ct-ongoing-event, .ct-custom-mark')
         .classed('ct-highlighted', d => d.key.indexOf(this.config.event_highlighted) > -1)
         .filter(d => d.key.indexOf(this.config.event_highlighted) > -1);
 
-    //Highlight Lines.
-    const paths = highlightedMarks.filter(function() {
+    //Highlight time intervals.
+    const timeIntervals = highlightedMarks.filter(function() {
         return this.tagName === 'path' && this.getAttribute('class').indexOf('highlighted') > -1;
     });
-    paths.each(function(d, i) {
+    timeIntervals.each(function(d, i) {
         const g = select(this.parentNode);
         const x1 = context.x(context.config.time_function(d.values[0].key));
         const x2 =
@@ -53,11 +53,16 @@ export default function highlightMarks() {
             });
     });
 
-    //Highlight circles.
-    const circles = highlightedMarks.filter(function() {
-        return this.tagName === 'circle' && this.getAttribute('class').indexOf('highlighted') > -1;
+    //Highlight timepoints.
+    const timepoints = highlightedMarks.filter(function() {
+        return (
+            ['circle', 'polygon'].indexOf(this.tagName) > -1 &&
+            this.getAttribute('class').indexOf('ct-highlighted') > -1 &&
+            this.getAttribute('class').indexOf('ct-hidden') < 0 &&
+            this.getAttribute('class').indexOf('ct-ongoing-event') < 0
+        );
     });
-    circles.attr({
+    timepoints.attr({
         stroke: d => this.colorScale(d.values.raw[0][this.config.event_col]),
         fill: d => this.config.event_highlight_color
     });

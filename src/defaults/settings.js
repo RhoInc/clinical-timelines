@@ -9,6 +9,7 @@ export const rendererSpecificSettings = {
     event_types: null,
     event_highlighted: null,
     event_highlight_color: 'black',
+    event_symbols: null,
 
   //Filter settings
     filters: null,
@@ -19,12 +20,13 @@ export const rendererSpecificSettings = {
     grouping_direction: 'horizontal',
 
   //Timing settings
-    time_scale: 'date',
+    time_scale: 'Date',
 
       //Date settings
         stdt_col: 'STDT',
         endt_col: 'ENDT',
         date_range: null,
+        date_ranges: null,
         date_format: '%Y-%m-%d',
         date_display_format: '%b %y', // sync in syncSettings()
 
@@ -32,13 +34,16 @@ export const rendererSpecificSettings = {
         stdy_col: 'STDY',
         endy_col: 'ENDY',
         day_range: null,
+        day_ranges: null,
 
   //Miscellaneous settings
     seq_col: 'SEQ',
-    tooltip_col: 'TOOLTIP',
     ongo_col: 'ONGO',
     ongo_val: 'Y',
+    tooltip_col: 'TOOLTIP',
+    offset_col: null,
     reference_lines: null,
+    mark_thickness: 6,
     transpose_data: false,
 
   //Listing settings
@@ -57,7 +62,7 @@ export const webchartsSettings = {
         type: 'ordinal',
         column: null, // set in syncSettings()
         label: null, // set in syncSettings()
-        sort: 'earliest',
+        sort: 'By Earliest Event',
         behavior: 'flex',
         grouping: null // set in syncSettings()
     },
@@ -67,16 +72,16 @@ export const webchartsSettings = {
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
             attributes: {
-                'stroke-width': 6
+                'stroke-width': null, // set in syncSettings()
             }
         },
         {
             type: 'circle',
             per: null, // set in syncSettings()
             tooltip: null, // set in syncSettings()
-            radius: 5,
+            radius: null, // set in syncSettings()
             attributes: {
-                'stroke-width': 4
+                'stroke-width': null, // set in syncSettings()
             }
         }
     ],

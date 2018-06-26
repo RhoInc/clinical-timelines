@@ -48,11 +48,11 @@ export default function defineStyles() {
                 '    display: inline-block;' +
                 '}',
             '#clinical-timelines #ct-left-column {' +
-                '    width: 20%;' +
+                '    width: 24%;' +
                 '    float: left;' +
                 '}',
             '#clinical-timelines #ct-right-column {' +
-                '    width: 79%;' +
+                '    width: 75%;' +
                 '    float: right;' +
                 '}',
             '#clinical-timelines .ct-column > * {' +
@@ -82,6 +82,8 @@ export default function defineStyles() {
                 '    float: left;' +
                 '    font-size: 110%;' +
                 '    font-weight: bold;' +
+                '    margin-bottom: 10px;' +
+                '    margin-right: 10px;' +
                 '}',
             '#clinical-timelines #ct-left-column .ct-details .ct-button a {' +
                 '    color: blue;' +
@@ -178,6 +180,9 @@ export default function defineStyles() {
 
             '#clinical-timelines #ct-right-column > * {' +
                 '}',
+            '#clinical-timelines #ct-right-column #ct-timelines {' +
+                '    min-height: 80px;' +
+                '}',
 
           //Legend
             '#clinical-timelines #ct-right-column #ct-timelines .legend {' +
@@ -189,6 +194,7 @@ export default function defineStyles() {
                 '    padding: 5px 7px 3px 4px;' +
                 '    border: 2px solid white;' +
                 '    margin-right: .25em !important;' +
+                '    margin-left: 10em;' +
                 '}',
             '#clinical-timelines #ct-right-column #ct-timelines .legend-item {' +
                 '    cursor: pointer;' +
@@ -208,6 +214,19 @@ export default function defineStyles() {
                 '    cx: .55em !important;' +
                 '    cy: .55em !important;' +
                 '    r: .4em !important;' +
+                '    stroke: black;' +
+                '    stroke-width: 1;' +
+                '}',
+
+          //Second legend
+            '#clinical-timelines #ct-legend {' +
+                '    list-style-type: none;' +
+                '    position: absolute;' +
+                '    top: 0;' +
+                '}',
+            '#clinical-timelines .ct-legend-item {' +
+                '    cursor: default;' +
+                '    margin-right: 10px;' +
                 '}',
 
           //Y-axis
@@ -257,12 +276,26 @@ export default function defineStyles() {
                 '}',
 
           //Circles
-            '#clinical-timelines circle.wc-data-mark {' +
-                '    stroke-width: 0;' +
+            '#clinical-timelines circle.wc-data-mark:not(.ct-highlighted) {' +
+                '    stroke-width: 1;' +
+                '    stroke: black;' +
                 '    fill-opacity: 1;' +
                 '}',
             '#clinical-timelines circle.wc-data-mark.ct-highlighted {' +
                 '    stroke-opacity: 1;' +
+                '    fill-opacity: 1;' +
+                `    stroke-width: ${circle.attributes['stroke-width']};` +
+                '}',
+
+          //Symbols
+            '#clinical-timelines .ct-custom-mark:not(.ct-highlighted) {' +
+                '    stroke-width: 1;' +
+                '    stroke: black;' +
+                '    fill-opacity: 1;' +
+                '}',
+            '#clinical-timelines .ct-custom-mark.ct-highlighted {' +
+                '    stroke-opacity: 1;' +
+                '    fill-opacity: 1;' +
                 `    stroke-width: ${circle.attributes['stroke-width']};` +
                 '}',
 

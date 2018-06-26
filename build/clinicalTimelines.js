@@ -2,8 +2,8 @@
     typeof exports === 'object' && typeof module !== 'undefined'
         ? (module.exports = factory(require('d3'), require('webcharts')))
         : typeof define === 'function' && define.amd
-            ? define(['d3', 'webcharts'], factory)
-            : (global.clinicalTimelines = factory(global.d3, global.webCharts));
+          ? define(['d3', 'webcharts'], factory)
+          : (global.clinicalTimelines = factory(global.d3, global.webCharts));
 })(this, function(d3, webcharts) {
     'use strict';
 
@@ -2622,9 +2622,7 @@
         timeRangeControls.property(
             'type',
             !this.clinicalTimelines.document.documentMode
-                ? this.config.time_scale === 'Date'
-                    ? 'date'
-                    : 'number'
+                ? this.config.time_scale === 'Date' ? 'date' : 'number'
                 : 'text'
         );
 
@@ -2898,17 +2896,11 @@
                         var earliestEventSort =
                             a.values > b.values
                                 ? -2
-                                : a.values < b.values
-                                    ? 2
-                                    : a.key > b.key
-                                        ? -1
-                                        : 1;
+                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
 
                         return aGrouping > bGrouping
                             ? -1
-                            : aGrouping < bGrouping
-                                ? 1
-                                : earliestEventSort;
+                            : aGrouping < bGrouping ? 1 : earliestEventSort;
                     }); // nest data by grouping and ID.
 
                 //Capture list of IDs by grouping.
@@ -2944,11 +2936,7 @@
                         var earliestEventSort =
                             a.values > b.values
                                 ? -2
-                                : a.values < b.values
-                                    ? 2
-                                    : a.key > b.key
-                                        ? -1
-                                        : 1;
+                                : a.values < b.values ? 2 : a.key > b.key ? -1 : 1;
 
                         return earliestEventSort;
                     })
@@ -2981,9 +2969,7 @@
 
                         return aGrouping > bGrouping
                             ? -1
-                            : aGrouping < bGrouping
-                                ? 1
-                                : alphanumericSort;
+                            : aGrouping < bGrouping ? 1 : alphanumericSort;
                     });
 
                 this.config.y.domain.forEach(function(d) {
@@ -3017,7 +3003,7 @@
     function updateTooltipSettings() {
         var _this = this;
 
-        if (this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
+        if (this.raw_data.length > 0 && this.raw_data[0].hasOwnProperty(this.config.tooltip_col)) {
             this.config.marks.forEach(function(mark) {
                 mark.tooltip = mark.tooltip + '\n[' + _this.config.tooltip_col + ']';
             });
@@ -3623,11 +3609,7 @@
                                 x2diff = b.x2 - a.x2;
                             return x1diff !== 0
                                 ? x1diff
-                                : x2diff !== 0
-                                    ? x2diff
-                                    : a.key < b.key
-                                        ? -1
-                                        : 1;
+                                : x2diff !== 0 ? x2diff : a.key < b.key ? -1 : 1;
                         });
 
                 if (overlappingLines.length) {
@@ -3993,9 +3975,10 @@
                         var event$$1 = d.values.raw[0][_this.config.event_col];
                         return (
                             (event_symbol.event === event$$1 ||
-                                event_symbol.events.indexOf(event$$1) > -1) &&
-                            _this.x_dom[0] <= d.total &&
-                            d.total <= _this.x_dom[1]
+                                event_symbol.events.indexOf(event$$1) > -1) && // point represents an event specified in the event symbol setting
+                            _this.x_dom[0] <= d.total && // point is within current x-domain
+                            d.total <= _this.x_dom[1] && // point is within current x-domain
+                            _this.currentEventTypes.indexOf(event$$1) > -1 // point represents a currently selected event type
                         );
                     })
                     .each(function(d) {

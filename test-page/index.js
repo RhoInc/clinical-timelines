@@ -1,5 +1,5 @@
 d3.csv(
-    'https://rawgit.com/RhoInc/viz-library/master/data/safetyData/ADTIMELINES.csv',
+    'https://raw.githubusercontent.com/RhoInc/viz-library/master/data/safetyData/ADTIMELINES.csv',
     function(d) {
         return d;
     },

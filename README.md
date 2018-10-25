@@ -17,7 +17,7 @@ With a dataset that meets the [default variable requirements](https://github.com
 
 ```javascript
 d3.csv(
-    'https://rawgit.com/RhoInc/viz-library/master/data/safetyData/ADTIMELINES.csv',
+    'https://raw.githubusercontent.com/RhoInc/viz-library/master/data/safetyData/ADTIMELINES.csv',
     function(data) {
         clinicalTimelines('body', settings).init(data);
     }
@@ -25,13 +25,13 @@ d3.csv(
 ```
 
 Download the [latest release](https://github.com/RhoInc/clinical-timelines/releases/latest), which supports anonymous AMD, CommonJS, and vanilla environments.
-You can also load the library directly from [rawgit](https://rawgit.com/RhoInc/clinical-timelines/master/build/clinicalTimelines.js):
+You can also load the library directly from [jsDelivr](https://cdn.jsdelivr.net/npm/clinical-timelines/build/clinicalTimelines.js):
 Import into a webpage like so:
 
 ```html
 <script type = 'text/javascript' src = 'https://d3js.org/d3.v3.js'></script>
-<script type = 'text/javascript' src = 'https://rawgit.com/RhoInc/Webcharts/master/build/webcharts.js'></script>
-<script type = 'text/javascript' src = 'https://rawgit.com/RhoInc/clinical-timelines/master/build/clinicalTimelines.js'></script>
+<script type = 'text/javascript' src = 'https://cdn.jsdelivr.net/npm/webcharts/build/webcharts.js'></script>
+<script type = 'text/javascript' src = 'https://cdn.jsdelivr.net/npm/clinical-timelines/build/clinicalTimelines.js'></script>
 ```
 
 Clinical Timelines is a modular library written with [ECMAScript 2015 syntax (ES2015)](http://es6-features.org/).

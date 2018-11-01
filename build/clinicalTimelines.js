@@ -14,14 +14,12 @@
         };
 
     /*------------------------------------------------------------------------------------------------\
-  Add assign method to Object if nonexistent.
-\------------------------------------------------------------------------------------------------*/
+      Add assign method to Object if nonexistent.
+    \------------------------------------------------------------------------------------------------*/
 
     if (typeof Object.assign != 'function') {
         (function() {
             Object.assign = function(target) {
-                'use strict';
-
                 if (target === undefined || target === null) {
                     throw new TypeError('Cannot convert undefined or null to object');
                 }
@@ -144,125 +142,9 @@
                       : typeof obj;
               };
 
-    var asyncGenerator = (function() {
-        function AwaitValue(value) {
-            this.value = value;
-        }
-
-        function AsyncGenerator(gen) {
-            var front, back;
-
-            function send(key, arg) {
-                return new Promise(function(resolve, reject) {
-                    var request = {
-                        key: key,
-                        arg: arg,
-                        resolve: resolve,
-                        reject: reject,
-                        next: null
-                    };
-
-                    if (back) {
-                        back = back.next = request;
-                    } else {
-                        front = back = request;
-                        resume(key, arg);
-                    }
-                });
-            }
-
-            function resume(key, arg) {
-                try {
-                    var result = gen[key](arg);
-                    var value = result.value;
-
-                    if (value instanceof AwaitValue) {
-                        Promise.resolve(value.value).then(
-                            function(arg) {
-                                resume('next', arg);
-                            },
-                            function(arg) {
-                                resume('throw', arg);
-                            }
-                        );
-                    } else {
-                        settle(result.done ? 'return' : 'normal', result.value);
-                    }
-                } catch (err) {
-                    settle('throw', err);
-                }
-            }
-
-            function settle(type, value) {
-                switch (type) {
-                    case 'return':
-                        front.resolve({
-                            value: value,
-                            done: true
-                        });
-                        break;
-
-                    case 'throw':
-                        front.reject(value);
-                        break;
-
-                    default:
-                        front.resolve({
-                            value: value,
-                            done: false
-                        });
-                        break;
-                }
-
-                front = front.next;
-
-                if (front) {
-                    resume(front.key, front.arg);
-                } else {
-                    back = null;
-                }
-            }
-
-            this._invoke = send;
-
-            if (typeof gen.return !== 'function') {
-                this.return = undefined;
-            }
-        }
-
-        if (typeof Symbol === 'function' && Symbol.asyncIterator) {
-            AsyncGenerator.prototype[Symbol.asyncIterator] = function() {
-                return this;
-            };
-        }
-
-        AsyncGenerator.prototype.next = function(arg) {
-            return this._invoke('next', arg);
-        };
-
-        AsyncGenerator.prototype.throw = function(arg) {
-            return this._invoke('throw', arg);
-        };
-
-        AsyncGenerator.prototype.return = function(arg) {
-            return this._invoke('return', arg);
-        };
-
-        return {
-            wrap: function(fn) {
-                return function() {
-                    return new AsyncGenerator(fn.apply(this, arguments));
-                };
-            },
-            await: function(value) {
-                return new AwaitValue(value);
-            }
-        };
-    })();
-
     /*------------------------------------------------------------------------------------------------\
-  Clone a variable (http://stackoverflow.com/a/728694).
-\------------------------------------------------------------------------------------------------*/
+      Clone a variable (http://stackoverflow.com/a/728694).
+    \------------------------------------------------------------------------------------------------*/
 
     function clone(obj) {
         var copy;
@@ -451,8 +333,8 @@
 
     function syncRendererSpecificSettings(settings) {
         /**-------------------------------------------------------------------------------------------\
-      ID settings
-    \-------------------------------------------------------------------------------------------**/
+          ID settings
+        \-------------------------------------------------------------------------------------------**/
 
         //id_unit
         settings.id_unit = settings.id_unit.replace(/^\s+|\s+$/g, ''); // remove leading and trailing white space
@@ -473,8 +355,8 @@
         );
 
         /**-------------------------------------------------------------------------------------------\
-      Event settings
-    \-------------------------------------------------------------------------------------------**/
+          Event settings
+        \-------------------------------------------------------------------------------------------**/
 
         //event_types
         if (!(settings.event_types instanceof Array && settings.event_types.length))
@@ -489,8 +371,8 @@
             delete settings.event_symbols;
 
         /**-------------------------------------------------------------------------------------------\
-      Filter settings
-    \-------------------------------------------------------------------------------------------**/
+          Filter settings
+        \-------------------------------------------------------------------------------------------**/
 
         //filters
         var defaultFilters = [
@@ -502,8 +384,8 @@
         settings.filters = arrayOfVariablesCheck(defaultFilters, settings.filters);
 
         /**-------------------------------------------------------------------------------------------\
-      Grouping settings
-    \-------------------------------------------------------------------------------------------**/
+          Grouping settings
+        \-------------------------------------------------------------------------------------------**/
 
         //groupings
         var defaultGroupings = [];
@@ -514,8 +396,8 @@
             settings.grouping_direction = 'horizontal';
 
         /**-------------------------------------------------------------------------------------------\
-      Timing settings
-    \-------------------------------------------------------------------------------------------**/
+          Timing settings
+        \-------------------------------------------------------------------------------------------**/
 
         //date_display_format
         settings.date_display_format = settings.date_display_format || settings.date_format;
@@ -626,8 +508,8 @@
         else settings.day_ranges = [];
 
         /**-------------------------------------------------------------------------------------------\
-      Miscellaneous settings
-    \-------------------------------------------------------------------------------------------**/
+          Miscellaneous settings
+        \-------------------------------------------------------------------------------------------**/
 
         //reference_lines
         if (settings.reference_lines) {
@@ -676,8 +558,8 @@
         }
 
         /**-------------------------------------------------------------------------------------------\
-      Listing settings
-    \-------------------------------------------------------------------------------------------**/
+          Listing settings
+        \-------------------------------------------------------------------------------------------**/
 
         //details
         var defaultDetails = [
@@ -985,8 +867,8 @@
         });
         var styles = [
             /***--------------------------------------------------------------------------------------\
-      Global styles
-    \--------------------------------------------------------------------------------------***/
+          Global styles
+        \--------------------------------------------------------------------------------------***/
 
             //general
             'html {' + '    overflow: -moz-scrollbars-vertical;' + '    overflow-y: scroll;' + '}',
@@ -1011,8 +893,8 @@
                 '}',
 
             /***--------------------------------------------------------------------------------------\
-      Left and right columns
-    \--------------------------------------------------------------------------------------***/
+          Left and right columns
+        \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines .ct-column {' + '    display: inline-block;' + '}',
             '#clinical-timelines #ct-left-column {' + '    width: 24%;' + '    float: left;' + '}',
@@ -1030,8 +912,8 @@
             '#clinical-timelines .ct-column > * > * {' + '    margin: 10px;' + '}',
 
             /***--------------------------------------------------------------------------------------\
-      Left column elements
-    \--------------------------------------------------------------------------------------***/
+          Left column elements
+        \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines #ct-left-column > * {' + '}',
 
@@ -1135,8 +1017,8 @@
                 '}',
 
             /***--------------------------------------------------------------------------------------\
-      Right column elements
-    \--------------------------------------------------------------------------------------***/
+          Right column elements
+        \--------------------------------------------------------------------------------------***/
 
             '#clinical-timelines #ct-right-column > * {' + '}',
             '#clinical-timelines #ct-right-column #ct-timelines {' + '    min-height: 80px;' + '}',
@@ -1554,8 +1436,8 @@
             .attr('id', 'clinical-timelines');
 
         /**-------------------------------------------------------------------------------------------\
-      Left column
-    \-------------------------------------------------------------------------------------------**/
+          Left column
+        \-------------------------------------------------------------------------------------------**/
 
         this.containers.leftColumn = this.containers.main
             .append('div')
@@ -1563,14 +1445,14 @@
             .attr('id', 'ct-left-column');
 
         /***--------------------------------------------------------------------------------------\
-      Details
-    \--------------------------------------------------------------------------------------***/
+          Details
+        \--------------------------------------------------------------------------------------***/
 
         this.containers.details = this.containers.leftColumn.append('div').attr('id', 'ct-details');
 
         /****---------------------------------------------------------------------------------\
-      Population details
-    \---------------------------------------------------------------------------------****/
+          Population details
+        \---------------------------------------------------------------------------------****/
 
         this.containers.populationDetails = this.containers.details
             .append('div')
@@ -1607,8 +1489,8 @@
             .attr('id', 'ct-outside-time-range');
 
         /****---------------------------------------------------------------------------------\
-      ID details
-    \---------------------------------------------------------------------------------****/
+          ID details
+        \---------------------------------------------------------------------------------****/
 
         this.containers.IDdetails = this.containers.details
             .append('div')
@@ -1626,16 +1508,16 @@
             });
 
         /***--------------------------------------------------------------------------------------\
-      Controls
-    \--------------------------------------------------------------------------------------***/
+          Controls
+        \--------------------------------------------------------------------------------------***/
 
         this.containers.controls = this.containers.leftColumn
             .append('div')
             .attr('id', 'ct-controls');
 
         /**-------------------------------------------------------------------------------------------\
-      Right column
-    \-------------------------------------------------------------------------------------------**/
+          Right column
+        \-------------------------------------------------------------------------------------------**/
 
         this.containers.rightColumn = this.containers.main
             .append('div')
@@ -1643,16 +1525,16 @@
             .attr('id', 'ct-right-column');
 
         /***--------------------------------------------------------------------------------------\
-      Timelines
-    \--------------------------------------------------------------------------------------***/
+          Timelines
+        \--------------------------------------------------------------------------------------***/
 
         this.containers.timelines = this.containers.rightColumn
             .append('div')
             .attr('id', 'ct-timelines');
 
         /***--------------------------------------------------------------------------------------\
-      ID timeline
-    \--------------------------------------------------------------------------------------***/
+          ID timeline
+        \--------------------------------------------------------------------------------------***/
 
         this.containers.IDtimeline = this.containers.rightColumn
             .append('div')
@@ -1660,8 +1542,8 @@
             .attr('id', 'ct-ID-timeline');
 
         /***--------------------------------------------------------------------------------------\
-      Listing
-    \--------------------------------------------------------------------------------------***/
+          Listing
+        \--------------------------------------------------------------------------------------***/
 
         this.containers.listing = this.containers.rightColumn
             .append('div')
@@ -1807,8 +1689,8 @@
         var _this = this;
 
         /**-------------------------------------------------------------------------------------------\
-      Dates
-    \-------------------------------------------------------------------------------------------**/
+          Dates
+        \-------------------------------------------------------------------------------------------**/
 
         if (this.anyDates) {
             //full domain
@@ -1842,8 +1724,8 @@
         }
 
         /**-------------------------------------------------------------------------------------------\
-      Days
-    \-------------------------------------------------------------------------------------------**/
+          Days
+        \-------------------------------------------------------------------------------------------**/
 
         if (this.anyDays) {
             //full domain
@@ -2058,8 +1940,8 @@
     }
 
     /*------------------------------------------------------------------------------------------------\
-  Expand a data array to one item per original item per specified column.
-\------------------------------------------------------------------------------------------------*/
+      Expand a data array to one item per original item per specified column.
+    \------------------------------------------------------------------------------------------------*/
 
     function lengthenRaw(data, columns) {
         var my_data = [];
@@ -2237,10 +2119,10 @@
         );
     }
 
-    function eventHighlighting(select$$1, d) {
+    function eventHighlighting(select, d) {
         //Update event highlighting settings.
         this.config.event_highlighted = d3
-            .select(select$$1)
+            .select(select)
             .select('option:checked')
             .text();
         this.IDtimeline.config.event_highlighted = this.config.event_highlighted;
@@ -2306,8 +2188,8 @@
         else this.draw();
     }
 
-    function yAxisGrouping(select$$1, d) {
-        var selected = d3.select(select$$1).select('option:checked');
+    function yAxisGrouping(select, d) {
+        var selected = d3.select(select).select('option:checked');
 
         //Update grouping settings.
         if (selected.text() !== 'None') {
@@ -2479,11 +2361,11 @@
         });
     }
 
-    function IDchange(select$$1) {
+    function IDchange(select) {
         var _this = this;
 
         this.selected_id = d3
-            .select(select$$1)
+            .select(select)
             .select('option:checked')
             .text();
         this.filters.filter(function(filter) {
@@ -2524,11 +2406,11 @@
         enableDisableControls.call(this);
     }
 
-    function eventTypeChange(select$$1) {
+    function eventTypeChange(select) {
         var _this = this;
 
         this.currentEventTypes = d3
-            .select(select$$1)
+            .select(select)
             .selectAll('select option:checked')
             .pop()
             .map(function(d) {
@@ -2874,8 +2756,8 @@
         var _this = this;
 
         /**-------------------------------------------------------------------------------------------\
-      Sort y-domain by the earliest event of each ID.
-    \-------------------------------------------------------------------------------------------**/
+          Sort y-domain by the earliest event of each ID.
+        \-------------------------------------------------------------------------------------------**/
         if (this.config.y.sort === 'By Earliest Event') {
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then earliest event if y-axis is grouped.
@@ -2946,8 +2828,8 @@
             }
         } else {
             /**-------------------------------------------------------------------------------------------\
-        Sort y-domain alphanumerically.
-        \-------------------------------------------------------------------------------------------**/
+            Sort y-domain alphanumerically.
+            \-------------------------------------------------------------------------------------------**/
 
             if (this.config.y.grouping) {
                 //Sort IDs by grouping then alphanumerically if y-axis is grouped.
@@ -3972,13 +3854,13 @@
                 var marks = _this.svg
                     .selectAll('g.point')
                     .filter(function(d) {
-                        var event$$1 = d.values.raw[0][_this.config.event_col];
+                        var event = d.values.raw[0][_this.config.event_col];
                         return (
-                            (event_symbol.event === event$$1 ||
-                                event_symbol.events.indexOf(event$$1) > -1) && // point represents an event specified in the event symbol setting
+                            (event_symbol.event === event ||
+                                event_symbol.events.indexOf(event) > -1) && // point represents an event specified in the event symbol setting
                             _this.x_dom[0] <= d.total && // point is within current x-domain
                             d.total <= _this.x_dom[1] && // point is within current x-domain
-                            _this.currentEventTypes.indexOf(event$$1) > -1 // point represents a currently selected event type
+                            _this.currentEventTypes.indexOf(event) > -1 // point represents a currently selected event type
                         );
                     })
                     .each(function(d) {
@@ -4011,10 +3893,9 @@
                 var marks = _this.wrap
                     .selectAll('.legend .legend-color-block')
                     .filter(function(d) {
-                        var event$$1 = d.label;
+                        var event = d.label;
                         return (
-                            event_symbol.event === event$$1 ||
-                            event_symbol.events.indexOf(event$$1) > -1
+                            event_symbol.event === event || event_symbol.events.indexOf(event) > -1
                         );
                     })
                     .each(function(d) {
@@ -4491,6 +4372,7 @@
     function drawTimeRange() {
         var _this = this;
 
+        //Add group for time range.
         this.svg.select('.time-range').remove();
         var x_dom = this.x_dom.map(function(x) {
             return x instanceof Date ? x.getTime() : x;
@@ -4631,9 +4513,7 @@
     }
 
     //polyfills and utility functions
-    //setup functions
-    //components
-    //initialization method
+
     function clinicalTimelines() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};

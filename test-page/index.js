@@ -1,5 +1,5 @@
 d3.csv(
-    'https://raw.githubusercontent.com/RhoInc/viz-library/master/data/safetyData/ADTIMELINES.csv',
+    'https://raw.githubusercontent.com/RhoInc/data-library/master/data/clinical-trials/renderer-specific/adtimelines.csv',
     function(d) {
         return d;
     },

@@ -1,5 +1,5 @@
 import { select } from 'd3';
-import syncTimeScaleSettings from '../../../../defaults/syncSettings/syncTimeScaleSettings';
+import syncTimeScaleSettings from '../../../../configuration/syncSettings/syncTimeScaleSettings';
 import hideTimeRangeControl from '../hideTimeRangeControl';
 import cleanData from '../../functions/cleanData';
 import defineData from '../../functions/defineData';

@@ -4,12 +4,17 @@
     "overview": "The most straightforward way to customize the Clinical Timelines is by using a configuration object whose properties describe the behavior and appearance of the chart. Since the Clinical Timelines is a Webcharts `chart` object, many default Webcharts settings are set in the [settings.js file](https://github.com/RhoInc/clinical-timelines/blob/master/src/defaults/settings.js) as [described below](#webcharts-settings). Refer to the [Webcharts documentation](https://github.com/RhoInc/Webcharts/wiki/Chart-Configuration) for more details on these settings.\nIn addition to the standard Webcharts settings several custom settings not available in the base Webcharts library have been added to the Clinical Timelines to facilitate data mapping and other custom functionality. These custom settings are described in detail below. All defaults can be overwritten by users.",
     "version": "1.4.0",
     "type": "object",
+    "data-guidelines": "The Clinical Timelines accepts [JSON](https://en.wikipedia.org/wiki/JSON) data of the format returned by [`d3.csv()`](https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md). The renderer visualizes clinical timelines data with **one row per participant per clinical event** plus the required variables specified below.",
+    "data-structure": "one record per participant per event with event start date/day and end date/day",
     "properties": {
         "id_col": {
             "title": "ID",
             "description": "unique identifier variable name",
             "default": "USUBJID",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "character",
+            "required": true
         },
         "id_unit": {
             "title": "ID Unit",
@@ -33,13 +38,19 @@
                         "type": "string"
                     }
                 }
-            }
+            },
+            "data-mapping": true,
+            "data-type": "either",
+            "required": false
         },
         "event_col": {
             "title": "Event Type",
             "description": "event type variable name",
             "default": "DOMAIN",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "character",
+            "required": true
         },
         "event_types": {
             "title": "Initial Event Types",
@@ -117,7 +128,10 @@
                         "type": "string"
                     }
                 }
-            }
+            },
+            "data-mapping": true,
+            "data-type": "either",
+            "required": false
         },
         "groupings": {
             "title": "ID Grouping",
@@ -135,7 +149,10 @@
                         "type": "string"
                     }
                 }
-            }
+            },
+            "data-mapping": true,
+            "data-type": "either",
+            "required": false
         },
         "grouping_initial": {
             "title": "Initial ID Grouping",
@@ -165,15 +182,21 @@
         },
         "stdt_col": {
             "title": "Start Date",
-            "description": "start date variable name",
+            "description": "start date variable name - not required if start day is present",
             "default": "STDT",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "character",
+            "required": true
         },
         "endt_col": {
             "title": "End Date",
             "description": "end date variable name",
             "default": "ENDT",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "character",
+            "required": false
         },
         "date_range": {
             "title": "Date Range",
@@ -224,15 +247,21 @@
         },
         "stdy_col": {
             "title": "Start Day",
-            "description": "start day variable name",
+            "description": "start day variable name - not required if start date is present",
             "default": "STDY",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "numeric",
+            "required": true
         },
         "endy_col": {
             "title": "End Day",
             "description": "end day variable name",
             "default": "ENDY",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "character",
+            "required": false
         },
         "day_range": {
             "title": "Day Range",
@@ -273,19 +302,28 @@
             "title": "Sequence Number",
             "description": "event type sequence variable name",
             "default": "SEQ",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "numeric",
+            "required": true
         },
         "tooltip_col": {
             "title": "Event Details",
             "description": "hovering over a mark displays a tooltip with the details of the event",
             "default": "TOOLTIP",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "character",
+            "required": false
         },
         "ongo_col": {
             "title": "Ongoing?",
             "description": "ongoing event indicator variable name",
             "default": "ONGO",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "character",
+            "required": false
         },
         "ongo_val": {
             "title": "Ongoing Value",
@@ -296,7 +334,10 @@
         "offset_col": {
             "title": "Offset Factor",
             "description": "the name of the variable that contains a ranking of vertical position at which to draw a mark",
-            "type": "string"
+            "type": "string",
+            "data-mapping": true,
+            "data-type": "numeric",
+            "required": false
         },
         "reference_lines": {
             "title": "Reference Timepoints",
@@ -344,7 +385,10 @@
                         "type": "string"
                     }
                 }
-            }
+            },
+            "data-mapping": true,
+            "data-type": "either",
+            "required": false
         },
         "details_config": {
             "title": "Details Listing Settings",

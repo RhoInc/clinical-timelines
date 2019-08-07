@@ -181,120 +181,122 @@
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
-    var rendererSpecificSettings = {
-        //ID settings
-        id_col: 'USUBJID',
-        id_unit: 'participant',
-        id_characteristics: null,
+    function rendererSettings() {
+        return {
+            // ID settings
+            id_col: 'USUBJID',
+            id_unit: 'participant',
+            id_characteristics: null,
 
-        //Event settings
-        event_col: 'DOMAIN',
-        event_types: null,
-        event_highlighted: null,
-        event_highlight_color: 'black',
-        event_symbols: null,
+            // event settings
+            event_col: 'DOMAIN',
+            event_types: null,
+            event_highlighted: null,
+            event_highlight_color: 'black',
+            event_symbols: null,
 
-        //Filter settings
-        filters: null,
+            // filter settings
+            filters: null,
 
-        //Grouping settings
-        groupings: null,
-        grouping_initial: null,
-        grouping_direction: 'horizontal',
+            // grouping settings
+            groupings: null,
+            grouping_initial: null,
+            grouping_direction: 'horizontal',
 
-        //Timing settings
-        time_scale: 'Date',
+            // timing settings
+            time_scale: 'Date',
 
-        //Date settings
-        stdt_col: 'STDT',
-        endt_col: 'ENDT',
-        date_range: null,
-        date_ranges: null,
-        date_format: '%Y-%m-%d',
-        date_display_format: '%b %y', // sync in syncSettings()
+            // date settings
+            stdt_col: 'STDT',
+            endt_col: 'ENDT',
+            date_range: null,
+            date_ranges: null,
+            date_format: '%Y-%m-%d',
+            date_display_format: '%b %y', // sync in syncSettings()
 
-        //Day settings
-        stdy_col: 'STDY',
-        endy_col: 'ENDY',
-        day_range: null,
-        day_ranges: null,
+            // day settings
+            stdy_col: 'STDY',
+            endy_col: 'ENDY',
+            day_range: null,
+            day_ranges: null,
 
-        //Miscellaneous settings
-        seq_col: 'SEQ',
-        ongo_col: 'ONGO',
-        ongo_val: 'Y',
-        tooltip_col: 'TOOLTIP',
-        offset_col: null,
-        reference_lines: null,
-        mark_thickness: 6,
-        transpose_data: false,
+            // miscellaneous settings
+            seq_col: 'SEQ',
+            ongo_col: 'ONGO',
+            ongo_val: 'Y',
+            tooltip_col: 'TOOLTIP',
+            offset_col: null,
+            reference_lines: null,
+            mark_thickness: 6,
+            transpose_data: false,
 
-        //Listing settings
-        details: null,
-        details_config: null
-    };
+            // listing settings
+            details: null,
+            details_config: null
+        };
+    }
 
-    var webchartsSettings = {
-        x: {
-            type: null, // set in syncSettings()
-            column: 'wc_value',
-            label: null, // set in syncSettings()
-            format: null // set in syncSettings()
-        },
-        y: {
-            type: 'ordinal',
-            column: null, // set in syncSettings()
-            label: null, // set in syncSettings()
-            sort: 'By Earliest Event',
-            behavior: 'flex',
-            grouping: null // set in syncSettings()
-        },
-        marks: [
-            {
-                type: 'line',
-                per: null, // set in syncSettings()
-                tooltip: null, // set in syncSettings()
-                attributes: {
-                    'stroke-width': null // set in syncSettings()
-                }
+    function webchartsSettings() {
+        return {
+            x: {
+                type: null, // set in syncSettings()
+                column: 'wc_value',
+                label: null, // set in syncSettings()
+                format: null // set in syncSettings()
             },
-            {
-                type: 'circle',
-                per: null, // set in syncSettings()
-                tooltip: null, // set in syncSettings()
-                radius: null, // set in syncSettings()
-                attributes: {
-                    'stroke-width': null // set in syncSettings()
+            y: {
+                type: 'ordinal',
+                column: null, // set in syncSettings()
+                label: null, // set in syncSettings()
+                sort: 'By Earliest Event',
+                behavior: 'flex',
+                grouping: null // set in syncSettings()
+            },
+            marks: [
+                {
+                    type: 'line',
+                    per: null, // set in syncSettings()
+                    tooltip: null, // set in syncSettings()
+                    attributes: {
+                        'stroke-width': null // set in syncSettings()
+                    }
+                },
+                {
+                    type: 'circle',
+                    per: null, // set in syncSettings()
+                    tooltip: null, // set in syncSettings()
+                    radius: null, // set in syncSettings()
+                    attributes: {
+                        'stroke-width': null // set in syncSettings()
+                    }
                 }
-            }
-        ],
-        colors: [
-            '#1b9e77',
-            '#d95f02',
-            '#7570b3',
-            '#a6cee3',
-            '#1f78b4',
-            '#b2df8a',
-            '#66c2a5',
-            '#fc8d62',
-            '#8da0cb'
-        ],
-        color_dom: null, // set in syncSettings()
-        legend: {
-            location: 'top',
-            label: 'Event Type',
-            order: null, // set in syncSettings()
-            mark: 'circle'
-        },
-        range_band: 35,
-        margin: {
-            top: 60,
-            right: 40
-        }, // for second x-axis
-        resizable: false // can't be resizable so the multiples aren't overlapped by their titles
-    };
-
-    var settings = Object.assign({}, rendererSpecificSettings, webchartsSettings);
+            ],
+            colors: [
+                '#1b9e77',
+                '#d95f02',
+                '#7570b3',
+                '#a6cee3',
+                '#1f78b4',
+                '#b2df8a',
+                '#66c2a5',
+                '#fc8d62',
+                '#8da0cb'
+            ],
+            color_dom: null, // set in syncSettings()
+            legend: {
+                location: 'top',
+                label: 'Event Type',
+                order: null, // set in syncSettings()
+                mark: 'circle'
+            },
+            range_band: 35,
+            margin: {
+                top: 60,
+                right: 40
+            }, // for second x-axis
+            resizable: false // can't be resizable so the multiples aren't overlapped by their titles
+        };
+    }
 
     function arrayOfVariablesCheck(defaultVariables, userDefinedVariables) {
         var validSetting =
@@ -746,54 +748,56 @@
         return syncedSettings;
     }
 
-    var controls = [
-        {
-            type: 'dropdown',
-            option: 'event_highlighted',
-            label: '',
-            description: 'Event highlighting',
-            values: null // set in onInit() callback
-        },
-        {
-            type: 'dropdown',
-            option: 'time_scale',
-            label: '',
-            description: 'X-axis scale',
-            values: ['Date', 'Day'],
-            require: true
-        },
-        {
-            type: 'dropdown',
-            option: 'date_time_range',
-            label: '',
-            description: 'Time range',
-            values: null, // set in onInit() callback
-            require: true
-        },
-        {
-            type: 'dropdown',
-            option: 'day_time_range',
-            label: '',
-            description: 'Time range',
-            values: null, // set in onInit() callback
-            require: true
-        },
-        {
-            type: 'dropdown',
-            option: 'y.sort',
-            label: '',
-            description: 'Y-axis sort',
-            values: ['By Earliest Event', 'Alphanumerically'],
-            require: true
-        },
-        {
-            type: 'dropdown',
-            option: 'y.groupingLabel',
-            label: '',
-            description: 'Y-axis grouping',
-            values: null // set in onInit() callback
-        }
-    ];
+    function controls() {
+        return [
+            {
+                type: 'dropdown',
+                option: 'event_highlighted',
+                label: '',
+                description: 'Event highlighting',
+                values: null // set in onInit() callback
+            },
+            {
+                type: 'dropdown',
+                option: 'time_scale',
+                label: '',
+                description: 'X-axis scale',
+                values: ['Date', 'Day'],
+                require: true
+            },
+            {
+                type: 'dropdown',
+                option: 'date_time_range',
+                label: '',
+                description: 'Time range',
+                values: null, // set in onInit() callback
+                require: true
+            },
+            {
+                type: 'dropdown',
+                option: 'day_time_range',
+                label: '',
+                description: 'Time range',
+                values: null, // set in onInit() callback
+                require: true
+            },
+            {
+                type: 'dropdown',
+                option: 'y.sort',
+                label: '',
+                description: 'Y-axis sort',
+                values: ['By Earliest Event', 'Alphanumerically'],
+                require: true
+            },
+            {
+                type: 'dropdown',
+                option: 'y.groupingLabel',
+                label: '',
+                description: 'Y-axis grouping',
+                values: null // set in onInit() callback
+            }
+        ];
+    }
 
     function syncControls(controls, settings) {
         settings.filters
@@ -834,8 +838,10 @@
         return syncedControls;
     }
 
-    var defaults$1 = {
-        settings: settings,
+    var configuration = {
+        rendererSettings: rendererSettings,
+        webchartsSettings: webchartsSettings,
+        settings: Object.assign({}, rendererSettings(), webchartsSettings()),
         syncSettings: syncSettings,
         controls: controls,
         syncControls: syncControls
@@ -844,15 +850,15 @@
     function defineSettings() {
         this.settings.merged = Object.assign(
             {},
-            clone(defaults$1.settings),
+            clone(configuration.settings),
             clone(this.settings.user)
         );
-        this.settings.synced = defaults$1.syncSettings(clone(this.settings.merged));
+        this.settings.synced = configuration.syncSettings(clone(this.settings.merged));
         Object.assign(this.settings, clone(this.settings.synced));
         this.settings.IDtimeline = clone(this.settings.IDtimelineSettings);
         this.settings.listing = clone(this.settings.details_config);
-        this.settings.controls = defaults$1.syncControls(
-            clone(defaults$1.controls),
+        this.settings.controls = configuration.syncControls(
+            configuration.controls(),
             clone(this.settings)
         );
     }

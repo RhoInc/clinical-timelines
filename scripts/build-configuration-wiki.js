@@ -1,8 +1,55 @@
-var pkg = require('../package'),
-    schema = require('../settings-schema'),
-    properties = schema.properties,
-    markdown = [],
-    fs = require('fs');
+//require('@babel/register');
+require('babel-register');
+const fs = require('fs');
+const pkg = require('../package');
+const schema = require('../settings-schema');
+const properties = schema.properties;
+const configuration = require('../src/configuration/index.js').default;
+const rendererSettings = configuration.rendererSettings();
+const webchartsSettings = configuration.webchartsSettings();
+const settings = Object.assign({}, rendererSettings, webchartsSettings);
+const syncedSettings = configuration.syncSettings(settings);
+
+function keepWebchartsSettings(obj) {
+    const keepers = [
+        'x',
+        'y',
+        'marks',
+        'color_by',
+        'color_dom',
+        'colors',
+        'legend',
+        'gridlines',
+        'interpolate',
+        'date_format',
+        'resizable',
+        'width',
+        'height',
+        'aspect',
+        'max_width',
+        'range_band',
+        'margin',
+        'scale_text',
+        'transitions',
+    ];
+
+    return Object.keys(obj)
+        .filter(key => keepers.indexOf(key) > -1)
+        .sort((a,b) => keepers.indexOf(a) - keepers.indexOf(b))
+        .reduce(
+            (acc,cur) => {
+                acc[cur] = obj[cur];
+                return acc;
+            },
+            {}
+        );
+}
+
+const timelinesSettings = keepWebchartsSettings(syncedSettings);
+const IDtimelineSettings = keepWebchartsSettings(syncedSettings.IDtimelineSettings);
+const listingSettings = syncedSettings.details_config;
+
+const markdown = [];
 
 function setDefault(setting) {
     let settingDefault = '**default:** ';
@@ -51,7 +98,7 @@ function setDefault(setting) {
                 markdown.push(`## settings.${property}`);
                 markdown.push(`\`${setting.type}\``);
                 markdown.push(``);
-                markdown.push(`${setting.description}`);
+                markdown.push(`${setting.description || setting.title}`);
 
                 if (setting.type !== 'object') {
                     markdown.push(``);
@@ -64,7 +111,7 @@ function setDefault(setting) {
                             markdown.push(`### settings.${property}.${subProperty}`);
                             markdown.push(`\`${subSetting.type}\``);
                             markdown.push(``);
-                            markdown.push(`${subSetting.description}`);
+                            markdown.push(`${subSetting.description || subSetting.title}`);
                             markdown.push(``);
                             markdown.push(setDefault(subSetting));
                         });
@@ -78,7 +125,7 @@ function setDefault(setting) {
                             markdown.push(`### settings.${property}[].${subProperty}`);
                             markdown.push(`\`${subSetting.type}\``);
                             markdown.push(``);
-                            markdown.push(`${subSetting.description}`);
+                            markdown.push(`${subSetting.description || subSetting.title}`);
                             markdown.push(``);
                             markdown.push(setDefault(subSetting));
                         });
@@ -95,38 +142,41 @@ function setDefault(setting) {
   Webcharts settings
 \------------------------------------------------------------------------------------------------*/
 
-    var webchartsSettingsFlag = 0,
-        webchartsSettings = fs.readFileSync('./src/defaults/settings.js', 'utf8')
-            .split('\n')
-            .filter(line => {
-                if (line.indexOf('const webchartsSettings') > -1)
-                    webchartsSettingsFlag = 1;
-
-                if (webchartsSettingsFlag === 1 && /};/.test(line))
-                    webchartsSettingsFlag = 0;
-
-                return webchartsSettingsFlag;
-            });
-        webchartsSettings.splice(0,1,'{\r');
-        webchartsSettings.push('}');
-
     markdown.push(``);
     markdown.push(`# Webcharts settings`);
-    markdown.push(`The object below contains each Webcharts setting as of version ${schema.version}.`);
-    markdown.push(``);
-    markdown.push('```');
-    markdown.push(webchartsSettings.join(''));
-    markdown.push('```');
+    markdown.push(`The objects below contain Webcharts settings for each display as of version ${schema.version} of the ${pkg.name}.`);
+
+    [
+        {
+            settings: timelinesSettings,
+            name: 'Timelines',
+        },
+        {
+            settings: IDtimelineSettings,
+            name: 'ID Timeline',
+        },
+        {
+            settings: listingSettings,
+            name: 'ID Listing',
+        },
+    ]
+    .forEach(display => {
+        markdown.push(``);
+        markdown.push(`## ${display.name}`);
+        markdown.push('```');
+        markdown.push(JSON.stringify(display.settings, null, 4));
+        markdown.push('```');
+    });
 
 /*------------------------------------------------------------------------------------------------\
   Configuration markdown
 \------------------------------------------------------------------------------------------------*/
 
     fs.writeFile(
-        './scripts/configuration.md',
+        './scripts/configuration-wiki.md',
         markdown.join('\n'),
         (err) => {
             if (err)
                 console.log(err);
-            console.log('The configuration markdown file was built!');
+            console.log('The configuration wiki markdown file was built!');
         });

@@ -7,7 +7,7 @@ export default function init(settingsObject) {
     describe('clinical-timelines initialization', () => {
         const
             { JSDOM } = jsdom,
-            data = require('../data/ADTIMELINES.json');
+            data = require('../adtimelines.json');
         let dom,
             container,
             CT;

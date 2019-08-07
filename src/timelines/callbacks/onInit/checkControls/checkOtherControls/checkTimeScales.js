@@ -1,4 +1,4 @@
-import syncTimeScaleSettings from '../../../../../defaults/syncSettings/syncTimeScaleSettings';
+import syncTimeScaleSettings from '../../../../../configuration/syncSettings/syncTimeScaleSettings';
 
 export default function checkTimeScales() {
     this.controls.config.inputs = this.controls.config.inputs.filter(input => {

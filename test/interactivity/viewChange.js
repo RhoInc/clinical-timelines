@@ -8,7 +8,7 @@ describe('Interactivity: view change', () => {
     const
         { JSDOM } = jsdom,
         settings = {details_config: {exportable: false}},
-        data = require('../data/ADTIMELINES.json');
+        data = require('../adtimelines.json');
     let dom,
         container,
         CT,

@@ -33,14 +33,14 @@ an array of identifier characteristic variables and associated metadata
 ### settings.id_characteristics[].value_col
 `string`
 
-undefined
+Variable name
 
 **default:** none
 
 ### settings.id_characteristics[].label
 `string`
 
-undefined
+Variable label
 
 **default:** none
 
@@ -122,14 +122,14 @@ an array of filter variables and associated metadata
 ### settings.filters[].value_col
 `string`
 
-undefined
+Variable name
 
 **default:** none
 
 ### settings.filters[].label
 `string`
 
-undefined
+Variable label
 
 **default:** none
 
@@ -145,14 +145,14 @@ an array of categorical ID characteristic variables with which to group IDs
 ### settings.groupings[].value_col
 `string`
 
-undefined
+Variable name
 
 **default:** none
 
 ### settings.groupings[].label
 `string`
 
-undefined
+Variable label
 
 **default:** none
 
@@ -188,7 +188,7 @@ the time scale on which to plot events
 ## settings.stdt_col
 `string`
 
-start date variable name
+start date variable name - not required if start day is present
 
 **default:** `"STDT"`
 
@@ -256,7 +256,7 @@ date format of x-axis
 ## settings.stdy_col
 `string`
 
-start day variable name
+start day variable name - not required if start date is present
 
 **default:** `"STDY"`
 
@@ -358,14 +358,14 @@ an array of reference timepoints and associated descriptions
 ### settings.reference_lines[].timepoint
 `string`
 
-undefined
+Timepoint
 
 **default:** none
 
 ### settings.reference_lines[].label
 `string`
 
-undefined
+Reference timepoint description
 
 **default:** none
 
@@ -399,14 +399,14 @@ an array of detail listing variables and associated metadata
 ### settings.details[].value_col
 `string`
 
-undefined
+Variable name
 
 **default:** none
 
 ### settings.details[].label
 `string`
 
-undefined
+Variable label
 
 **default:** none
 
@@ -420,48 +420,231 @@ a webcharts table settings object
 ### settings.details_config.cols
 `array`
 
-undefined
+List of variables
 
 **default:** none
 
 ### settings.details_config.headers
 `string`
 
-undefined
+List of headers
 
 **default:** none
 
 ### settings.details_config.searchable
 `boolean`
 
-undefined
+Searchable?
 
 **default:** `true`
 
 ### settings.details_config.sortable
 `boolean`
 
-undefined
+sortable?
 
 **default:** `true`
 
 ### settings.details_config.pagination
 `boolean`
 
-undefined
+Paginated?
 
 **default:** `true`
 
 ### settings.details_config.exportable
 `boolean`
 
-undefined
+Exportable?
 
 **default:** `true`
 
 # Webcharts settings
-The object below contains each Webcharts setting as of version 1.4.0.
+The objects below contain Webcharts settings for each display as of version 1.4.0 of the clinical-timelines.
 
+## Timelines
 ```
-{    x: {        type: null, // set in syncSettings()        column: 'wc_value',        label: null, // set in syncSettings()        format: null // set in syncSettings()    },    y: {        type: 'ordinal',        column: null, // set in syncSettings()        label: null, // set in syncSettings()        sort: 'By Earliest Event',        behavior: 'flex',        grouping: null // set in syncSettings()    },    marks: [        {            type: 'line',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            attributes: {                'stroke-width': null, // set in syncSettings()            }        },        {            type: 'circle',            per: null, // set in syncSettings()            tooltip: null, // set in syncSettings()            radius: null, // set in syncSettings()            attributes: {                'stroke-width': null, // set in syncSettings()            }        }    ],    colors: [        '#1b9e77',        '#d95f02',        '#7570b3',        '#a6cee3',        '#1f78b4',        '#b2df8a',        '#66c2a5',        '#fc8d62',        '#8da0cb'    ],    color_dom: null, // set in syncSettings()    legend: {        location: 'top',        label: 'Event Type',        order: null, // set in syncSettings()        mark: 'circle'    },    range_band: 35,    margin: {        top: 60,        right: 40    }, // for second x-axis    resizable: false // can't be resizable so the multiples aren't overlapped by their titles}
+{
+    "x": {
+        "type": "time",
+        "column": "wc_value",
+        "label": null,
+        "format": "%b %y"
+    },
+    "y": {
+        "type": "ordinal",
+        "column": "USUBJID",
+        "label": null,
+        "sort": "By Earliest Event",
+        "behavior": "flex",
+        "grouping": null
+    },
+    "marks": [
+        {
+            "type": "line",
+            "per": [
+                "USUBJID",
+                "DOMAIN",
+                "SEQ"
+            ],
+            "tooltip": "Event: [DOMAIN]\nStart date: [STDT]\nStop date: [ENDT]",
+            "attributes": {
+                "stroke-width": 7.5
+            },
+            "values": {
+                "wc_category": [
+                    "STDT",
+                    "ENDT"
+                ]
+            }
+        },
+        {
+            "type": "circle",
+            "per": [
+                "USUBJID",
+                "DOMAIN",
+                "SEQ",
+                "wc_value"
+            ],
+            "tooltip": "Event: [DOMAIN]\nDate: [STDT]",
+            "radius": 4.5,
+            "attributes": {
+                "stroke-width": 3
+            },
+            "values": {
+                "wc_category": "DT"
+            }
+        }
+    ],
+    "color_by": "DOMAIN",
+    "color_dom": null,
+    "colors": [
+        "#1b9e77",
+        "#d95f02",
+        "#7570b3",
+        "#a6cee3",
+        "#1f78b4",
+        "#b2df8a",
+        "#66c2a5",
+        "#fc8d62",
+        "#8da0cb"
+    ],
+    "legend": {
+        "location": "top",
+        "label": "Event Type",
+        "order": null,
+        "mark": "circle"
+    },
+    "date_format": "%Y-%m-%d",
+    "resizable": false,
+    "range_band": 35,
+    "margin": {
+        "top": 60,
+        "right": 40,
+        "bottom": 95
+    }
+}
+```
+
+## ID Timeline
+```
+{
+    "x": {
+        "type": "time",
+        "column": "wc_value",
+        "label": "",
+        "format": "%b %y"
+    },
+    "y": {
+        "type": "ordinal",
+        "column": "SEQ",
+        "label": null,
+        "sort": "alphabetical-descending",
+        "behavior": "flex",
+        "grouping": null
+    },
+    "marks": [
+        {
+            "type": "line",
+            "per": [
+                "DOMAIN",
+                "SEQ"
+            ],
+            "tooltip": "Event: [DOMAIN]\nStart date: [STDT]\nStop date: [ENDT]",
+            "attributes": {
+                "stroke-width": 7.5
+            },
+            "values": {
+                "wc_category": [
+                    "STDT",
+                    "ENDT"
+                ]
+            }
+        },
+        {
+            "type": "circle",
+            "per": [
+                "DOMAIN",
+                "SEQ",
+                "wc_value"
+            ],
+            "tooltip": "Event: [DOMAIN]\nDate: [STDT]",
+            "radius": 4.5,
+            "attributes": {
+                "stroke-width": 3
+            },
+            "values": {
+                "wc_category": "DT"
+            }
+        }
+    ],
+    "color_by": "DOMAIN",
+    "color_dom": null,
+    "colors": [
+        "#1b9e77",
+        "#d95f02",
+        "#7570b3",
+        "#a6cee3",
+        "#1f78b4",
+        "#b2df8a",
+        "#66c2a5",
+        "#fc8d62",
+        "#8da0cb"
+    ],
+    "legend": {
+        "location": "top",
+        "label": "Event Type",
+        "order": null,
+        "mark": "circle"
+    },
+    "gridlines": "y",
+    "date_format": "%Y-%m-%d",
+    "resizable": false,
+    "range_band": 12,
+    "margin": {
+        "left": 25
+    }
+}
+```
+
+## ID Listing
+```
+{
+    "cols": [
+        "DOMAIN",
+        "stdtdy",
+        "endtdy",
+        "SEQ",
+        "ONGO",
+        "TOOLTIP"
+    ],
+    "headers": [
+        "Event Type",
+        "Start Date (Day)",
+        "Stop Date (Day)",
+        "Sequence Number",
+        "Ongoing?",
+        "Details"
+    ]
+}
 ```

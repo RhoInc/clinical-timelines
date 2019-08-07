@@ -1,54 +1,58 @@
 {
-  "name": "clinical-timelines",
-  "description": "A general purpose graphical timeline library",
-  "version": "1.6.0",
-  "author": "Rho, Inc.",
-  "license": "MIT",
-  "homepage": "https://github.com/RhoInc/clinical-timelines",
-  "main": "./build/clinicalTimelines.js",
-  "module": "./src/index.js",
-  "keywords": [
-    "clinical timelines",
-    "clinical trials",
-    "events over time",
-    "interactive",
-    "data visualization"
-  ],
-  "dependencies": {
-    "d3": "^3",
-    "webcharts": "^1.10"
-  },
-  "scripts": {
-    "build": "npm audit fix && npm run bundle && npm run format && npm run build-md",
-    "build-md": "node ./scripts/configuration-markdown.js",
-    "bundle": "rollup -c",
-    "format": "npm run format-src && npm run format-build",
-    "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write \"src/**/!(*settings|*defineStyles|*defineLayout).js\"",
-    "format-build": "prettier --print-width=100 --tab-width=4 --single-quote --write build/clinicalTimelines.js",
-    "test": "npm run test-call && npm run test-init && npm run test-interactivity",
-    "test-call": "mocha --timeout 10000 --require babel-register --recursive ./test/call.js",
-    "test-init": "mocha --timeout 10000 --require babel-register --recursive ./test/init.js",
-    "test-interactivity": "mocha --timeout 10000 --require babel-register --recursive ./test/interactivity/viewChange.js",
-    "test-page": "start chrome ./test-page/index.html && start firefox ./test-page/index.html && start iexplore file://%CD%/test-page/index.html",
-    "unit-test": "mocha --timeout 10000 --require babel-register --recursive ./test/call.js",
-    "watch": "rollup -c -w"
-  },
-  "devDependencies": {
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
-    "expect": "^22.0.3",
-    "jsdom": "^11.5.1",
-    "mocha": "^4.0.1",
-    "prettier": "^1.7.4",
-    "rollup": "^0.66.6",
-    "rollup-plugin-babel": "^3.0.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/RhoInc/clinical-timelines.git"
-  },
-  "bugs": {
-    "url": "https://github.com/RhoInc/clinical-timelines/issues"
-  }
+    "name": "clinical-timelines",
+    "description": "A general purpose graphical timeline library",
+    "version": "1.6.0",
+    "author": "Rho, Inc.",
+    "license": "MIT",
+    "homepage": "https://github.com/RhoInc/clinical-timelines",
+    "module": "./src/index.js",
+    "main": "./clinicalTimelines.js",
+    "keywords": [
+        "clinical timelines",
+        "clinical trials",
+        "events over time",
+        "interactive",
+        "data visualization"
+    ],
+    "dependencies": {
+        "d3": "^3",
+        "webcharts": "^1.10"
+    },
+    "scripts": {
+        "build": "npm audit fix && npm run bundle && npm run format && npm run build-wiki && npm run check-settings-schema && npm run save-data && npm run test",
+        "build-wiki": "npm run build-configuration-wiki && npm run build-data-guidelines-wiki",
+        "build-configuration-wiki": "node ./scripts/build-configuration-wiki.js",
+        "build-data-guidelines-wiki": "node ./scripts/build-data-guidelines-wiki.js",
+        "bundle": "rollup -c",
+        "check-settings-schema": "node ./scripts/check-settings-schema.js",
+        "format": "npm run format-src && npm run format-bundle",
+        "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write \"./src/**/!(*settings|*defineStyles|*defineLayout).js\"",
+        "format-bundle": "prettier --print-width=100 --tab-width=4 --single-quote --write ./clinicalTimelines.js",
+        "save-data": "node ./scripts/save-data.js",
+        "test": "npm run test-call && npm run test-init && npm run test-interactivity",
+        "test-call": "mocha --timeout 10000 --require babel-register --recursive ./test/call.js",
+        "test-init": "mocha --timeout 10000 --require babel-register --recursive ./test/init.js",
+        "test-interactivity": "mocha --timeout 10000 --require babel-register --recursive ./test/interactivity/viewChange.js",
+        "test-page": "start chrome ./test-page/index.html && start firefox ./test-page/index.html && start iexplore file://%CD%/test-page/index.html",
+        "unit-test": "mocha --timeout 10000 --require babel-register --recursive ./test/call.js",
+        "watch": "rollup -c -w"
+    },
+    "devDependencies": {
+        "babel-plugin-external-helpers": "^6.22.0",
+        "babel-preset-env": "^1.7.0",
+        "babel-register": "^6.26.0",
+        "expect": "^22.0.3",
+        "jsdom": "^11.5.1",
+        "mocha": "^4.0.1",
+        "prettier": "^1.7.4",
+        "rollup": "^0.66.6",
+        "rollup-plugin-babel": "^3.0.2"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/RhoInc/clinical-timelines.git"
+    },
+    "bugs": {
+        "url": "https://github.com/RhoInc/clinical-timelines/issues"
+    }
 }
